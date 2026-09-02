@@ -1,0 +1,15 @@
+# Local runtime / progress files
+__pycache__/
+*.pyc
+progress-v1.json
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Node/Cloudflare local tooling
+node_modules/
+.wrangler/
+.dev.vars
