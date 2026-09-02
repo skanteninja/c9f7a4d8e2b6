@@ -125,15 +125,7 @@
     });
     html.classList.add(actionBroken ? 'dashboard-overflow-detected' : 'dashboard-action-layout-ok');
 
-    const pageRect = page.getBoundingClientRect();
-    const visibleChildren = [...page.querySelectorAll(':scope > *, :scope > * > *')].filter(el => {
-      const style = getComputedStyle(el);
-      return style.display !== 'none' && style.visibility !== 'hidden';
-    });
-    const pageBroken = page.scrollWidth > page.clientWidth + 3 || visibleChildren.some(el => {
-      const r = el.getBoundingClientRect();
-      return r.right > pageRect.right + 4 || r.left < pageRect.left - 4;
-    });
+    const pageBroken = page.scrollWidth > page.clientWidth + 3 || html.scrollWidth > html.clientWidth + 3;
     html.classList.add(pageBroken ? 'dashboard-page-overflow-detected' : 'dashboard-page-layout-ok');
   }
 
