@@ -31,13 +31,18 @@ jobs:
           test "$(curl -fsSL --max-time 15 "$BASE_URL/styles.css?ci=$GITHUB_RUN_ID" | wc -c)" -gt 70000
           test "$(curl -fsSL --max-time 15 "$BASE_URL/guide-data.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 250000
           test "$(curl -fsSL --max-time 15 "$BASE_URL/app.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 70000
-      - name: Verify live browser boot
+          test "$(curl -fsSL --max-time 15 "$BASE_URL/dashboard-polish.css?ci=$GITHUB_RUN_ID" | wc -c)" -gt 4000
+          test "$(curl -fsSL --max-time 15 "$BASE_URL/dashboard-polish.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 3000
+      - name: Verify live browser boot and dashboard layout
         env:
           BASE_URL: https://maplestory-classic.ofri505.workers.dev
         run: |
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
           test -n "$chrome"
-          "$chrome" --headless --no-sandbox --disable-gpu --virtual-time-budget=5000 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID" >/tmp/maplestory-live-dom.html
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=8500 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID" >/tmp/maplestory-live-dom.html
           grep -q 'class="atlas-action-row' /tmp/maplestory-live-dom.html
           grep -q 'class="gear-slot' /tmp/maplestory-live-dom.html
           grep -q 'class="atlas-timeline-level' /tmp/maplestory-live-dom.html
+          grep -q 'dashboard-polish-ready' /tmp/maplestory-live-dom.html
+          grep -q 'dashboard-action-layout-ok' /tmp/maplestory-live-dom.html
+          ! grep -q 'dashboard-overflow-detected' /tmp/maplestory-live-dom.html
