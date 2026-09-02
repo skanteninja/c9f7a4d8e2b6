@@ -40,13 +40,13 @@
     return `${RAW}images/items/${String(Math.trunc(id)).padStart(8,'0')}.png`;
   }
 
-  function tile(slot, name, newNow) {
+  function tile(slot, name, newNow, lv) {
     const row = item(name);
     const src = currentItemImage(row);
     const highly = !!row?.['Highly Recommended'];
     return `<div class="progression-loadout-item ${newNow?'new-at-level':''} ${highly?'highly-recommended':''}" data-loadout-slot="${esc(slot)}" data-loadout-item="${esc(name)}">
       <span class="progression-loadout-icon">${src?`<img src="${esc(src)}" alt="${esc(name)}" loading="lazy" decoding="async">`:'+'}</span>
-      <span class="progression-loadout-copy"><small>${esc(slot)}</small><b>${esc(name)}</b><em>${newNow?`NEW AT LV ${level()}`:highly?'HIGHLY RECOMMENDED':'RECOMMENDED HOLD'}</em></span>
+      <span class="progression-loadout-copy"><small>${esc(slot)}</small><b>${esc(name)}</b><em>${newNow?`NEW AT LV ${lv}`:highly?'HIGHLY RECOMMENDED':'RECOMMENDED HOLD'}</em></span>
     </div>`;
   }
 
@@ -66,7 +66,10 @@
       root.parentElement.insertBefore(strip, root);
     }
     const changeCount = Object.keys(changed).length;
-    strip.innerHTML = `<div class="progression-loadout-head"><div><span>LEVEL-SYNCED EQUIPMENT</span><b>Recommended loadout · Lv${lv}</b><small>${changeCount?`${changeCount} recommended ${changeCount===1?'piece changes':'pieces change'} at this level.`:next?`Hold this set. Next recommended equipment change: Lv${Number(next.min)}.`:'Current recommended end-of-plan loadout.'}</small></div><strong>${changeCount?`NEW ×${changeCount}`:'HOLD'}</strong></div><div class="progression-loadout-items">${entries.map(([slot,name]) => tile(slot,name,changed[slot]===name)).join('')}</div>`;
+    const signature = JSON.stringify({lv,loadout,changed,next:Number(next?.min||0)});
+    if (strip.dataset.signature === signature) return;
+    strip.dataset.signature = signature;
+    strip.innerHTML = `<div class="progression-loadout-head"><div><span>LEVEL-SYNCED EQUIPMENT</span><b>Recommended loadout · Lv${lv}</b><small>${changeCount?`${changeCount} recommended ${changeCount===1?'piece changes':'pieces change'} at this level.`:next?`Hold this set. Next recommended equipment change: Lv${Number(next.min)}.`:'Current recommended end-of-plan loadout.'}</small></div><strong>${changeCount?`NEW ×${changeCount}`:'HOLD'}</strong></div><div class="progression-loadout-items">${entries.map(([slot,name]) => tile(slot,name,changed[slot]===name,lv)).join('')}</div>`;
     strip.querySelectorAll('img').forEach(img => img.addEventListener('error',()=>img.remove(),{once:true}));
   }
 
@@ -94,7 +97,8 @@
         marker.className = 'progression-slot-marker';
         slot.appendChild(marker);
       }
-      marker.textContent = newNow ? `NEW LV${lv}` : 'REC';
+      const markerText = newNow ? `NEW LV${lv}` : 'REC';
+      if (marker.textContent !== markerText) marker.textContent = markerText;
       marker.title = newNow ? `New recommended ${slotName} at level ${lv}` : `Recommended ${slotName} for level ${lv}`;
     });
   }
