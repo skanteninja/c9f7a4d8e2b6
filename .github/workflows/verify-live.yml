@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Dashboard live gate v6: wait for corrected scroll-width guard, then verify containment at three widths.
+# Live gate v7: verify dashboard containment plus level-synced skills and equipment visualization.
 on:
   workflow_run:
     workflows: ["Build static site"]
@@ -21,12 +21,16 @@ jobs:
           BASE_URL: https://maplestory-classic.ofri505.workers.dev
         run: |
           ready=0
-          for i in {1..24}; do
+          for i in {1..30}; do
             build_ok=0
             guard_ok=0
+            skill_ok=0
+            gear_ok=0
             if curl -fsSL --max-time 10 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" | grep -q 'MapleStory Classic Builder 0.8.1-static1'; then build_ok=1; fi
             if curl -fsSL --max-time 10 "$BASE_URL/dashboard-polish.js?ci=$GITHUB_RUN_ID" | grep -q 'html.scrollWidth > html.clientWidth'; then guard_ok=1; fi
-            if [ "$build_ok" -eq 1 ] && [ "$guard_ok" -eq 1 ]; then
+            if curl -fsSL --max-time 10 "$BASE_URL/progression-skill-state.js?ci=$GITHUB_RUN_ID" | grep -q 'progression-skill-state-ready'; then skill_ok=1; fi
+            if curl -fsSL --max-time 10 "$BASE_URL/progression-gear-visual.js?ci=$GITHUB_RUN_ID" | grep -q 'progression-gear-visual-ready'; then gear_ok=1; fi
+            if [ "$build_ok" -eq 1 ] && [ "$guard_ok" -eq 1 ] && [ "$skill_ok" -eq 1 ] && [ "$gear_ok" -eq 1 ]; then
               ready=1
               break
             fi
@@ -38,6 +42,9 @@ jobs:
           test "$(curl -fsSL --max-time 15 "$BASE_URL/app.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 70000
           test "$(curl -fsSL --max-time 15 "$BASE_URL/dashboard-polish.css?ci=$GITHUB_RUN_ID" | wc -c)" -gt 4000
           test "$(curl -fsSL --max-time 15 "$BASE_URL/dashboard-polish.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 3000
+          test "$(curl -fsSL --max-time 15 "$BASE_URL/progression-skill-state.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 1000
+          test "$(curl -fsSL --max-time 15 "$BASE_URL/progression-gear-visual.css?ci=$GITHUB_RUN_ID" | wc -c)" -gt 1500
+          test "$(curl -fsSL --max-time 15 "$BASE_URL/progression-gear-visual.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 3000
       - name: Verify live browser boot and dashboard layout
         env:
           BASE_URL: https://maplestory-classic.ofri505.workers.dev
@@ -46,11 +53,16 @@ jobs:
           test -n "$chrome"
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-live-${viewport//,/-}.html"
-            "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=8500 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID&viewport=$viewport" >"$file"
+            "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=10000 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID&viewport=$viewport" >"$file"
             grep -q 'class="atlas-action-row' "$file"
             grep -q 'class="gear-slot' "$file"
             grep -q 'class="atlas-timeline-level' "$file"
             grep -q 'dashboard-polish-ready' "$file"
+            grep -q 'progression-sync-ready' "$file"
+            grep -q 'progression-level-hook-ready' "$file"
+            grep -q 'progression-skill-state-ready' "$file"
+            grep -q 'progression-gear-visual-ready' "$file"
+            grep -q 'id="progression-loadout-equipment-window"' "$file"
             grep -q 'dashboard-action-layout-ok' "$file"
             ! grep -q 'dashboard-overflow-detected' "$file"
             grep -q 'dashboard-page-layout-ok' "$file"
