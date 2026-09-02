@@ -19,6 +19,8 @@ on:
       - 'public/visuals-portals.css'
       - 'public/dashboard-polish.js'
       - 'public/dashboard-polish.css'
+      - 'public/progression-sync.js'
+      - 'public/progression-sync.css'
       - 'public/assets/runtime/**'
       - 'public/repairs/**'
       - 'build.cjs'
@@ -51,6 +53,7 @@ jobs:
           node --check site/visuals-skills.js
           node --check site/visuals-portals.js
           node --check site/dashboard-polish.js
+          node --check site/progression-sync.js
           grep -q 'styles.css?v=0.8.1-static1' site/index.html
           grep -q 'visuals.css?v=0.8.1-static1' site/index.html
           grep -q 'visuals-db.css?v=0.8.1-static1' site/index.html
@@ -58,6 +61,7 @@ jobs:
           grep -q 'visuals-skills.css?v=0.8.1-static1' site/index.html
           grep -q 'visuals-portals.css?v=0.8.1-static1' site/index.html
           grep -q 'dashboard-polish.css?v=0.8.1-static1' site/index.html
+          grep -q 'progression-sync.css?v=0.8.1-static1' site/index.html
           grep -q 'guide-data.js?v=0.8.1-static1' site/index.html
           grep -q 'app.js?v=0.8.1-static1' site/index.html
           grep -q 'visuals.js?v=0.8.1-static1' site/index.html
@@ -66,6 +70,7 @@ jobs:
           grep -q 'visuals-skills.js?v=0.8.1-static1' site/index.html
           grep -q 'visuals-portals.js?v=0.8.1-static1' site/index.html
           grep -q 'dashboard-polish.js?v=0.8.1-static1' site/index.html
+          grep -q 'progression-sync.js?v=0.8.1-static1' site/index.html
           grep -q 'MapleStory Classic Builder 0.8.1-static1' site/build-info.txt
           test -s site/styles.css
           test -s site/visuals.css
@@ -74,6 +79,7 @@ jobs:
           test -s site/visuals-skills.css
           test -s site/visuals-portals.css
           test -s site/dashboard-polish.css
+          test -s site/progression-sync.css
           test -s site/guide-data.js
           test -s site/app.js
           test -s site/visuals.js
@@ -82,8 +88,45 @@ jobs:
           test -s site/visuals-skills.js
           test -s site/visuals-portals.js
           test -s site/dashboard-polish.js
+          test -s site/progression-sync.js
       - name: Browser boot and dashboard layout smoke test
         run: |
+          cat > site/ci-progression-test.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><body><iframe id="app" src="/"></iframe><div id="ci-result">pending</div><script>
+          const delay=ms=>new Promise(r=>setTimeout(r,ms));
+          const result=document.getElementById('ci-result');
+          const frame=document.getElementById('app');
+          frame.addEventListener('load',async()=>{
+            try{
+              const d=frame.contentDocument;
+              for(let i=0;i<40&&!d.documentElement.classList.contains('progression-sync-ready');i++)await delay(150);
+              if(!d.documentElement.classList.contains('progression-sync-ready'))throw Error('progression layer did not boot');
+              if(!d.documentElement.classList.contains('beginner-skill-tree-ready'))throw Error('beginner tree did not boot');
+              if(d.querySelectorAll('#atlas-skill-grid .beginner-skill-card').length!==3)throw Error('beginner skill count');
+              const change=async(level,needles)=>{
+                const sel=d.getElementById('level-select');sel.value=String(level);sel.dispatchEvent(new Event('change',{bubbles:true}));await delay(950);
+                if(d.documentElement.dataset.autoGearLevel!==String(level))throw Error('auto gear marker '+level);
+                const equipment=d.getElementById('equipment-window')?.innerHTML||'';
+                const avatar=d.getElementById('atlas-avatar')?.innerHTML||'';
+                for(const name of needles){if(!equipment.includes(name))throw Error('equipment missing '+level+' '+name);}
+                if(!avatar.includes(needles[needles.length-1]))throw Error('avatar missing '+level+' '+needles[needles.length-1]);
+              };
+              await change(15,['Blue Plain Robe','Hardwood Wand']);
+              const zero=d.querySelector('[data-progress-skill="Magic Guard"]');
+              const active=d.querySelector('[data-progress-skill="Magic Claw"]');
+              if(!zero?.classList.contains('unlearned'))throw Error('Magic Guard should be grey at 15');
+              if(!active?.classList.contains('learned'))throw Error('Magic Claw should be active at 15');
+              await change(30,['Golden Pride','Blue Wizard Robe','Mithril Wand']);
+              const tp=d.querySelector('[data-progress-skill="Teleport"]');
+              const tb=d.querySelector('[data-progress-skill="Thunder Bolt"]');
+              if(!tp?.classList.contains('learned'))throw Error('Teleport should be active at 30');
+              if(!tb?.classList.contains('unlearned'))throw Error('Thunder Bolt should be grey at 30');
+              await change(50,['Aqua Golden Circlet','Blue Calas','Cromi']);
+              result.textContent='progression-level-sync-ok';
+            }catch(e){result.textContent='progression-level-sync-failed: '+e.message;}
+          });
+          </script></body>
+          HTML
           python3 -m http.server 4173 --directory site >/tmp/maplestory-static-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
@@ -95,7 +138,7 @@ jobs:
           test -n "$chrome"
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-static-${viewport//,/-}.html"
-            "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=8500 --dump-dom http://127.0.0.1:4173/ >"$file"
+            "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=10000 --dump-dom http://127.0.0.1:4173/ >"$file"
             grep -q 'class="atlas-action-row' "$file"
             grep -q 'class="gear-slot' "$file"
             grep -q 'class="atlas-timeline-level' "$file"
@@ -105,6 +148,12 @@ jobs:
             grep -q 'visual-skill-layer-ready' "$file"
             grep -q 'visual-portal-layer-ready' "$file"
             grep -q 'dashboard-polish-ready' "$file"
+            grep -q 'progression-sync-ready' "$file"
+            grep -q 'skill-progression-board-ready' "$file"
+            grep -q 'beginner-skill-tree-ready' "$file"
+            grep -q 'data-progress-skill="Nimble Feet"' "$file"
+            grep -q 'data-progress-skill="Three Snails"' "$file"
+            grep -q 'data-progress-skill="Recovery"' "$file"
             grep -q 'dashboard-action-layout-ok' "$file"
             ! grep -q 'dashboard-overflow-detected' "$file"
             grep -q 'dashboard-page-layout-ok' "$file"
@@ -125,6 +174,10 @@ jobs:
           assert len(checks) == len(held), f'checkbox wrapper mismatch: {len(checks)} vs {len(held)} rows'
           PY
           done
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=15000 --dump-dom http://127.0.0.1:4173/ci-progression-test.html >/tmp/progression-test.html
+          grep -q '>progression-level-sync-ok<' /tmp/progression-test.html
+          ! grep -q 'progression-level-sync-failed' /tmp/progression-test.html
+          rm -f site/ci-progression-test.html
       - name: Commit generated site
         run: |
           git config user.name 'github-actions[bot]'
