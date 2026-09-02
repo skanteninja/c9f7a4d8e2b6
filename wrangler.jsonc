@@ -2,7 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "maplestory-classic",
   "compatibility_date": "2026-09-02",
+  "build": {
+    "command": "node build.cjs"
+  },
   "assets": {
-    "directory": "./public"
+    "directory": "./dist"
   }
 }
