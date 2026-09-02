@@ -8,6 +8,7 @@ on:
       - 'public/index.html'
       - 'public/manifest.webmanifest'
       - 'public/assets/runtime/**'
+      - 'public/repairs/**'
       - 'build.cjs'
       - '.github/workflows/build-static.yml'
 
@@ -28,7 +29,17 @@ jobs:
           node build.cjs
           rm -rf site
           mv dist site
-          printf 'MapleStory Classic Builder static-direct-1\n' > site/build-info.txt
+      - name: Verify static output
+        run: |
+          node --check site/app.js
+          node --check site/guide-data.js
+          grep -q 'styles.css?v=0.8.1-static1' site/index.html
+          grep -q 'guide-data.js?v=0.8.1-static1' site/index.html
+          grep -q 'app.js?v=0.8.1-static1' site/index.html
+          grep -q 'MapleStory Classic Builder 0.8.1-static1' site/build-info.txt
+          test -s site/styles.css
+          test -s site/guide-data.js
+          test -s site/app.js
       - name: Commit generated site
         run: |
           git config user.name 'github-actions[bot]'
