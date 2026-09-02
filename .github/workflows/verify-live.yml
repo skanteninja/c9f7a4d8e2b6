@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Dashboard live gate v3: visual polish + action containment + whole-dashboard horizontal containment.
+# Dashboard live gate v4: final visual polish + action containment + whole-dashboard horizontal containment.
 on:
   workflow_run:
     workflows: ["Build static site"]
