@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Dashboard live gate v5: wait for exact dashboard guard code, then verify containment at three widths.
+# Dashboard live gate v6: wait for corrected scroll-width guard, then verify containment at three widths.
 on:
   workflow_run:
     workflows: ["Build static site"]
@@ -25,7 +25,7 @@ jobs:
             build_ok=0
             guard_ok=0
             if curl -fsSL --max-time 10 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" | grep -q 'MapleStory Classic Builder 0.8.1-static1'; then build_ok=1; fi
-            if curl -fsSL --max-time 10 "$BASE_URL/dashboard-polish.js?ci=$GITHUB_RUN_ID" | grep -q 'dashboard-page-layout-ok'; then guard_ok=1; fi
+            if curl -fsSL --max-time 10 "$BASE_URL/dashboard-polish.js?ci=$GITHUB_RUN_ID" | grep -q 'html.scrollWidth > html.clientWidth'; then guard_ok=1; fi
             if [ "$build_ok" -eq 1 ] && [ "$guard_ok" -eq 1 ]; then
               ready=1
               break
