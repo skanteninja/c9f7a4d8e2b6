@@ -1,0 +1,9 @@
+(()=>{
+  const V='0.8.0';
+  const show=()=>document.body.classList.add('boot-ready');
+  const fail=(err)=>{console.error('MapleStory Classic boot failed',err);show();const box=document.createElement('div');box.style.cssText='position:fixed;left:20px;right:20px;bottom:20px;padding:14px 16px;border:1px solid #7a3040;background:#27121a;color:#ffdbe2;border-radius:12px;z-index:99999;font:14px Segoe UI,Arial';box.textContent='The app could not finish loading. Refresh once; if it persists, report this build.';document.body.appendChild(box)};
+  async function chunks(prefix,count){const parts=await Promise.all(Array.from({length:count},(_,i)=>fetch(`assets/runtime/${prefix}.${String(i).padStart(2,'0')}.txt?v=${V}`,{cache:'force-cache'}).then(r=>{if(!r.ok)throw Error(`${prefix}: ${r.status}`);return r.text()})));return parts.join('').replace(/\s+/g,'')}
+  async function ungzip(prefix,count){const b64=await chunks(prefix,count);const bin=atob(b64),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);if(!('DecompressionStream' in window))throw Error('Browser gzip streams unsupported');return new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text()}
+  async function boot(){const [css,guideJson,app]=await Promise.all([ungzip('styles',3),ungzip('guide',6),ungzip('app',4)]);const style=document.createElement('style');style.textContent=css;document.head.appendChild(style);window.GUIDE_DATA=JSON.parse(guideJson);show();const script=document.createElement('script');script.textContent=app;document.body.appendChild(script)}
+  boot().catch(fail);
+})();
