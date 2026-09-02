@@ -2,7 +2,6 @@
   const RAW = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/data/current/';
   let timer = null;
   let mapsPromise = null;
-  let lastMapKey = '';
 
   const norm = value => String(value ?? '').toLowerCase().replace(/\[[^\]]*\]/g,' ').replace(/[^a-z0-9]+/g,' ').trim();
 
@@ -56,7 +55,6 @@
     const row = document.querySelector('#dashboard-actions .train-action');
     if (!row) return;
     const routeText = currentRouteText();
-    const key = `${document.getElementById('hero-level')?.textContent || ''}|${routeText}`;
     if (!routeText) return;
 
     const allMaps = await maps();
@@ -81,7 +79,6 @@
       img.onerror = () => removeBrokenPreview(row, preview);
       preview.title = `${match.name} · current COT2 map`;
       row.classList.add('has-route-map');
-      lastMapKey = key;
       return;
     }
 
@@ -93,7 +90,6 @@
         img.addEventListener('error', () => removeBrokenPreview(row, preview), { once: true });
       }
     }
-    lastMapKey = key;
   }
 
   function actionKind(row) {
@@ -115,16 +111,30 @@
   }
 
   function verifyLayout() {
+    const html = document.documentElement;
+    const page = document.querySelector('.dashboard-v72');
     const panel = document.querySelector('.dashboard-v72 .v72-now-panel');
     const rows = [...document.querySelectorAll('.dashboard-v72 #dashboard-actions .atlas-action-row')];
-    document.documentElement.classList.remove('dashboard-action-layout-ok','dashboard-overflow-detected');
-    if (!panel || !rows.length) return;
+    html.classList.remove('dashboard-action-layout-ok','dashboard-overflow-detected','dashboard-page-layout-ok','dashboard-page-overflow-detected');
+    if (!page || !panel || !rows.length) return;
+
     const panelRect = panel.getBoundingClientRect();
-    const broken = rows.some(row => {
+    const actionBroken = rows.some(row => {
       const r = row.getBoundingClientRect();
       return row.scrollWidth > row.clientWidth + 3 || r.right > panelRect.right + 3 || r.left < panelRect.left - 3;
     });
-    document.documentElement.classList.add(broken ? 'dashboard-overflow-detected' : 'dashboard-action-layout-ok');
+    html.classList.add(actionBroken ? 'dashboard-overflow-detected' : 'dashboard-action-layout-ok');
+
+    const pageRect = page.getBoundingClientRect();
+    const visibleChildren = [...page.querySelectorAll(':scope > *, :scope > * > *')].filter(el => {
+      const style = getComputedStyle(el);
+      return style.display !== 'none' && style.visibility !== 'hidden';
+    });
+    const pageBroken = page.scrollWidth > page.clientWidth + 3 || visibleChildren.some(el => {
+      const r = el.getBoundingClientRect();
+      return r.right > pageRect.right + 4 || r.left < pageRect.left - 4;
+    });
+    html.classList.add(pageBroken ? 'dashboard-page-overflow-detected' : 'dashboard-page-layout-ok');
   }
 
   function enhance() {
