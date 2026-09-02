@@ -1,0 +1,1 @@
+(()=>{const s=document.createElement('script');s.src='bootstrap.js?v=0.8.0';s.onerror=()=>{document.body.classList.add('boot-ready');console.error('Failed to load v0.8.0 bootstrap')};document.body.appendChild(s)})();
