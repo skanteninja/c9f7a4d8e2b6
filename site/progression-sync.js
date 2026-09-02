@@ -1,0 +1,235 @@
+(() => {
+  const D = window.GUIDE_DATA;
+  if (!D) return;
+
+  const RAW = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/data/current/';
+  const BEGINNER_PLAN = {
+    1: { 'Nimble Feet': 0, 'Three Snails': 0, Recovery: 0 },
+    2: { 'Nimble Feet': 1, 'Three Snails': 0, Recovery: 0 },
+    3: { 'Nimble Feet': 2, 'Three Snails': 0, Recovery: 0 },
+    4: { 'Nimble Feet': 3, 'Three Snails': 0, Recovery: 0 },
+    5: { 'Nimble Feet': 3, 'Three Snails': 1, Recovery: 0 },
+    6: { 'Nimble Feet': 3, 'Three Snails': 2, Recovery: 0 },
+    7: { 'Nimble Feet': 3, 'Three Snails': 3, Recovery: 0 },
+    8: { 'Nimble Feet': 3, 'Three Snails': 3, Recovery: 1 },
+    9: { 'Nimble Feet': 3, 'Three Snails': 3, Recovery: 2 },
+    10: { 'Nimble Feet': 3, 'Three Snails': 3, Recovery: 3 }
+  };
+  const TIERS = [
+    { id: 'beginner', label: 'Beginner', opens: 1, names: ['Nimble Feet','Three Snails','Recovery'] },
+    { id: 'magician', label: 'Magician · 1st Job', opens: 10, names: ['Energy Bolt','Magic Claw','Magic Guard','Improved MP Recovery','Max MP Increase','Magic Armor'] },
+    { id: 'il', label: 'Wizard (I/L) · 2nd Job', opens: 30, names: ['Teleport','Cold Beam','Thunder Bolt','MP Eater','Meditation','Slow'] }
+  ];
+  const ABBR = {
+    magician: { EB:'Energy Bolt', MC:'Magic Claw', MG:'Magic Guard', MPR:'Improved MP Recovery', MaxMP:'Max MP Increase', Armor:'Magic Armor' },
+    il: { TP:'Teleport', CB:'Cold Beam', TB:'Thunder Bolt', 'MP Eater':'MP Eater', Med:'Meditation', Slow:'Slow' }
+  };
+
+  let skillPromise = null;
+  let timer = null;
+  let gearTimer = null;
+  let lastLevel = null;
+  let booted = false;
+
+  const norm = value => String(value ?? '').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+
+  function currentLevel() {
+    const hero = Number(document.getElementById('hero-level')?.textContent);
+    const select = Number(document.getElementById('level-select')?.value);
+    return Math.max(1, Math.min(Number(D.meta?.maxLevel)||70, hero || select || 1));
+  }
+
+  function collectSkills(value, out=[]) {
+    if (Array.isArray(value)) { value.forEach(v => collectSkills(v,out)); return out; }
+    if (!value || typeof value !== 'object') return out;
+    if (value.id !== undefined && value.name && value.thumbnail) out.push(value);
+    Object.values(value).forEach(v => { if (v && typeof v === 'object') collectSkills(v,out); });
+    return out;
+  }
+
+  function skillIndex() {
+    if (!skillPromise) {
+      skillPromise = fetch(`${RAW}skills.json`, {cache:'force-cache'})
+        .then(r => { if(!r.ok) throw new Error(`skills ${r.status}`); return r.json(); })
+        .then(data => {
+          const byName = new Map();
+          collectSkills(data).forEach(skill => {
+            const key = norm(skill.name);
+            if (key && !byName.has(key)) byName.set(key,skill);
+          });
+          return byName;
+        }).catch(() => new Map());
+    }
+    return skillPromise;
+  }
+
+  function parseAllocation(text, kind) {
+    const out = {};
+    const map = ABBR[kind] || {};
+    String(text || '').split('|').forEach(part => {
+      const match = part.trim().match(/^(.+?)\s+(\d+)$/);
+      if (!match) return;
+      const name = map[match[1].trim()];
+      if (name) out[name] = Number(match[2]);
+    });
+    return out;
+  }
+
+  function latestAllocation(kind, level) {
+    if (kind === 'beginner') return BEGINNER_PLAN[Math.min(10,Math.max(1,level))] || BEGINNER_PLAN[1];
+    const token = kind === 'magician' ? /\bEB\s+\d+/ : /\bTP\s+\d+/;
+    const rows = (D.skills || []).filter(row => Number(row.Level) <= level && token.test(String(row['Result After Level'] || '')));
+    if (!rows.length) return {};
+    return parseAllocation(rows[rows.length - 1]['Result After Level'], kind);
+  }
+
+  function maxLevel(skill, fallback) {
+    const value = Number(skill?.max_level);
+    return Number.isFinite(value) && value > 0 ? value : fallback;
+  }
+
+  function fallbackMax(name) {
+    if (['Nimble Feet','Three Snails','Recovery'].includes(name)) return 3;
+    const first = { 'Energy Bolt':20,'Magic Claw':20,'Magic Guard':15,'Improved MP Recovery':16,'Max MP Increase':15,'Magic Armor':20 };
+    const second = { Teleport:20,'Cold Beam':30,'Thunder Bolt':30,'MP Eater':20,Meditation:20,Slow:20 };
+    return first[name] || second[name] || 20;
+  }
+
+  function skillIcon(skill, name) {
+    const src = skill?.thumbnail ? `${RAW}${String(skill.thumbnail).replace(/^\/+/, '')}` : '';
+    return src ? `<img src="${esc(src)}" alt="${esc(name)}" loading="lazy" decoding="async">` : '<span class="progress-skill-fallback">✦</span>';
+  }
+
+  function tierCard(name, level, skill, tierLocked=false) {
+    const max = maxLevel(skill, fallbackMax(name));
+    const learned = level > 0;
+    return `<article class="progress-skill-card ${learned?'learned':'unlearned'} ${tierLocked?'tier-locked':''}" data-progress-skill="${esc(name)}">
+      <span class="progress-skill-icon">${skillIcon(skill,name)}</span>
+      <div><b>${esc(name)}</b><small>Lv ${level}/${max}</small></div>
+      <span class="progress-skill-state">${tierLocked?'LOCKED':learned?'ACTIVE':'0 SP'}</span>
+    </article>`;
+  }
+
+  async function renderMasteryBoard() {
+    const list = document.getElementById('skill-list');
+    if (!list) return;
+    const level = currentLevel();
+    const idx = await skillIndex();
+    if (!document.body.contains(list)) return;
+
+    let board = document.getElementById('skill-progression-board');
+    if (!board) {
+      board = document.createElement('section');
+      board.id = 'skill-progression-board';
+      board.className = 'skill-progression-board';
+      list.parentNode.insertBefore(board,list);
+    }
+
+    board.innerHTML = `<div class="skill-progression-head"><div><span>LEVEL-SYNCED SKILL TREE</span><h3>Skill Mastery at Lv${level}</h3><small>Grey = 0 points. A skill returns to full color the moment this progression begins investing in it.</small></div><b>Lv${level}</b></div>` + TIERS.map(tier => {
+      const alloc = latestAllocation(tier.id,level);
+      const locked = level < tier.opens;
+      return `<section class="progress-skill-tier ${locked?'locked':''}"><div class="progress-tier-title"><b>${esc(tier.label)}</b><small>${tier.id==='beginner'?'Recommended order: Nimble Feet → Three Snails → Recovery':`Opens at Lv${tier.opens}`}</small></div><div class="progress-skill-grid">${tier.names.map(name => tierCard(name,Number(alloc[name]||0),idx.get(norm(name)),locked)).join('')}</div></section>`;
+    }).join('');
+
+    board.querySelectorAll('img').forEach(img => img.addEventListener('error',()=>{img.closest('.progress-skill-icon')?.classList.add('asset-failed');img.remove();},{once:true}));
+    document.documentElement.classList.add('skill-progression-board-ready');
+  }
+
+  async function renderBeginnerDashboard() {
+    const active = document.querySelector('#atlas-skill-tabs [data-skill-tab="beginner"].active');
+    const grid = document.getElementById('atlas-skill-grid');
+    const detail = document.getElementById('atlas-skill-detail');
+    if (!active || !grid || !detail) return;
+    const level = currentLevel();
+    const alloc = latestAllocation('beginner',level);
+    const idx = await skillIndex();
+    if (!document.body.contains(grid) || !document.querySelector('#atlas-skill-tabs [data-skill-tab="beginner"].active')) return;
+
+    const names = TIERS[0].names;
+    grid.innerHTML = names.map(name => {
+      const skill = idx.get(norm(name));
+      const lv = Number(alloc[name]||0);
+      const max = maxLevel(skill,3);
+      return `<button class="atlas-skill-card beginner-skill-card ${lv>0?'learned':''}" data-skill-name="${esc(name)}"><span class="skill-img-wrap">${skillIcon(skill,name)}</span><b>${esc(name)}</b><small>Lv. ${lv}/${max}</small></button>`;
+    }).join('');
+
+    const firstNext = names.find(name => Number(alloc[name]||0) < 3) || 'Recovery';
+    function show(name) {
+      const skill = idx.get(norm(name));
+      const lv = Number(alloc[name]||0);
+      const max = maxLevel(skill,3);
+      const stats = Array.isArray(skill?.all_level_stats) && lv > 0 ? String(skill.all_level_stats[Math.min(lv-1,skill.all_level_stats.length-1)]||'') : '';
+      detail.innerHTML = `<span class="skill-img-wrap">${skillIcon(skill,name)}</span><div><span class="detail-kicker">BEGINNER · CURRENT COT2 SKILL</span><b>${esc(name)} · Lv ${lv}/${max}</b><p>${esc(skill?.description || (lv ? 'Active in the recommended Beginner progression.' : 'Not invested yet; this icon stays grey until its first recommended point.'))}</p>${stats?`<small>${esc(stats)}</small>`:''}<small class="evidence-inline">Recommended planner order: Nimble Feet 3 → Three Snails 3 → Recovery 3. Beginner skill acquisition is still rechecked against live/tutorial behavior.</small></div>`;
+    }
+    grid.querySelectorAll('[data-skill-name]').forEach(btn => btn.addEventListener('click',()=>{
+      grid.querySelectorAll('.atlas-skill-card').forEach(x=>x.classList.remove('selected'));
+      btn.classList.add('selected');
+      show(btn.dataset.skillName);
+    }));
+    show(firstNext);
+    document.documentElement.classList.add('beginner-skill-tree-ready');
+  }
+
+  function decorateExistingSkillCards() {
+    document.querySelectorAll('.atlas-skill-card').forEach(card => {
+      const text = card.querySelector('small')?.textContent || '';
+      const match = text.match(/Lv\.?\s*(\d+)/i);
+      const lv = Number(match?.[1] || 0);
+      card.classList.toggle('learned',lv > 0);
+      card.classList.toggle('unlearned',lv <= 0);
+    });
+  }
+
+  function addGearBadges() {
+    const level = currentLevel();
+    const targets = [
+      document.querySelector('.dashboard-v72 .v5-equipment-hero .v5-panel-heading'),
+      document.getElementById('equipment-window-page')?.parentElement?.querySelector('.section-head')
+    ].filter(Boolean);
+    targets.forEach(root => {
+      let badge = root.querySelector('.auto-gear-badge');
+      if (!badge) { badge=document.createElement('span');badge.className='auto-gear-badge';root.appendChild(badge); }
+      badge.textContent = `AUTO RECOMMENDED · LV${level}`;
+    });
+  }
+
+  function applyRecommendedGear(level) {
+    const button = document.getElementById('preset-efficient');
+    if (!button) return;
+    button.click();
+    document.documentElement.dataset.autoGearLevel = String(level);
+    document.documentElement.classList.add('auto-gear-synced');
+    addGearBadges();
+  }
+
+  function syncLevel() {
+    const level = currentLevel();
+    if (lastLevel === null) {
+      lastLevel = level;
+      addGearBadges();
+      return;
+    }
+    if (level === lastLevel) return;
+    lastLevel = level;
+    clearTimeout(gearTimer);
+    gearTimer = setTimeout(()=>applyRecommendedGear(level),120);
+  }
+
+  async function enhance() {
+    document.documentElement.classList.add('progression-sync-ready');
+    syncLevel();
+    addGearBadges();
+    decorateExistingSkillCards();
+    await Promise.allSettled([renderMasteryBoard(),renderBeginnerDashboard()]);
+  }
+
+  function schedule() { clearTimeout(timer); timer=setTimeout(enhance,90); }
+  new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,characterData:true});
+  document.addEventListener('click',schedule,true);
+  document.addEventListener('change',schedule,true);
+  document.addEventListener('input',schedule,true);
+  window.addEventListener('resize',schedule,{passive:true});
+
+  if (!booted) { booted=true; enhance(); }
+})();
