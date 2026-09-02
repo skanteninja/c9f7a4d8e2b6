@@ -107,6 +107,8 @@ jobs:
             grep -q 'dashboard-polish-ready' "$file"
             grep -q 'dashboard-action-layout-ok' "$file"
             ! grep -q 'dashboard-overflow-detected' "$file"
+            grep -q 'dashboard-page-layout-ok' "$file"
+            ! grep -q 'dashboard-page-overflow-detected' "$file"
             grep -Eq 'visual-media-strip|visualized-item-row|visual-quest-items' "$file"
           done
       - name: Commit generated site
