@@ -5,6 +5,9 @@
   const indices = new Map();
   let timer = null;
   let monstersByMapPromise = null;
+  let itemQuestLinksPromise = null;
+  let itemCraftLinksPromise = null;
+  let npcLookupPromise = null;
 
   const norm = value => String(value ?? '').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const nameOf = row => row?.name || row?.title || row?.quest_name || row?.map_name || row?.monster_name || row?.item_name || row?.result_item_name || '';
@@ -57,6 +60,9 @@
   function mobFallback(row) {
     return row?.thumbnail ? `${REPO_RAW}data/images/monsters/${row.thumbnail}.png` : '';
   }
+  function npcUrl(id) {
+    const n = Number(id); return Number.isFinite(n) ? `${RAW}images/npcs/${String(Math.trunc(n)).padStart(7,'0')}.png` : '';
+  }
 
   function image(url, alt, fallback = '') {
     const img = document.createElement('img');
@@ -78,6 +84,20 @@
     const fallback = kind === 'mob' ? mobFallback(row) : '';
     if (url) wrap.appendChild(image(url,label,fallback));
     const text = document.createElement('span'); text.innerHTML = `<b>${label.replace(/[&<>"']/g,'')}</b>${note ? `<small>${String(note).replace(/[&<>"']/g,'')}</small>` : ''}`;
+    wrap.appendChild(text); return wrap;
+  }
+
+  function questAsset(quest,npcByName,note='') {
+    const wrap = document.createElement('div'); wrap.className = 'visual-db-asset visual-db-quest';
+    const npc = npcByName.get(norm(quest?.npc_name));
+    if (npc?.id) {
+      const img = document.createElement('img'); img.src = npcUrl(npc.id); img.alt = npc.name; img.loading = 'lazy'; img.decoding = 'async';
+      img.addEventListener('error',()=>img.remove()); wrap.appendChild(img);
+    } else {
+      const badge = document.createElement('i'); badge.className = 'visual-db-quest-badge'; badge.textContent = 'Q'; wrap.appendChild(badge);
+    }
+    const text = document.createElement('span');
+    text.innerHTML = `<b>${String(quest?.name || quest?.quest_name || `Quest #${quest?.id ?? '—'}`).replace(/[&<>"']/g,'')}</b><small>${String(note || quest?.npc_name || 'COT2 quest').replace(/[&<>"']/g,'')}</small>`;
     wrap.appendChild(text); return wrap;
   }
 
@@ -115,6 +135,63 @@
       });
     }
     return monstersByMapPromise;
+  }
+
+  async function npcLookup() {
+    if (!npcLookupPromise) {
+      npcLookupPromise = load('lookups.json').then(data => {
+        const byName = new Map();
+        Object.entries(data?.npc_names || {}).forEach(([id,name]) => {
+          const key = norm(name); if (key && !byName.has(key)) byName.set(key,{id:Number(id),name});
+        });
+        return byName;
+      });
+    }
+    return npcLookupPromise;
+  }
+
+  async function itemQuestLinks() {
+    if (!itemQuestLinksPromise) {
+      itemQuestLinksPromise = index('quests.json').then(quests => {
+        const requiredBy = new Map(), rewardedBy = new Map();
+        quests.rows.forEach(q => {
+          (q.requirements_list || []).filter(r=>r?.type==='item').forEach(req => {
+            const id=Number(req.id); if(!Number.isFinite(id)) return;
+            if(!requiredBy.has(id)) requiredBy.set(id,[]);
+            requiredBy.get(id).push({quest:q,count:Number(req.count)||1});
+          });
+          (q.rewards || []).filter(r=>r?.type==='item').forEach(reward => {
+            const id=Number(reward.id); if(!Number.isFinite(id)) return;
+            if(!rewardedBy.has(id)) rewardedBy.set(id,[]);
+            rewardedBy.get(id).push({quest:q,count:Number(reward.count)||1});
+          });
+        });
+        return {requiredBy,rewardedBy};
+      });
+    }
+    return itemQuestLinksPromise;
+  }
+
+  async function itemCraftLinks() {
+    if (!itemCraftLinksPromise) {
+      itemCraftLinksPromise = Promise.all([index('crafting.json'),index('items.json')]).then(([crafting,items]) => {
+        const producedBy = new Map(), consumedByName = new Map();
+        crafting.rows.forEach(recipe => {
+          const outId=Number(recipe.output_id);
+          if(Number.isFinite(outId)) {
+            if(!producedBy.has(outId)) producedBy.set(outId,[]);
+            producedBy.get(outId).push(recipe);
+          }
+          (recipe.ingredients || []).forEach(ing => {
+            const key=norm(ing.item_name); if(!key) return;
+            if(!consumedByName.has(key)) consumedByName.set(key,[]);
+            consumedByName.get(key).push({recipe,count:Number(ing.count)||1});
+          });
+        });
+        return {producedBy,consumedByName,items};
+      });
+    }
+    return itemCraftLinksPromise;
   }
 
   async function enhanceMonsters(cards) {
@@ -183,6 +260,29 @@
     });
   }
 
+  async function enhanceItems(cards,dataset) {
+    const [items,questLinks,craftLinks,npcs] = await Promise.all([index('items.json'),itemQuestLinks(),itemCraftLinks(),npcLookup()]);
+    cards.forEach(card => {
+      if (card.dataset.visualDbDone === dataset) return;
+      const id=cardId(card), item=items.byId.get(id); if(!item) return;
+      const p=panel(card);
+      const required=questLinks.requiredBy.get(id)||[];
+      const reqRel=relation('COT2 quest requirements',required.slice(0,12).map(x=>questAsset(x.quest,npcs,`needs ×${x.count}`)),required.length); if(reqRel)p.appendChild(reqRel);
+      const rewarded=questLinks.rewardedBy.get(id)||[];
+      const rewRel=relation('COT2 quest rewards',rewarded.slice(0,12).map(x=>questAsset(x.quest,npcs,`rewards ×${x.count}`)),rewarded.length); if(rewRel)p.appendChild(rewRel);
+      const produced=craftLinks.producedBy.get(id)||[];
+      const producedAssets=produced.slice(0,8).flatMap(recipe=>(recipe.ingredients||[]).map(ing=>({ing,row:items.exact.get(norm(ing.item_name))})).filter(x=>x.row).slice(0,6).map(x=>asset('item',x.row,`×${x.ing.count||1}`)));
+      const prodRel=relation('Crafted from',producedAssets,producedAssets.length); if(prodRel)p.appendChild(prodRel);
+      const consumed=craftLinks.consumedByName.get(norm(nameOf(item)))||[];
+      const consumeAssets=consumed.slice(0,12).map(x=>items.byId.get(Number(x.recipe.output_id))).filter(Boolean).map(row=>asset('item',row,'craft result'));
+      const consumeRel=relation('Used to craft',consumeAssets,consumed.length); if(consumeRel)p.appendChild(consumeRel);
+      if(p.children.length){
+        const note=document.createElement('small');note.className='visual-db-evidence-note';note.textContent='Relationships shown from the COT2 client export; they do not prove live server drops or shop inventory.';p.appendChild(note);
+      }
+      card.dataset.visualDbDone=dataset;
+    });
+  }
+
   async function enhance() {
     document.documentElement.classList.add('visual-db-layer-ready');
     const dataset = document.getElementById('db-dataset')?.value;
@@ -192,6 +292,7 @@
     if (dataset === 'maps') await enhanceMaps(cards);
     if (dataset === 'quests') await enhanceQuests(cards);
     if (dataset === 'crafting') await enhanceCrafting(cards);
+    if (dataset === 'items' || dataset === 'equipment') await enhanceItems(cards,dataset);
   }
 
   function schedule() { clearTimeout(timer); timer = setTimeout(enhance,120); }
