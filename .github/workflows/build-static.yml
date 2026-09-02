@@ -120,6 +120,8 @@ jobs:
               if(!d.documentElement.classList.contains('progression-level-hook-ready'))throw Error('level hook did not boot');
               if(!d.documentElement.classList.contains('progression-skill-state-ready'))throw Error('skill state bridge did not boot');
               if(!d.documentElement.classList.contains('progression-gear-visual-ready'))throw Error('gear visual layer did not boot');
+              if(!d.documentElement.classList.contains('progression-compact-dashboard-ready'))throw Error('compact dashboard did not boot');
+              if(!d.documentElement.classList.contains('progression-gear-decision-verified'))throw Error('gear decisions not verified');
               if(d.querySelectorAll('#atlas-skill-grid .beginner-skill-card').length!==3)throw Error('beginner skill count');
               const change=async(level,needles,newWeapon)=>{
                 const sel=d.getElementById('level-select');sel.value=String(level);sel.dispatchEvent(new frame.contentWindow.Event('change',{bubbles:true}));await delay(1050);
@@ -130,10 +132,11 @@ jobs:
                 const avatar=d.getElementById('atlas-avatar')?.innerHTML||'';
                 for(const name of needles){if(!equipment.includes(name))throw Error('equipment missing '+level+' '+name);}
                 if(!avatar.includes(needles[needles.length-1]))throw Error('avatar missing '+level+' '+needles[needles.length-1]);
-                const strip=d.getElementById('progression-loadout-equipment-window');
-                if(!strip?.querySelector(`[data-loadout-item="${newWeapon}"]`))throw Error('loadout missing '+level+' '+newWeapon);
+                if(d.querySelector('.progression-loadout-strip'))throw Error('duplicate level-synced equipment strip present');
+                if(d.querySelector('.v5-avatar .avatar-equipped-icons'))throw Error('duplicate avatar equipment chips present');
                 const weapon=d.querySelector(`#equipment-window .gear-slot[data-slot="Weapon"][data-item-name="${newWeapon}"]`);
                 if(!weapon?.classList.contains('progression-new-equipped'))throw Error('new weapon not marked '+level+' '+newWeapon);
+                if(!weapon.querySelector('.progression-slot-marker'))throw Error('weapon recommendation marker missing '+level);
               };
               await change(15,['Blue Plain Robe','Hardwood Wand'],'Hardwood Wand');
               const zero=d.querySelector('[data-progress-skill="Magic Guard"]');
@@ -176,11 +179,15 @@ jobs:
             grep -q 'progression-level-hook-ready' "$file"
             grep -q 'progression-skill-state-ready' "$file"
             grep -q 'progression-gear-visual-ready' "$file"
+            grep -q 'progression-compact-dashboard-ready' "$file"
+            grep -q 'progression-gear-decision-verified' "$file"
             grep -q 'skill-progression-board-ready' "$file"
             grep -q 'beginner-skill-tree-ready' "$file"
             grep -q 'data-progress-skill="Nimble Feet"' "$file"
             grep -q 'data-progress-skill="Three Snails"' "$file"
             grep -q 'data-progress-skill="Recovery"' "$file"
+            ! grep -q 'class="progression-loadout-strip' "$file"
+            ! grep -q 'class="avatar-equipped-icons' "$file"
             grep -q 'dashboard-action-layout-ok' "$file"
             ! grep -q 'dashboard-overflow-detected' "$file"
             grep -q 'dashboard-page-layout-ok' "$file"
