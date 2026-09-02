@@ -1,0 +1,39 @@
+name: Verify live site
+
+on:
+  workflow_run:
+    workflows: ["Build static site"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  verify-live:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify deployed static files
+        env:
+          BASE_URL: https://maplestory-classic.ofri505.workers.dev
+        run: |
+          ready=0
+          for i in {1..24}; do
+            if curl -fsSL --max-time 10 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" | grep -q 'MapleStory Classic Builder 0.8.1-static1'; then
+              ready=1
+              break
+            fi
+            sleep 5
+          done
+          test "$ready" -eq 1
+          test "$(curl -fsSL --max-time 15 "$BASE_URL/styles.css?ci=$GITHUB_RUN_ID" | wc -c)" -gt 70000
+          test "$(curl -fsSL --max-time 15 "$BASE_URL/guide-data.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 250000
+          test "$(curl -fsSL --max-time 15 "$BASE_URL/app.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 70000
+      - name: Verify live browser boot
+        env:
+          BASE_URL: https://maplestory-classic.ofri505.workers.dev
+        run: |
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          "$chrome" --headless --no-sandbox --disable-gpu --virtual-time-budget=5000 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID" >/tmp/maplestory-live-dom.html
+          grep -q 'class="atlas-action-row' /tmp/maplestory-live-dom.html
+          grep -q 'class="gear-slot' /tmp/maplestory-live-dom.html
+          grep -q 'class="atlas-timeline-level' /tmp/maplestory-live-dom.html
