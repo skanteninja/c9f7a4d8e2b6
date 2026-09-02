@@ -5,6 +5,7 @@
 
   const RAW = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/data/current/';
   let timer = null;
+  let decisionsVerified = null;
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
@@ -94,6 +95,30 @@
     </section>`;
   }
 
+  function verifyDecisionRenderer() {
+    if (decisionsVerified !== null) return decisionsVerified;
+    const checks = [
+      {lv:20,action:'SKIP',candidate:'Metal Wand',weapon:'Hardwood Wand',answer:'KEEP HARDWOOD WAND'},
+      {lv:25,action:'SKIP',candidate:'Ice Wand',weapon:'Hardwood Wand',answer:'KEEP HARDWOOD WAND'},
+      {lv:30,action:'BUY',candidate:'Mithril Wand',weapon:'Mithril Wand',answer:'EQUIP MITHRIL WAND'}
+    ];
+    decisionsVerified = checks.every(check => {
+      const decision = upgradeDecisionAt(check.lv);
+      const loadout = loadoutAt(check.lv);
+      if (!decision || loadout.Weapon !== check.weapon) return false;
+      const template = document.createElement('template');
+      template.innerHTML = decisionCard(decision,check.lv).trim();
+      const card = template.content.firstElementChild;
+      return !!card
+        && card.dataset.upgradeAction === check.action
+        && card.dataset.upgradeCandidate === check.candidate
+        && card.querySelector('.progression-upgrade-answer b')?.textContent.trim() === check.answer;
+    });
+    document.documentElement.classList.toggle('progression-gear-decision-verified',decisionsVerified);
+    document.documentElement.classList.toggle('progression-gear-decision-verification-failed',!decisionsVerified);
+    return decisionsVerified;
+  }
+
   function tile(slot, name, newNow, lv) {
     const row = item(name);
     const src = currentItemImage(row);
@@ -159,6 +184,7 @@
   }
 
   function enhance() {
+    if (!verifyDecisionRenderer()) return;
     ['equipment-window','equipment-window-page'].forEach(id => {
       const root = document.getElementById(id);
       if (!root) return;
