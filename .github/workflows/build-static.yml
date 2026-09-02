@@ -23,6 +23,8 @@ on:
       - 'public/progression-sync.css'
       - 'public/progression-level-hook.js'
       - 'public/progression-skill-state.js'
+      - 'public/progression-gear-visual.js'
+      - 'public/progression-gear-visual.css'
       - 'public/assets/runtime/**'
       - 'public/repairs/**'
       - 'build.cjs'
@@ -58,6 +60,7 @@ jobs:
           node --check site/progression-sync.js
           node --check site/progression-level-hook.js
           node --check site/progression-skill-state.js
+          node --check site/progression-gear-visual.js
           grep -q 'styles.css?v=0.8.1-static1' site/index.html
           grep -q 'visuals.css?v=0.8.1-static1' site/index.html
           grep -q 'visuals-db.css?v=0.8.1-static1' site/index.html
@@ -66,6 +69,7 @@ jobs:
           grep -q 'visuals-portals.css?v=0.8.1-static1' site/index.html
           grep -q 'dashboard-polish.css?v=0.8.1-static1' site/index.html
           grep -q 'progression-sync.css?v=0.8.1-static1' site/index.html
+          grep -q 'progression-gear-visual.css?v=0.8.1-static1' site/index.html
           grep -q 'guide-data.js?v=0.8.1-static1' site/index.html
           grep -q 'app.js?v=0.8.1-static1' site/index.html
           grep -q 'visuals.js?v=0.8.1-static1' site/index.html
@@ -77,6 +81,7 @@ jobs:
           grep -q 'progression-sync.js?v=0.8.1-static1' site/index.html
           grep -q 'progression-level-hook.js?v=0.8.1-static1' site/index.html
           grep -q 'progression-skill-state.js?v=0.8.1-static1' site/index.html
+          grep -q 'progression-gear-visual.js?v=0.8.1-static1' site/index.html
           grep -q 'MapleStory Classic Builder 0.8.1-static1' site/build-info.txt
           test -s site/styles.css
           test -s site/visuals.css
@@ -86,6 +91,7 @@ jobs:
           test -s site/visuals-portals.css
           test -s site/dashboard-polish.css
           test -s site/progression-sync.css
+          test -s site/progression-gear-visual.css
           test -s site/guide-data.js
           test -s site/app.js
           test -s site/visuals.js
@@ -97,6 +103,7 @@ jobs:
           test -s site/progression-sync.js
           test -s site/progression-level-hook.js
           test -s site/progression-skill-state.js
+          test -s site/progression-gear-visual.js
       - name: Browser boot and dashboard layout smoke test
         run: |
           cat > site/ci-progression-test.html <<'HTML'
@@ -112,27 +119,33 @@ jobs:
               if(!d.documentElement.classList.contains('beginner-skill-tree-ready'))throw Error('beginner tree did not boot');
               if(!d.documentElement.classList.contains('progression-level-hook-ready'))throw Error('level hook did not boot');
               if(!d.documentElement.classList.contains('progression-skill-state-ready'))throw Error('skill state bridge did not boot');
+              if(!d.documentElement.classList.contains('progression-gear-visual-ready'))throw Error('gear visual layer did not boot');
               if(d.querySelectorAll('#atlas-skill-grid .beginner-skill-card').length!==3)throw Error('beginner skill count');
-              const change=async(level,needles)=>{
-                const sel=d.getElementById('level-select');sel.value=String(level);sel.dispatchEvent(new frame.contentWindow.Event('change',{bubbles:true}));await delay(950);
+              const change=async(level,needles,newWeapon)=>{
+                const sel=d.getElementById('level-select');sel.value=String(level);sel.dispatchEvent(new frame.contentWindow.Event('change',{bubbles:true}));await delay(1050);
                 if(d.documentElement.dataset.autoGearLevel!==String(level))throw Error('auto gear marker '+level);
                 if(d.documentElement.dataset.skillStateLevel!==String(level))throw Error('skill state marker '+level);
+                if(d.documentElement.dataset.progressionGearVisualLevel!==String(level))throw Error('gear visual marker '+level);
                 const equipment=d.getElementById('equipment-window')?.innerHTML||'';
                 const avatar=d.getElementById('atlas-avatar')?.innerHTML||'';
                 for(const name of needles){if(!equipment.includes(name))throw Error('equipment missing '+level+' '+name);}
                 if(!avatar.includes(needles[needles.length-1]))throw Error('avatar missing '+level+' '+needles[needles.length-1]);
+                const strip=d.getElementById('progression-loadout-equipment-window');
+                if(!strip?.querySelector(`[data-loadout-item="${newWeapon}"]`))throw Error('loadout missing '+level+' '+newWeapon);
+                const weapon=d.querySelector(`#equipment-window .gear-slot[data-slot="Weapon"][data-item-name="${newWeapon}"]`);
+                if(!weapon?.classList.contains('progression-new-equipped'))throw Error('new weapon not marked '+level+' '+newWeapon);
               };
-              await change(15,['Blue Plain Robe','Hardwood Wand']);
+              await change(15,['Blue Plain Robe','Hardwood Wand'],'Hardwood Wand');
               const zero=d.querySelector('[data-progress-skill="Magic Guard"]');
               const active=d.querySelector('[data-progress-skill="Magic Claw"]');
               if(!zero?.classList.contains('unlearned'))throw Error('Magic Guard should be grey at 15');
               if(!active?.classList.contains('learned'))throw Error('Magic Claw should be active at 15');
-              await change(30,['Golden Pride','Blue Wizard Robe','Mithril Wand']);
+              await change(30,['Golden Pride','Blue Wizard Robe','Mithril Wand'],'Mithril Wand');
               const tp=d.querySelector('[data-progress-skill="Teleport"]');
               const tb=d.querySelector('[data-progress-skill="Thunder Bolt"]');
               if(!tp?.classList.contains('learned'))throw Error('Teleport should be active at 30');
               if(!tb?.classList.contains('unlearned'))throw Error('Thunder Bolt should be grey at 30');
-              await change(50,['Aqua Golden Circlet','Blue Calas','Cromi']);
+              await change(50,['Aqua Golden Circlet','Blue Calas','Cromi'],'Cromi');
               result.textContent='progression-level-sync-ok';
             }catch(e){result.textContent='progression-level-sync-failed: '+e.message;}
           });
@@ -162,6 +175,7 @@ jobs:
             grep -q 'progression-sync-ready' "$file"
             grep -q 'progression-level-hook-ready' "$file"
             grep -q 'progression-skill-state-ready' "$file"
+            grep -q 'progression-gear-visual-ready' "$file"
             grep -q 'skill-progression-board-ready' "$file"
             grep -q 'beginner-skill-tree-ready' "$file"
             grep -q 'data-progress-skill="Nimble Feet"' "$file"
@@ -187,7 +201,7 @@ jobs:
           assert len(checks) == len(held), f'checkbox wrapper mismatch: {len(checks)} vs {len(held)} rows'
           PY
           done
-          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=15000 --dump-dom http://127.0.0.1:4173/ci-progression-test.html >/tmp/progression-test.html
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=16000 --dump-dom http://127.0.0.1:4173/ci-progression-test.html >/tmp/progression-test.html
           grep -o 'progression-level-sync-[^<]*' /tmp/progression-test.html || true
           grep -q '>progression-level-sync-ok<' /tmp/progression-test.html
           ! grep -q 'progression-level-sync-failed' /tmp/progression-test.html
