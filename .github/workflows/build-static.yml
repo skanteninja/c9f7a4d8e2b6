@@ -7,6 +7,8 @@ on:
     paths:
       - 'public/index.html'
       - 'public/manifest.webmanifest'
+      - 'public/visuals.js'
+      - 'public/visuals.css'
       - 'public/assets/runtime/**'
       - 'public/repairs/**'
       - 'build.cjs'
@@ -33,13 +35,18 @@ jobs:
         run: |
           node --check site/app.js
           node --check site/guide-data.js
+          node --check site/visuals.js
           grep -q 'styles.css?v=0.8.1-static1' site/index.html
+          grep -q 'visuals.css?v=0.8.1-static1' site/index.html
           grep -q 'guide-data.js?v=0.8.1-static1' site/index.html
           grep -q 'app.js?v=0.8.1-static1' site/index.html
+          grep -q 'visuals.js?v=0.8.1-static1' site/index.html
           grep -q 'MapleStory Classic Builder 0.8.1-static1' site/build-info.txt
           test -s site/styles.css
+          test -s site/visuals.css
           test -s site/guide-data.js
           test -s site/app.js
+          test -s site/visuals.js
       - name: Browser boot smoke test
         run: |
           python3 -m http.server 4173 --directory site >/tmp/maplestory-static-http.log 2>&1 &
@@ -51,10 +58,12 @@ jobs:
           done
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
           test -n "$chrome"
-          "$chrome" --headless --no-sandbox --disable-gpu --virtual-time-budget=3000 --dump-dom http://127.0.0.1:4173/ >/tmp/maplestory-static-dom.html
+          "$chrome" --headless --no-sandbox --disable-gpu --virtual-time-budget=6500 --dump-dom http://127.0.0.1:4173/ >/tmp/maplestory-static-dom.html
           grep -q 'class="atlas-action-row' /tmp/maplestory-static-dom.html
           grep -q 'class="gear-slot' /tmp/maplestory-static-dom.html
           grep -q 'class="atlas-timeline-level' /tmp/maplestory-static-dom.html
+          grep -q 'visual-layer-ready' /tmp/maplestory-static-dom.html
+          grep -Eq 'visual-media-strip|visualized-item-row|visual-quest-items' /tmp/maplestory-static-dom.html
       - name: Commit generated site
         run: |
           git config user.name 'github-actions[bot]'
