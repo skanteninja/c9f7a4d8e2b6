@@ -110,6 +110,20 @@ jobs:
             grep -q 'dashboard-page-layout-ok' "$file"
             ! grep -q 'dashboard-page-overflow-detected' "$file"
             grep -Eq 'visual-media-strip|visualized-item-row|visual-quest-items' "$file"
+            grep -q 'etc-planner-fixed-ready' "$file"
+            grep -q 'class="etc-recommended"' "$file"
+            grep -q 'class="etc-check-wrap' "$file"
+            python3 - "$file" <<'PY'
+          import re, sys
+          s=open(sys.argv[1], encoding='utf-8', errors='replace').read()
+          held=re.findall(r'<input[^>]*data-held="[^"]+"[^>]*>', s)
+          recs=re.findall(r'class="etc-recommended"', s)
+          checks=re.findall(r'class="etc-check-wrap', s)
+          assert len(held) >= 10, f'expected ETC held controls, got {len(held)}'
+          assert all('hidden' in tag for tag in held), 'visible ETC quantity input detected'
+          assert len(recs) == len(held), f'recommendation mismatch: {len(recs)} recs vs {len(held)} rows'
+          assert len(checks) == len(held), f'checkbox wrapper mismatch: {len(checks)} vs {len(held)} rows'
+          PY
           done
       - name: Commit generated site
         run: |
