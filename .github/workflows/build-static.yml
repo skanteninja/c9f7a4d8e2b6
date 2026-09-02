@@ -1,0 +1,42 @@
+name: Build static site
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'public/index.html'
+      - 'public/manifest.webmanifest'
+      - 'public/assets/runtime/**'
+      - 'build.cjs'
+      - '.github/workflows/build-static.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reconstruct verified static files
+        run: |
+          node build.cjs
+          rm -rf site
+          mv dist site
+          printf 'MapleStory Classic Builder static-direct-1\n' > site/build-info.txt
+      - name: Commit generated site
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f site
+          if git diff --cached --quiet; then
+            echo 'Static site already up to date.'
+          else
+            git commit -m 'Build verified static deploy assets'
+            git push
+          fi
