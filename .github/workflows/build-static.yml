@@ -93,19 +93,22 @@ jobs:
           done
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
           test -n "$chrome"
-          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=8500 --dump-dom http://127.0.0.1:4173/ >/tmp/maplestory-static-dom.html
-          grep -q 'class="atlas-action-row' /tmp/maplestory-static-dom.html
-          grep -q 'class="gear-slot' /tmp/maplestory-static-dom.html
-          grep -q 'class="atlas-timeline-level' /tmp/maplestory-static-dom.html
-          grep -q 'visual-layer-ready' /tmp/maplestory-static-dom.html
-          grep -q 'visual-db-layer-ready' /tmp/maplestory-static-dom.html
-          grep -q 'visual-npc-layer-ready' /tmp/maplestory-static-dom.html
-          grep -q 'visual-skill-layer-ready' /tmp/maplestory-static-dom.html
-          grep -q 'visual-portal-layer-ready' /tmp/maplestory-static-dom.html
-          grep -q 'dashboard-polish-ready' /tmp/maplestory-static-dom.html
-          grep -q 'dashboard-action-layout-ok' /tmp/maplestory-static-dom.html
-          ! grep -q 'dashboard-overflow-detected' /tmp/maplestory-static-dom.html
-          grep -Eq 'visual-media-strip|visualized-item-row|visual-quest-items' /tmp/maplestory-static-dom.html
+          for viewport in 1365,900 1024,768 800,900; do
+            file="/tmp/maplestory-static-${viewport//,/-}.html"
+            "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=8500 --dump-dom http://127.0.0.1:4173/ >"$file"
+            grep -q 'class="atlas-action-row' "$file"
+            grep -q 'class="gear-slot' "$file"
+            grep -q 'class="atlas-timeline-level' "$file"
+            grep -q 'visual-layer-ready' "$file"
+            grep -q 'visual-db-layer-ready' "$file"
+            grep -q 'visual-npc-layer-ready' "$file"
+            grep -q 'visual-skill-layer-ready' "$file"
+            grep -q 'visual-portal-layer-ready' "$file"
+            grep -q 'dashboard-polish-ready' "$file"
+            grep -q 'dashboard-action-layout-ok' "$file"
+            ! grep -q 'dashboard-overflow-detected' "$file"
+            grep -Eq 'visual-media-strip|visualized-item-row|visual-quest-items' "$file"
+          done
       - name: Commit generated site
         run: |
           git config user.name 'github-actions[bot]'
