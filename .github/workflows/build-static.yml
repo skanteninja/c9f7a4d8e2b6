@@ -104,7 +104,7 @@ jobs:
               if(!d.documentElement.classList.contains('beginner-skill-tree-ready'))throw Error('beginner tree did not boot');
               if(d.querySelectorAll('#atlas-skill-grid .beginner-skill-card').length!==3)throw Error('beginner skill count');
               const change=async(level,needles)=>{
-                const sel=d.getElementById('level-select');sel.value=String(level);sel.dispatchEvent(new Event('change',{bubbles:true}));await delay(950);
+                const sel=d.getElementById('level-select');sel.value=String(level);sel.dispatchEvent(new frame.contentWindow.Event('change',{bubbles:true}));await delay(950);
                 if(d.documentElement.dataset.autoGearLevel!==String(level))throw Error('auto gear marker '+level);
                 const equipment=d.getElementById('equipment-window')?.innerHTML||'';
                 const avatar=d.getElementById('atlas-avatar')?.innerHTML||'';
@@ -175,6 +175,7 @@ jobs:
           PY
           done
           "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=15000 --dump-dom http://127.0.0.1:4173/ci-progression-test.html >/tmp/progression-test.html
+          grep -o 'progression-level-sync-[^<]*' /tmp/progression-test.html || true
           grep -q '>progression-level-sync-ok<' /tmp/progression-test.html
           ! grep -q 'progression-level-sync-failed' /tmp/progression-test.html
           rm -f site/ci-progression-test.html
