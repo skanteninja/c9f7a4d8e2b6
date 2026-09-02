@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Dashboard live gate v2: verifies the visual polish layer and action-row containment at desktop and responsive widths.
+# Dashboard live gate v3: visual polish + action containment + whole-dashboard horizontal containment.
 on:
   workflow_run:
     workflows: ["Build static site"]
@@ -49,4 +49,6 @@ jobs:
             grep -q 'dashboard-polish-ready' "$file"
             grep -q 'dashboard-action-layout-ok' "$file"
             ! grep -q 'dashboard-overflow-detected' "$file"
+            grep -q 'dashboard-page-layout-ok' "$file"
+            ! grep -q 'dashboard-page-overflow-detected' "$file"
           done
