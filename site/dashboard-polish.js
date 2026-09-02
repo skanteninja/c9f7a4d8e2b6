@@ -110,6 +110,94 @@
     });
   }
 
+  function etcTargetParts(row) {
+    const held = row.querySelector('input[data-held]');
+    if (!held) return null;
+    const children = [...row.children];
+    const heldIndex = children.indexOf(held);
+    const before = children.slice(0, heldIndex).reverse();
+    const after = children.slice(heldIndex + 1);
+    const minEl = before.find(el => /\bmin\b/i.test(el.textContent || '')) || null;
+    const allInEl = after.find(el => /\ball-in\b/i.test(el.textContent || '')) || null;
+    const minMatch = minEl?.textContent?.match(/\d+/);
+    const allInMatch = allInEl?.textContent?.match(/\d+/);
+    const min = minMatch ? Number(minMatch[0]) : 0;
+    const allIn = allInMatch ? Number(allInMatch[0]) : NaN;
+    const target = Number.isFinite(allIn) ? allIn : min;
+    return { held, minEl, allInEl, target };
+  }
+
+  function setFilterCopy() {
+    const label = document.getElementById('etc-hide-done')?.closest('label');
+    if (!label) return;
+    const textNode = [...label.childNodes].find(node => node.nodeType === Node.TEXT_NODE);
+    if (textNode) textNode.textContent = ' Hide checked / satisfied';
+  }
+
+  function decorateEtcPlanner() {
+    const page = document.querySelector('[data-page="etc"]');
+    const list = document.getElementById('etc-list');
+    if (!page || !list) return;
+
+    document.documentElement.classList.add('etc-planner-fixed-ready');
+    const heading = page.querySelector('.section-head h2');
+    if (heading) heading.textContent = 'ETC Keep Checklist';
+
+    const sectionHead = page.querySelector('.section-head');
+    if (sectionHead && !page.querySelector('.etc-guidance')) {
+      const guide = document.createElement('div');
+      guide.className = 'etc-guidance';
+      guide.innerHTML = '<b>One number. One checkbox.</b><span>KEEP is the exact cumulative target this build recommends. Bank that amount, then check the item off. There is no quantity entry.</span>';
+      sectionHead.insertAdjacentElement('afterend', guide);
+    }
+    setFilterCopy();
+
+    [...list.querySelectorAll('.etc-row')].forEach(row => {
+      const parts = etcTargetParts(row);
+      if (!parts) return;
+      const { held, minEl, allInEl, target } = parts;
+      const itemName = row.querySelector('.etc-name')?.textContent?.trim() || 'ETC item';
+      const done = row.querySelector('input[data-etc-done]');
+
+      row.classList.add('etc-fixed-target');
+      row.dataset.recommendedKeep = String(target);
+      held.hidden = true;
+      held.tabIndex = -1;
+      held.setAttribute('aria-hidden', 'true');
+      if (minEl) minEl.hidden = true;
+      if (allInEl) allInEl.hidden = true;
+
+      let rec = row.querySelector('.etc-recommended');
+      if (!rec) {
+        rec = document.createElement('div');
+        rec.className = 'etc-recommended';
+        const anchor = allInEl || held.nextElementSibling;
+        if (anchor) row.insertBefore(rec, anchor);
+        else row.appendChild(rec);
+      }
+      rec.innerHTML = `<span>KEEP</span><b>${target}</b><small>recommended total</small>`;
+      rec.title = `${itemName}: keep ${target}`;
+
+      if (done) {
+        done.classList.add('etc-done-control');
+        done.setAttribute('aria-label', `Mark ${itemName} handled`);
+        done.title = `Mark ${itemName} handled`;
+        let wrap = done.closest('.etc-check-wrap');
+        if (!wrap) {
+          wrap = document.createElement('label');
+          wrap.className = 'etc-check-wrap';
+          done.parentNode.insertBefore(wrap, done);
+          wrap.appendChild(done);
+          const copy = document.createElement('span');
+          copy.textContent = 'DONE';
+          wrap.appendChild(copy);
+        }
+        wrap.classList.toggle('is-checked', done.checked);
+        row.classList.toggle('is-done', done.checked);
+      }
+    });
+  }
+
   function verifyLayout() {
     const html = document.documentElement;
     const page = document.querySelector('.dashboard-v72');
@@ -132,6 +220,7 @@
   function enhance() {
     document.documentElement.classList.add('dashboard-polish-ready');
     decorateActions();
+    decorateEtcPlanner();
     upgradeTrainMap().finally(() => requestAnimationFrame(() => requestAnimationFrame(verifyLayout)));
   }
 
