@@ -1,0 +1,9 @@
+{
+  "name": "MapleStory Classic Builder",
+  "short_name": "Classic Builder",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#090b13",
+  "theme_color": "#090b13",
+  "icons": []
+}
