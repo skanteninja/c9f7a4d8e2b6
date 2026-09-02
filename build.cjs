@@ -5,14 +5,33 @@ const zlib = require('zlib');
 const root = __dirname;
 const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
+const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.8.0-direct2';
+const assetVersion = '0.8.1-static1';
+
+function readChunk(name) {
+  const directRepair = path.join(repairs, name);
+  if (fs.existsSync(directRepair)) {
+    return fs.readFileSync(directRepair, 'utf8');
+  }
+
+  const stem = name.replace(/\.txt$/, '');
+  let repaired = '';
+  for (let i = 0; ; i++) {
+    const part = path.join(repairs, `${stem}.part${i}.txt`);
+    if (!fs.existsSync(part)) break;
+    repaired += fs.readFileSync(part, 'utf8');
+  }
+  if (repaired) return repaired;
+
+  return fs.readFileSync(path.join(runtime, name), 'utf8');
+}
 
 function readChunks(prefix, count) {
   let base64 = '';
   for (let i = 0; i < count; i++) {
     const name = `${prefix}.${String(i).padStart(2, '0')}.txt`;
-    base64 += fs.readFileSync(path.join(runtime, name), 'utf8').replace(/\s+/g, '');
+    base64 += readChunk(name).replace(/\s+/g, '');
   }
   return zlib.gunzipSync(Buffer.from(base64, 'base64')).toString('utf8');
 }
