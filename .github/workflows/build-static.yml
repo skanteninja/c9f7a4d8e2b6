@@ -148,6 +148,7 @@ jobs:
             echo 'Static site already up to date.'
           else
             git commit -m 'Build verified static deploy assets'
+            git reset --hard HEAD
             git fetch origin main
             git rebase origin/main
             git push origin HEAD:main
