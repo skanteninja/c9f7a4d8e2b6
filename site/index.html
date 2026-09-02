@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#090b13">
+  <title>MapleStory Classic Builder</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css?v=0.8.1-static1">
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">⚡</div>
+        <div>
+          <div class="brand-title">CLASSIC BUILDER</div>
+          <div class="brand-sub">MapleStory Classic Builder</div>
+        </div>
+      </div>
+      <nav id="nav">
+        <div class="nav-section-label">PLAY</div>
+        <button data-page="dashboard" class="nav-btn active"><span>◈</span> Dashboard</button>
+        <button data-page="builds" class="nav-btn"><span>▣</span> Builds</button>
+        <button data-page="leveling" class="nav-btn"><span>↗</span> Leveling</button>
+        <button data-page="quests" class="nav-btn"><span>✓</span> Quests</button>
+        <button data-page="equipment" class="nav-btn"><span>◆</span> Equipment</button>
+        <button data-page="skills" class="nav-btn"><span>✦</span> Skill Tree</button>
+        <button data-page="etc" class="nav-btn"><span>▦</span> ETC Planner</button>
+        <div class="nav-section-label">DATABASE</div>
+        <button data-page="classicdb" class="nav-btn"><span>⌘</span> Classic DB</button>
+        <button data-page="cashshop" class="nav-btn"><span>◇</span> Cash Shop</button>
+        <button data-page="beauty" class="nav-btn"><span>✧</span> Beauty</button>
+        <button data-page="formulas" class="nav-btn"><span>∑</span> Formulas</button>
+        <div class="nav-section-label">META</div>
+        <button data-page="research" class="nav-btn"><span>⌕</span> Research</button>
+        <button data-page="data" class="nav-btn"><span>◎</span> Agent / Data</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sync-dot"></div>
+        <div><b>Headless data source attached</b><small>Website is the main interface</small></div>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div class="topbar-title-wrap">
+          <button id="page-back" class="page-back" type="button" hidden>← Back</button>
+          <div><h1 id="page-title">MapleStory Classic Builder</h1><p id="page-subtitle">Your personalized Ice / Lightning build workspace.</p></div>
+        </div>
+        <div class="level-control"><label for="level-select">CURRENT LEVEL</label><select id="level-select"></select></div>
+      </header>
+
+      <div class="beta-banner"><b>Beta rule:</b> yellow / amber labels are COT2 or pre-launch information that must be re-verified live.</div>
+
+      <section data-page="dashboard" class="page active dashboard-v5 dashboard-v72">
+        <div class="v5-buildbar">
+          <div><div class="v5-kicker-row"><span class="class-pill">MAGICIAN</span><span class="job-pill">WIZARD (I/L)</span><span id="atlas-beta-pill" class="beta-tag">COT2-AWARE</span></div><h2>MapleStory Classic Builder</h2><p>Ice / Lightning Wizard · Level 1–70 · equipment, skills, quests, targets and progression in one build.</p></div>
+          <div class="v5-build-actions"><button class="ghost-btn" data-goto="builds">Build Library</button><button class="primary-btn" id="preset-efficient">Equip Efficient Set</button></div>
+        </div>
+
+        <section class="v7-audit-strip v72-audit-top" aria-label="Classic data confidence summary"><div><span class="audit-dot current"></span><b id="audit-current">0</b><small>COT2 verified gear</small></div><div><span class="audit-dot verify"></span><b id="audit-verify">0</b><small>launch-scope pending</small></div><div><span class="audit-dot historical"></span><b id="audit-historical">0</b><small>legacy reference only</small></div><button class="mini-btn" data-goto="research">Evidence & sources</button></section>
+
+        <section class="v72-command-grid">
+          <section class="panel atlas-panel current-plan-panel v72-now-panel"><div class="atlas-panel-head"><div><h3>Do This Now</h3><small>Click an action to open its full tab · Escape returns here</small></div></div><div id="dashboard-actions" class="atlas-action-list v72-action-list"></div></section>
+          <section class="panel atlas-panel compact-panel v72-quest-panel"><div class="atlas-panel-head"><div><h3>Quest Queue</h3><small>Finish here · 10-second undo safety</small></div><button class="mini-btn" data-goto="quests">Open tracker</button></div><div id="atlas-quest-queue" class="v72-queue"></div></section>
+          <section class="panel atlas-panel compact-panel v72-etc-panel"><div class="atlas-panel-head"><div><h3>ETC Queue</h3><small>Core need + 15% safety buffer</small></div><button class="mini-btn" data-goto="etc">Open planner</button></div><div id="atlas-etc-queue" class="v72-etc-icons"></div></section>
+        </section>
+
+        <section class="v5-hero-grid v72-hero-grid">
+          <section class="panel v5-equipment-hero"><div class="v5-panel-heading"><div><span class="eyebrow">LOADOUT</span><h3>Equipment Inventory</h3><small>Click any slot to replace it</small></div><button class="mini-btn" data-goto="equipment">Progression</button></div><div id="equipment-window" class="equipment-window atlas-equipment-window v5-equipment-window"></div><div class="equipment-presets-inline"><button class="mini-btn" id="preset-luk">LUK Bridge</button><button class="mini-btn" id="clear-gear">Clear</button></div></section>
+          <section class="panel v5-character-hero"><div id="atlas-avatar" class="atlas-avatar v5-avatar"></div><div class="v5-character-copy"><span class="eyebrow">ACTIVE BUILD</span><h3 id="v5-job-title">Beginner</h3><p id="atlas-route-sub">Current route</p><div class="v5-quick-metrics"><button data-goto="leveling"><small>TRAINING</small><b id="v5-training">—</b></button><button data-goto="skills"><small>NEXT SP</small><b id="v5-sp">—</b></button><button data-goto="quests"><small>QUESTS</small><b id="v5-quests">0 ready</b></button><button data-goto="etc"><small>ETC</small><b id="v5-etc">0 urgent</b></button></div></div></section>
+          <section class="panel v5-level-hero"><div class="v5-level-caption">CURRENT LEVEL</div><div class="v5-level-number"><span>LV</span><strong id="hero-level">1</strong></div><div id="atlas-job-line" class="v5-job-line">Lv1 Beginner</div><div class="v5-level-stepper"><button id="level-prev" class="level-round" aria-label="Previous level">−</button><select id="hero-level-select" aria-label="Jump to level"></select><button id="level-next" class="level-round" aria-label="Next level">+</button></div><input id="level-range" class="v5-level-range" type="range" min="1" max="70" step="1" value="1" aria-label="Character level"><div class="v5-milestones"><span>1</span><b>10<br><small>Magician</small></b><b>30<br><small>I/L</small></b><span>70</span></div></section>
+        </section>
+
+        <section class="v6-primary-grid v72-secondary-content"><section class="panel atlas-panel skills-main-panel v6-skills-panel"><div class="atlas-panel-head"><div><h3>Skill Tree</h3><small>Your current allocation and the exact next SP action</small></div><button class="mini-btn" data-goto="skills">Full Tree</button></div><div id="atlas-skill-tabs" class="atlas-skill-tabs"></div><div id="atlas-skill-grid" class="atlas-skill-grid"></div><div id="atlas-skill-detail" class="atlas-skill-detail"></div></section><section class="panel atlas-panel v6-stats-panel"><div class="atlas-panel-head"><div><h3>Character Stats</h3><small>Calculated from your current loadout</small></div><span class="panel-accent purple"></span></div><div id="build-summary" class="atlas-stat-list"></div></section></section>
+
+        <section class="v6-tertiary-grid"><section id="next-upgrade" class="panel atlas-panel next-upgrade"></section><section class="panel atlas-panel v6-buffs-panel"><div class="atlas-panel-head"><div><h3>Build Rules & Buffs</h3><small>I/L utility and spending rules</small></div></div><div id="atlas-buffs" class="atlas-buffs"></div></section><section class="panel atlas-panel damage-panel v6-damage-panel"><div class="atlas-panel-head"><div><h3>Upgrade Calculator</h3><small>Current weapon vs meaningful candidate</small></div></div><div hidden><select id="atlas-mob-select"></select><div id="atlas-mob-card"></div></div><div id="atlas-damage"></div></section></section>
+        <section class="v5-progress-grid v72-bottom-grid"><section class="panel atlas-panel five-level-panel"><div class="atlas-panel-head"><div><h3>Next 5 Levels</h3><small>Click any level to preview it instantly</small></div></div><div id="level-timeline" class="atlas-level-timeline"></div></section></section>
+      </section>
+
+      <section data-page="builds" class="page"><section class="build-library-hero"><div><span class="eyebrow">MULTI-BUILD INFRASTRUCTURE</span><h2>Build Library</h2><p>Ice / Lightning is the active personalized build today; future class cards stay infrastructure-only until researched and verified.</p></div><div class="library-count"><strong id="active-build-count">1</strong><span>active build</span></div></section><div id="build-library" class="build-library"></div><section class="panel build-schema-panel"><span class="eyebrow">HOW THIS SCALES</span><h3>Shared game data, separate build decisions</h3><div class="schema-flow"><div><b>Class</b><span>Magician</span></div><i>→</i><div><b>Build</b><span>I/L Wizard</span></div><i>→</i><div><b>Guide modules</b><span>Routes · quests · skills · gear · ETCs</span></div><i>→</i><div><b>Your state</b><span>Level · checks · loadout · held items</span></div></div></section></section>
+
+      <section data-page="leveling" class="page"><div class="section-head"><div><span class="eyebrow">DEDUPLICATED</span><h2>Training Route</h2></div><button class="mini-btn" data-goto="classicdb" data-db-jump="maps">Full Maps DB</button></div><div id="route-cards" class="route-cards"></div><div class="section-head"><div><span class="eyebrow">EXACT LEVEL</span><h2>Current-level detail</h2></div></div><div id="level-detail" class="panel"></div></section>
+
+      <section data-page="quests" class="page"><div class="section-head"><div><span class="eyebrow">CURATED ROUTE</span><h2>Quest Tracker</h2></div><button class="mini-btn" data-goto="classicdb" data-db-jump="quests">Full Quests DB</button></div><div class="filters"><input id="quest-search" placeholder="Search quests, rewards, ETCs..."><select id="quest-priority"><option value="all">All priorities</option><option>High</option><option>Medium</option><option>Low / Optional</option></select><select id="quest-region"><option value="all">All regions</option></select><label class="toggle"><input id="quest-relevant" type="checkbox" checked> I/L relevant only</label><label class="toggle"><input id="quest-available" type="checkbox" checked> Available by current level</label><label class="toggle"><input id="quest-hide-done" type="checkbox"> Hide completed</label></div><div class="quest-summary" id="quest-summary"></div><div id="quest-list" class="quest-list"></div></section>
+
+      <section data-page="equipment" class="page"><div class="section-head"><div><span class="eyebrow">CURATED I/L GEAR</span><h2>Equipment Progression</h2></div><button class="mini-btn" data-goto="classicdb" data-db-jump="equipment">Full Equipment DB</button></div><div class="equipment-layout"><div><div class="section-head"><div><span class="eyebrow">CLICK A SLOT</span><h2>Equipment Inventory</h2></div></div><div id="equipment-window-page" class="equipment-window"></div></div><div id="build-summary-page" class="build-summary"></div></div><div class="section-head"><div><span class="eyebrow">LOW-MESO DECISIONS</span><h2>Weapon Roadmap</h2></div></div><div id="weapon-roadmap" class="weapon-roadmap"></div><div class="section-head"><div><span class="eyebrow">ONLY IF NEEDED</span><h2>Crafting Recipes</h2></div><button class="mini-btn" data-goto="classicdb" data-db-jump="crafting">Full Crafting DB</button></div><div id="recipe-grid" class="recipe-grid"></div></section>
+
+      <section data-page="skills" class="page"><div class="section-head"><div><span class="eyebrow">CURATED I/L SKILLS</span><h2>Skill Tree</h2></div><button class="mini-btn" data-goto="classicdb" data-db-jump="skills">Full Skills DB</button></div><div class="decision-callout"><div class="decision-icon">✦</div><div><b>Definitive 1st-job attack: Magic Claw.</b><span> Energy Bolt stays at 1 as the prerequisite. The guide prioritizes terrain reliability over the theoretical MP discount.</span></div></div><div id="skill-list" class="skill-list"></div></section>
+
+      <section data-page="etc" class="page"><div class="section-head"><div><span class="eyebrow">ANTI-BACKTRACKING</span><h2>Cumulative ETC Planner</h2></div></div><div class="filters"><input id="etc-search" placeholder="Search ETCs or quests..."><label class="toggle"><input id="etc-current-only" type="checkbox"> Started by current level</label><label class="toggle"><input id="etc-hide-done" type="checkbox"> Hide satisfied</label></div><div id="etc-list" class="etc-list"></div></section>
+
+      <section data-page="classicdb" class="page"><div class="db-hero"><div><span class="eyebrow">OSMS · CURRENT COT2 CLIENT EXPORT</span><h2>Classic Database</h2><p>Search the broad COT2 metadata layer without mixing it into curated I/L recommendations.</p></div><div class="db-provider-badge"><b>Provider</b><span>OSMS Data Explorer</span></div></div><div class="db-toolbar"><select id="db-dataset" aria-label="Database dataset"><option value="items">Items</option><option value="equipment">Equipment</option><option value="monsters">Monsters</option><option value="maps">Maps</option><option value="quests">Quests</option><option value="skills">Skills</option><option value="crafting">Crafting</option><option value="portals">Portals</option><option value="patch_notes">Patch Notes</option></select><input id="db-search" type="search" placeholder="Search names, IDs, descriptions, fields..."><button id="db-more" class="mini-btn" type="button">Show more</button></div><div id="db-status" class="db-status"></div><div id="db-results" class="db-results"></div></section>
+
+      <section data-page="cashshop" class="page"><div class="db-hero"><div><span class="eyebrow">COT2 CATALOG · PRICES ARE BETA DATA</span><h2>Cash Shop</h2><p>Browse the client-exported catalog. Availability and prices stay visibly pre-launch until live confirmation.</p></div><span class="beta-tag">COT2 / VERIFY LIVE</span></div><div class="db-toolbar"><select id="cash-category" aria-label="Cash Shop category"><option value="all">All categories</option></select><input id="cash-search" type="search" placeholder="Search Cash Shop items..."><label class="toggle"><input id="cash-sale-only" type="checkbox"> On-sale only</label></div><div id="cash-status" class="db-status"></div><div id="cash-results" class="db-card-grid"></div></section>
+
+      <section data-page="beauty" class="page"><div class="db-hero"><div><span class="eyebrow">COT2 CLIENT CATALOG</span><h2>Beauty</h2><p>Hair and face styles with exact IDs and current exported artwork.</p></div></div><div class="db-toolbar"><select id="beauty-type"><option value="hair">Hair</option><option value="face">Face</option></select><select id="beauty-gender"><option value="all">All genders</option><option value="male">Male</option><option value="female">Female</option></select><input id="beauty-search" type="search" placeholder="Search styles or IDs..."></div><div id="beauty-status" class="db-status"></div><div id="beauty-results" class="beauty-grid"></div></section>
+
+      <section data-page="formulas" class="page"><div class="db-hero"><div><span class="eyebrow">COT2 FORMULA LAB</span><h2>I/L Damage Formula</h2><p>Client-audited magical damage formula with your current loadout values prefilled where possible.</p></div><span class="status-tag">MapleStory Quest · COT2 audit</span></div><div class="formula-layout"><section class="panel formula-card"><h3>Inputs</h3><label>Total INT<input id="formula-int" type="number" min="1" value="4"></label><label>Magic Attack<input id="formula-matk" type="number" min="0" value="0"></label><label>Skill BasicAttack<input id="formula-basic" type="number" min="1" value="40"></label><label>Mastery %<input id="formula-mastery" type="number" min="0" max="100" step="1" value="10"></label><label>Element modifier<select id="formula-element"><option value="1">Neutral ×1.00</option><option value="1.25">Weak ×1.25</option><option value="0.75">Resist ×0.75</option><option value="0">Immune ×0</option></select></label></section><section class="panel formula-result" id="formula-result"></section><section class="panel formula-notes"><h3>Audited formula</h3><code>MAGIC = Total INT / 2 + Magic Attack</code><code>MIN = (BasicAttack / 100) × MAGIC × (Total INT × Mastery / 100 + 1)</code><code>MAX = (BasicAttack / 100) × MAGIC × (Total INT / 100 + 1)</code><p>This is a client-formula lab, not yet a full casts-to-kill simulator. Mob MDEF, level penalty and every server-side/live modifier still need their own verified layer.</p></section></div></section>
+
+      <section data-page="research" class="page"><div class="section-head"><div><span class="eyebrow">SOURCE CONFIDENCE</span><h2>Why the guide says what it says</h2></div></div><div id="decision-list" class="decision-list"></div><div id="source-list" class="source-list"></div></section>
+
+      <section data-page="data" class="page"><div class="agent-card"><div class="agent-orb">◎</div><div><span class="eyebrow">AGENT BRIDGE</span><h2>Persistent guide maintenance</h2><p>The website is your actual guide. A connected Google Sheet remains hidden behind it as a headless maintenance source so ChatGPT can reliably update guide data in future sessions. The website code is backend-agnostic, so that source can be replaced later without rebuilding the interface.</p></div></div><div id="data-status" class="data-status"></div><div class="data-actions"><button id="export-progress" class="primary-btn">Export my progress</button><label class="primary-btn file-btn">Import progress<input id="import-progress" type="file" accept=".json,application/json"></label><button id="cache-assets" class="ghost-btn">Preload visual sprites</button><button id="reset-progress" class="danger-btn">Reset local progress</button></div><div class="panel"><h3>Maintenance contract</h3><p>Guide research is maintained separately from your personal playthrough. Quest checks, selected level, held ETC counts and equipped items stay in your browser and must survive guide updates. The current maintenance source is the connected Sheet; it is not part of the user-facing workflow.</p></div></section>
+    </main>
+  </div>
+
+  <div id="gear-modal" class="modal" aria-hidden="true"><div class="modal-backdrop" data-close-modal></div><div class="modal-card"><div class="modal-head"><div><span class="eyebrow">EQUIPMENT SLOT</span><h2 id="modal-title">Choose item</h2></div><button class="close-btn" data-close-modal>×</button></div><div class="modal-filter-row"><label class="toggle"><input id="modal-show-future" type="checkbox"> Show future-level items</label><label class="toggle"><input id="modal-show-optional" type="checkbox" checked> Show all curated Mage options</label></div><div id="gear-options" class="gear-options"></div></div></div>
+  <div id="toast" class="toast"></div>
+  <script src="guide-data.js?v=0.8.1-static1"></script>
+  <script src="app.js?v=0.8.1-static1"></script>
+</body>
+</html>
