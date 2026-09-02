@@ -1,5 +1,6 @@
 name: Verify live site
 
+# Dashboard live gate v1: verifies the visual polish layer and action-row containment.
 on:
   workflow_run:
     workflows: ["Build static site"]
