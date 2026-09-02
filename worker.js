@@ -1,4 +1,4 @@
-const VERSION = '0.8.1-direct4';
+const VERSION = '0.8.1-direct5';
 const COUNTS = { styles: 3, guide: 6, app: 4 };
 const MIME = {
   styles: 'text/css; charset=utf-8',
@@ -57,6 +57,11 @@ function retirementServiceWorker() {
   return `const PREFIXES=['maplestory-classic-builder-','ultimate-il-guide-'];\nself.addEventListener('install',e=>self.skipWaiting());\nself.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>PREFIXES.some(p=>k.startsWith(p))).map(k=>caches.delete(k)))),self.registration.unregister(),self.clients.claim()])));\n`;
 }
 
+function guardedBundle(json, app) {
+  const guard = `\n;(()=>{const ready=()=>{const ok=!!document.querySelector('#dashboard-actions .atlas-action-row')&&!!document.querySelector('#equipment-window .gear-slot');window.__MSCLASSIC_READY=ok;if(ok)return;const id='msclassic-runtime-error';if(document.getElementById(id))return;const el=document.createElement('div');el.id=id;el.style.cssText='position:fixed;left:20px;right:20px;bottom:20px;z-index:999999;padding:14px 16px;border:1px solid #8a4050;border-radius:12px;background:#28131b;color:#ffdbe3;font:14px Segoe UI,Arial,sans-serif';el.textContent='Build ${VERSION} loaded but the app did not initialize. Runtime diagnostics are available at /runtime-health.json.';document.body.appendChild(el);};setTimeout(ready,0);})();`;
+  return `window.__MSCLASSIC_BUILD='${VERSION}';\nwindow.__MSCLASSIC_READY=false;\nwindow.GUIDE_DATA = ${json};\ntry {\n${app}\n} catch (e) {\n  window.__MSCLASSIC_BOOT_ERROR=String(e&&e.message||e);\n  console.error('MapleStory Classic boot failure',e);\n  const el=document.createElement('div');\n  el.id='msclassic-runtime-error';\n  el.style.cssText='position:fixed;left:20px;right:20px;bottom:20px;z-index:999999;padding:14px 16px;border:1px solid #8a4050;border-radius:12px;background:#28131b;color:#ffdbe3;font:14px Segoe UI,Arial,sans-serif';\n  el.textContent='Build ${VERSION} failed to initialize: '+window.__MSCLASSIC_BOOT_ERROR;\n  document.body.appendChild(el);\n}\n${guard}\n//# sourceURL=app-v081.js\n`;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -68,11 +73,10 @@ export default {
       if (url.pathname === '/app-v081.js') {
         const [json, app] = await Promise.all([readRuntime(env, 'guide'), readRuntime(env, 'app')]);
         JSON.parse(json);
-        const bundle = `window.__MSCLASSIC_BUILD='${VERSION}';\nwindow.GUIDE_DATA = ${json};\n${app}`;
-        return response(bundle, MIME.app);
+        return response(guardedBundle(json, app), MIME.app);
       }
 
-      // Kept temporarily for old tabs while the versioned bundle takes over.
+      // Kept temporarily for any old tab that still has the pre-0.8.1 HTML cached.
       if (url.pathname === '/app.js') {
         return response(await readRuntime(env, 'app'), MIME.app);
       }
@@ -90,7 +94,7 @@ export default {
       if (url.pathname === '/runtime-health.json') {
         const [css, json, app] = await Promise.all([readRuntime(env, 'styles'), readRuntime(env, 'guide'), readRuntime(env, 'app')]);
         JSON.parse(json);
-        return response(JSON.stringify({ ok: true, version: VERSION, cssBytes: css.length, guideBytes: json.length, appBytes: app.length, atomicBundle: true }), 'application/json; charset=utf-8');
+        return response(JSON.stringify({ ok: true, version: VERSION, cssBytes: css.length, guideBytes: json.length, appBytes: app.length, atomicBundle: true, guardedBoot: true }), 'application/json; charset=utf-8');
       }
 
       const asset = await env.ASSETS.fetch(request);
