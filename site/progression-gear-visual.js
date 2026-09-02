@@ -3,20 +3,13 @@
   const preset = D?.gearPresets?.efficient;
   if (!D || !preset?.levels?.length) return;
 
-  const RAW = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/data/current/';
   let timer = null;
   let decisionsVerified = null;
-
-  const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
   function level() {
     const select = Number(document.getElementById('level-select')?.value);
     const hero = Number(document.getElementById('hero-level')?.textContent);
     return Math.max(1, Math.min(Number(D.meta?.maxLevel) || 70, select || hero || 1));
-  }
-
-  function item(name) {
-    return (D.gear || []).find(row => row.Item === name) || null;
   }
 
   function loadoutAt(lv) {
@@ -31,18 +24,8 @@
     return {...(preset.levels.find(stage => Number(stage.min) === lv)?.gear || {})};
   }
 
-  function nextStage(lv) {
-    return [...preset.levels].sort((a,b) => Number(a.min)-Number(b.min)).find(stage => Number(stage.min) > lv) || null;
-  }
-
   function upgradeDecisionAt(lv) {
     return (D.upgrades || []).find(row => Number(row.Lv) === lv) || null;
-  }
-
-  function currentItemImage(row) {
-    const id = Number(row?.['Item ID'] || 0);
-    if (!id) return '';
-    return `${RAW}images/items/${String(Math.trunc(id)).padStart(8,'0')}.png`;
   }
 
   function weaponNameFromLabel(label) {
@@ -51,15 +34,7 @@
     return raw;
   }
 
-  function decisionTone(action) {
-    const text = String(action || '').toUpperCase();
-    if (text.includes('SKIP')) return 'skip';
-    if (text.includes('BUY')) return 'buy';
-    if (text.includes('HOLD')) return 'hold';
-    return 'review';
-  }
-
-  function decisionVerb(action) {
+  function actionVerb(action) {
     const text = String(action || '').toUpperCase();
     if (text.includes('SKIP')) return 'SKIP';
     if (text.includes('BUY')) return 'BUY';
@@ -67,90 +42,29 @@
     return 'REVIEW';
   }
 
-  function decisionCard(decision, lv) {
-    if (!decision) return '';
-    const currentName = weaponNameFromLabel(decision['Current Weapon']);
-    const candidateName = weaponNameFromLabel(decision.Candidate);
-    const currentRow = item(currentName);
-    const candidateRow = item(candidateName);
-    const currentSrc = currentItemImage(currentRow);
-    const candidateSrc = currentItemImage(candidateRow);
-    const action = String(decision['Default Action'] || 'REVIEW');
-    const tone = decisionTone(action);
-    const verb = decisionVerb(action);
-    const gain = Number(decision['M.ATK Gain']);
-    const exactInstruction = tone === 'skip'
-      ? `KEEP ${currentName.toUpperCase()}`
-      : tone === 'buy'
-        ? `EQUIP ${candidateName.toUpperCase()}`
-        : `${verb} ${candidateName.toUpperCase()}`;
-    return `<section class="progression-upgrade-decision ${tone}" data-upgrade-decision-level="${lv}" data-upgrade-action="${verb}" data-upgrade-candidate="${esc(candidateName)}">
-      <div class="progression-upgrade-kicker"><span>LV${lv} WEAPON DECISION</span><strong>${verb}</strong></div>
-      <div class="progression-upgrade-flow">
-        <div class="progression-upgrade-weapon current"><span>${currentSrc?`<img src="${esc(currentSrc)}" alt="${esc(currentName)}" loading="lazy" decoding="async">`:''}</span><div><small>KEEPING NOW</small><b>${esc(currentName)}</b></div></div>
-        <i>→</i>
-        <div class="progression-upgrade-weapon candidate"><span>${candidateSrc?`<img src="${esc(candidateSrc)}" alt="${esc(candidateName)}" loading="lazy" decoding="async">`:''}</span><div><small>UNLOCKED OPTION</small><b>${esc(candidateName)}</b>${Number.isFinite(gain)?`<em>+${gain} M.ATK</em>`:''}</div></div>
-      </div>
-      <div class="progression-upgrade-answer"><b>${esc(exactInstruction)}</b><p>${esc(decision.Why || '')}</p></div>
-    </section>`;
-  }
-
-  function verifyDecisionRenderer() {
+  function verifyDecisionData() {
     if (decisionsVerified !== null) return decisionsVerified;
     const checks = [
-      {lv:20,action:'SKIP',candidate:'Metal Wand',weapon:'Hardwood Wand',answer:'KEEP HARDWOOD WAND'},
-      {lv:25,action:'SKIP',candidate:'Ice Wand',weapon:'Hardwood Wand',answer:'KEEP HARDWOOD WAND'},
-      {lv:30,action:'BUY',candidate:'Mithril Wand',weapon:'Mithril Wand',answer:'EQUIP MITHRIL WAND'}
+      {lv:20,action:'SKIP',candidate:'Metal Wand',weapon:'Hardwood Wand'},
+      {lv:25,action:'SKIP',candidate:'Ice Wand',weapon:'Hardwood Wand'},
+      {lv:30,action:'BUY',candidate:'Mithril Wand',weapon:'Mithril Wand'}
     ];
     decisionsVerified = checks.every(check => {
       const decision = upgradeDecisionAt(check.lv);
       const loadout = loadoutAt(check.lv);
-      if (!decision || loadout.Weapon !== check.weapon) return false;
-      const template = document.createElement('template');
-      template.innerHTML = decisionCard(decision,check.lv).trim();
-      const card = template.content.firstElementChild;
-      return !!card
-        && card.dataset.upgradeAction === check.action
-        && card.dataset.upgradeCandidate === check.candidate
-        && card.querySelector('.progression-upgrade-answer b')?.textContent.trim() === check.answer;
+      return !!decision
+        && actionVerb(decision['Default Action']) === check.action
+        && weaponNameFromLabel(decision.Candidate) === check.candidate
+        && loadout.Weapon === check.weapon;
     });
-    document.documentElement.classList.toggle('progression-gear-decision-verified',decisionsVerified);
-    document.documentElement.classList.toggle('progression-gear-decision-verification-failed',!decisionsVerified);
+    document.documentElement.classList.toggle('progression-gear-decision-verified', decisionsVerified);
+    document.documentElement.classList.toggle('progression-gear-decision-verification-failed', !decisionsVerified);
     return decisionsVerified;
   }
 
-  function tile(slot, name, newNow, lv) {
-    const row = item(name);
-    const src = currentItemImage(row);
-    const highly = !!row?.['Highly Recommended'];
-    return `<div class="progression-loadout-item ${newNow?'new-at-level':''} ${highly?'highly-recommended':''}" data-loadout-slot="${esc(slot)}" data-loadout-item="${esc(name)}">
-      <span class="progression-loadout-icon">${src?`<img src="${esc(src)}" alt="${esc(name)}" loading="lazy" decoding="async">`:'+'}</span>
-      <span class="progression-loadout-copy"><small>${esc(slot)}</small><b>${esc(name)}</b><em>${newNow?`NEW AT LV ${lv}`:highly?'HIGHLY RECOMMENDED':'RECOMMENDED HOLD'}</em></span>
-    </div>`;
-  }
-
-  function renderStrip(root) {
-    if (!root?.parentElement) return;
-    const lv = level();
-    const loadout = loadoutAt(lv);
-    const changed = changesAt(lv);
-    const next = nextStage(lv);
-    const decision = upgradeDecisionAt(lv);
-    const entries = Object.entries(loadout).filter(([,name]) => name && name !== 'None');
-    const id = `progression-loadout-${root.id}`;
-    let strip = document.getElementById(id);
-    if (!strip) {
-      strip = document.createElement('section');
-      strip.id = id;
-      strip.className = 'progression-loadout-strip';
-      root.parentElement.insertBefore(strip, root);
-    }
-    const changeCount = Object.keys(changed).length;
-    const signature = JSON.stringify({lv,loadout,changed,next:Number(next?.min||0),decision:decision?{a:decision['Default Action'],c:decision.Candidate}:null});
-    if (strip.dataset.signature === signature) return;
-    strip.dataset.signature = signature;
-    strip.innerHTML = `<div class="progression-loadout-head"><div><span>LEVEL-SYNCED EQUIPMENT</span><b>Recommended loadout · Lv${lv}</b><small>${changeCount?`${changeCount} recommended ${changeCount===1?'piece changes':'pieces change'} at this level.`:next?`Hold this set. Next recommended equipment change: Lv${Number(next.min)}.`:'Current recommended end-of-plan loadout.'}</small></div><strong>${changeCount?`NEW ×${changeCount}`:'HOLD'}</strong></div>${decisionCard(decision,lv)}<div class="progression-loadout-items">${entries.map(([slot,name]) => tile(slot,name,changed[slot]===name,lv)).join('')}</div>`;
-    strip.querySelectorAll('img').forEach(img => img.addEventListener('error',()=>img.remove(),{once:true}));
+  function removeDuplicateGearUi() {
+    document.querySelectorAll('.progression-loadout-strip').forEach(node => node.remove());
+    document.querySelectorAll('.v5-avatar .avatar-equipped-icons').forEach(node => node.remove());
   }
 
   function annotateEquipment(root) {
@@ -164,9 +78,9 @@
       const equipped = slot.dataset.itemName;
       const recommended = !!target && target !== 'None' && equipped === target;
       const newNow = recommended && changed[slotName] === target;
-      slot.classList.toggle('progression-recommended-equipped',recommended);
-      slot.classList.toggle('progression-new-equipped',newNow);
-      slot.classList.toggle('progression-target-mismatch',!!target && target !== 'None' && equipped !== target);
+      slot.classList.toggle('progression-recommended-equipped', recommended);
+      slot.classList.toggle('progression-new-equipped', newNow);
+      slot.classList.toggle('progression-target-mismatch', !!target && target !== 'None' && equipped !== target);
       let marker = slot.querySelector('.progression-slot-marker');
       if (!recommended) {
         marker?.remove();
@@ -177,30 +91,25 @@
         marker.className = 'progression-slot-marker';
         slot.appendChild(marker);
       }
-      const markerText = newNow ? `NEW LV${lv}` : 'REC';
-      if (marker.textContent !== markerText) marker.textContent = markerText;
+      marker.textContent = newNow ? `NEW LV${lv}` : 'REC';
       marker.title = newNow ? `New recommended ${slotName} at level ${lv}` : `Recommended ${slotName} for level ${lv}`;
     });
   }
 
   function enhance() {
-    if (!verifyDecisionRenderer()) return;
-    ['equipment-window','equipment-window-page'].forEach(id => {
-      const root = document.getElementById(id);
-      if (!root) return;
-      annotateEquipment(root);
-      renderStrip(root);
-    });
-    document.documentElement.classList.add('progression-gear-visual-ready');
+    if (!verifyDecisionData()) return;
+    removeDuplicateGearUi();
+    ['equipment-window','equipment-window-page'].forEach(id => annotateEquipment(document.getElementById(id)));
+    document.documentElement.classList.add('progression-gear-visual-ready','progression-compact-dashboard-ready');
     document.documentElement.dataset.progressionGearVisualLevel = String(level());
   }
 
   function schedule() {
     clearTimeout(timer);
-    timer = setTimeout(enhance,70);
+    timer = setTimeout(enhance, 60);
   }
 
-  new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['data-item-name','class']});
+  new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['data-item-name']});
   document.addEventListener('change',schedule,true);
   document.addEventListener('input',schedule,true);
   document.addEventListener('click',schedule,true);
