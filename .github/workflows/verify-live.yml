@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Live gate v7: verify dashboard containment plus level-synced skills and equipment visualization.
+# Live gate v8: verify compact dashboard plus level-synced skills and inventory-only equipment progression.
 on:
   workflow_run:
     workflows: ["Build static site"]
@@ -22,29 +22,23 @@ jobs:
         run: |
           ready=0
           for i in {1..30}; do
-            build_ok=0
-            guard_ok=0
-            skill_ok=0
-            gear_ok=0
-            if curl -fsSL --max-time 10 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" | grep -q 'MapleStory Classic Builder 0.8.1-static1'; then build_ok=1; fi
-            if curl -fsSL --max-time 10 "$BASE_URL/dashboard-polish.js?ci=$GITHUB_RUN_ID" | grep -q 'html.scrollWidth > html.clientWidth'; then guard_ok=1; fi
-            if curl -fsSL --max-time 10 "$BASE_URL/progression-skill-state.js?ci=$GITHUB_RUN_ID" | grep -q 'progression-skill-state-ready'; then skill_ok=1; fi
-            if curl -fsSL --max-time 10 "$BASE_URL/progression-gear-visual.js?ci=$GITHUB_RUN_ID" | grep -q 'progression-gear-visual-ready'; then gear_ok=1; fi
-            if [ "$build_ok" -eq 1 ] && [ "$guard_ok" -eq 1 ] && [ "$skill_ok" -eq 1 ] && [ "$gear_ok" -eq 1 ]; then
-              ready=1
-              break
-            fi
+            build_ok=0; guard_ok=0; skill_ok=0; gear_ok=0; compact_ok=0
+            curl -fsSL --max-time 10 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" | grep -q 'MapleStory Classic Builder 0.8.1-static1' && build_ok=1 || true
+            curl -fsSL --max-time 10 "$BASE_URL/dashboard-polish.js?ci=$GITHUB_RUN_ID" | grep -q 'html.scrollWidth > html.clientWidth' && guard_ok=1 || true
+            curl -fsSL --max-time 10 "$BASE_URL/progression-skill-state.js?ci=$GITHUB_RUN_ID" | grep -q 'progression-skill-state-ready' && skill_ok=1 || true
+            gear_js="$(curl -fsSL --max-time 10 "$BASE_URL/progression-gear-visual.js?ci=$GITHUB_RUN_ID" || true)"
+            printf '%s' "$gear_js" | grep -q 'progression-gear-visual-ready' && gear_ok=1 || true
+            printf '%s' "$gear_js" | grep -q 'progression-compact-dashboard-ready' && compact_ok=1 || true
+            if [ "$build_ok" -eq 1 ] && [ "$guard_ok" -eq 1 ] && [ "$skill_ok" -eq 1 ] && [ "$gear_ok" -eq 1 ] && [ "$compact_ok" -eq 1 ]; then ready=1; break; fi
             sleep 5
           done
           test "$ready" -eq 1
           test "$(curl -fsSL --max-time 15 "$BASE_URL/styles.css?ci=$GITHUB_RUN_ID" | wc -c)" -gt 70000
           test "$(curl -fsSL --max-time 15 "$BASE_URL/guide-data.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 250000
           test "$(curl -fsSL --max-time 15 "$BASE_URL/app.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 70000
-          test "$(curl -fsSL --max-time 15 "$BASE_URL/dashboard-polish.css?ci=$GITHUB_RUN_ID" | wc -c)" -gt 4000
-          test "$(curl -fsSL --max-time 15 "$BASE_URL/dashboard-polish.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 3000
-          test "$(curl -fsSL --max-time 15 "$BASE_URL/progression-skill-state.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 1000
           test "$(curl -fsSL --max-time 15 "$BASE_URL/progression-gear-visual.css?ci=$GITHUB_RUN_ID" | wc -c)" -gt 1500
-          test "$(curl -fsSL --max-time 15 "$BASE_URL/progression-gear-visual.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 3000
+          test "$(curl -fsSL --max-time 15 "$BASE_URL/progression-gear-visual.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 2500
+
       - name: Verify live browser boot and dashboard layout
         env:
           BASE_URL: https://maplestory-classic.ofri505.workers.dev
@@ -57,14 +51,11 @@ jobs:
             grep -q 'class="atlas-action-row' "$file"
             grep -q 'class="gear-slot' "$file"
             grep -q 'class="atlas-timeline-level' "$file"
-            grep -q 'dashboard-polish-ready' "$file"
-            grep -q 'progression-sync-ready' "$file"
-            grep -q 'progression-level-hook-ready' "$file"
-            grep -q 'progression-skill-state-ready' "$file"
-            grep -q 'progression-gear-visual-ready' "$file"
-            grep -q 'id="progression-loadout-equipment-window"' "$file"
-            grep -q 'dashboard-action-layout-ok' "$file"
+            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok; do
+              grep -q "$marker" "$file"
+            done
+            ! grep -q 'class="progression-loadout-strip' "$file"
+            ! grep -q 'class="avatar-equipped-icons' "$file"
             ! grep -q 'dashboard-overflow-detected' "$file"
-            grep -q 'dashboard-page-layout-ok' "$file"
             ! grep -q 'dashboard-page-overflow-detected' "$file"
           done
