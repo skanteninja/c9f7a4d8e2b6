@@ -1,0 +1,26 @@
+name: Inspect ETC planner temp
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-etc-temp.yml'
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect rendered ETC planner
+        env:
+          BASE_URL: https://maplestory-classic.ofri505.workers.dev
+        run: |
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=9000 --dump-dom "$BASE_URL/?inspect=etc-$GITHUB_RUN_ID" >/tmp/dom.html
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('/tmp/dom.html').read_text(errors='replace')
+          p=s.find('id="etc-list"')
+          print('ETC_MARKER_INDEX',p)
+          print(s[max(0,p-500):p+12000] if p>=0 else 'ETC LIST NOT FOUND')
+          PY
