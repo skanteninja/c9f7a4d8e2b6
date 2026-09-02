@@ -6,6 +6,7 @@ const root = __dirname;
 const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const out = path.join(root, 'dist');
+const assetVersion = '0.8.0-direct2';
 
 function readChunks(prefix, count) {
   let base64 = '';
@@ -23,19 +24,21 @@ const css = readChunks('styles', 3);
 const guideJson = readChunks('guide', 6);
 const app = readChunks('app', 4);
 
-// Fail the deployment instead of publishing a broken runtime.
 JSON.parse(guideJson);
 if (!css.includes('.sidebar') || !app.includes('GUIDE_DATA')) {
   throw new Error('Runtime verification failed');
 }
 
-fs.copyFileSync(path.join(source, 'index.html'), path.join(out, 'index.html'));
+let html = fs.readFileSync(path.join(source, 'index.html'), 'utf8');
+html = html.replaceAll('?v=0.8.0', `?v=${assetVersion}`);
+fs.writeFileSync(path.join(out, 'index.html'), html);
 fs.copyFileSync(path.join(source, 'manifest.webmanifest'), path.join(out, 'manifest.webmanifest'));
 fs.writeFileSync(path.join(out, 'styles.css'), css);
 fs.writeFileSync(path.join(out, 'guide-data.js'), `window.GUIDE_DATA = ${guideJson};\n`);
 fs.writeFileSync(path.join(out, 'app.js'), app);
+fs.writeFileSync(path.join(out, 'build-info.txt'), `MapleStory Classic Builder ${assetVersion}\n`);
 
-const sw = `const CACHE='maplestory-classic-builder-v0.8.0-direct1';\nconst CORE=['./','./index.html','./styles.css?v=0.8.0','./guide-data.js?v=0.8.0','./app.js?v=0.8.0','./manifest.webmanifest'];\nself.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).catch(()=>{}));});\nself.addEventListener('activate',e=>{e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('maplestory-classic-builder-')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]));});\nself.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin)return;e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy)).catch(()=>{});return r;}).catch(()=>caches.match(e.request).then(x=>x||caches.match('./index.html'))));});\n`;
+const sw = `const CACHE='maplestory-classic-builder-${assetVersion}';\nconst CORE=['./','./index.html','./styles.css?v=${assetVersion}','./guide-data.js?v=${assetVersion}','./app.js?v=${assetVersion}','./manifest.webmanifest'];\nself.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).catch(()=>{}));});\nself.addEventListener('activate',e=>{e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('maplestory-classic-builder-')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]));});\nself.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin)return;e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy)).catch(()=>{});return r;}).catch(()=>caches.match(e.request).then(x=>x||caches.match('./index.html'))));});\n`;
 fs.writeFileSync(path.join(out, 'sw.js'), sw);
 
-console.log(`Built direct v0.8.0 assets: CSS ${css.length} bytes, guide ${guideJson.length} bytes, app ${app.length} bytes.`);
+console.log(`Built ${assetVersion}: CSS ${css.length} bytes, guide ${guideJson.length} bytes, app ${app.length} bytes.`);
