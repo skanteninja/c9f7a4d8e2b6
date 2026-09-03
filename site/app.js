@@ -180,7 +180,7 @@
   }
   function skillVisualCandidates(skill){
     if(!skill) return [];
-    return [...new Set([String(skill.url||'').trim(),mapleIoSkillIcon(skill)].filter(Boolean))];
+    return [...new Set([mapleIoSkillIcon(skill)].filter(Boolean))];
   }
   function skillImgTag(name, cls='skill-icon'){
     const skill=D.skillIcons[name], urls=skillVisualCandidates(skill);
@@ -853,19 +853,18 @@
 
   function renderSkills(){
     document.getElementById('skill-list').innerHTML=D.skills.map(s=>{
-      const id=skillId(s),done=!!state.skills[id],cur=Number(s.Level)===state.level;
-      return `<div class="skill-row ${done?'done':''} ${cur?'current':''}">
+      const cur=Number(s.Level)===state.level;
+      const skillName=skillNameFromSpend(s.Spend);
+      return `<div class="skill-row ${cur?'current':''}" data-informational="1">
         <b style="color:#8bdfff">Lv${esc(s.Level)}</b>
         <b>${esc(s.SP)}</b>
-        <div>${skillIcon(s.Spend)}</div>
+        <div class="skill-icon-host" data-skill-icon-name="${esc(skillName)}">${skillName?skillImgTag(skillName):''}</div>
         <div class="skill-spend">${esc(s.Spend)}</div>
         <div class="skill-why">${esc(s['Why This Is The Action'])}</div>
         <div>${isBeta(s.Status)?`<span class="beta-tag">verify</span>`:`<span class="status-tag">${esc(s.Status||'')}</span>`}</div>
-        <input class="check skill-check" data-id="${esc(id)}" type="checkbox" ${done?'checked':''}>
         <div class="skill-result" style="grid-column:4/-1">${esc(s['Result After Level']||'')}</div>
       </div>`;
     }).join('');
-    document.querySelectorAll('.skill-check').forEach(c=>c.addEventListener('change',()=>{state.skills[c.dataset.id]=c.checked;save();renderSkills();}));
   }
 
   ['etc-search','etc-current-only','etc-hide-done'].forEach(id=>document.getElementById(id).addEventListener('input',renderEtc));
