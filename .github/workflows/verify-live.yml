@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Live gate v10: Top Classic World branding, owned public URLs, queue-first dashboard and steady level updates.
+# Live gate v11: Top Classic World branding, owned public URLs, avatar level footer, queue-first dashboard and steady level updates.
 on:
   workflow_run:
     workflows: ["Build static site"]
@@ -24,11 +24,11 @@ jobs:
           for i in {1..40}; do
             build_ok=0; ownership_ok=0; app_ok=0; gateway_ok=0
             curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" | grep -q 'Top Classic World Maplestory 0.8.1-static1' && build_ok=1 || true
-            curl -fsSL --max-time 12 "$BASE_URL/ownership-ui.js?ci=$GITHUB_RUN_ID" | grep -q 'dashboard-queues-after-hero-ready' && ownership_ok=1 || true
+            curl -fsSL --max-time 12 "$BASE_URL/ownership-ui.js?ci=$GITHUB_RUN_ID" | grep -q 'dashboard-avatar-level-footer-ready' && ownership_ok=1 || true
             app_js="$(curl -fsSL --max-time 12 "$BASE_URL/app.js?ci=$GITHUB_RUN_ID" || true)"
             printf '%s' "$app_js" | grep -q 'function renderLevelPage' && printf '%s' "$app_js" | grep -q 'slice(0,8)' && printf '%s' "$app_js" | grep -q 'slice(0,12)' && app_ok=1 || true
-            maps="$(curl -fsSL --max-time 15 "$BASE_URL/game-origin/data/current/maps.json?ci=$GITHUB_RUN_ID" || true)"
-            skills="$(curl -fsSL --max-time 15 "$BASE_URL/game-origin/data/current/skills.json?ci=$GITHUB_RUN_ID" || true)"
+            maps="$(curl -fsSL --max-time 15 "$BASE_URL/game-data/data/current/maps.json?ci=$GITHUB_RUN_ID" || true)"
+            skills="$(curl -fsSL --max-time 15 "$BASE_URL/game-data/data/current/skills.json?ci=$GITHUB_RUN_ID" || true)"
             if [ "${#maps}" -gt 1000 ] && [ "${#skills}" -gt 1000 ]; then gateway_ok=1; fi
             if [ "$build_ok" -eq 1 ] && [ "$ownership_ok" -eq 1 ] && [ "$app_ok" -eq 1 ] && [ "$gateway_ok" -eq 1 ]; then ready=1; break; fi
             sleep 5
@@ -50,15 +50,19 @@ jobs:
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-live-${viewport//,/-}.html"
             "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=18000 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID&viewport=$viewport" >"$file"
-            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-topbar-level-only-ready owned-image-urls-ready; do
+            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready; do
               grep -q "$marker" "$file"
             done
             grep -q '<title>Top Classic World Maplestory</title>' "$file"
-            grep -q 'id="dashboard-level-state-host"' "$file"
+            grep -q 'class="progression-avatar-level-controls' "$file"
+            grep -q 'id="level-range"' "$file"
+            grep -q 'id="hero-level-select"' "$file"
             grep -q 'class="v72-command-grid' "$file"
             grep -q 'id="atlas-quest-queue"' "$file"
             grep -q 'id="atlas-etc-queue"' "$file"
             grep -q 'id="level-select"' "$file"
+            ! grep -q 'id="dashboard-level-state-host"' "$file"
+            ! grep -q 'class="v5-level-hero' "$file"
             ! grep -q 'class="progression-loadout-strip' "$file"
             ! grep -q 'class="avatar-equipped-icons' "$file"
             ! grep -q 'dashboard-overflow-detected' "$file"
