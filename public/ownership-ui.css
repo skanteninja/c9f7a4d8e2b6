@@ -19,8 +19,8 @@ html[data-level-update="1"] .page.active img{transition:none!important;animation
 .dashboard-v72 .v5-level-hero,.dashboard-v72 .v72-level-hero{display:none!important}
 .dashboard-v72 .progression-avatar-level-controls{display:grid!important;grid-column:1/-1!important;grid-row:2!important}
 
-.dashboard-v72 .v72-command-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;margin:0 0 12px!important;align-items:stretch}
-.dashboard-v72 .v72-command-grid>.panel{height:318px;min-height:318px;max-height:318px;display:flex;flex-direction:column;overflow:hidden}
+.dashboard-v72 .v72-command-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-rows:318px!important;gap:12px!important;margin:0 0 12px!important;align-items:stretch!important}
+.dashboard-v72 .v72-command-grid>.panel{height:318px!important;min-height:318px!important;max-height:318px!important;align-self:stretch!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
 .dashboard-v72 .v72-command-grid .atlas-panel-head{flex:0 0 auto;margin-bottom:7px;padding-bottom:7px}
 .dashboard-v72 .v72-command-grid .atlas-panel-head h3{font-size:14px}
 .dashboard-v72 .v72-command-grid .atlas-panel-head small{font-size:8px;line-height:1.25}
@@ -43,8 +43,8 @@ html[data-level-update="1"] .page.active img{transition:none!important;animation
 
 @media(max-width:1100px){
   .dashboard-v72 .v72-hero-grid{grid-template-columns:1fr!important}
-  .dashboard-v72 .v72-command-grid{grid-template-columns:1fr!important}
-  .dashboard-v72 .v72-command-grid>.panel{height:auto;min-height:260px;max-height:none}
+  .dashboard-v72 .v72-command-grid{grid-template-columns:1fr!important;grid-auto-rows:auto!important}
+  .dashboard-v72 .v72-command-grid>.panel{height:auto!important;min-height:260px!important;max-height:none!important}
   .dashboard-v72 .v72-etc-panel .v72-etc-icons{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 }
 @media(max-width:620px){
