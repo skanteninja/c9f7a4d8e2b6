@@ -219,7 +219,7 @@ const progressionSkillState = fs.readFileSync(path.join(source, 'progression-ski
 const progressionGearVisualCss = fs.readFileSync(path.join(source, 'progression-gear-visual.css'), 'utf8');
 const progressionGearVisual = fs.readFileSync(path.join(source, 'progression-gear-visual.js'), 'utf8');
 const ownershipUiCss = fs.readFileSync(path.join(source, 'ownership-ui.css'), 'utf8');
-const ownershipUi = publicScript(fs.readFileSync(path.join(source, 'ownership-ui.js'), 'utf8'));
+const ownershipUi = fs.readFileSync(path.join(source, 'ownership-ui.js'), 'utf8');
 
 JSON.parse(guideJson);
 if (!css.includes('.sidebar') || !app.includes('GUIDE_DATA')) throw new Error('Runtime verification failed');
