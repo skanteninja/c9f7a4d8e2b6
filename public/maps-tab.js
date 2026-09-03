@@ -174,7 +174,7 @@
     q('#maps-search')?.addEventListener('input',e=>renderSearch(e.target.value));
     q('#maps-search')?.addEventListener('keydown',e=>{if(e.key==='Enter'){const first=searchMatches(e.target.value)[0];if(first){e.preventDefault();showDetail(padMap(first.id));}}});
     q('#map-detail-select')?.addEventListener('change',e=>showDetail(e.target.value));
-    page()?.querySelectorAll('[data-world-zoom]').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.worldZoom;if(v==='reset')setWorldZoom(1);else setWorldZoom(state.zoom+(v==='+'?.15:-.15));}));
+    page()?.querySelectorAll('[data-world-zoom]').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.worldZoom;if(v==='reset')setWorldZoom(1);else setWorldZoom(state.zoom + (v==='+' ? .15 : -.15));}));
     page()?.querySelectorAll('[data-map-layer]').forEach(box=>box.addEventListener('change',()=>{state.showNpcs=q('[data-map-layer="npcs"]')?.checked!==false;state.showMobs=q('[data-map-layer="mobs"]')?.checked!==false;state.showPortals=q('[data-map-layer="portals"]')?.checked!==false;const map=state.byId.get(state.selected);if(map)renderOverlays(map);}));
     q('#map-full-image')?.addEventListener('click',()=>{const src=q('#map-detail-image')?.src;if(src)window.open(src,'_blank','noopener');});
   }
