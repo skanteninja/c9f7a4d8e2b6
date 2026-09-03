@@ -1,8 +1,12 @@
   function renderSkills(){
-    const beginnerNames=['Nimble Feet','Three Snails','Recovery'];
+    const beginnerSkills=[
+      {name:'Nimble Feet',id:'0001002'},
+      {name:'Three Snails',id:'0001000'},
+      {name:'Recovery',id:'0001001'}
+    ];
     const beginnerHtml=`<section class="skill-beginner-reference" data-core-beginner="1">
       <div class="skill-beginner-head"><div><span class="eyebrow">BEGINNER · LV1–10</span><h3>Beginner Skills</h3></div><p>Reference only · your build target is 3/3 in all three before the Magician progression below.</p></div>
-      <div class="skill-beginner-grid">${beginnerNames.map(name=>`<article class="skill-beginner-card" data-full-skill-name="${esc(name)}"><span class="skill-beginner-icon" data-skill-icon-name="${esc(name)}"></span><div><div class="skill-beginner-title"><b>${esc(name)}</b><span>3 / 3</span></div><p class="skill-beginner-description">Beginner skill reference.</p><small class="skill-beginner-meta">Beginner</small></div></article>`).join('')}</div>
+      <div class="skill-beginner-grid">${beginnerSkills.map(skill=>`<article class="skill-beginner-card" data-full-skill-name="${esc(skill.name)}"><span class="skill-beginner-icon" data-skill-icon-name="${esc(skill.name)}"><img class="skill-icon canonical-skill-icon" src="/game-data/data/current/images/skills/${skill.id}.png" data-asset-fallbacks="/game-media/skills/000.img/skill/${Number(skill.id)}/icon" data-skill-id="${skill.id}" data-skill-name="${esc(skill.name)}" data-skill-icon-policy="current-classic-first-name-matched-wz-fallback" alt="${esc(skill.name)}"></span><div><div class="skill-beginner-title"><b>${esc(skill.name)}</b><span>3 / 3</span></div><p class="skill-beginner-description">Beginner skill reference.</p><small class="skill-beginner-meta">Beginner · ID ${skill.id}</small></div></article>`).join('')}</div>
     </section>`;
     const rows=D.skills.map(s=>{
       const cur=Number(s.Level)===state.level;
