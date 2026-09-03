@@ -43,8 +43,8 @@ jobs:
             const out=document.getElementById('result');
             try{
               const w=frame.contentWindow,d=frame.contentDocument;
-              for(let i=0;i<70&&!d.documentElement.classList.contains('dashboard-queues-after-hero-ready');i++)await wait(120);
-              const required=['navigation-cleanup-ready','visual-asset-audit-ready','dashboard-skill-immediate-ready','dashboard-queues-after-hero-ready','dashboard-topbar-level-only-ready','top-classic-world-ready','public-source-clean-ready','owned-image-urls-ready'];
+              for(let i=0;i<70&&!d.documentElement.classList.contains('dashboard-avatar-level-footer-ready');i++)await wait(120);
+              const required=['navigation-cleanup-ready','visual-asset-audit-ready','dashboard-skill-immediate-ready','dashboard-queues-after-hero-ready','dashboard-avatar-level-footer-ready','top-classic-world-ready','public-source-clean-ready','owned-image-urls-ready'];
               for(const cls of required){if(!d.documentElement.classList.contains(cls))throw Error('missing '+cls);}
 
               if(d.title!=='Top Classic World Maplestory')throw Error('brand title incorrect');
@@ -57,11 +57,14 @@ jobs:
               const dashboard=d.querySelector('.dashboard-v72');
               const hero=dashboard?.querySelector('.v72-hero-grid');
               const commands=dashboard?.querySelector('.v72-command-grid');
-              const host=dashboard?.querySelector('#dashboard-level-state-host');
-              const controls=host?.querySelector('.progression-avatar-level-controls');
-              if(!dashboard||!hero||!commands||!host||!controls)throw Error('new dashboard hierarchy missing');
+              const character=dashboard?.querySelector('.v5-character-hero');
+              const controls=character?.querySelector(':scope > .progression-avatar-level-controls');
+              if(!dashboard||!hero||!commands||!character||!controls)throw Error('dashboard avatar level footer hierarchy missing');
               if(hero.nextElementSibling!==commands)throw Error('action queues are not directly below hero cards');
-              if(getComputedStyle(controls).display!=='none')throw Error('dashboard level footer is visible');
+              if(getComputedStyle(controls).display==='none')throw Error('avatar level footer is hidden');
+              if(!controls.contains(d.getElementById('level-range')))throw Error('avatar level line missing');
+              if(!controls.contains(d.getElementById('hero-level-select')))throw Error('avatar level selector missing');
+              if(d.querySelector('.v5-level-hero,.v72-level-hero'))throw Error('standalone level card returned');
               if(!d.getElementById('level-select'))throw Error('topbar level control missing');
               const panels=[...commands.children].filter(x=>x.classList.contains('panel'));
               if(panels.length!==3)throw Error('expected three action queue cards');
@@ -74,6 +77,9 @@ jobs:
               const level=d.getElementById('level-select');
               level.value='30';level.dispatchEvent(new w.Event('change',{bubbles:true}));
               await wait(1800);
+              const controlsAfter=dashboard.querySelector('.v5-character-hero > .progression-avatar-level-controls');
+              if(!controlsAfter||getComputedStyle(controlsAfter).display==='none')throw Error('avatar level footer lost after level change');
+              if(String(d.getElementById('hero-level')?.textContent)!=='30')throw Error('avatar level footer did not sync to 30');
               if(d.querySelectorAll('#atlas-quest-queue .atlas-queue-row').length<5)throw Error('Quest Queue still capped at four rows');
               if(d.querySelectorAll('#atlas-etc-queue .v72-etc-chip').length<7)throw Error('ETC Queue still capped at six targets');
 
