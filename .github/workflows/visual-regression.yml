@@ -7,6 +7,9 @@ on:
     paths:
       - 'public/**'
       - 'build.cjs'
+      - 'worker.js'
+      - 'wrangler.jsonc'
+      - '.github/ci_static_proxy.py'
       - '.github/workflows/visual-regression.yml'
 
 jobs:
@@ -20,12 +23,12 @@ jobs:
           node-version: '22'
       - name: Build test site
         run: node build.cjs
-      - name: Browser UI and asset audit
+      - name: Browser UI, ownership and asset audit
         run: |
-          python3 -m http.server 4173 --directory dist >/tmp/maplestory-visual-http.log 2>&1 &
+          python3 .github/ci_static_proxy.py --directory dist --port 4173 >/tmp/maplestory-visual-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          for i in {1..20}; do
+          for i in {1..30}; do
             curl -fsS http://127.0.0.1:4173/ >/dev/null && break
             sleep .25
           done
@@ -40,31 +43,42 @@ jobs:
             const out=document.getElementById('result');
             try{
               const w=frame.contentWindow,d=frame.contentDocument;
-              for(let i=0;i<50&&!d.documentElement.classList.contains('progression-level-footer-ready');i++)await wait(120);
-              const required=['navigation-cleanup-ready','visual-asset-audit-ready','dashboard-skill-immediate-ready','progression-level-footer-ready'];
+              for(let i=0;i<70&&!d.documentElement.classList.contains('dashboard-queues-after-hero-ready');i++)await wait(120);
+              const required=['navigation-cleanup-ready','visual-asset-audit-ready','dashboard-skill-immediate-ready','dashboard-queues-after-hero-ready','dashboard-topbar-level-only-ready','top-classic-world-ready','public-source-clean-ready','owned-image-urls-ready'];
               for(const cls of required){if(!d.documentElement.classList.contains(cls))throw Error('missing '+cls);}
 
+              if(d.title!=='Top Classic World Maplestory')throw Error('brand title incorrect');
               const labels=[...d.querySelectorAll('#nav .nav-section-label')].map(x=>x.textContent.trim().toUpperCase());
-              if(labels.includes('PLAY'))throw Error('PLAY label still visible');
-              if(labels.includes('DATABASE'))throw Error('DATABASE label still visible');
-              if(d.querySelector('#nav .nav-btn[data-page="formulas"]'))throw Error('Formula nav still visible');
+              if(labels.some(x=>['PLAY','DATABASE','META'].includes(x)))throw Error('obsolete nav section label visible');
+              for(const page of ['formulas','research','data'])if(d.querySelector(`#nav .nav-btn[data-page="${page}"]`))throw Error(page+' nav still visible');
               const db=d.querySelector('#nav .nav-btn[data-page="classicdb"]');
               if(!db||db.textContent.trim()!=='⌘ Database')throw Error('Database nav copy incorrect: '+(db?.textContent||'missing'));
 
-              const character=d.querySelector('.dashboard-v72 .v5-character-hero');
-              const avatar=character?.querySelector('.v5-avatar');
-              const copy=character?.querySelector('.v5-character-copy');
-              const controls=character?.querySelector(':scope > .progression-avatar-level-controls');
-              if(!character||!avatar||!copy||!controls)throw Error('character progression structure missing');
-              const cr=controls.getBoundingClientRect(), ar=avatar.getBoundingClientRect(), xr=copy.getBoundingClientRect();
-              if(cr.top < Math.max(ar.bottom,xr.bottom)-3)throw Error('level controls are not below full character content');
-              if(!controls.contains(d.getElementById('level-range'))||!controls.contains(d.getElementById('hero-level-select')))throw Error('level controls lost real inputs');
+              const dashboard=d.querySelector('.dashboard-v72');
+              const hero=dashboard?.querySelector('.v72-hero-grid');
+              const commands=dashboard?.querySelector('.v72-command-grid');
+              const host=dashboard?.querySelector('#dashboard-level-state-host');
+              const controls=host?.querySelector('.progression-avatar-level-controls');
+              if(!dashboard||!hero||!commands||!host||!controls)throw Error('new dashboard hierarchy missing');
+              if(hero.nextElementSibling!==commands)throw Error('action queues are not directly below hero cards');
+              if(getComputedStyle(controls).display!=='none')throw Error('dashboard level footer is visible');
+              if(!d.getElementById('level-select'))throw Error('topbar level control missing');
+              const panels=[...commands.children].filter(x=>x.classList.contains('panel'));
+              if(panels.length!==3)throw Error('expected three action queue cards');
+              const heights=panels.map(x=>Math.round(x.getBoundingClientRect().height));
+              if(Math.max(...heights)-Math.min(...heights)>3)throw Error('queue card heights differ: '+heights.join(','));
 
               if(d.querySelector('#atlas-skill-grid .beginner-milestone-grid'))throw Error('Beginner milestone placeholder still visible');
               if(d.querySelectorAll('#atlas-skill-grid .beginner-skill-card').length!==3)throw Error('Beginner skill cards not stable');
 
+              const level=d.getElementById('level-select');
+              level.value='30';level.dispatchEvent(new w.Event('change',{bubbles:true}));
+              await wait(1800);
+              if(d.querySelectorAll('#atlas-quest-queue .atlas-queue-row').length<5)throw Error('Quest Queue still capped at four rows');
+              if(d.querySelectorAll('#atlas-etc-queue .v72-etc-chip').length<7)throw Error('ETC Queue still capped at six targets');
+
               d.querySelector('#nav .nav-btn[data-page="cashshop"]')?.click();
-              await wait(2200);
+              await wait(2600);
               const cash=d.getElementById('cash-results');
               const unavailable=[...(cash?.querySelectorAll('.cash-card.cash-unavailable')||[])];
               if(!unavailable.length)throw Error('Cash Shop unavailable styling missing');
@@ -72,26 +86,37 @@ jobs:
               if(unavailable.some(card=>!/UNAVAILABLE/i.test(card.querySelector('.cash-meta b')?.textContent||'')))throw Error('Unavailable Cash Shop price copy missing');
 
               const pages=['dashboard','leveling','quests','equipment','skills','etc','classicdb','cashshop','beauty'];
-              const broken=[];
+              const broken=[],external=[];
               for(const page of pages){
                 d.querySelector(`#nav .nav-btn[data-page="${page}"]`)?.click();
-                await wait(page==='classicdb'||page==='cashshop'||page==='beauty'?1500:550);
+                await wait(page==='classicdb'||page==='cashshop'||page==='beauty'?1800:700);
                 d.querySelectorAll('img').forEach(img=>img.loading='eager');
                 w.scrollTo(0,d.body.scrollHeight);
-                await wait(650);
+                await wait(800);
                 const root=d.querySelector(`section[data-page="${page}"]`);
                 [...(root?.querySelectorAll('img')||[])].forEach(img=>{
-                  if(img.complete&&img.naturalWidth===0&&img.getAttribute('src'))broken.push(`${page}: ${img.alt||'(no alt)'} -> ${img.getAttribute('src')}`);
+                  const src=img.getAttribute('src')||'';
+                  if(img.complete&&img.naturalWidth===0&&src)broken.push(`${page}: ${img.alt||'(no alt)'} -> ${src}`);
+                  if(src&&!/^(?:data:|blob:)/i.test(src)){
+                    const u=new URL(src,w.location.href);
+                    if(u.origin!==w.location.origin)external.push(`${page}: ${src}`);
+                  }
                 });
                 w.scrollTo(0,0);
               }
               if(broken.length)throw Error('broken images: '+broken.slice(0,12).join(' | '));
+              if(external.length)throw Error('third-party image URLs exposed: '+external.slice(0,12).join(' | '));
+
+              d.querySelector('#nav .nav-btn[data-page="dashboard"]')?.click();
+              await wait(300);
+              const visibleText=d.body.innerText||'';
+              if(/\b(?:COT2|OSMS)\b|pre[- ]launch|launch[- ]scope|Evidence\s*&\s*sources/i.test(visibleText))throw Error('source/provenance language visible in public UI');
               out.textContent='visual-ui-regression-ok';
             }catch(e){out.textContent='visual-ui-regression-failed: '+e.message;}
           });
           </script></body>
           HTML
 
-          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=30000 --dump-dom http://127.0.0.1:4173/ci-visual-regression.html >/tmp/visual-regression.html
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=45000 --dump-dom http://127.0.0.1:4173/ci-visual-regression.html >/tmp/visual-regression.html
           grep -o '<pre id="result">[^<]*' /tmp/visual-regression.html || true
           grep -q '<pre id="result">visual-ui-regression-ok</pre>' /tmp/visual-regression.html
