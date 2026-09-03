@@ -77,6 +77,7 @@
       label.textContent = 'LEVEL PROGRESSION';
       const badge = document.createElement('b');
       badge.className = 'progression-avatar-current-level';
+      badge.append('Lv');
       head.append(label, badge);
       controls.insertBefore(head, controls.firstChild);
     }
@@ -125,6 +126,8 @@
       if (milestones) controls.appendChild(milestones);
       if (jobLine) {
         jobLine.classList.add('progression-core-job-line');
+        jobLine.hidden = true;
+        jobLine.style.display = 'none';
         controls.appendChild(jobLine);
       }
       oldLevelPanel.remove();
