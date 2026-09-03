@@ -1,0 +1,30 @@
+name: Patch Skill Renderer Temp
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-skill-render-temp.yml'
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch core Skill Tree renderer
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('build.cjs')
+          s=p.read_text()
+          anchor="""  app = app.replaceAll(etcChipNeedle, etcChipNamed);\n  return app;"""
+          insertion="""  app = app.replaceAll(etcChipNeedle, etcChipNamed);\n\n  // The full Skill Tree is informational: the core renderer never emits completion checkboxes.\n  const skillRenderer=fs.readFileSync(path.join(root,'patches','skill-renderer.txt'),'utf8').trimEnd();\n  const skillStart=app.indexOf('  function renderSkills(){');\n  const skillEnd=app.indexOf(\"\\n\\n  ['etc-search'\",skillStart);\n  if(skillStart<0||skillEnd<0) throw new Error('Skill Tree renderer patch target missing');\n  app=app.slice(0,skillStart)+skillRenderer+app.slice(skillEnd);\n\n  // Never use the generic icon endpoint for skills; it can resolve to unrelated item artwork.\n  const genericSkillCandidates=\"return [...new Set([String(skill.url||'').trim(),mapleIoSkillIcon(skill)].filter(Boolean))];\";\n  const safeSkillCandidates=\"return [...new Set([mapleIoSkillIcon(skill)].filter(Boolean))];\";\n  if(!app.includes(genericSkillCandidates)) throw new Error('generic skill icon candidate patch target missing');\n  app=app.replace(genericSkillCandidates,safeSkillCandidates);\n  return app;"""
+          if anchor not in s:
+              raise SystemExit('build.cjs skill patch anchor missing')
+          p.write_text(s.replace(anchor,insertion))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add build.cjs
+          git commit -m "Make Skill Tree informational in core renderer"
+          git push
