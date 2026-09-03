@@ -53,11 +53,16 @@ jobs:
             try{
               const d=frame.contentDocument;
               for(let i=0;i<40&&!d.documentElement.classList.contains('progression-sync-ready');i++)await delay(150);
-              const required=['progression-sync-ready','beginner-skill-tree-ready','progression-level-hook-ready','progression-skill-state-ready','progression-gear-visual-ready','progression-compact-dashboard-ready','progression-gear-decision-verified'];
+              const required=['progression-sync-ready','beginner-skill-tree-ready','progression-level-hook-ready','progression-skill-state-ready','progression-gear-visual-ready','progression-compact-dashboard-ready','progression-avatar-level-merged-ready','progression-gear-decision-verified'];
               for(const cls of required){if(!d.documentElement.classList.contains(cls))throw Error('missing '+cls);}
               if(d.querySelectorAll('#atlas-skill-grid .beginner-skill-card').length!==3)throw Error('beginner skill count');
               if(d.querySelector('.progression-loadout-strip'))throw Error('duplicate level-synced equipment strip present');
               if(d.querySelector('.v5-avatar .avatar-equipped-icons'))throw Error('duplicate avatar equipment chips present');
+              if(d.querySelector('.dashboard-v72 .v5-level-hero,.dashboard-v72 .v72-level-hero'))throw Error('standalone level card still present');
+              const merged=d.querySelector('.dashboard-v72 .v5-character-hero .progression-avatar-level-controls');
+              if(!merged)throw Error('avatar level controls missing');
+              if(!merged.contains(d.getElementById('level-range')))throw Error('level range not below avatar');
+              if(!merged.contains(d.getElementById('hero-level-select')))throw Error('hero level select not merged');
               if(!d.querySelector('#atlas-avatar .avatar-character'))throw Error('character render missing');
 
               const change=async(level,needles,newWeapon)=>{
@@ -68,10 +73,15 @@ jobs:
                 if(d.documentElement.dataset.autoGearLevel!==String(level))throw Error('auto gear marker '+level);
                 if(d.documentElement.dataset.skillStateLevel!==String(level))throw Error('skill state marker '+level);
                 if(d.documentElement.dataset.progressionGearVisualLevel!==String(level))throw Error('gear visual marker '+level);
+                if(d.documentElement.dataset.progressionAvatarLevel!==String(level))throw Error('avatar level marker '+level);
                 const equipment=d.getElementById('equipment-window')?.innerHTML||'';
                 for(const name of needles){if(!equipment.includes(name))throw Error('equipment missing '+level+' '+name);}
                 if(d.querySelector('.progression-loadout-strip'))throw Error('strip returned at '+level);
                 if(d.querySelector('.v5-avatar .avatar-equipped-icons'))throw Error('avatar chips returned at '+level);
+                if(d.querySelector('.dashboard-v72 .v5-level-hero,.dashboard-v72 .v72-level-hero'))throw Error('standalone level card returned at '+level);
+                const levelControls=d.querySelector('.dashboard-v72 .v5-character-hero .progression-avatar-level-controls');
+                if(!levelControls?.contains(d.getElementById('level-range')))throw Error('merged level range lost at '+level);
+                if(!levelControls?.contains(d.getElementById('hero-level-select')))throw Error('merged level select lost at '+level);
                 if(!d.querySelector('#atlas-avatar .avatar-character'))throw Error('character render missing '+level);
                 const weapon=d.querySelector(`#equipment-window .gear-slot[data-slot="Weapon"][data-item-name="${newWeapon}"]`);
                 if(!weapon?.classList.contains('progression-new-equipped'))throw Error('new weapon not marked '+level+' '+newWeapon);
@@ -104,17 +114,21 @@ jobs:
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-static-${viewport//,/-}.html"
             "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=10000 --dump-dom http://127.0.0.1:4173/ >"$file"
-            for marker in visual-layer-ready visual-db-layer-ready visual-npc-layer-ready visual-skill-layer-ready visual-portal-layer-ready dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-gear-decision-verified skill-progression-board-ready beginner-skill-tree-ready dashboard-action-layout-ok dashboard-page-layout-ok etc-planner-fixed-ready; do
+            for marker in visual-layer-ready visual-db-layer-ready visual-npc-layer-ready visual-skill-layer-ready visual-portal-layer-ready dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified skill-progression-board-ready beginner-skill-tree-ready dashboard-action-layout-ok dashboard-page-layout-ok etc-planner-fixed-ready; do
               grep -q "$marker" "$file"
             done
             grep -q 'class="atlas-action-row' "$file"
             grep -q 'class="gear-slot' "$file"
             grep -q 'class="atlas-timeline-level' "$file"
+            grep -q 'class="progression-avatar-level-controls' "$file"
+            grep -q 'id="level-range"' "$file"
+            grep -q 'id="hero-level-select"' "$file"
             grep -q 'data-progress-skill="Nimble Feet"' "$file"
             grep -q 'data-progress-skill="Three Snails"' "$file"
             grep -q 'data-progress-skill="Recovery"' "$file"
             ! grep -q 'class="progression-loadout-strip' "$file"
             ! grep -q 'class="avatar-equipped-icons' "$file"
+            ! grep -q 'class="v5-level-hero' "$file"
             ! grep -q 'dashboard-overflow-detected' "$file"
             ! grep -q 'dashboard-page-overflow-detected' "$file"
             grep -Eq 'visual-media-strip|visualized-item-row|visual-quest-items' "$file"
