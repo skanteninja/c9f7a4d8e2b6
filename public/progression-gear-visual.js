@@ -68,6 +68,21 @@
     document.querySelectorAll('.v5-avatar .avatar-equipped-icons').forEach(node => node.remove());
   }
 
+  function ensureLevelHead(controls) {
+    let head = controls.querySelector('.progression-avatar-level-head');
+    if (!head) {
+      head = document.createElement('div');
+      head.className = 'progression-avatar-level-head';
+      const label = document.createElement('span');
+      label.textContent = 'LEVEL PROGRESSION';
+      const badge = document.createElement('b');
+      badge.className = 'progression-avatar-current-level';
+      head.append(label, badge);
+      controls.insertBefore(head, controls.firstChild);
+    }
+    return head;
+  }
+
   function mergeAvatarAndLevel() {
     const dashboard = document.querySelector('.dashboard-v72');
     const character = dashboard?.querySelector('.v5-character-hero');
@@ -95,26 +110,31 @@
         controls.className = 'progression-avatar-level-controls';
         column.appendChild(controls);
       }
+
+      const head = ensureLevelHead(controls);
+      const badge = head.querySelector('.progression-avatar-current-level');
+      const heroLevel = oldLevelPanel.querySelector('#hero-level');
+      const jobLine = oldLevelPanel.querySelector('#atlas-job-line');
       const stepper = oldLevelPanel.querySelector('.v5-level-stepper');
       const range = oldLevelPanel.querySelector('.v5-level-range');
       const milestones = oldLevelPanel.querySelector('.v5-milestones');
+
+      if (heroLevel && badge && heroLevel.parentElement !== badge) badge.appendChild(heroLevel);
       if (stepper) controls.appendChild(stepper);
       if (range) controls.appendChild(range);
       if (milestones) controls.appendChild(milestones);
+      if (jobLine) {
+        jobLine.classList.add('progression-core-job-line');
+        controls.appendChild(jobLine);
+      }
       oldLevelPanel.remove();
     }
     if (!controls) return false;
 
-    let head = controls.querySelector('.progression-avatar-level-head');
-    if (!head) {
-      head = document.createElement('div');
-      head.className = 'progression-avatar-level-head';
-      controls.insertBefore(head, controls.firstChild);
-    }
-    if (head.dataset.level !== String(lv)) {
-      head.dataset.level = String(lv);
-      head.innerHTML = `<span>LEVEL PROGRESSION</span><b>Lv${lv}</b>`;
-    }
+    const head = ensureLevelHead(controls);
+    const badge = head.querySelector('.progression-avatar-current-level');
+    const heroLevel = document.getElementById('hero-level');
+    if (heroLevel && badge && heroLevel.parentElement !== badge) badge.appendChild(heroLevel);
 
     document.documentElement.classList.add('progression-avatar-level-merged-ready');
     document.documentElement.classList.remove('progression-avatar-level-merge-missing');
