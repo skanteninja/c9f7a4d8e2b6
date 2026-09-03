@@ -1,0 +1,49 @@
+name: Inspect visual assets temp
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/inspect-visual-assets-temp.yml']
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: |
+          node build.cjs
+          python3 -m http.server 4173 --directory dist >/tmp/http.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep .25; done
+          cat > dist/visual-diag.html <<'HTML'
+          <!doctype html><body><iframe id="f" src="/"></iframe><pre id="out">pending</pre><script>
+          const wait=ms=>new Promise(r=>setTimeout(r,ms));
+          const pages=['dashboard','leveling','quests','equipment','skills','etc','classicdb','cashshop','beauty','research','data'];
+          f.onload=async()=>{
+            const w=f.contentWindow,d=f.contentDocument,out=document.getElementById('out');
+            await wait(2200);
+            const report={};
+            for(const page of pages){
+              d.querySelector(`[data-page="${page}"].nav-btn`)?.click();
+              await wait(page==='classicdb'||page==='cashshop'||page==='beauty'?1800:700);
+              d.querySelectorAll('img').forEach(img=>img.loading='eager');
+              w.scrollTo(0,d.body.scrollHeight);
+              await wait(800);
+              const active=d.querySelector(`section[data-page="${page}"]`);
+              const imgs=[...(active?.querySelectorAll('img')||[])];
+              const broken=imgs.filter(img=>img.complete&&img.naturalWidth===0).map(img=>({alt:img.alt||'',src:img.getAttribute('src')||'',cls:img.className||'',parent:img.parentElement?.className||''})).slice(0,80);
+              const missing=imgs.filter(img=>img.classList.contains('asset-missing')||img.parentElement?.classList.contains('asset-failed')).map(img=>({alt:img.alt||'',src:img.getAttribute('src')||'',cls:img.className||''})).slice(0,80);
+              report[page]={images:imgs.length,broken,missing};
+              w.scrollTo(0,0);
+            }
+            d.querySelector('[data-page="dashboard"].nav-btn')?.click();
+            await wait(1000);
+            report.dashboardSkill={tabs:[...d.querySelectorAll('#atlas-skill-tabs .atlas-skill-tab')].map(x=>({text:x.textContent.trim(),active:x.classList.contains('active'),tab:x.dataset.skillTab})),gridClass:d.getElementById('atlas-skill-grid')?.firstElementChild?.className||'',gridText:d.getElementById('atlas-skill-grid')?.innerText||'',cards:d.querySelectorAll('#atlas-skill-grid .atlas-skill-card').length,beginnerCards:d.querySelectorAll('#atlas-skill-grid .beginner-skill-card').length,detail:d.getElementById('atlas-skill-detail')?.innerText||''};
+            out.textContent=JSON.stringify(report,null,2);
+          };
+          </script></body>
+          HTML
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=30000 --dump-dom http://127.0.0.1:4173/visual-diag.html >/tmp/visual-diag-dom.html
+          sed -n '/<pre id="out">/,/<\/pre>/p' /tmp/visual-diag-dom.html
