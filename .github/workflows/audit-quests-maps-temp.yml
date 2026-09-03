@@ -14,18 +14,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Compact current ETC audit
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Print ETC planner source fields
         run: |
-          curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github.raw+json' \
-            'https://api.github.com/repos/ohmi69/osms_datamine_dashboard/contents/data/current/quests.json?ref=main' -o /tmp/quests.json
           node - <<'NODE'
           const fs=require('fs'),zlib=require('zlib');const root=process.cwd();
           function chunk(name){const d=`${root}/public/repairs/${name}`;if(fs.existsSync(d))return fs.readFileSync(d,'utf8');const stem=name.replace(/\.txt$/,'');let r='';for(let i=0;;i++){const p=`${root}/public/repairs/${stem}.part${i}.txt`;if(!fs.existsSync(p))break;r+=fs.readFileSync(p,'utf8')}return r||fs.readFileSync(`${root}/public/assets/runtime/${name}`,'utf8')}
-          let b='';for(let i=0;i<6;i++)b+=chunk(`guide.${String(i).padStart(2,'0')}.txt`).replace(/\s+/g,'');const guide=JSON.parse(zlib.gunzipSync(Buffer.from(b,'base64')).toString('utf8'));
-          const quests=JSON.parse(fs.readFileSync('/tmp/quests.json','utf8')).quests||[];const all=new Map();
-          for(const q of quests)for(const r of q.requirements_list||[]){if(r.type!=='item'||!r.name||!+r.count||(q.level_min!=null&&+q.level_min>70))continue;const a=all.get(r.name)||[];a.push({id:String(q.id),quest:q.name,level:q.level_min??null,count:+r.count,weekly:!!q.is_weekly,region:q.region||''});all.set(r.name,a)}
-          console.log('ITEM|OLDCORE|OLDALLIN|ONE|KEEP15|WEEKLYMAX|START|QUESTUSES');
-          for(const old of guide.etc||[]){const rows=all.get(old.Item)||[],oneRows=rows.filter(x=>!x.weekly),week=rows.filter(x=>x.weekly),one=oneRows.reduce((s,x)=>s+x.count,0),wm=week.reduce((m,x)=>Math.max(m,x.count),0);console.log([old.Item,old['Core Quest Need'],old['All-In Total'],one,Math.ceil(one*1.15),wm,old['Start Lv']??old['Start Saving']??'',oneRows.map(x=>`${x.quest} x${x.count}`).join('; ')].join('|'))}
+          let b='';for(let i=0;i<6;i++)b+=chunk(`guide.${String(i).padStart(2,'0')}.txt`).replace(/\s+/g,'');const g=JSON.parse(zlib.gunzipSync(Buffer.from(b,'base64')).toString('utf8'));
+          for(const x of g.etc||[])console.log(JSON.stringify(x));
           NODE
