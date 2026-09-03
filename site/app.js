@@ -442,13 +442,13 @@
   }
   function characterRenderUrl(){
     const ids=characterItemIds();
-    return `https://api.dreamms.gg/api/GMS/latest/character/2000/${ids.join(',')}/stand1/0?resize=2&format=png`;
+    return `/game-media/characters/2000/${ids.join(',')}/stand1/0?resize=2&format=png`;
   }
   function mapleIoCharacterRenderUrl(ids=characterItemIds()){
     return `https://maplestory.io/api/GMS/83/Character/2000/${ids.join(',')}/stand1/0?resize=2`;
   }
   function baseCharacterRenderUrl(){
-    return `https://api.dreamms.gg/api/GMS/latest/character/2000/${BASE_CHARACTER_IDS.join(',')}/stand1/0?resize=2&format=png`;
+    return `/game-media/characters/2000/${BASE_CHARACTER_IDS.join(',')}/stand1/0?resize=2&format=png`;
   }
   function baseMapleIoCharacterRenderUrl(){
     return mapleIoCharacterRenderUrl(BASE_CHARACTER_IDS);
