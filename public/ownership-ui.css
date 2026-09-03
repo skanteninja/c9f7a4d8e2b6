@@ -10,6 +10,11 @@ html[data-level-update="1"] .page.active img{transition:none!important;animation
 .brand-title{letter-spacing:.08em}
 .brand-sub{max-width:150px;line-height:1.2}
 
+/* Native dropdown menus must stay readable in the dark product theme. */
+.level-control select,#hero-level-select,.filters select,.db-toolbar select{color-scheme:dark!important}
+.level-control select option,#hero-level-select option,.filters select option,.db-toolbar select option{background:#111624!important;color:#f4f7ff!important}
+.level-control select option:checked,#hero-level-select option:checked,.filters select option:checked,.db-toolbar select option:checked{background:#76b8f5!important;color:#07101c!important}
+
 /* Dashboard hierarchy: loadout + character first, then three equally weighted action queues. */
 .dashboard-v72 .v72-hero-grid{grid-template-columns:minmax(300px,.82fr) minmax(0,1.18fr)!important;gap:12px;margin-bottom:12px}
 .dashboard-v72 .v5-character-hero{grid-template-columns:176px minmax(0,1fr)!important;grid-template-rows:auto auto!important;min-height:286px}
