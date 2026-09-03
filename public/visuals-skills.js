@@ -113,21 +113,34 @@
   }
 
   async function ensureBeginnerSection(idx){
-    const list=document.getElementById('skill-list');if(!list||list.querySelector('.skill-beginner-reference'))return;
-    const skills=BEGINNER_ORDER.map(name=>idx.byName.get(norm(name))).filter(Boolean);
-    if(skills.length!==3)return;
-    const section=document.createElement('section');section.className='skill-beginner-reference';
-    section.innerHTML='<div class="skill-beginner-head"><div><span class="eyebrow">BEGINNER · LV1–10</span><h3>Beginner Skills</h3></div><p>Reference only · your build target is 3/3 in all three before the Magician progression below.</p></div>';
-    const grid=document.createElement('div');grid.className='skill-beginner-grid';
-    skills.forEach(skill=>{
-      const card=document.createElement('article');card.className='skill-beginner-card';card.dataset.fullSkillName=skill.name;
-      const icon=document.createElement('span');icon.className='skill-beginner-icon';icon.appendChild(img(skill,'skill-icon'));
-      const copy=document.createElement('div');
-      copy.innerHTML=`<div class="skill-beginner-title"><b>${esc(skill.name)}</b><span>3 / ${esc(skill.max_level||3)}</span></div><p>${esc(cleanDescription(skill))}</p><small>ID ${esc(skill.id)} · ${esc(skill.job||skill.class_name||'Beginner')}</small>`;
-      card.append(icon,copy);grid.appendChild(card);
-    });
-    section.appendChild(grid);list.prepend(section);
-    document.documentElement.classList.add('full-skill-beginner-ready');
+    const list=document.getElementById('skill-list');if(!list)return;
+    let section=list.querySelector('.skill-beginner-reference');
+    if(!section){
+      section=document.createElement('section');section.className='skill-beginner-reference';
+      section.innerHTML='<div class="skill-beginner-head"><div><span class="eyebrow">BEGINNER · LV1–10</span><h3>Beginner Skills</h3></div><p>Reference only · your build target is 3/3 in all three before the Magician progression below.</p></div><div class="skill-beginner-grid"></div>';
+      list.prepend(section);
+    }
+    const grid=section.querySelector('.skill-beginner-grid');if(!grid)return;
+    for(const name of BEGINNER_ORDER){
+      const skill=idx.byName.get(norm(name));if(!skill)continue;
+      let card=[...grid.querySelectorAll('.skill-beginner-card')].find(x=>norm(x.dataset.fullSkillName)===norm(name));
+      if(!card){
+        card=document.createElement('article');card.className='skill-beginner-card';card.dataset.fullSkillName=name;
+        card.innerHTML=`<span class="skill-beginner-icon" data-skill-icon-name="${esc(name)}"></span><div><div class="skill-beginner-title"><b>${esc(name)}</b><span>3 / 3</span></div><p class="skill-beginner-description">Beginner skill reference.</p><small class="skill-beginner-meta">Beginner</small></div>`;
+        grid.appendChild(card);
+      }
+      card.dataset.fullSkillName=skill.name;
+      const icon=card.querySelector('.skill-beginner-icon');
+      let im=icon?.querySelector('img');
+      if(icon&&!im){im=img(skill,'skill-icon');icon.appendChild(im);}else if(im)applyCanonicalImage(im,skill);
+      const title=card.querySelector('.skill-beginner-title b');if(title)title.textContent=skill.name;
+      const target=card.querySelector('.skill-beginner-title span');if(target)target.textContent=`3 / ${skill.max_level||3}`;
+      const desc=card.querySelector('.skill-beginner-description')||card.querySelector('p');if(desc)desc.textContent=cleanDescription(skill)||'Beginner skill reference.';
+      const meta=card.querySelector('.skill-beginner-meta')||card.querySelector('small');if(meta)meta.textContent=`ID ${skill.id} · ${skill.job||skill.class_name||'Beginner'}`;
+    }
+    const cards=[...grid.querySelectorAll('.skill-beginner-card')];
+    const ready=BEGINNER_ORDER.every(name=>cards.some(card=>norm(card.dataset.fullSkillName)===norm(name)&&card.querySelector('img.canonical-skill-icon')));
+    document.documentElement.classList.toggle('full-skill-beginner-ready',ready);
   }
 
   function canonicalizeSkillImages(idx){
