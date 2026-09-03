@@ -9,6 +9,7 @@ ICON_MEDIA='https://meowdb.com/msclassic/api/assets/icons/'
 ITEM_MEDIA_PRIMARY='https://api.dreamms.gg/api/GMS/latest/item/'
 PET_MEDIA='https://api.dreamms.gg/api/GMS/latest/pet/'
 CHARACTER_MEDIA='https://api.dreamms.gg/api/GMS/latest/character/'
+MONSTER_MEDIA='https://api.dreamms.gg/api/GMS/latest/mob/'
 ITEM_MEDIA_FALLBACK='https://maplestory.io/api/GMS/83/item/'
 SKILL_MEDIA='https://maplestory.io/api/wz/img/GMS/83/Skill/'
 
@@ -23,6 +24,7 @@ def upstream(path):
         ('/game-media/items/primary/',ITEM_MEDIA_PRIMARY),
         ('/game-media/pets/',PET_MEDIA),
         ('/game-media/characters/',CHARACTER_MEDIA),
+        ('/game-media/monsters/',MONSTER_MEDIA),
         ('/game-media/items/fallback/',ITEM_MEDIA_FALLBACK),
         ('/game-media/skills/',SKILL_MEDIA),
     )
