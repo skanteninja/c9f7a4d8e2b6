@@ -46,8 +46,6 @@
 
     if(hero.nextElementSibling!==command)hero.insertAdjacentElement('afterend',command);
 
-    // The level progression belongs in the lower part of the Avatar card.
-    // Recover it if an older build ever stashed it in the former hidden state host.
     const host=dashboard.querySelector('#dashboard-level-state-host');
     const stashed=host?.querySelector('.progression-avatar-level-controls');
     if(stashed&&character)character.appendChild(stashed);
@@ -64,6 +62,23 @@
     document.documentElement.classList.toggle('dashboard-avatar-level-footer-ready',!!footer);
     document.documentElement.classList.remove('dashboard-topbar-level-only-ready');
     if(footer)document.documentElement.classList.remove('progression-avatar-level-merge-missing');
+  }
+
+  function makeQueuesReadable(){
+    const dashboard=document.querySelector('.dashboard-v72');
+    if(!dashboard)return;
+    dashboard.querySelectorAll('.v72-etc-chip').forEach(chip=>{
+      if(chip.querySelector('.tcw-etc-name'))return;
+      const raw=String(chip.getAttribute('title')||'').trim();
+      const name=raw.split(/\s+·\s+/)[0].trim();
+      if(!name)return;
+      const label=document.createElement('span');
+      label.className='tcw-etc-name';
+      label.textContent=name;
+      const qty=chip.querySelector(':scope > b');
+      if(qty)chip.insertBefore(label,qty);else chip.appendChild(label);
+    });
+    document.documentElement.classList.add('dashboard-queues-readable-ready');
   }
 
   function cleanStaticSourceChrome(){
@@ -183,7 +198,7 @@
 
   function enhance(){
     document.documentElement.classList.add('top-classic-world-ready','public-source-clean-ready');
-    brand();cleanNavigation();arrangeDashboard();cleanStaticSourceChrome();cleanDatabaseHeroes();ownRenderedImages();scrubDynamicCopy();protectPublicPages();
+    brand();cleanNavigation();arrangeDashboard();makeQueuesReadable();cleanStaticSourceChrome();cleanDatabaseHeroes();ownRenderedImages();scrubDynamicCopy();protectPublicPages();
   }
   function schedule(){clearTimeout(timer);timer=setTimeout(enhance,90);}
   new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['src']});
