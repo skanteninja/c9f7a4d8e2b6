@@ -110,6 +110,60 @@
     });
   }
 
+  function setNavButtonCopy(button, text) {
+    if (!button) return;
+    const node = [...button.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
+    if (node) node.textContent = ` ${text}`;
+    else button.append(` ${text}`);
+    button.setAttribute('aria-label', text);
+    button.title = text;
+  }
+
+  function cleanNavigation() {
+    const nav = document.getElementById('nav');
+    if (!nav) return;
+    nav.querySelectorAll('.nav-section-label').forEach(label => {
+      const text = String(label.textContent || '').trim().toUpperCase();
+      if (text === 'PLAY' || text === 'DATABASE') label.remove();
+    });
+    nav.querySelector('.nav-btn[data-page="formulas"]')?.remove();
+    setNavButtonCopy(nav.querySelector('.nav-btn[data-page="classicdb"]'), 'Database');
+    document.documentElement.classList.add('navigation-cleanup-ready');
+  }
+
+  function decorateCashShop() {
+    const page = document.querySelector('[data-page="cashshop"]');
+    const cards = [...document.querySelectorAll('#cash-results .cash-card')];
+    if (!page) return;
+    let unavailable = 0;
+    cards.forEach(card => {
+      const price = card.querySelector('.cash-meta b');
+      const isUnavailable = card.classList.contains('cash-unavailable') || /^\s*0\s*NX\s*$/i.test(String(price?.textContent || ''));
+      card.classList.toggle('cash-unavailable', isUnavailable);
+      if (!isUnavailable) return;
+      unavailable += 1;
+      card.dataset.cashAvailability = 'unavailable';
+      if (price) {
+        price.textContent = 'UNAVAILABLE';
+        price.setAttribute('aria-label', 'Unavailable in the current COT2 Cash Shop catalog');
+      }
+    });
+    if (cards.length) {
+      document.documentElement.classList.add('cash-shop-unavailable-ready');
+      document.documentElement.dataset.cashUnavailableCount = String(unavailable);
+    }
+  }
+
+  function watchVisualAssets() {
+    document.querySelectorAll('img').forEach(img => {
+      if (img.dataset.visualAuditHooked) return;
+      img.dataset.visualAuditHooked = '1';
+      img.addEventListener('load', () => { delete img.dataset.visualAuditFailed; });
+      img.addEventListener('error', () => { img.dataset.visualAuditFailed = '1'; });
+    });
+    document.documentElement.classList.add('visual-asset-audit-ready');
+  }
+
   function etcTargetParts(row) {
     const held = row.querySelector('input[data-held]');
     if (!held) return null;
@@ -219,14 +273,17 @@
 
   function enhance() {
     document.documentElement.classList.add('dashboard-polish-ready');
+    cleanNavigation();
     decorateActions();
+    decorateCashShop();
     decorateEtcPlanner();
+    watchVisualAssets();
     upgradeTrainMap().finally(() => requestAnimationFrame(() => requestAnimationFrame(verifyLayout)));
   }
 
   function schedule() {
     clearTimeout(timer);
-    timer = setTimeout(enhance, 90);
+    timer = setTimeout(enhance, 80);
   }
 
   new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
