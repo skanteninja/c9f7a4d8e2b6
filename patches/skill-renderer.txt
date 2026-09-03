@@ -1,0 +1,15 @@
+  function renderSkills(){
+    document.getElementById('skill-list').innerHTML=D.skills.map(s=>{
+      const cur=Number(s.Level)===state.level;
+      const skillName=skillNameFromSpend(s.Spend);
+      return `<div class="skill-row ${cur?'current':''}" data-informational="1">
+        <b style="color:#8bdfff">Lv${esc(s.Level)}</b>
+        <b>${esc(s.SP)}</b>
+        <div class="skill-icon-host" data-skill-icon-name="${esc(skillName)}">${skillName?skillImgTag(skillName):''}</div>
+        <div class="skill-spend">${esc(s.Spend)}</div>
+        <div class="skill-why">${esc(s['Why This Is The Action'])}</div>
+        <div>${isBeta(s.Status)?`<span class="beta-tag">verify</span>`:`<span class="status-tag">${esc(s.Status||'')}</span>`}</div>
+        <div class="skill-result" style="grid-column:4/-1">${esc(s['Result After Level']||'')}</div>
+      </div>`;
+    }).join('');
+  }
