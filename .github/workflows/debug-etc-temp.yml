@@ -1,0 +1,35 @@
+name: Debug ETC queue temp
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/debug-etc-temp.yml'
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node build.cjs
+      - name: Inspect final ETC queue DOM
+        run: |
+          python3 .github/ci_static_proxy.py --directory dist --port 4173 >/tmp/tcw-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep .25; done
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          cat > dist/debug-etc.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><style>html,body{width:100%;height:100%;margin:0}iframe{width:100%;height:100%;border:0}</style><iframe id="app" src="/"></iframe><pre id="out">pending</pre><script>
+          const wait=ms=>new Promise(r=>setTimeout(r,ms));
+          app.onload=async()=>{const w=app.contentWindow,d=app.contentDocument;for(let i=0;i<80&&!d.documentElement.classList.contains('dashboard-avatar-level-footer-ready');i++)await wait(100);const level=d.getElementById('level-select');level.value='44';level.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(2600);const rows=[...d.querySelectorAll('#atlas-etc-queue .v72-etc-chip')];const info=rows.slice(0,4).map((x,i)=>{const n=x.querySelector('.tcw-etc-name');return {i,title:x.title,iconName:x.querySelector('[data-etc-icon-name]')?.dataset.etcIconName,name:n?.textContent||null,nameSize:n?getComputedStyle(n).fontSize:null,html:x.outerHTML}});out.textContent=JSON.stringify({ready:d.documentElement.classList.contains('dashboard-queues-readable-ready'),count:rows.length,info},null,2);};
+          </script>
+          HTML
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=12000 --dump-dom http://127.0.0.1:4173/debug-etc.html > /tmp/debug-etc-dom.html
+          python3 - <<'PY'
+          import re,html
+          s=open('/tmp/debug-etc-dom.html',encoding='utf-8',errors='replace').read()
+          m=re.search(r'<pre id="out">(.*?)</pre>',s,re.S)
+          print(html.unescape(m.group(1)) if m else 'NO DEBUG OUTPUT')
+          PY
