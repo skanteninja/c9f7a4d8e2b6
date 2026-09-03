@@ -84,6 +84,38 @@
     return head;
   }
 
+  function ensureLevelTrack(controls, lv) {
+    const range = controls.querySelector('#level-range, .v5-level-range');
+    const milestones = controls.querySelector('.v5-milestones');
+    if (!range || !milestones) return null;
+
+    let track = controls.querySelector('.progression-level-track');
+    if (!track) {
+      track = document.createElement('div');
+      track.className = 'progression-level-track';
+      controls.appendChild(track);
+    }
+    if (range.parentElement !== track) track.appendChild(range);
+
+    let readout = track.querySelector('.progression-level-slider-value');
+    if (!readout) {
+      readout = document.createElement('output');
+      readout.className = 'progression-level-slider-value';
+      readout.setAttribute('aria-hidden','true');
+      track.appendChild(readout);
+    }
+    if (milestones.parentElement !== track) track.appendChild(milestones);
+
+    const min = Number(range.min || 1);
+    const max = Number(range.max || D.meta?.maxLevel || 70);
+    const bounded = Math.max(min, Math.min(max, Number(lv) || min));
+    const pct = max > min ? ((bounded - min) / (max - min)) * 100 : 0;
+    track.style.setProperty('--level-pct', `${pct}%`);
+    readout.textContent = `LV ${bounded}`;
+    document.documentElement.classList.add('progression-level-scale-correct-ready');
+    return track;
+  }
+
   function unwrapOldAvatarColumn(character) {
     const column = character.querySelector('.progression-avatar-column');
     if (!column) return;
@@ -142,6 +174,7 @@
     const badge = head.querySelector('.progression-avatar-current-level');
     const heroLevel = document.getElementById('hero-level');
     if (heroLevel && badge && heroLevel.parentElement !== badge) badge.appendChild(heroLevel);
+    ensureLevelTrack(controls, lv);
 
     document.documentElement.classList.add('progression-avatar-level-merged-ready','progression-level-footer-ready');
     document.documentElement.classList.remove('progression-avatar-level-merge-missing');
