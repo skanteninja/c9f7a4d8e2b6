@@ -2,6 +2,8 @@
   const RAW = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/data/current/';
   let timer = null;
   let mapsPromise = null;
+  let cashResultsObserver = null;
+  let cashResultsRoot = null;
 
   const norm = value => String(value ?? '').toLowerCase().replace(/\[[^\]]*\]/g,' ').replace(/[^a-z0-9]+/g,' ').trim();
 
@@ -133,17 +135,19 @@
 
   function decorateCashShop() {
     const page = document.querySelector('[data-page="cashshop"]');
-    const cards = [...document.querySelectorAll('#cash-results .cash-card')];
-    if (!page) return;
+    const results = document.getElementById('cash-results');
+    if (!page || !results) return;
+    const cards = [...results.querySelectorAll('.cash-card')];
     let unavailable = 0;
     cards.forEach(card => {
       const price = card.querySelector('.cash-meta b');
-      const isUnavailable = card.classList.contains('cash-unavailable') || /^\s*0\s*NX\s*$/i.test(String(price?.textContent || ''));
-      card.classList.toggle('cash-unavailable', isUnavailable);
+      const priceText = String(price?.textContent || '').trim();
+      const isUnavailable = card.classList.contains('cash-unavailable') || /^0\s*NX$/i.test(priceText);
       if (!isUnavailable) return;
       unavailable += 1;
+      card.classList.add('cash-unavailable');
       card.dataset.cashAvailability = 'unavailable';
-      if (price) {
+      if (price && priceText.toUpperCase() !== 'UNAVAILABLE') {
         price.textContent = 'UNAVAILABLE';
         price.setAttribute('aria-label', 'Unavailable in the current COT2 Cash Shop catalog');
       }
@@ -151,7 +155,21 @@
     if (cards.length) {
       document.documentElement.classList.add('cash-shop-unavailable-ready');
       document.documentElement.dataset.cashUnavailableCount = String(unavailable);
+      results.dataset.cashUnavailableDecorated = '1';
     }
+  }
+
+  function wireCashShopObserver() {
+    const results = document.getElementById('cash-results');
+    if (!results) return;
+    if (cashResultsRoot !== results) {
+      cashResultsObserver?.disconnect();
+      cashResultsRoot = results;
+      cashResultsObserver = new MutationObserver(() => decorateCashShop());
+      cashResultsObserver.observe(results, { childList: true, subtree: true });
+      results.dataset.cashObserverReady = '1';
+    }
+    decorateCashShop();
   }
 
   function watchVisualAssets() {
@@ -275,7 +293,7 @@
     document.documentElement.classList.add('dashboard-polish-ready');
     cleanNavigation();
     decorateActions();
-    decorateCashShop();
+    wireCashShopObserver();
     decorateEtcPlanner();
     watchVisualAssets();
     upgradeTrainMap().finally(() => requestAnimationFrame(() => requestAnimationFrame(verifyLayout)));
