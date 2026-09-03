@@ -1,5 +1,6 @@
 name: Build static site
 
+# Dashboard contract: the level progression line is visible in the lower part of the Avatar card; no standalone level card.
 on:
   workflow_dispatch:
   push:
