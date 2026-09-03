@@ -146,6 +146,12 @@ function patchApp(raw) {
     `.sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,6);`,
     `.sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,12);`
   );
+
+  // ETC names are part of the core queue markup so rerenders cannot erase readable labels.
+  const etcChipNeedle = '<span class="etc-icon-shell" data-etc-icon-name="${esc(x.Item)}">◌</span><b>';
+  const etcChipNamed = '<span class="etc-icon-shell" data-etc-icon-name="${esc(x.Item)}">◌</span><span class="tcw-etc-name">${esc(x.Item)}</span><b>';
+  if (!app.includes(etcChipNeedle)) throw new Error('ETC queue chip markup patch target missing');
+  app = app.replaceAll(etcChipNeedle, etcChipNamed);
   return app;
 }
 
