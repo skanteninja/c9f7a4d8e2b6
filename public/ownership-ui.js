@@ -47,7 +47,7 @@
     if(hero.nextElementSibling!==command)hero.insertAdjacentElement('afterend',command);
 
     // The level progression belongs in the lower part of the Avatar card.
-    // A previous ownership pass moved it into a hidden state host; recover it if that stale host exists.
+    // Recover it if an older build ever stashed it in the former hidden state host.
     const host=dashboard.querySelector('#dashboard-level-state-host');
     const stashed=host?.querySelector('.progression-avatar-level-controls');
     if(stashed&&character)character.appendChild(stashed);
@@ -84,7 +84,14 @@
   }
 
   function localizeKnownUrl(value){
-    return String(value||'')
+    const raw=String(value||'');
+    try{
+      const u=new URL(raw,location.href);
+      if(u.origin!==location.origin&&u.pathname.startsWith('/api/GMS/latest/character/')){
+        return '/game-media/characters/'+u.pathname.slice('/api/GMS/latest/character/'.length)+u.search;
+      }
+    }catch{}
+    return raw
       .replace('/game-origin/','/game-data/')
       .replace('/game-art/meow/icons/','/game-media/icons/')
       .replace('/game-art/dream/item/','/game-media/items/primary/')
