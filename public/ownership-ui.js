@@ -68,15 +68,18 @@
     const dashboard=document.querySelector('.dashboard-v72');
     if(!dashboard)return;
     dashboard.querySelectorAll('.v72-etc-chip').forEach(chip=>{
-      if(chip.querySelector('.tcw-etc-name'))return;
-      const raw=String(chip.getAttribute('title')||'').trim();
-      const name=raw.split(/\s+·\s+/)[0].trim();
+      let label=chip.querySelector('.tcw-etc-name');
+      const icon=chip.querySelector('[data-etc-icon-name]');
+      const rawTitle=String(chip.getAttribute('title')||'').trim();
+      const name=String(icon?.dataset.etcIconName||rawTitle.split(/\s+·\s+/)[0]||'').trim();
       if(!name)return;
-      const label=document.createElement('span');
-      label.className='tcw-etc-name';
-      label.textContent=name;
-      const qty=chip.querySelector(':scope > b');
-      if(qty)chip.insertBefore(label,qty);else chip.appendChild(label);
+      if(!label){
+        label=document.createElement('span');
+        label.className='tcw-etc-name';
+        const qty=chip.querySelector(':scope > b');
+        if(qty)chip.insertBefore(label,qty);else chip.appendChild(label);
+      }
+      if(label.textContent!==name)label.textContent=name;
     });
     document.documentElement.classList.add('dashboard-queues-readable-ready');
   }
