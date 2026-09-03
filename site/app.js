@@ -852,7 +852,12 @@
   }
 
   function renderSkills(){
-    document.getElementById('skill-list').innerHTML=D.skills.map(s=>{
+    const beginnerNames=['Nimble Feet','Three Snails','Recovery'];
+    const beginnerHtml=`<section class="skill-beginner-reference" data-core-beginner="1">
+      <div class="skill-beginner-head"><div><span class="eyebrow">BEGINNER · LV1–10</span><h3>Beginner Skills</h3></div><p>Reference only · your build target is 3/3 in all three before the Magician progression below.</p></div>
+      <div class="skill-beginner-grid">${beginnerNames.map(name=>`<article class="skill-beginner-card" data-full-skill-name="${esc(name)}"><span class="skill-beginner-icon" data-skill-icon-name="${esc(name)}"></span><div><div class="skill-beginner-title"><b>${esc(name)}</b><span>3 / 3</span></div><p class="skill-beginner-description">Beginner skill reference.</p><small class="skill-beginner-meta">Beginner</small></div></article>`).join('')}</div>
+    </section>`;
+    const rows=D.skills.map(s=>{
       const cur=Number(s.Level)===state.level;
       const skillName=skillNameFromSpend(s.Spend);
       return `<div class="skill-row ${cur?'current':''}" data-informational="1">
@@ -865,6 +870,7 @@
         <div class="skill-result" style="grid-column:4/-1">${esc(s['Result After Level']||'')}</div>
       </div>`;
     }).join('');
+    document.getElementById('skill-list').innerHTML=beginnerHtml+rows;
   }
 
   ['etc-search','etc-current-only','etc-hide-done'].forEach(id=>document.getElementById(id).addEventListener('input',renderEtc));
