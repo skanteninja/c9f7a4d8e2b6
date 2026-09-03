@@ -46,7 +46,7 @@ jobs:
           grep -q 'Top Classic World Maplestory 0.8.1-static1' site/build-info.txt
           ! grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard' site/app.js
           ! grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard' site/visuals.js
-          grep -q '/game-origin/' site/app.js
+          grep -q '/game-data/' site/app.js
 
       - name: Browser boot dashboard and progression regression gate
         run: |
@@ -58,18 +58,19 @@ jobs:
           frame.addEventListener('load',async()=>{
             try{
               const d=frame.contentDocument;
-              for(let i=0;i<55&&!d.documentElement.classList.contains('dashboard-queues-after-hero-ready');i++)await delay(150);
-              const required=['progression-sync-ready','beginner-skill-tree-ready','progression-level-hook-ready','progression-skill-state-ready','progression-gear-visual-ready','progression-compact-dashboard-ready','progression-avatar-level-merged-ready','progression-gear-decision-verified','top-classic-world-ready','public-source-clean-ready','dashboard-queues-after-hero-ready','dashboard-topbar-level-only-ready','owned-image-urls-ready'];
+              for(let i=0;i<55&&!d.documentElement.classList.contains('dashboard-avatar-level-footer-ready');i++)await delay(150);
+              const required=['progression-sync-ready','beginner-skill-tree-ready','progression-level-hook-ready','progression-skill-state-ready','progression-gear-visual-ready','progression-compact-dashboard-ready','progression-avatar-level-merged-ready','progression-gear-decision-verified','top-classic-world-ready','public-source-clean-ready','dashboard-queues-after-hero-ready','dashboard-avatar-level-footer-ready','owned-image-urls-ready'];
               for(const cls of required){if(!d.documentElement.classList.contains(cls))throw Error('missing '+cls);}
               if(d.querySelectorAll('#atlas-skill-grid .beginner-skill-card').length!==3)throw Error('beginner skill count');
               if(d.querySelector('.progression-loadout-strip'))throw Error('duplicate level-synced equipment strip present');
               if(d.querySelector('.v5-avatar .avatar-equipped-icons'))throw Error('duplicate avatar equipment chips present');
-              const host=d.querySelector('#dashboard-level-state-host');
-              const controls=host?.querySelector('.progression-avatar-level-controls');
-              if(!host||!controls)throw Error('hidden dashboard level state missing');
-              if(!controls.contains(d.getElementById('level-range')))throw Error('hidden level range missing');
-              if(!controls.contains(d.getElementById('hero-level-select')))throw Error('hidden hero level select missing');
-              if(getComputedStyle(controls).display!=='none')throw Error('dashboard level footer is visible');
+              const character=d.querySelector('.dashboard-v72 .v5-character-hero');
+              const controls=character?.querySelector(':scope > .progression-avatar-level-controls');
+              if(!character||!controls)throw Error('avatar level footer missing');
+              if(!controls.contains(d.getElementById('level-range')))throw Error('avatar level range missing');
+              if(!controls.contains(d.getElementById('hero-level-select')))throw Error('avatar level select missing');
+              if(getComputedStyle(controls).display==='none')throw Error('avatar level footer hidden');
+              if(d.querySelector('.dashboard-v72 .v5-level-hero,.dashboard-v72 .v72-level-hero'))throw Error('standalone level card returned');
               if(!d.getElementById('level-select'))throw Error('topbar level select missing');
               if(!d.querySelector('#atlas-avatar .avatar-character'))throw Error('character render missing');
               const hero=d.querySelector('.dashboard-v72 .v72-hero-grid'),commands=d.querySelector('.dashboard-v72 .v72-command-grid');
@@ -87,11 +88,11 @@ jobs:
                 for(const name of needles){if(!equipment.includes(name))throw Error('equipment missing '+level+' '+name);}
                 if(d.querySelector('.progression-loadout-strip'))throw Error('strip returned at '+level);
                 if(d.querySelector('.v5-avatar .avatar-equipped-icons'))throw Error('avatar chips returned at '+level);
-                const levelControls=d.querySelector('#dashboard-level-state-host .progression-avatar-level-controls');
-                if(!levelControls?.contains(d.getElementById('level-range')))throw Error('hidden level range lost at '+level);
-                if(!levelControls?.contains(d.getElementById('hero-level-select')))throw Error('hidden level select lost at '+level);
-                if(getComputedStyle(levelControls).display!=='none')throw Error('level footer returned at '+level);
-                if(String(d.getElementById('hero-level')?.textContent)!==String(level))throw Error('hidden hero level not synced '+level);
+                const levelControls=d.querySelector('.dashboard-v72 .v5-character-hero > .progression-avatar-level-controls');
+                if(!levelControls?.contains(d.getElementById('level-range')))throw Error('avatar level range lost at '+level);
+                if(!levelControls?.contains(d.getElementById('hero-level-select')))throw Error('avatar level select lost at '+level);
+                if(getComputedStyle(levelControls).display==='none')throw Error('avatar level footer hidden at '+level);
+                if(String(d.getElementById('hero-level')?.textContent)!==String(level))throw Error('avatar hero level not synced '+level);
                 if(!d.querySelector('#atlas-avatar .avatar-character'))throw Error('character render missing '+level);
                 const weapon=d.querySelector(`#equipment-window .gear-slot[data-slot="Weapon"][data-item-name="${newWeapon}"]`);
                 if(!weapon?.classList.contains('progression-new-equipped'))throw Error('new weapon not marked '+level+' '+newWeapon);
@@ -124,16 +125,17 @@ jobs:
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-static-${viewport//,/-}.html"
             "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=14000 --dump-dom http://127.0.0.1:4173/ >"$file"
-            for marker in visual-layer-ready visual-db-layer-ready visual-npc-layer-ready visual-skill-layer-ready visual-portal-layer-ready dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified skill-progression-board-ready beginner-skill-tree-ready dashboard-action-layout-ok dashboard-page-layout-ok etc-planner-fixed-ready top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-topbar-level-only-ready owned-image-urls-ready; do
+            for marker in visual-layer-ready visual-db-layer-ready visual-npc-layer-ready visual-skill-layer-ready visual-portal-layer-ready dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified skill-progression-board-ready beginner-skill-tree-ready dashboard-action-layout-ok dashboard-page-layout-ok etc-planner-fixed-ready top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready; do
               grep -q "$marker" "$file"
             done
             grep -q 'class="atlas-action-row' "$file"
             grep -q 'class="gear-slot' "$file"
             grep -q 'class="atlas-timeline-level' "$file"
-            grep -q 'id="dashboard-level-state-host"' "$file"
             grep -q 'class="progression-avatar-level-controls' "$file"
             grep -q 'id="level-range"' "$file"
             grep -q 'id="hero-level-select"' "$file"
+            ! grep -q 'id="dashboard-level-state-host"' "$file"
+            ! grep -q 'class="v5-level-hero' "$file"
             grep -q 'data-progress-skill="Nimble Feet"' "$file"
             grep -q 'data-progress-skill="Three Snails"' "$file"
             grep -q 'data-progress-skill="Recovery"' "$file"
