@@ -4,12 +4,12 @@ from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 import argparse
 
-ORIGIN_RAW='https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/'
-MEOW='https://meowdb.com/msclassic/api/assets/icons/'
-DREAM_ITEM='https://api.dreamms.gg/api/GMS/latest/item/'
-DREAM_PET='https://api.dreamms.gg/api/GMS/latest/pet/'
-MAPLE_ITEM='https://maplestory.io/api/GMS/83/item/'
-MAPLE_SKILL='https://maplestory.io/api/wz/img/GMS/83/Skill/'
+CURRENT_DATA='https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/'
+ICON_MEDIA='https://meowdb.com/msclassic/api/assets/icons/'
+ITEM_MEDIA_PRIMARY='https://api.dreamms.gg/api/GMS/latest/item/'
+PET_MEDIA='https://api.dreamms.gg/api/GMS/latest/pet/'
+ITEM_MEDIA_FALLBACK='https://maplestory.io/api/GMS/83/item/'
+SKILL_MEDIA='https://maplestory.io/api/wz/img/GMS/83/Skill/'
 
 
 def upstream(path):
@@ -17,12 +17,12 @@ def upstream(path):
     p=parsed.path
     suffix=('?'+parsed.query) if parsed.query else ''
     routes=(
-        ('/game-origin/',ORIGIN_RAW),
-        ('/game-art/meow/icons/',MEOW),
-        ('/game-art/dream/item/',DREAM_ITEM),
-        ('/game-art/dream/pet/',DREAM_PET),
-        ('/game-art/mapleio/item/',MAPLE_ITEM),
-        ('/game-art/mapleio/skill/',MAPLE_SKILL),
+        ('/game-data/',CURRENT_DATA),
+        ('/game-media/icons/',ICON_MEDIA),
+        ('/game-media/items/primary/',ITEM_MEDIA_PRIMARY),
+        ('/game-media/pets/',PET_MEDIA),
+        ('/game-media/items/fallback/',ITEM_MEDIA_FALLBACK),
+        ('/game-media/skills/',SKILL_MEDIA),
     )
     for prefix,base in routes:
         if p.startswith(prefix): return base+p[len(prefix):]+suffix
