@@ -2,6 +2,8 @@
   const RAW = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/data/current/';
   let timer = null;
   let mapsPromise = null;
+  let cashResultsObserver = null;
+  let cashResultsRoot = null;
 
   const norm = value => String(value ?? '').toLowerCase().replace(/\[[^\]]*\]/g,' ').replace(/[^a-z0-9]+/g,' ').trim();
 
@@ -108,6 +110,76 @@
         row.classList.toggle('has-route-map', !!preview && getComputedStyle(preview).display !== 'none');
       }
     });
+  }
+
+  function setNavButtonCopy(button, text) {
+    if (!button) return;
+    const node = [...button.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
+    if (node) node.textContent = ` ${text}`;
+    else button.append(` ${text}`);
+    button.setAttribute('aria-label', text);
+    button.title = text;
+  }
+
+  function cleanNavigation() {
+    const nav = document.getElementById('nav');
+    if (!nav) return;
+    nav.querySelectorAll('.nav-section-label').forEach(label => {
+      const text = String(label.textContent || '').trim().toUpperCase();
+      if (text === 'PLAY' || text === 'DATABASE') label.remove();
+    });
+    nav.querySelector('.nav-btn[data-page="formulas"]')?.remove();
+    setNavButtonCopy(nav.querySelector('.nav-btn[data-page="classicdb"]'), 'Database');
+    document.documentElement.classList.add('navigation-cleanup-ready');
+  }
+
+  function decorateCashShop() {
+    const page = document.querySelector('[data-page="cashshop"]');
+    const results = document.getElementById('cash-results');
+    if (!page || !results) return;
+    const cards = [...results.querySelectorAll('.cash-card')];
+    let unavailable = 0;
+    cards.forEach(card => {
+      const price = card.querySelector('.cash-meta b');
+      const priceText = String(price?.textContent || '').trim();
+      const isUnavailable = card.classList.contains('cash-unavailable') || /^0\s*NX$/i.test(priceText);
+      if (!isUnavailable) return;
+      unavailable += 1;
+      card.classList.add('cash-unavailable');
+      card.dataset.cashAvailability = 'unavailable';
+      if (price && priceText.toUpperCase() !== 'UNAVAILABLE') {
+        price.textContent = 'UNAVAILABLE';
+        price.setAttribute('aria-label', 'Unavailable in the current COT2 Cash Shop catalog');
+      }
+    });
+    if (cards.length) {
+      document.documentElement.classList.add('cash-shop-unavailable-ready');
+      document.documentElement.dataset.cashUnavailableCount = String(unavailable);
+      results.dataset.cashUnavailableDecorated = '1';
+    }
+  }
+
+  function wireCashShopObserver() {
+    const results = document.getElementById('cash-results');
+    if (!results) return;
+    if (cashResultsRoot !== results) {
+      cashResultsObserver?.disconnect();
+      cashResultsRoot = results;
+      cashResultsObserver = new MutationObserver(() => decorateCashShop());
+      cashResultsObserver.observe(results, { childList: true, subtree: true });
+      results.dataset.cashObserverReady = '1';
+    }
+    decorateCashShop();
+  }
+
+  function watchVisualAssets() {
+    document.querySelectorAll('img').forEach(img => {
+      if (img.dataset.visualAuditHooked) return;
+      img.dataset.visualAuditHooked = '1';
+      img.addEventListener('load', () => { delete img.dataset.visualAuditFailed; });
+      img.addEventListener('error', () => { img.dataset.visualAuditFailed = '1'; });
+    });
+    document.documentElement.classList.add('visual-asset-audit-ready');
   }
 
   function etcTargetParts(row) {
@@ -219,14 +291,17 @@
 
   function enhance() {
     document.documentElement.classList.add('dashboard-polish-ready');
+    cleanNavigation();
     decorateActions();
+    wireCashShopObserver();
     decorateEtcPlanner();
+    watchVisualAssets();
     upgradeTrainMap().finally(() => requestAnimationFrame(() => requestAnimationFrame(verifyLayout)));
   }
 
   function schedule() {
     clearTimeout(timer);
-    timer = setTimeout(enhance, 90);
+    timer = setTimeout(enhance, 80);
   }
 
   new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });

@@ -96,9 +96,40 @@
     return first[name] || second[name] || 20;
   }
 
+  function localSkillUrl(name) {
+    return String(D.skillIcons?.[name]?.url || '').trim();
+  }
+
   function skillIcon(skill, name) {
-    const src = skill?.thumbnail ? `${RAW}${String(skill.thumbnail).replace(/^\/+/, '')}` : '';
-    return src ? `<img src="${esc(src)}" alt="${esc(name)}" loading="lazy" decoding="async">` : '<span class="progress-skill-fallback">✦</span>';
+    const current = skill?.thumbnail ? `${RAW}${String(skill.thumbnail).replace(/^\/+/, '')}` : '';
+    const fallback = localSkillUrl(name);
+    const src = current || fallback;
+    if (!src) return '<span class="progress-skill-fallback">✦</span>';
+    const fallbackAttr = current && fallback && fallback !== current ? ` data-skill-fallback="${esc(fallback)}"` : '';
+    return `<img src="${esc(src)}"${fallbackAttr} alt="${esc(name)}" loading="lazy" decoding="async">`;
+  }
+
+  function wireSkillImages(root) {
+    root?.querySelectorAll('img').forEach(img => {
+      if (img.dataset.progressionSkillHooked) return;
+      img.dataset.progressionSkillHooked = '1';
+      img.addEventListener('error',()=>{
+        const fallback = img.dataset.skillFallback;
+        if (fallback && !img.dataset.skillFallbackUsed) {
+          img.dataset.skillFallbackUsed = '1';
+          img.src = fallback;
+          return;
+        }
+        const wrap = img.closest('.skill-img-wrap,.progress-skill-icon');
+        if (wrap && !wrap.querySelector('.progress-skill-fallback')) {
+          const mark = document.createElement('span');
+          mark.className = 'progress-skill-fallback';
+          mark.textContent = '✦';
+          wrap.appendChild(mark);
+        }
+        img.remove();
+      },{once:false});
+    });
   }
 
   function tierCard(name, level, skill, tierLocked=false) {
@@ -125,50 +156,70 @@
       board.className = 'skill-progression-board';
       list.parentNode.insertBefore(board,list);
     }
+    if (board.dataset.progressionLevel === String(level) && board.querySelector('.progress-skill-tier')) {
+      wireSkillImages(board);
+      document.documentElement.classList.add('skill-progression-board-ready');
+      return;
+    }
 
+    board.dataset.progressionLevel = String(level);
     board.innerHTML = `<div class="skill-progression-head"><div><span>LEVEL-SYNCED SKILL TREE</span><h3>Skill Mastery at Lv${level}</h3><small>Grey = 0 points. A skill returns to full color the moment this progression begins investing in it.</small></div><b>Lv${level}</b></div>` + TIERS.map(tier => {
       const alloc = latestAllocation(tier.id,level);
       const locked = level < tier.opens;
       return `<section class="progress-skill-tier ${locked?'locked':''}"><div class="progress-tier-title"><b>${esc(tier.label)}</b><small>${tier.id==='beginner'?'Recommended order: Nimble Feet → Three Snails → Recovery':`Opens at Lv${tier.opens}`}</small></div><div class="progress-skill-grid">${tier.names.map(name => tierCard(name,Number(alloc[name]||0),idx.get(norm(name)),locked)).join('')}</div></section>`;
     }).join('');
 
-    board.querySelectorAll('img').forEach(img => img.addEventListener('error',()=>{img.closest('.progress-skill-icon')?.classList.add('asset-failed');img.remove();},{once:true}));
+    wireSkillImages(board);
     document.documentElement.classList.add('skill-progression-board-ready');
   }
 
-  async function renderBeginnerDashboard() {
+  function renderBeginnerDashboard(idx = null) {
     const active = document.querySelector('#atlas-skill-tabs [data-skill-tab="beginner"].active');
     const grid = document.getElementById('atlas-skill-grid');
     const detail = document.getElementById('atlas-skill-detail');
-    if (!active || !grid || !detail) return;
+    if (!active || !grid || !detail) return false;
     const level = currentLevel();
-    const alloc = latestAllocation('beginner',level);
-    const idx = await skillIndex();
-    if (!document.body.contains(grid) || !document.querySelector('#atlas-skill-tabs [data-skill-tab="beginner"].active')) return;
+    const enriched = !!(idx && idx.size);
+    const alreadyCards = grid.querySelectorAll('.beginner-skill-card').length === 3 && !grid.querySelector('.beginner-milestone-grid');
+    const sameLevel = grid.dataset.beginnerRenderLevel === String(level);
+    const currentMode = grid.dataset.beginnerRenderMode || '';
+    if (alreadyCards && sameLevel && (currentMode === 'cot2' || !enriched)) {
+      wireSkillImages(grid);
+      wireSkillImages(detail);
+      document.documentElement.classList.add('beginner-skill-tree-ready','dashboard-skill-immediate-ready');
+      return true;
+    }
 
+    const alloc = latestAllocation('beginner',level);
     const names = TIERS[0].names;
+    const getSkill = name => idx?.get?.(norm(name)) || null;
+    grid.dataset.beginnerRenderLevel = String(level);
+    grid.dataset.beginnerRenderMode = enriched ? 'cot2' : 'fallback';
     grid.innerHTML = names.map(name => {
-      const skill = idx.get(norm(name));
+      const skill = getSkill(name);
       const lv = Number(alloc[name]||0);
       const max = maxLevel(skill,3);
-      return `<button class="atlas-skill-card beginner-skill-card ${lv>0?'learned':''}" data-skill-name="${esc(name)}"><span class="skill-img-wrap">${skillIcon(skill,name)}</span><b>${esc(name)}</b><small>Lv. ${lv}/${max}</small></button>`;
+      return `<button class="atlas-skill-card beginner-skill-card ${lv>0?'learned':'unlearned'}" data-skill-name="${esc(name)}"><span class="skill-img-wrap">${skillIcon(skill,name)}</span><b>${esc(name)}</b><small>Lv. ${lv}/${max}</small></button>`;
     }).join('');
 
     const firstNext = names.find(name => Number(alloc[name]||0) < 3) || 'Recovery';
     function show(name) {
-      const skill = idx.get(norm(name));
+      const skill = getSkill(name);
       const lv = Number(alloc[name]||0);
       const max = maxLevel(skill,3);
       const stats = Array.isArray(skill?.all_level_stats) && lv > 0 ? String(skill.all_level_stats[Math.min(lv-1,skill.all_level_stats.length-1)]||'') : '';
       detail.innerHTML = `<span class="skill-img-wrap">${skillIcon(skill,name)}</span><div><span class="detail-kicker">BEGINNER · CURRENT COT2 SKILL</span><b>${esc(name)} · Lv ${lv}/${max}</b><p>${esc(skill?.description || (lv ? 'Active in the recommended Beginner progression.' : 'Not invested yet; this icon stays grey until its first recommended point.'))}</p>${stats?`<small>${esc(stats)}</small>`:''}<small class="evidence-inline">Recommended planner order: Nimble Feet 3 → Three Snails 3 → Recovery 3. Beginner skill acquisition is still rechecked against live/tutorial behavior.</small></div>`;
+      wireSkillImages(detail);
     }
     grid.querySelectorAll('[data-skill-name]').forEach(btn => btn.addEventListener('click',()=>{
       grid.querySelectorAll('.atlas-skill-card').forEach(x=>x.classList.remove('selected'));
       btn.classList.add('selected');
       show(btn.dataset.skillName);
     }));
+    wireSkillImages(grid);
     show(firstNext);
-    document.documentElement.classList.add('beginner-skill-tree-ready');
+    document.documentElement.classList.add('beginner-skill-tree-ready','dashboard-skill-immediate-ready');
+    return true;
   }
 
   function decorateExistingSkillCards() {
@@ -183,6 +234,7 @@
 
   function addGearBadges() {
     const level = currentLevel();
+    const wanted = `AUTO RECOMMENDED · LV${level}`;
     const targets = [
       document.querySelector('.dashboard-v72 .v5-equipment-hero .v5-panel-heading'),
       document.getElementById('equipment-window-page')?.parentElement?.querySelector('.section-head')
@@ -190,7 +242,7 @@
     targets.forEach(root => {
       let badge = root.querySelector('.auto-gear-badge');
       if (!badge) { badge=document.createElement('span');badge.className='auto-gear-badge';root.appendChild(badge); }
-      badge.textContent = `AUTO RECOMMENDED · LV${level}`;
+      if (badge.textContent !== wanted) badge.textContent = wanted;
     });
   }
 
@@ -220,12 +272,22 @@
     document.documentElement.classList.add('progression-sync-ready');
     syncLevel();
     addGearBadges();
+    renderBeginnerDashboard();
     decorateExistingSkillCards();
-    await Promise.allSettled([renderMasteryBoard(),renderBeginnerDashboard()]);
+    const idxPromise = skillIndex();
+    await Promise.allSettled([
+      renderMasteryBoard(),
+      idxPromise.then(idx => renderBeginnerDashboard(idx))
+    ]);
   }
 
-  function schedule() { clearTimeout(timer); timer=setTimeout(enhance,90); }
-  new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,characterData:true});
+  function schedule() { clearTimeout(timer); timer=setTimeout(enhance,55); }
+  new MutationObserver(()=>{
+    if (document.querySelector('#atlas-skill-tabs [data-skill-tab="beginner"].active') && document.querySelector('#atlas-skill-grid .beginner-milestone-grid')) {
+      renderBeginnerDashboard();
+    }
+    schedule();
+  }).observe(document.body,{childList:true,subtree:true});
   document.addEventListener('click',schedule,true);
   document.addEventListener('change',schedule,true);
   document.addEventListener('input',schedule,true);

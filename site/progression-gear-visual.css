@@ -62,10 +62,34 @@
 /* The original standalone level panel is removed by JS after its real controls are moved. */
 .dashboard-v72 .v5-level-hero,.dashboard-v72 .v72-level-hero{display:none!important}
 
+/* Dashboard lower half: compact, balanced and readable instead of leaving a giant empty Skill Tree card. */
+.dashboard-v72 .v72-secondary-content{grid-template-columns:minmax(0,1.5fr) minmax(300px,.58fr)!important;align-items:start!important;gap:10px!important}
+.dashboard-v72 .v6-skills-panel,.dashboard-v72 .v6-stats-panel{align-self:start!important;height:auto!important;min-height:0!important}
+.dashboard-v72 .v6-skills-panel{padding:14px}
+.dashboard-v72 .v6-skills-panel .atlas-panel-head{margin-bottom:10px}
+.dashboard-v72 .v6-skills-panel .atlas-skill-tabs{margin-bottom:10px;padding-bottom:8px}
+.dashboard-v72 .v6-skills-panel .atlas-skill-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px}
+.dashboard-v72 .v6-skills-panel .atlas-skill-card{min-height:76px!important;padding:8px 6px!important}
+.dashboard-v72 .v6-skills-panel .skill-img-wrap{width:39px;height:39px}
+.dashboard-v72 .v6-skills-panel .atlas-skill-card img{max-width:33px;max-height:33px}
+.dashboard-v72 .v6-skills-panel .atlas-skill-detail{min-height:72px!important;margin-top:9px;padding:10px 12px}
+.dashboard-v72 .v6-skills-panel .atlas-skill-detail p{margin:3px 0;font-size:9px;line-height:1.35}
+.dashboard-v72 .v6-skills-panel .atlas-skill-detail small{font-size:8px}
+.dashboard-v72 .v6-stats-panel{padding:14px}
+.dashboard-v72 .v6-tertiary-grid{gap:10px!important;margin-top:10px!important}
+.dashboard-v72 .v72-bottom-grid{margin-top:10px!important}
+
+/* Cash Shop: zero-price entries in the COT2 export are unavailable, not free. */
+[data-page="cashshop"] .cash-card.cash-unavailable{position:relative;overflow:hidden;border-color:rgba(155,62,68,.24);box-shadow:inset 0 0 0 1px rgba(111,28,34,.08)}
+[data-page="cashshop"] .cash-card.cash-unavailable::after{content:"";position:absolute;inset:0;z-index:4;background:rgba(72,8,13,.16);pointer-events:none}
+[data-page="cashshop"] .cash-card.cash-unavailable .cash-meta b{color:#d77d83;letter-spacing:.035em;font-size:9px}
+[data-page="cashshop"] .cash-card.cash-unavailable .cash-meta span{opacity:.72}
+
 @media(max-width:1120px){
   .dashboard-v72 .v72-hero-grid{grid-template-columns:1fr}
   .dashboard-v72 .v5-equipment-hero{min-height:0}
   .dashboard-v72 .v5-character-hero{grid-template-columns:170px minmax(0,1fr)}
+  .dashboard-v72 .v72-secondary-content{grid-template-columns:1fr!important}
 }
 @media(max-width:760px){
   .dashboard-v72 .v5-character-hero{grid-template-columns:150px minmax(0,1fr);column-gap:12px}
@@ -81,4 +105,5 @@
   .dashboard-v72 .progression-avatar-level-head{grid-template-columns:1fr auto;align-items:center;justify-items:stretch}
   .dashboard-v72 .progression-avatar-level-head b{justify-self:end}
   .dashboard-v72 .progression-avatar-level-controls .v5-level-stepper{max-width:260px;width:100%;justify-self:center}
+  .dashboard-v72 .v6-skills-panel .atlas-skill-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 }
