@@ -32,7 +32,7 @@
   let booted = false;
 
   const norm = value => String(value ?? '').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-  const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
   function currentLevel() {
     const hero = Number(document.getElementById('hero-level')?.textContent);
@@ -156,7 +156,13 @@
       board.className = 'skill-progression-board';
       list.parentNode.insertBefore(board,list);
     }
+    if (board.dataset.progressionLevel === String(level) && board.querySelector('.progress-skill-tier')) {
+      wireSkillImages(board);
+      document.documentElement.classList.add('skill-progression-board-ready');
+      return;
+    }
 
+    board.dataset.progressionLevel = String(level);
     board.innerHTML = `<div class="skill-progression-head"><div><span>LEVEL-SYNCED SKILL TREE</span><h3>Skill Mastery at Lv${level}</h3><small>Grey = 0 points. A skill returns to full color the moment this progression begins investing in it.</small></div><b>Lv${level}</b></div>` + TIERS.map(tier => {
       const alloc = latestAllocation(tier.id,level);
       const locked = level < tier.opens;
@@ -173,10 +179,22 @@
     const detail = document.getElementById('atlas-skill-detail');
     if (!active || !grid || !detail) return false;
     const level = currentLevel();
+    const enriched = !!(idx && idx.size);
+    const alreadyCards = grid.querySelectorAll('.beginner-skill-card').length === 3 && !grid.querySelector('.beginner-milestone-grid');
+    const sameLevel = grid.dataset.beginnerRenderLevel === String(level);
+    const currentMode = grid.dataset.beginnerRenderMode || '';
+    if (alreadyCards && sameLevel && (currentMode === 'cot2' || !enriched)) {
+      wireSkillImages(grid);
+      wireSkillImages(detail);
+      document.documentElement.classList.add('beginner-skill-tree-ready','dashboard-skill-immediate-ready');
+      return true;
+    }
+
     const alloc = latestAllocation('beginner',level);
     const names = TIERS[0].names;
     const getSkill = name => idx?.get?.(norm(name)) || null;
-
+    grid.dataset.beginnerRenderLevel = String(level);
+    grid.dataset.beginnerRenderMode = enriched ? 'cot2' : 'fallback';
     grid.innerHTML = names.map(name => {
       const skill = getSkill(name);
       const lv = Number(alloc[name]||0);
@@ -216,6 +234,7 @@
 
   function addGearBadges() {
     const level = currentLevel();
+    const wanted = `AUTO RECOMMENDED · LV${level}`;
     const targets = [
       document.querySelector('.dashboard-v72 .v5-equipment-hero .v5-panel-heading'),
       document.getElementById('equipment-window-page')?.parentElement?.querySelector('.section-head')
@@ -223,7 +242,7 @@
     targets.forEach(root => {
       let badge = root.querySelector('.auto-gear-badge');
       if (!badge) { badge=document.createElement('span');badge.className='auto-gear-badge';root.appendChild(badge); }
-      badge.textContent = `AUTO RECOMMENDED · LV${level}`;
+      if (badge.textContent !== wanted) badge.textContent = wanted;
     });
   }
 
@@ -268,7 +287,7 @@
       renderBeginnerDashboard();
     }
     schedule();
-  }).observe(document.body,{childList:true,subtree:true,characterData:true});
+  }).observe(document.body,{childList:true,subtree:true});
   document.addEventListener('click',schedule,true);
   document.addEventListener('change',schedule,true);
   document.addEventListener('input',schedule,true);
