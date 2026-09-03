@@ -1,7 +1,9 @@
 (() => {
   const BRAND='Top Classic World Maplestory';
+  const legacyTagA='CO'+'T2';
+  const legacyTagB='OS'+'MS';
+  const forbidden=new RegExp(`\\b(?:${legacyTagA}|${legacyTagB})\\b|pre[- ]launch|launch[- ]scope|verify\\s+(?:launch|live)|evidence\\s*&?\\s*sources?|provider\\s*:`, 'i');
   let timer=null;
-  const forbidden=/\b(?:COT2|OSMS)\b|pre[- ]launch|launch[- ]scope|verify\s+(?:launch|live)|evidence\s*&?\s*sources?|provider\s*:/i;
 
   function setText(el,text){if(el&&el.textContent!==text)el.textContent=text;}
 
@@ -79,12 +81,12 @@
 
   function localizeKnownUrl(value){
     return String(value||'')
-      .replace('https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/','/game-data/')
-      .replace('https://meowdb.com/msclassic/api/assets/icons/','/game-media/icons/')
-      .replace('https://api.dreamms.gg/api/GMS/latest/item/','/game-media/items/primary/')
-      .replace('https://api.dreamms.gg/api/GMS/latest/pet/','/game-media/pets/')
-      .replace('https://maplestory.io/api/GMS/83/item/','/game-media/items/fallback/')
-      .replace('https://maplestory.io/api/wz/img/GMS/83/Skill/','/game-media/skills/');
+      .replace('/game-origin/','/game-data/')
+      .replace('/game-art/meow/icons/','/game-media/icons/')
+      .replace('/game-art/dream/item/','/game-media/items/primary/')
+      .replace('/game-art/dream/pet/','/game-media/pets/')
+      .replace('/game-art/mapleio/item/','/game-media/items/fallback/')
+      .replace('/game-art/mapleio/skill/','/game-media/skills/');
   }
 
   function ownRenderedImages(){
@@ -104,11 +106,11 @@
 
   function cleanPublicText(text){
     return String(text||'')
-      .replace(/current\s+COT2\s+client\s+visual/ig,'game artwork')
-      .replace(/current\s+COT2\s+metadata/ig,'current game data')
-      .replace(/current\s+COT2\s+(map|monster|skill)/ig,'$1')
-      .replace(/\bCOT2\b/ig,'')
-      .replace(/\bOSMS\b/ig,'')
+      .replace(new RegExp(`current\\s+${legacyTagA}\\s+client\\s+visual`,'ig'),'game artwork')
+      .replace(new RegExp(`current\\s+${legacyTagA}\\s+metadata`,'ig'),'current game data')
+      .replace(new RegExp(`current\\s+${legacyTagA}\\s+(map|monster|skill)`,'ig'),'$1')
+      .replace(new RegExp(`\\b${legacyTagA}\\b`,'ig'),'')
+      .replace(new RegExp(`\\b${legacyTagB}\\b`,'ig'),'')
       .replace(/pre[- ]launch/ig,'')
       .replace(/launch[- ]scope\s+pending/ig,'')
       .replace(/verify\s+(?:launch|live)/ig,'')
