@@ -65,7 +65,14 @@ jobs:
               if(!controls.contains(d.getElementById('level-range')))throw Error('avatar level line missing');
               if(!controls.contains(d.getElementById('hero-level-select')))throw Error('avatar level selector missing');
               if(d.querySelector('.v5-level-hero,.v72-level-hero'))throw Error('standalone level card returned');
-              if(!d.getElementById('level-select'))throw Error('topbar level control missing');
+              const level=d.getElementById('level-select');
+              if(!level)throw Error('topbar level control missing');
+              const option=level.options[Math.min(25,Math.max(0,level.options.length-1))];
+              const optionStyle=option?getComputedStyle(option):null;
+              if(!optionStyle)throw Error('level dropdown option missing');
+              const optionColor=optionStyle.color.replace(/\s+/g,'');
+              if(optionColor==='rgb(17,17,17)'||optionColor==='rgb(0,0,0)')throw Error('level dropdown option text is dark on dark UI: '+optionColor);
+              if(getComputedStyle(level).colorScheme!=='dark')throw Error('level dropdown is not using dark native controls');
               const panels=[...commands.children].filter(x=>x.classList.contains('panel'));
               if(panels.length!==3)throw Error('expected three action queue cards');
               const heights=panels.map(x=>Math.round(x.getBoundingClientRect().height));
@@ -74,7 +81,6 @@ jobs:
               if(d.querySelector('#atlas-skill-grid .beginner-milestone-grid'))throw Error('Beginner milestone placeholder still visible');
               if(d.querySelectorAll('#atlas-skill-grid .beginner-skill-card').length!==3)throw Error('Beginner skill cards not stable');
 
-              const level=d.getElementById('level-select');
               level.value='44';level.dispatchEvent(new w.Event('change',{bubbles:true}));
               await wait(1900);
               const controlsAfter=dashboard.querySelector('.v5-character-hero > .progression-avatar-level-controls');
@@ -108,6 +114,48 @@ jobs:
               const qScroll=d.getElementById('atlas-quest-queue'),eScroll=d.getElementById('atlas-etc-queue');
               if(qScroll.scrollHeight<=qScroll.clientHeight)throw Error('Quest Queue is not using internal scroll for extra rows');
               if(eScroll.scrollHeight<=eScroll.clientHeight)throw Error('ETC Queue is not using internal scroll for extra rows');
+
+              d.querySelector('#nav .nav-btn[data-page="skills"]')?.click();
+              for(let i=0;i<35&&!d.documentElement.classList.contains('canonical-skill-icons-ready');i++)await wait(120);
+              await wait(700);
+              if(!d.documentElement.classList.contains('skill-tree-informational-ready'))throw Error('Skill Tree informational mode missing');
+              if(!d.documentElement.classList.contains('full-skill-beginner-ready'))throw Error('full Beginner skill section missing');
+              if(!d.documentElement.classList.contains('canonical-skill-icons-ready'))throw Error('canonical skill icon resolver missing');
+              const skillList=d.getElementById('skill-list');
+              if(!skillList)throw Error('Skill Tree list missing');
+              if(skillList.querySelector('input[type="checkbox"],.skill-check'))throw Error('Skill Tree still contains completion checkboxes');
+              if([...skillList.querySelectorAll('.skill-row')].some(r=>r.classList.contains('done')))throw Error('Skill Tree still has completion-state styling');
+              const beginnerCards=[...skillList.querySelectorAll('.skill-beginner-card')];
+              if(beginnerCards.length!==3)throw Error('expected exactly three full-page Beginner skills, got '+beginnerCards.length);
+              const beginnerNames=beginnerCards.map(x=>x.dataset.fullSkillName).sort().join('|');
+              if(beginnerNames!==['Nimble Feet','Recovery','Three Snails'].sort().join('|'))throw Error('Beginner skill names incorrect: '+beginnerNames);
+              if(beginnerCards.some(x=>!x.querySelector('img.canonical-skill-icon')))throw Error('Beginner skill canonical icon missing');
+
+              const fullRows=[...skillList.querySelectorAll('.skill-row')];
+              const rowFor=name=>fullRows.find(r=>String(r.querySelector('.skill-spend')?.textContent||'').includes(name));
+              const magicGuardRow=rowFor('Magic Guard');
+              const maxMpRow=rowFor('Max MP Increase');
+              const magicGuardIcon=magicGuardRow?.querySelector('img.canonical-skill-icon');
+              const maxMpIcon=maxMpRow?.querySelector('img.canonical-skill-icon');
+              if(!magicGuardIcon||magicGuardIcon.dataset.skillId!=='2001000')throw Error('Magic Guard did not resolve to current Classic skill 2001000');
+              if(!maxMpIcon||maxMpIcon.dataset.skillId!=='2000001')throw Error('Max MP Increase did not resolve to current Classic skill 2000001');
+              if(!/\/game-data\/data\/current\/images\/skills\/2001000\.png$/.test(magicGuardIcon.getAttribute('src')||''))throw Error('Magic Guard primary icon is not current Classic artwork: '+magicGuardIcon.getAttribute('src'));
+              if(!/\/game-data\/data\/current\/images\/skills\/2000001\.png$/.test(maxMpIcon.getAttribute('src')||''))throw Error('Max MP Increase primary icon is not current Classic artwork: '+maxMpIcon.getAttribute('src'));
+              if(!/\/game-media\/skills\//.test(magicGuardIcon.dataset.assetFallbacks||''))throw Error('Magic Guard name-matched WZ fallback missing');
+              const skillIcons=[...skillList.querySelectorAll('img.canonical-skill-icon')];
+              if(!skillIcons.length)throw Error('no canonical Skill Tree icons rendered');
+              if(skillIcons.some(im=>/\/game-media\/icons\//.test(im.getAttribute('src')||'')||/\/game-media\/icons\//.test(im.dataset.assetFallbacks||'')))throw Error('generic item/icon endpoint still used by Skill Tree');
+
+              d.querySelector('#nav .nav-btn[data-page="classicdb"]')?.click();
+              await wait(400);
+              const dataset=d.getElementById('db-dataset');
+              dataset.value='skills';dataset.dispatchEvent(new w.Event('change',{bubbles:true}));dataset.dispatchEvent(new w.Event('input',{bubbles:true}));
+              await wait(1800);
+              const dbCards=[...d.querySelectorAll('#db-results .db-card')];
+              const dbMagicGuard=dbCards.find(card=>String(card.querySelector('h3')?.textContent||'').trim()==='Magic Guard');
+              const dbMagicGuardIcon=dbMagicGuard?.querySelector('.db-thumb img.canonical-skill-icon');
+              if(!dbMagicGuardIcon||dbMagicGuardIcon.dataset.skillId!=='2001000')throw Error('Skills database Magic Guard icon is not canonical 2001000');
+              if((dbMagicGuardIcon.getAttribute('src')||'')!==(magicGuardIcon.getAttribute('src')||''))throw Error('Skill Tree and Skills DB disagree on Magic Guard artwork');
 
               d.querySelector('#nav .nav-btn[data-page="cashshop"]')?.click();
               await wait(2600);
@@ -149,6 +197,6 @@ jobs:
           </script></body>
           HTML
 
-          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=45000 --dump-dom http://127.0.0.1:4173/ci-visual-regression.html >/tmp/visual-regression.html
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=60000 --dump-dom http://127.0.0.1:4173/ci-visual-regression.html >/tmp/visual-regression.html
           grep -o '<pre id="result">[^<]*' /tmp/visual-regression.html || true
           grep -q '<pre id="result">visual-ui-regression-ok</pre>' /tmp/visual-regression.html
