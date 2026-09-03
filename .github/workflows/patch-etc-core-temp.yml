@@ -1,0 +1,30 @@
+name: Patch ETC core temp
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-etc-core-temp.yml'
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add ETC names to core queue renderer patch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('build.cjs')
+          s=p.read_text()
+          anchor="""  app = app.replace(\n    `.sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,6);`,\n    `.sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,12);`\n  );\n  return app;"""
+          replacement="""  app = app.replace(\n    `.sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,6);`,\n    `.sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,12);`\n  );\n\n  // ETC names are part of the core queue markup so rerenders cannot erase readable labels.\n  const etcChipNeedle = '<span class=\"etc-icon-shell\" data-etc-icon-name=\"${esc(x.Item)}\">◌</span><b>';\n  const etcChipNamed = '<span class=\"etc-icon-shell\" data-etc-icon-name=\"${esc(x.Item)}\">◌</span><span class=\"tcw-etc-name\">${esc(x.Item)}</span><b>';\n  if (!app.includes(etcChipNeedle)) throw new Error('ETC queue chip markup patch target missing');\n  app = app.replaceAll(etcChipNeedle, etcChipNamed);\n  return app;"""
+          if anchor not in s:
+              raise SystemExit('build.cjs patch anchor missing')
+          p.write_text(s.replace(anchor,replacement))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add build.cjs
+          git commit -m "Render ETC item names in core dashboard queue"
+          git push
