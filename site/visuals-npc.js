@@ -1,5 +1,5 @@
 (() => {
-  const REPO_RAW = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/';
+  const REPO_RAW = '/game-origin/';
   const RAW = `${REPO_RAW}data/current/`;
   let lookupsPromise = null;
   let questsPromise = null;

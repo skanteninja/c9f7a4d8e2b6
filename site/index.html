@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#090b13">
-  <title>MapleStory Classic Builder</title>
+  <title>Top Classic World Maplestory</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css?v=0.8.1-static1">
   <link rel="stylesheet" href="visuals.css?v=0.8.1-static1">
@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="dashboard-polish.css?v=0.8.1-static1">
   <link rel="stylesheet" href="progression-sync.css?v=0.8.1-static1">
   <link rel="stylesheet" href="progression-gear-visual.css?v=0.8.1-static1">
+  <link rel="stylesheet" href="ownership-ui.css?v=0.8.1-static1">
 </head>
 <body>
   <div id="app">
@@ -23,8 +24,8 @@
       <div class="brand">
         <div class="brand-mark">⚡</div>
         <div>
-          <div class="brand-title">CLASSIC BUILDER</div>
-          <div class="brand-sub">MapleStory Classic Builder</div>
+          <div class="brand-title">TOP CLASSIC WORLD</div>
+          <div class="brand-sub">Maplestory · Classic World</div>
         </div>
       </div>
       <nav id="nav">
@@ -40,14 +41,10 @@
         <button data-page="classicdb" class="nav-btn"><span>⌘</span> Classic DB</button>
         <button data-page="cashshop" class="nav-btn"><span>◇</span> Cash Shop</button>
         <button data-page="beauty" class="nav-btn"><span>✧</span> Beauty</button>
-        <button data-page="formulas" class="nav-btn"><span>∑</span> Formulas</button>
-        <div class="nav-section-label">META</div>
-        <button data-page="research" class="nav-btn"><span>⌕</span> Research</button>
-        <button data-page="data" class="nav-btn"><span>◎</span> Agent / Data</button>
-      </nav>
+</nav>
       <div class="sidebar-footer">
         <div class="sync-dot"></div>
-        <div><b>Headless data source attached</b><small>Website is the main interface</small></div>
+        <div><b>Top Classic World</b><small>Database online</small></div>
       </div>
     </aside>
 
@@ -55,22 +52,16 @@
       <header class="topbar">
         <div class="topbar-title-wrap">
           <button id="page-back" class="page-back" type="button" hidden>← Back</button>
-          <div><h1 id="page-title">MapleStory Classic Builder</h1><p id="page-subtitle">Your personalized Ice / Lightning build workspace.</p></div>
+          <div><h1 id="page-title">Top Classic World Maplestory</h1><p id="page-subtitle">Your personalized Ice / Lightning build workspace.</p></div>
         </div>
         <div class="level-control"><label for="level-select">CURRENT LEVEL</label><select id="level-select"></select></div>
       </header>
-
-      <div class="beta-banner"><b>Beta rule:</b> yellow / amber labels are COT2 or pre-launch information that must be re-verified live.</div>
-
-      <section data-page="dashboard" class="page active dashboard-v5 dashboard-v72">
+<section data-page="dashboard" class="page active dashboard-v5 dashboard-v72">
         <div class="v5-buildbar">
-          <div><div class="v5-kicker-row"><span class="class-pill">MAGICIAN</span><span class="job-pill">WIZARD (I/L)</span><span id="atlas-beta-pill" class="beta-tag">COT2-AWARE</span></div><h2>MapleStory Classic Builder</h2><p>Ice / Lightning Wizard · Level 1–70 · equipment, skills, quests, targets and progression in one build.</p></div>
+          <div><div class="v5-kicker-row"><span class="class-pill">MAGICIAN</span><span class="job-pill">WIZARD (I/L)</span></div><h2>Top Classic World Maplestory</h2><p>Ice / Lightning Wizard · Level 1–70 · equipment, skills, quests, targets and progression in one build.</p></div>
           <div class="v5-build-actions"><button class="ghost-btn" data-goto="builds">Build Library</button><button class="primary-btn" id="preset-efficient">Equip Efficient Set</button></div>
         </div>
-
-        <section class="v7-audit-strip v72-audit-top" aria-label="Classic data confidence summary"><div><span class="audit-dot current"></span><b id="audit-current">0</b><small>COT2 verified gear</small></div><div><span class="audit-dot verify"></span><b id="audit-verify">0</b><small>launch-scope pending</small></div><div><span class="audit-dot historical"></span><b id="audit-historical">0</b><small>legacy reference only</small></div><button class="mini-btn" data-goto="research">Evidence & sources</button></section>
-
-        <section class="v72-command-grid">
+<section class="v72-command-grid">
           <section class="panel atlas-panel current-plan-panel v72-now-panel"><div class="atlas-panel-head"><div><h3>Do This Now</h3><small>Click an action to open its full tab · Escape returns here</small></div></div><div id="dashboard-actions" class="atlas-action-list v72-action-list"></div></section>
           <section class="panel atlas-panel compact-panel v72-quest-panel"><div class="atlas-panel-head"><div><h3>Quest Queue</h3><small>Finish here · 10-second undo safety</small></div><button class="mini-btn" data-goto="quests">Open tracker</button></div><div id="atlas-quest-queue" class="v72-queue"></div></section>
           <section class="panel atlas-panel compact-panel v72-etc-panel"><div class="atlas-panel-head"><div><h3>ETC Queue</h3><small>Core need + 15% safety buffer</small></div><button class="mini-btn" data-goto="etc">Open planner</button></div><div id="atlas-etc-queue" class="v72-etc-icons"></div></section>
@@ -100,11 +91,11 @@
 
       <section data-page="etc" class="page"><div class="section-head"><div><span class="eyebrow">ANTI-BACKTRACKING</span><h2>Cumulative ETC Planner</h2></div></div><div class="filters"><input id="etc-search" placeholder="Search ETCs or quests..."><label class="toggle"><input id="etc-current-only" type="checkbox"> Started by current level</label><label class="toggle"><input id="etc-hide-done" type="checkbox"> Hide satisfied</label></div><div id="etc-list" class="etc-list"></div></section>
 
-      <section data-page="classicdb" class="page"><div class="db-hero"><div><span class="eyebrow">OSMS · CURRENT COT2 CLIENT EXPORT</span><h2>Classic Database</h2><p>Search the broad COT2 metadata layer without mixing it into curated I/L recommendations.</p></div><div class="db-provider-badge"><b>Provider</b><span>OSMS Data Explorer</span></div></div><div class="db-toolbar"><select id="db-dataset" aria-label="Database dataset"><option value="items">Items</option><option value="equipment">Equipment</option><option value="monsters">Monsters</option><option value="maps">Maps</option><option value="quests">Quests</option><option value="skills">Skills</option><option value="crafting">Crafting</option><option value="portals">Portals</option><option value="patch_notes">Patch Notes</option></select><input id="db-search" type="search" placeholder="Search names, IDs, descriptions, fields..."><button id="db-more" class="mini-btn" type="button">Show more</button></div><div id="db-status" class="db-status"></div><div id="db-results" class="db-results"></div></section>
+      <section data-page="classicdb" class="page"><div class="db-hero"><div><span class="eyebrow">TOP CLASSIC WORLD</span><h2>Database</h2><p>Search items, equipment, monsters, maps, quests, skills, crafting and portals in one place.</p></div></div><div class="db-toolbar"><select id="db-dataset" aria-label="Database dataset"><option value="items">Items</option><option value="equipment">Equipment</option><option value="monsters">Monsters</option><option value="maps">Maps</option><option value="quests">Quests</option><option value="skills">Skills</option><option value="crafting">Crafting</option><option value="portals">Portals</option><option value="patch_notes">Patch Notes</option></select><input id="db-search" type="search" placeholder="Search names, IDs, descriptions, fields..."><button id="db-more" class="mini-btn" type="button">Show more</button></div><div id="db-status" class="db-status"></div><div id="db-results" class="db-results"></div></section>
 
-      <section data-page="cashshop" class="page"><div class="db-hero"><div><span class="eyebrow">COT2 CATALOG · PRICES ARE BETA DATA</span><h2>Cash Shop</h2><p>Browse the client-exported catalog. Availability and prices stay visibly pre-launch until live confirmation.</p></div><span class="beta-tag">COT2 / VERIFY LIVE</span></div><div class="db-toolbar"><select id="cash-category" aria-label="Cash Shop category"><option value="all">All categories</option></select><input id="cash-search" type="search" placeholder="Search Cash Shop items..."><label class="toggle"><input id="cash-sale-only" type="checkbox"> On-sale only</label></div><div id="cash-status" class="db-status"></div><div id="cash-results" class="db-card-grid"></div></section>
+      <section data-page="cashshop" class="page"><div class="db-hero"><div><span class="eyebrow">TOP CLASSIC WORLD</span><h2>Cash Shop</h2><p>Browse the current catalog, prices and availability.</p></div></div><div class="db-toolbar"><select id="cash-category" aria-label="Cash Shop category"><option value="all">All categories</option></select><input id="cash-search" type="search" placeholder="Search Cash Shop items..."><label class="toggle"><input id="cash-sale-only" type="checkbox"> On-sale only</label></div><div id="cash-status" class="db-status"></div><div id="cash-results" class="db-card-grid"></div></section>
 
-      <section data-page="beauty" class="page"><div class="db-hero"><div><span class="eyebrow">COT2 CLIENT CATALOG</span><h2>Beauty</h2><p>Hair and face styles with exact IDs and current exported artwork.</p></div></div><div class="db-toolbar"><select id="beauty-type"><option value="hair">Hair</option><option value="face">Face</option></select><select id="beauty-gender"><option value="all">All genders</option><option value="male">Male</option><option value="female">Female</option></select><input id="beauty-search" type="search" placeholder="Search styles or IDs..."></div><div id="beauty-status" class="db-status"></div><div id="beauty-results" class="beauty-grid"></div></section>
+      <section data-page="beauty" class="page"><div class="db-hero"><div><span class="eyebrow">TOP CLASSIC WORLD</span><h2>Beauty</h2><p>Hair and face styles with exact IDs and artwork.</p></div></div><div class="db-toolbar"><select id="beauty-type"><option value="hair">Hair</option><option value="face">Face</option></select><select id="beauty-gender"><option value="all">All genders</option><option value="male">Male</option><option value="female">Female</option></select><input id="beauty-search" type="search" placeholder="Search styles or IDs..."></div><div id="beauty-status" class="db-status"></div><div id="beauty-results" class="beauty-grid"></div></section>
 
       <section data-page="formulas" class="page"><div class="db-hero"><div><span class="eyebrow">COT2 FORMULA LAB</span><h2>I/L Damage Formula</h2><p>Client-audited magical damage formula with your current loadout values prefilled where possible.</p></div><span class="status-tag">MapleStory Quest · COT2 audit</span></div><div class="formula-layout"><section class="panel formula-card"><h3>Inputs</h3><label>Total INT<input id="formula-int" type="number" min="1" value="4"></label><label>Magic Attack<input id="formula-matk" type="number" min="0" value="0"></label><label>Skill BasicAttack<input id="formula-basic" type="number" min="1" value="40"></label><label>Mastery %<input id="formula-mastery" type="number" min="0" max="100" step="1" value="10"></label><label>Element modifier<select id="formula-element"><option value="1">Neutral ×1.00</option><option value="1.25">Weak ×1.25</option><option value="0.75">Resist ×0.75</option><option value="0">Immune ×0</option></select></label></section><section class="panel formula-result" id="formula-result"></section><section class="panel formula-notes"><h3>Audited formula</h3><code>MAGIC = Total INT / 2 + Magic Attack</code><code>MIN = (BasicAttack / 100) × MAGIC × (Total INT × Mastery / 100 + 1)</code><code>MAX = (BasicAttack / 100) × MAGIC × (Total INT / 100 + 1)</code><p>This is a client-formula lab, not yet a full casts-to-kill simulator. Mob MDEF, level penalty and every server-side/live modifier still need their own verified layer.</p></section></div></section>
 
@@ -128,5 +119,6 @@
   <script src="progression-level-hook.js?v=0.8.1-static1"></script>
   <script src="progression-skill-state.js?v=0.8.1-static1"></script>
   <script src="progression-gear-visual.js?v=0.8.1-static1"></script>
+  <script src="ownership-ui.js?v=0.8.1-static1"></script>
 </body>
 </html>

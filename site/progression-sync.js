@@ -2,7 +2,7 @@
   const D = window.GUIDE_DATA;
   if (!D) return;
 
-  const RAW = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/data/current/';
+  const RAW = '/game-origin/data/current/';
   const BEGINNER_PLAN = {
     1: { 'Nimble Feet': 0, 'Three Snails': 0, Recovery: 0 },
     2: { 'Nimble Feet': 1, 'Three Snails': 0, Recovery: 0 },

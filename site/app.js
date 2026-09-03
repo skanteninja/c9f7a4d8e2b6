@@ -16,7 +16,7 @@
   const UNDO_MS = 10000;
   const pendingQuestUndo = new Map();
   const pendingEtcUndo = new Map();
-  const OSMS_RAW_BASE = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/data/current/';
+  const OSMS_RAW_BASE = '/game-origin/data/current/';
   let osmsItemIndexPromise = null;
   const osmsDataCache = new Map();
   const osmsRenderLimit = { classicdb: 80 };
@@ -61,7 +61,7 @@
     if(level<10 && gear.Weapon==="Beginner's Wooden Wand / job wand") gear.Weapon='None';
     return {
       level,
-      page:raw.page||'dashboard',
+      page:['research','data','formulas'].includes(raw.page)?'dashboard':(raw.page||'dashboard'),
       activeBuildId:raw.activeBuildId||D.catalog?.activeBuildId||'magician-il-fresh',
       quests:raw.quests||{},
       skills:raw.skills||{},
@@ -86,7 +86,7 @@
     launcherSaveTimer=setTimeout(()=>{
       fetch('/__builder_state',{
         method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({schema:1,project:'MapleStory Classic Builder',updatedAt,state})
+        body:JSON.stringify({schema:1,project:'Top Classic World Maplestory',updatedAt,state})
       }).catch(()=>{});
     },120);
   }
@@ -132,10 +132,10 @@
   // Legacy GMS/v83 sprites are acceptable as artwork when the item/monster itself has
   // been confirmed against MapleStory Classic data. They are never used as proof of stats,
   // availability, quests, drops, recipes, or mechanics.
-  function meowIcon(id){ return id ? `https://meowdb.com/msclassic/api/assets/icons/${Math.trunc(Number(id))}` : ''; }
-  function dreamItemIcon(id, resize=2){ return id ? `https://api.dreamms.gg/api/GMS/latest/item/${Math.trunc(Number(id))}/icon?format=png&resize=${resize}` : ''; }
-  function mapleIoItemIcon(id){ return id ? `https://maplestory.io/api/GMS/83/item/${Math.trunc(Number(id))}/icon` : ''; }
-  function dreamPetIcon(id, resize=2){ return id ? `https://api.dreamms.gg/api/GMS/latest/pet/${Math.trunc(Number(id))}/move/0?format=png&resize=${resize}` : ''; }
+  function meowIcon(id){ return id ? `/game-art/meow/icons/${Math.trunc(Number(id))}` : ''; }
+  function dreamItemIcon(id, resize=2){ return id ? `/game-art/dream/item/${Math.trunc(Number(id))}/icon?format=png&resize=${resize}` : ''; }
+  function mapleIoItemIcon(id){ return id ? `/game-art/mapleio/item/${Math.trunc(Number(id))}/icon` : ''; }
+  function dreamPetIcon(id, resize=2){ return id ? `/game-art/dream/pet/${Math.trunc(Number(id))}/move/0?format=png&resize=${resize}` : ''; }
   function visualCandidates(item){
     if(!item || !item['Item ID'] || Number(item['Item ID'])===0) return [];
     const id=item['Item ID'];
@@ -176,7 +176,7 @@
   function mapleIoSkillIcon(skill){
     const id=Number(skill?.id||0); if(!id) return '';
     const book=Math.trunc(id/10000);
-    return `https://maplestory.io/api/wz/img/GMS/83/Skill/${book}.img/skill/${id}/icon`;
+    return `/game-art/mapleio/skill/${book}.img/skill/${id}/icon`;
   }
   function skillVisualCandidates(skill){
     if(!skill) return [];
@@ -229,13 +229,7 @@
     // actionable picker until the entity is confirmed in Classic/COT2.
     return D.gear.filter(g=>g.Item==='None'||(g.Slot===s && !['HISTORICAL ONLY','UNVERIFIED'].includes(String(g['Evidence Class']||''))));
   }
-  function evidenceLabel(item){
-    const e=String(item?.['Evidence Class']||'UNVERIFIED');
-    if(e.includes('HISTORICAL')) return 'HISTORICAL ONLY';
-    if(e.includes('PRE-LAUNCH')) return 'COT2 · VERIFY LAUNCH';
-    if(e.includes('CURRENT')) return 'COT2 VERIFIED';
-    return 'UNVERIFIED';
-  }
+  function evidenceLabel(){ return ''; }
 
   function computeBuild(){
     let chosen=[];
@@ -257,10 +251,45 @@
     };
   }
 
+  function preserveLoadedImages(root,render){
+    const pool=new Map();
+    if(root) root.querySelectorAll('img[src]').forEach(img=>{
+      const key=[img.getAttribute('src')||'',img.alt||'',img.className||''].join('¦');
+      if(!pool.has(key))pool.set(key,[]);
+      pool.get(key).push(img);
+    });
+    render();
+    if(!root)return;
+    root.querySelectorAll('img[src]').forEach(img=>{
+      const key=[img.getAttribute('src')||'',img.alt||'',img.className||''].join('¦');
+      const old=pool.get(key)?.shift();
+      if(old&&old!==img&&old.complete&&old.naturalWidth>0)img.replaceWith(old);
+    });
+  }
+  function renderLevelPage(){
+    const p=state.page;
+    const root=document.querySelector('.page[data-page="'+p+'"]');
+    preserveLoadedImages(root,()=>{
+      if(p==='dashboard')renderDashboard();
+      else if(p==='builds')renderBuildLibrary();
+      else if(p==='leveling')renderRoutes();
+      else if(p==='quests')renderQuests();
+      else if(p==='equipment'){renderWeapons();renderEquipment('equipment-window-page','build-summary-page');}
+      else if(p==='skills')renderSkills();
+      else if(p==='etc')renderEtc();
+      else if(p==='formulas')renderFormulas();
+    });
+  }
   function setLevel(level){
-    state.level=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));
+    const next=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));
+    if(next===state.level)return;
+    state.level=next;
     save();
-    renderAll();
+    const a=document.getElementById('level-select'),b=document.getElementById('hero-level-select'),r=document.getElementById('level-range');
+    if(a)a.value=String(next);if(b)b.value=String(next);if(r)r.value=String(next);
+    document.documentElement.dataset.levelUpdate='1';
+    renderLevelPage();
+    requestAnimationFrame(()=>document.documentElement.removeAttribute('data-level-update'));
   }
   function fillLevelSelect(sel){
     if(!sel)return;
@@ -281,7 +310,7 @@
   }
 
   const pageMeta={
-    dashboard:['MapleStory Classic Builder','Your personalized Ice / Lightning build workspace.'],
+    dashboard:['Top Classic World Maplestory','Your personalized Ice / Lightning build workspace.'],
     builds:['Build Library','Multi-class infrastructure with your I/L build active and personalized right now.'],
     leveling:['Leveling Route','One clean route, with exact per-level instructions when you need them.'],
     quests:['Quest Tracker','Prioritized for an Ice / Lightning Mage and saved forever in your browser.'],
@@ -303,7 +332,12 @@
     document.getElementById('page-title').textContent=pageMeta[p][0];
     document.getElementById('page-subtitle').textContent=pageMeta[p][1];
     const back=document.getElementById('page-back'); if(back) back.hidden=p==='dashboard';
-    if(p==='equipment') renderEquipment('equipment-window-page','build-summary-page');
+    if(p==='dashboard') renderDashboard();
+    if(p==='leveling') renderRoutes();
+    if(p==='quests') renderQuests();
+    if(p==='skills') renderSkills();
+    if(p==='etc') renderEtc();
+    if(p==='equipment'){renderWeapons();renderEquipment('equipment-window-page','build-summary-page');}
     if(p==='builds') renderBuildLibrary();
     if(p==='classicdb') renderClassicDb();
     if(p==='cashshop') renderCashShop();
@@ -950,7 +984,7 @@
         </div>
         ${desc?`<p>${esc(desc.slice(0,280))}${desc.length>280?'…':''}</p>`:''}
         ${facts.length?`<div class="db-facts">${facts.map(([k,v])=>`<span><small>${esc(k)}</small><b>${esc(v)}</b></span>`).join('')}</div>`:''}
-        <details><summary>Full metadata</summary><pre>${esc(JSON.stringify(Object.fromEntries(Object.entries(row).filter(([k])=>!k.startsWith('__'))),null,2))}</pre></details>
+        <details><summary>Full metadata</summary><pre>${esc(JSON.stringify(Object.fromEntries(Object.entries(row).filter(([k])=>!k.startsWith('__')&&!/(?:source|provider|origin|url|thumbnail|gif|hash)/i.test(k))),null,2))}</pre></details>
       </article>`;
     }).join('');
   }
@@ -973,7 +1007,7 @@
       if(key==='equipment') rows=rows.filter(r=>String(r.category||'').toLowerCase()==='equipment'||r.equip_slot||r.slot);
       if(q) rows=rows.filter(r=>searchableRecord(r).includes(q));
       const limit=osmsRenderLimit.classicdb;
-      status.innerHTML=`<b>${rows.length.toLocaleString()}</b> matching records · showing ${Math.min(limit,rows.length).toLocaleString()} · <span>COT2 client export via OSMS</span>`;
+      status.innerHTML=`<b>${rows.length.toLocaleString()}</b> matching records · showing ${Math.min(limit,rows.length).toLocaleString()} · <span>Top Classic World database</span>`;
       results.innerHTML=renderOsmsCards(rows,key,limit)||'<div class="db-empty">No matching records.</div>';
       const more=document.getElementById('db-more'); if(more) more.hidden=rows.length<=limit;
       hookImageFallback(results);
@@ -1095,7 +1129,7 @@
   function renderAll(){
     const a=document.getElementById('level-select'), b=document.getElementById('hero-level-select'), r=document.getElementById('level-range');
     if(a)a.value=String(state.level); if(b)b.value=String(state.level); if(r)r.value=String(state.level);
-    renderDashboard();renderBuildLibrary();renderRoutes();renderQuests();renderWeapons();renderSkills();renderEtc();renderResearch();renderData();
+    renderDashboard();renderBuildLibrary();renderRoutes();renderQuests();renderWeapons();renderSkills();renderEtc();
     setPage(state.page,false);
   }
 

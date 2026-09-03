@@ -1,5 +1,5 @@
 (() => {
-  const RAW = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/data/current/';
+  const RAW = '/game-origin/data/current/';
   let timer = null;
   let mapsPromise = null;
   let cashResultsObserver = null;

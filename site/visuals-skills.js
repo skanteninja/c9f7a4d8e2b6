@@ -1,5 +1,5 @@
 (() => {
-  const RAW='https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/data/current/';
+  const RAW='/game-origin/data/current/';
   let skillIndexPromise=null;
   let timer=null;
   const norm=v=>String(v??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();

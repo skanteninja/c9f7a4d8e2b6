@@ -1,0 +1,54 @@
+/* Public product surface: source/research implementation stays out of the customer UI. */
+.page[data-page="research"],.page[data-page="data"],.page[data-page="formulas"]{display:none!important}
+.db-provider-badge,.beta-banner,.v72-audit-top,#atlas-beta-pill,.visual-skill-source{display:none!important}
+
+/* Keep level changes visually steady while the active view updates in-place. */
+html[data-level-update="1"] .page.active{contain:layout paint}
+html[data-level-update="1"] .page.active img{transition:none!important;animation:none!important}
+
+/* Brand sizing after the longer product name. */
+.brand-title{letter-spacing:.08em}
+.brand-sub{max-width:150px;line-height:1.2}
+
+/* Dashboard hierarchy: loadout + character first, then three equally weighted action queues. */
+.dashboard-v72 .v72-hero-grid{grid-template-columns:minmax(300px,.82fr) minmax(0,1.18fr)!important;gap:12px;margin-bottom:12px}
+.dashboard-v72 .v5-character-hero{grid-template-columns:176px minmax(0,1fr)!important;grid-template-rows:1fr!important;min-height:286px}
+.dashboard-v72 .v5-avatar{grid-column:1!important;grid-row:1!important}
+.dashboard-v72 .v5-character-copy{grid-column:2!important;grid-row:1!important}
+#dashboard-level-state-host{display:none!important}
+.dashboard-v72 .v5-level-hero,.dashboard-v72 .v72-level-hero,.dashboard-v72 .progression-avatar-level-controls{display:none!important}
+
+.dashboard-v72 .v72-command-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;margin:0 0 12px!important;align-items:stretch}
+.dashboard-v72 .v72-command-grid>.panel{height:318px;min-height:318px;max-height:318px;display:flex;flex-direction:column;overflow:hidden}
+.dashboard-v72 .v72-command-grid .atlas-panel-head{flex:0 0 auto;margin-bottom:7px;padding-bottom:7px}
+.dashboard-v72 .v72-command-grid .atlas-panel-head h3{font-size:14px}
+.dashboard-v72 .v72-command-grid .atlas-panel-head small{font-size:8px;line-height:1.25}
+.dashboard-v72 .v72-now-panel .v72-action-list,.dashboard-v72 .v72-quest-panel .v72-queue,.dashboard-v72 .v72-etc-panel .v72-etc-icons{flex:1 1 auto;min-height:0;overflow:auto;scrollbar-width:thin}
+
+/* Quest rows are deliberately dense here so the dashboard can carry a real queue instead of four oversized entries. */
+.dashboard-v72 .v72-quest-panel .v72-queue{display:flex;flex-direction:column;gap:4px;padding-right:2px}
+.dashboard-v72 .v72-quest-panel .atlas-queue-row{min-height:29px!important;padding:5px 7px!important;border-radius:7px!important;gap:7px}
+.dashboard-v72 .v72-quest-panel .atlas-queue-row b{font-size:9px;line-height:1.15}
+.dashboard-v72 .v72-quest-panel .atlas-queue-row small{font-size:7px;line-height:1.15}
+.dashboard-v72 .v72-quest-panel .queue-check,.dashboard-v72 .v72-quest-panel input[type="checkbox"]{width:15px;height:15px;min-width:15px}
+
+/* ETC gets the same physical card budget, but uses a compact grid to expose many more targets at once. */
+.dashboard-v72 .v72-etc-panel .v72-etc-icons{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-rows:minmax(48px,1fr);gap:5px!important;align-content:start;padding-right:2px}
+.dashboard-v72 .v72-etc-panel .v72-etc-chip{min-width:0!important;min-height:48px!important;height:48px;padding:5px!important;border-radius:8px!important}
+.dashboard-v72 .v72-etc-panel .v72-etc-chip .etc-icon-shell{width:26px;height:26px}
+.dashboard-v72 .v72-etc-panel .v72-etc-chip img{max-width:25px;max-height:25px}
+.dashboard-v72 .v72-etc-panel .v72-etc-chip>b{font-size:9px}
+.dashboard-v72 .v72-etc-panel .v72-etc-chip .check{width:15px;height:15px}
+
+@media(max-width:1100px){
+  .dashboard-v72 .v72-hero-grid{grid-template-columns:1fr!important}
+  .dashboard-v72 .v72-command-grid{grid-template-columns:1fr!important}
+  .dashboard-v72 .v72-command-grid>.panel{height:auto;min-height:260px;max-height:none}
+  .dashboard-v72 .v72-etc-panel .v72-etc-icons{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
+@media(max-width:620px){
+  .dashboard-v72 .v5-character-hero{grid-template-columns:1fr!important;grid-template-rows:auto auto!important}
+  .dashboard-v72 .v5-avatar{grid-column:1!important;grid-row:1!important}
+  .dashboard-v72 .v5-character-copy{grid-column:1!important;grid-row:2!important}
+  .dashboard-v72 .v72-etc-panel .v72-etc-icons{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
