@@ -5,7 +5,7 @@
 .page[data-page="skills"] .skill-row>div:nth-child(3){display:grid;place-items:center;min-width:38px}
 .page[data-page="skills"] .skill-row .skill-result{grid-column:4/-1!important}
 .page[data-page="skills"] .skill-icon{width:34px;height:34px;object-fit:contain}
-.canonical-skill-icon{object-fit:contain!important}
+.canonical-skill-icon{display:block;object-fit:contain!important}
 .skill-icon-unavailable{display:none!important}
 
 .skill-beginner-reference{display:grid;gap:12px;margin:0 0 12px;padding:15px;border:1px solid rgba(115,217,255,.22);border-radius:15px;background:linear-gradient(135deg,rgba(115,217,255,.075),rgba(140,124,255,.045))}
