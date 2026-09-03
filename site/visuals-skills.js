@@ -250,7 +250,10 @@
     await Promise.allSettled([enhanceSkillTracker(idx),enhanceDashboardSkillCards(idx),enhanceClassicDb(idx)]);
     canonicalizeSkillImages(idx);
   }
-  function schedule(){clearTimeout(timer);timer=setTimeout(enhance,90);}
+  function schedule(){
+    if(timer)return;
+    timer=setTimeout(()=>{timer=null;enhance();},90);
+  }
   new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});
   document.addEventListener('click',schedule,true);document.addEventListener('change',schedule,true);document.addEventListener('input',schedule,true);enhance();
 })();
