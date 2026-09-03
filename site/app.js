@@ -531,7 +531,7 @@
       const rank={'High':0,'Medium':1,'Low / Optional':2};
       const list=D.quests.map((q,i)=>({...q,_id:questId(q,i)}))
         .filter(q=>(!state.quests[q._id]||pendingActive(pendingQuestUndo,q._id))&&questRelevant(q)&&(q.Lv===''||q.Lv==null||Number(q.Lv)<=state.level))
-        .sort((a,b)=>(rank[a.Priority]??9)-(rank[b.Priority]??9)||Number(a.Lv||0)-Number(b.Lv||0)).slice(0,4);
+        .sort((a,b)=>(rank[a.Priority]??9)-(rank[b.Priority]??9)||Number(a.Lv||0)-Number(b.Lv||0)).slice(0,8);
       qr.innerHTML=list.length?list.map(q=>{
         const pending=state.quests[q._id]&&pendingActive(pendingQuestUndo,q._id);
         return pending
@@ -550,7 +550,7 @@
     }
     if(er){
       const list=D.etc.filter(x=>Number(x['Start Lv']||999)<=state.level+5 && (!state.etcDone[etcId(x)]||pendingActive(pendingEtcUndo,etcId(x))))
-        .sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,6);
+        .sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,12);
       er.innerHTML=list.length?list.map(x=>{
         const id=etcId(x),base=Number(x['Core + Craft Minimum']||0),allIn=Number(x['All-In Total']||0);
         const need=Math.ceil((base||allIn||0)*1.15);
