@@ -14,42 +14,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Download current Classic datasets
+      - name: Compact current ETC audit
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p /tmp/tcw-audit
-          for f in quests.json maps.json monsters.json lookups.json portals.json map_manifest.json; do
-            curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github.raw+json' \
-              "https://api.github.com/repos/ohmi69/osms_datamine_dashboard/contents/data/current/$f?ref=main" -o "/tmp/tcw-audit/$f"
-          done
-          curl -A 'Mozilla/5.0' -fsSL 'https://meowdb.com/msclassic/world-map' -o /tmp/tcw-audit/meow-world-map.html || : > /tmp/tcw-audit/meow-world-map.html
-      - name: Print complete ETC planner audit
-        run: |
-          cat > /tmp/tcw-audit/audit.mjs <<'NODE'
-          import fs from 'fs';import zlib from 'zlib';
-          const root=process.cwd();
-          const readChunk=name=>{const direct=`${root}/public/repairs/${name}`;if(fs.existsSync(direct))return fs.readFileSync(direct,'utf8');const stem=name.replace(/\.txt$/,'');let repaired='';for(let i=0;;i++){const p=`${root}/public/repairs/${stem}.part${i}.txt`;if(!fs.existsSync(p))break;repaired+=fs.readFileSync(p,'utf8');}return repaired||fs.readFileSync(`${root}/public/assets/runtime/${name}`,'utf8');};
-          const readChunks=(prefix,count)=>{let b='';for(let i=0;i<count;i++)b+=readChunk(`${prefix}.${String(i).padStart(2,'0')}.txt`).replace(/\s+/g,'');return zlib.gunzipSync(Buffer.from(b,'base64')).toString('utf8');};
-          const guide=JSON.parse(readChunks('guide',6));
-          const quests=JSON.parse(fs.readFileSync('/tmp/tcw-audit/quests.json','utf8')).quests||[];
-          const all=new Map();
-          for(const q of quests){for(const r of q.requirements_list||[]){if(r.type!=='item'||!r.name||!Number(r.count)||(q.level_min!=null&&Number(q.level_min)>70))continue;const a=all.get(r.name)||[];a.push({id:q.id,quest:q.name,level:q.level_min??null,count:Number(r.count),weekly:!!q.is_weekly,parent:q.parent||'',region:q.region||''});all.set(r.name,a);}}
-          const audit=(guide.etc||[]).map(old=>{const name=old.Item;const rows=all.get(name)||[];const oneRows=rows.filter(x=>!x.weekly),weekRows=rows.filter(x=>x.weekly);const one=oneRows.reduce((s,x)=>s+x.count,0);const weeklyMax=weekRows.reduce((m,x)=>Math.max(m,x.count),0);return{name,oldCore:old['Core Quest Need'],oldAllIn:old['All-In Total'],one,keep:Math.ceil(one*1.15),weeklyMax,startLv:old['Start Lv']??old['Start Saving'],oneRows,weekRows};});
-          console.log('=== COMPLETE EXISTING PLANNER AUDIT JSON ===');console.log(JSON.stringify(audit,null,2));
-          console.log('=== EXTRA LARGE CURRENT MATERIAL REQUIREMENTS NOT IN PLANNER ===');
-          const existing=new Set((guide.etc||[]).map(x=>x.Item));
-          const extras=[...all.entries()].map(([name,rows])=>{const oneRows=rows.filter(x=>!x.weekly);const weekRows=rows.filter(x=>x.weekly);const one=oneRows.reduce((s,x)=>s+x.count,0);const weeklyMax=weekRows.reduce((m,x)=>Math.max(m,x.count),0);return{name,one,keep:Math.ceil(one*1.15),weeklyMax,oneRows,weekRows};}).filter(x=>!existing.has(x.name)&&x.one>=20).sort((a,b)=>b.one-a.one);
-          console.log(JSON.stringify(extras,null,2));
-          NODE
-          node /tmp/tcw-audit/audit.mjs
-      - name: Print Victoria marker table from current world-map HTML
-        run: |
+          curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github.raw+json' \
+            'https://api.github.com/repos/ohmi69/osms_datamine_dashboard/contents/data/current/quests.json?ref=main' -o /tmp/quests.json
           node - <<'NODE'
-          const fs=require('fs');const h=fs.readFileSync('/tmp/tcw-audit/meow-world-map.html','utf8');
-          const imgStart=h.indexOf('src="/msclassic/worldmap/victoria-island.webp"');
-          const next=h.indexOf('src="/msclassic/worldmap/ossyria-el-nath-mts.webp"',imgStart);
-          const s=h.slice(imgStart,next>imgStart?next:undefined);
-          const re=/<a aria-label="([^"]+?) - open map page"[^>]*style="left:([0-9.]+)px;top:([0-9.]+)px"[^>]*href="\/msclassic\/maps\/(\d{9})"><img src="\/msclassic\/worldmap\/marker-([a-z]+)\.png"/g;
-          const out=[];let m;while((m=re.exec(s)))out.push({name:m[1],x:+m[2],y:+m[3],id:m[4],type:m[5]});console.log('=== VICTORIA MARKERS ===');console.log(JSON.stringify(out,null,2));console.log('COUNT',out.length);
+          const fs=require('fs'),zlib=require('zlib');const root=process.cwd();
+          function chunk(name){const d=`${root}/public/repairs/${name}`;if(fs.existsSync(d))return fs.readFileSync(d,'utf8');const stem=name.replace(/\.txt$/,'');let r='';for(let i=0;;i++){const p=`${root}/public/repairs/${stem}.part${i}.txt`;if(!fs.existsSync(p))break;r+=fs.readFileSync(p,'utf8')}return r||fs.readFileSync(`${root}/public/assets/runtime/${name}`,'utf8')}
+          let b='';for(let i=0;i<6;i++)b+=chunk(`guide.${String(i).padStart(2,'0')}.txt`).replace(/\s+/g,'');const guide=JSON.parse(zlib.gunzipSync(Buffer.from(b,'base64')).toString('utf8'));
+          const quests=JSON.parse(fs.readFileSync('/tmp/quests.json','utf8')).quests||[];const all=new Map();
+          for(const q of quests)for(const r of q.requirements_list||[]){if(r.type!=='item'||!r.name||!+r.count||(q.level_min!=null&&+q.level_min>70))continue;const a=all.get(r.name)||[];a.push({id:String(q.id),quest:q.name,level:q.level_min??null,count:+r.count,weekly:!!q.is_weekly,region:q.region||''});all.set(r.name,a)}
+          console.log('ITEM|OLDCORE|OLDALLIN|ONE|KEEP15|WEEKLYMAX|START|QUESTUSES');
+          for(const old of guide.etc||[]){const rows=all.get(old.Item)||[],oneRows=rows.filter(x=>!x.weekly),week=rows.filter(x=>x.weekly),one=oneRows.reduce((s,x)=>s+x.count,0),wm=week.reduce((m,x)=>Math.max(m,x.count),0);console.log([old.Item,old['Core Quest Need'],old['All-In Total'],one,Math.ceil(one*1.15),wm,old['Start Lv']??old['Start Saving']??'',oneRows.map(x=>`${x.quest} x${x.count}`).join('; ')].join('|'))}
           NODE
