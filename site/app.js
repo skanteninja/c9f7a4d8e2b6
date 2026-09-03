@@ -555,8 +555,8 @@
         const id=etcId(x),base=Number(x['Core + Craft Minimum']||0),allIn=Number(x['All-In Total']||0);
         const need=Math.ceil((base||allIn||0)*1.15);
         const held=Number(state.etcHeld[id]||0),pending=state.etcDone[id]&&pendingActive(pendingEtcUndo,id);
-        if(pending) return `<div class="v72-etc-chip pending-undo" title="${esc(x.Item)}"><span class="etc-icon-shell" data-etc-icon-name="${esc(x.Item)}">◌</span><b>✓</b><button class="undo-btn" data-undo-etc="${esc(id)}">Undo</button></div>`;
-        return `<label class="v72-etc-chip" title="${esc(x.Item)} · safe target ${need||'optional'}"><span class="etc-icon-shell" data-etc-icon-name="${esc(x.Item)}">◌</span><b>${need?`×${need}`:'OPT'}</b><input class="check" type="checkbox" data-atlas-etc-done="${esc(id)}"></label>`;
+        if(pending) return `<div class="v72-etc-chip pending-undo" title="${esc(x.Item)}"><span class="etc-icon-shell" data-etc-icon-name="${esc(x.Item)}">◌</span><span class="tcw-etc-name">${esc(x.Item)}</span><b>✓</b><button class="undo-btn" data-undo-etc="${esc(id)}">Undo</button></div>`;
+        return `<label class="v72-etc-chip" title="${esc(x.Item)} · safe target ${need||'optional'}"><span class="etc-icon-shell" data-etc-icon-name="${esc(x.Item)}">◌</span><span class="tcw-etc-name">${esc(x.Item)}</span><b>${need?`×${need}`:'OPT'}</b><input class="check" type="checkbox" data-atlas-etc-done="${esc(id)}"></label>`;
       }).join(''):'<div class="queue-empty">No urgent ETC pressure.</div>';
       er.querySelectorAll('[data-atlas-etc-done]').forEach(c=>c.addEventListener('change',()=>{
         if(!c.checked) return;

@@ -54,11 +54,11 @@ html[data-level-update="1"] .page.active img{transition:none!important;animation
 .dashboard-v72 .v72-quest-panel .undo-btn{font-size:9px!important}
 
 /* ETC Queue: show the item name and target clearly. Twelve entries stay loaded; overflow scrolls instead of shrinking text. */
-.dashboard-v72 .v72-etc-panel .v72-etc-icons{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows:62px!important;gap:7px!important;align-content:start;padding-right:4px}
-.dashboard-v72 .v72-etc-panel .v72-etc-chip{display:grid!important;grid-template-columns:34px minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;column-gap:7px;row-gap:2px;min-width:0!important;min-height:62px!important;height:62px!important;padding:7px 8px!important;border-radius:9px!important}
+.dashboard-v72 .v72-etc-panel .v72-etc-icons{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows:68px!important;gap:7px!important;align-content:start;padding-right:4px}
+.dashboard-v72 .v72-etc-panel .v72-etc-chip{display:grid!important;grid-template-columns:34px minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;column-gap:7px;row-gap:2px;min-width:0!important;min-height:68px!important;height:68px!important;padding:7px 8px!important;border-radius:9px!important}
 .dashboard-v72 .v72-etc-panel .v72-etc-chip .etc-icon-shell{grid-column:1;grid-row:1 / span 2;width:32px!important;height:32px!important}
 .dashboard-v72 .v72-etc-panel .v72-etc-chip img{max-width:30px!important;max-height:30px!important}
-.dashboard-v72 .v72-etc-panel .v72-etc-chip .tcw-etc-name{grid-column:2;grid-row:1;min-width:0;font-size:10px!important;font-weight:750;line-height:1.2;color:#dfe8f5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dashboard-v72 .v72-etc-panel .v72-etc-chip .tcw-etc-name{grid-column:2;grid-row:1;min-width:0;font-size:10px!important;font-weight:750;line-height:1.18;color:#dfe8f5;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;white-space:normal;overflow-wrap:anywhere}
 .dashboard-v72 .v72-etc-panel .v72-etc-chip>b{grid-column:2;grid-row:2;justify-self:start;font-size:12px!important;line-height:1.1;color:#f3f7ff}
 .dashboard-v72 .v72-etc-panel .v72-etc-chip .check{grid-column:3;grid-row:1 / span 2;width:17px!important;height:17px!important;margin:0}
 .dashboard-v72 .v72-etc-panel .v72-etc-chip .undo-btn{grid-column:3;grid-row:1 / span 2;font-size:9px!important}
