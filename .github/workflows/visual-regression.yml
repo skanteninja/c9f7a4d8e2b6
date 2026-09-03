@@ -93,6 +93,5 @@ jobs:
           HTML
 
           "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=30000 --dump-dom http://127.0.0.1:4173/ci-visual-regression.html >/tmp/visual-regression.html
-          grep -o 'visual-ui-regression-[^<]*' /tmp/visual-regression.html || true
-          grep -q '>visual-ui-regression-ok<' /tmp/visual-regression.html
-          ! grep -q 'visual-ui-regression-failed' /tmp/visual-regression.html
+          grep -o '<pre id="result">[^<]*' /tmp/visual-regression.html || true
+          grep -q '<pre id="result">visual-ui-regression-ok</pre>' /tmp/visual-regression.html
