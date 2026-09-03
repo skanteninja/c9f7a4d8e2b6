@@ -15,7 +15,7 @@
 .skill-beginner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
 .skill-beginner-card{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:center;min-width:0;padding:11px;border:1px solid rgba(140,165,210,.16);border-radius:11px;background:#0e1420}
 .skill-beginner-icon{width:40px;height:40px;display:grid;place-items:center;border:1px solid rgba(115,217,255,.12);border-radius:9px;background:#0a101a}
-.skill-beginner-icon img{width:34px!important;height:34px!important;object-fit:contain}
+.skill-beginner-icon img,.skill-beginner-icon .canonical-skill-icon{display:block;width:34px!important;height:34px!important;object-fit:contain}
 .skill-beginner-title{display:flex;justify-content:space-between;gap:8px;align-items:center}
 .skill-beginner-title b{font-size:12px;color:#eef5ff}
 .skill-beginner-title span{font-size:9px;font-weight:900;color:#82dcff;white-space:nowrap}
