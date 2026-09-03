@@ -73,6 +73,10 @@
     const character = dashboard?.querySelector('.v5-character-hero');
     if (!dashboard || !character) return false;
 
+    const lv = level();
+    const syncedLevel = Number(document.documentElement.dataset.autoGearLevel || 0);
+    if (syncedLevel && syncedLevel !== lv) return false;
+
     let column = character.querySelector('.progression-avatar-column');
     const avatar = character.querySelector('.v5-avatar');
     if (!column && avatar) {
@@ -107,10 +111,14 @@
       head.className = 'progression-avatar-level-head';
       controls.insertBefore(head, controls.firstChild);
     }
-    head.innerHTML = `<span>LEVEL PROGRESSION</span><b>Lv${level()}</b>`;
+    if (head.dataset.level !== String(lv)) {
+      head.dataset.level = String(lv);
+      head.innerHTML = `<span>LEVEL PROGRESSION</span><b>Lv${lv}</b>`;
+    }
 
     document.documentElement.classList.add('progression-avatar-level-merged-ready');
-    document.documentElement.dataset.progressionAvatarLevel = String(level());
+    document.documentElement.classList.remove('progression-avatar-level-merge-missing');
+    document.documentElement.dataset.progressionAvatarLevel = String(lv);
     return true;
   }
 
@@ -146,10 +154,12 @@
   function enhance() {
     if (!verifyDecisionData()) return;
     removeDuplicateGearUi();
-    const merged = mergeAvatarAndLevel();
     ['equipment-window','equipment-window-page'].forEach(id => annotateEquipment(document.getElementById(id)));
+    const merged = mergeAvatarAndLevel();
     document.documentElement.classList.add('progression-gear-visual-ready','progression-compact-dashboard-ready');
-    document.documentElement.classList.toggle('progression-avatar-level-merge-missing', !merged && !!document.querySelector('.dashboard-v72'));
+    if (!merged && document.querySelector('.dashboard-v72') && Number(document.documentElement.dataset.autoGearLevel || 0) === level()) {
+      document.documentElement.classList.add('progression-avatar-level-merge-missing');
+    }
     document.documentElement.dataset.progressionGearVisualLevel = String(level());
   }
 
