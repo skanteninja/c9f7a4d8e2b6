@@ -131,25 +131,31 @@ jobs:
               if(beginnerNames!==['Nimble Feet','Recovery','Three Snails'].sort().join('|'))throw Error('Beginner skill names incorrect: '+beginnerNames);
               if(beginnerCards.some(x=>!x.querySelector('img.canonical-skill-icon')))throw Error('Beginner skill canonical icon missing');
 
-              const fullRows=[...skillList.querySelectorAll('.skill-row')];
-              const rowFor=name=>fullRows.find(r=>String(r.querySelector('.skill-spend')?.textContent||'').includes(name));
-              const magicGuardRow=rowFor('Magic Guard');
-              const maxMpRow=rowFor('Max MP Increase');
-              const magicGuardIcon=magicGuardRow?.querySelector('img.canonical-skill-icon');
-              const maxMpIcon=maxMpRow?.querySelector('img.canonical-skill-icon');
+              const skillIcons=[...skillList.querySelectorAll('img.canonical-skill-icon')];
+              if(!skillIcons.length)throw Error('no canonical Skill Tree icons rendered');
+              const iconFor=name=>skillIcons.find(im=>String(im.dataset.skillName||'')===name);
+              const magicGuardIcon=iconFor('Magic Guard');
+              const maxMpIcon=iconFor('Max MP Increase');
               if(!magicGuardIcon||magicGuardIcon.dataset.skillId!=='2001000')throw Error('Magic Guard did not resolve to current Classic skill 2001000');
               if(!maxMpIcon||maxMpIcon.dataset.skillId!=='2000001')throw Error('Max MP Increase did not resolve to current Classic skill 2000001');
               if(!/\/game-data\/data\/current\/images\/skills\/2001000\.png$/.test(magicGuardIcon.getAttribute('src')||''))throw Error('Magic Guard primary icon is not current Classic artwork: '+magicGuardIcon.getAttribute('src'));
               if(!/\/game-data\/data\/current\/images\/skills\/2000001\.png$/.test(maxMpIcon.getAttribute('src')||''))throw Error('Max MP Increase primary icon is not current Classic artwork: '+maxMpIcon.getAttribute('src'));
               if(!/\/game-media\/skills\//.test(magicGuardIcon.dataset.assetFallbacks||''))throw Error('Magic Guard name-matched WZ fallback missing');
-              const skillIcons=[...skillList.querySelectorAll('img.canonical-skill-icon')];
-              if(!skillIcons.length)throw Error('no canonical Skill Tree icons rendered');
-              if(skillIcons.some(im=>/\/game-media\/icons\//.test(im.getAttribute('src')||'')||/\/game-media\/icons\//.test(im.dataset.assetFallbacks||'')))throw Error('generic item/icon endpoint still used by Skill Tree');
+              for(const im of skillIcons){
+                const id=String(im.dataset.skillId||'');
+                if(!id)throw Error('canonical Skill Tree icon missing skill ID: '+(im.alt||'unknown'));
+                if(im.dataset.skillIconPolicy!=='current-classic-first-name-matched-wz-fallback')throw Error('inconsistent skill icon policy: '+(im.alt||id));
+                const src=im.getAttribute('src')||'';
+                if(!src.endsWith(`/game-data/data/current/images/skills/${id}.png`))throw Error('skill icon does not match its current Classic ID: '+(im.alt||id)+' -> '+src);
+                if(/\/game-media\/icons\//.test(src)||/\/game-media\/icons\//.test(im.dataset.assetFallbacks||''))throw Error('generic item/icon endpoint still used by Skill Tree');
+              }
 
               d.querySelector('#nav .nav-btn[data-page="classicdb"]')?.click();
               await wait(400);
               const dataset=d.getElementById('db-dataset');
               dataset.value='skills';dataset.dispatchEvent(new w.Event('change',{bubbles:true}));dataset.dispatchEvent(new w.Event('input',{bubbles:true}));
+              const dbSearch=d.getElementById('db-search');
+              if(dbSearch){dbSearch.value='Magic Guard';dbSearch.dispatchEvent(new w.Event('input',{bubbles:true}));dbSearch.dispatchEvent(new w.Event('change',{bubbles:true}));}
               await wait(1800);
               const dbCards=[...d.querySelectorAll('#db-results .db-card')];
               const dbMagicGuard=dbCards.find(card=>String(card.querySelector('h3')?.textContent||'').trim()==='Magic Guard');
