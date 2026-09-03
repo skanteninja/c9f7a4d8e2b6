@@ -2,7 +2,7 @@
   const D = window.GUIDE_DATA;
   if (!D) return;
 
-  const RAW = '/game-origin/data/current/';
+  const RAW = '/game-data/data/current/';
   const BEGINNER_PLAN = {
     1: { 'Nimble Feet': 0, 'Three Snails': 0, Recovery: 0 },
     2: { 'Nimble Feet': 1, 'Three Snails': 0, Recovery: 0 },
@@ -183,7 +183,7 @@
     const alreadyCards = grid.querySelectorAll('.beginner-skill-card').length === 3 && !grid.querySelector('.beginner-milestone-grid');
     const sameLevel = grid.dataset.beginnerRenderLevel === String(level);
     const currentMode = grid.dataset.beginnerRenderMode || '';
-    if (alreadyCards && sameLevel && (currentMode === 'cot2' || !enriched)) {
+    if (alreadyCards && sameLevel && (currentMode === 'current' || !enriched)) {
       wireSkillImages(grid);
       wireSkillImages(detail);
       document.documentElement.classList.add('beginner-skill-tree-ready','dashboard-skill-immediate-ready');
@@ -194,7 +194,7 @@
     const names = TIERS[0].names;
     const getSkill = name => idx?.get?.(norm(name)) || null;
     grid.dataset.beginnerRenderLevel = String(level);
-    grid.dataset.beginnerRenderMode = enriched ? 'cot2' : 'fallback';
+    grid.dataset.beginnerRenderMode = enriched ? 'current' : 'fallback';
     grid.innerHTML = names.map(name => {
       const skill = getSkill(name);
       const lv = Number(alloc[name]||0);
@@ -208,7 +208,7 @@
       const lv = Number(alloc[name]||0);
       const max = maxLevel(skill,3);
       const stats = Array.isArray(skill?.all_level_stats) && lv > 0 ? String(skill.all_level_stats[Math.min(lv-1,skill.all_level_stats.length-1)]||'') : '';
-      detail.innerHTML = `<span class="skill-img-wrap">${skillIcon(skill,name)}</span><div><span class="detail-kicker">BEGINNER · CURRENT COT2 SKILL</span><b>${esc(name)} · Lv ${lv}/${max}</b><p>${esc(skill?.description || (lv ? 'Active in the recommended Beginner progression.' : 'Not invested yet; this icon stays grey until its first recommended point.'))}</p>${stats?`<small>${esc(stats)}</small>`:''}<small class="evidence-inline">Recommended planner order: Nimble Feet 3 → Three Snails 3 → Recovery 3. Beginner skill acquisition is still rechecked against live/tutorial behavior.</small></div>`;
+      detail.innerHTML = `<span class="skill-img-wrap">${skillIcon(skill,name)}</span><div><span class="detail-kicker">BEGINNER · CURRENT CURRENT SKILL</span><b>${esc(name)} · Lv ${lv}/${max}</b><p>${esc(skill?.description || (lv ? 'Active in the recommended Beginner progression.' : 'Not invested yet; this icon stays grey until its first recommended point.'))}</p>${stats?`<small>${esc(stats)}</small>`:''}<small class="evidence-inline">Recommended planner order: Nimble Feet 3 → Three Snails 3 → Recovery 3. Beginner skill acquisition is still rechecked against live/tutorial behavior.</small></div>`;
       wireSkillImages(detail);
     }
     grid.querySelectorAll('[data-skill-name]').forEach(btn => btn.addEventListener('click',()=>{

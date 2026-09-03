@@ -16,32 +16,32 @@
   const UNDO_MS = 10000;
   const pendingQuestUndo = new Map();
   const pendingEtcUndo = new Map();
-  const OSMS_RAW_BASE = '/game-origin/data/current/';
-  let osmsItemIndexPromise = null;
-  const osmsDataCache = new Map();
-  const osmsRenderLimit = { classicdb: 80 };
+  const TCW_RAW_BASE = '/game-data/data/current/';
+  let tcwItemIndexPromise = null;
+  const tcwDataCache = new Map();
+  const tcwRenderLimit = { classicdb: 80 };
 
-  function osmsItemIndex(){
-    if(osmsItemIndexPromise) return osmsItemIndexPromise;
-    osmsItemIndexPromise = fetch(`${OSMS_RAW_BASE}items.json`,{cache:'force-cache'})
-      .then(r=>{if(!r.ok) throw new Error(`OSMS items ${r.status}`); return r.json();})
+  function tcwItemIndex(){
+    if(tcwItemIndexPromise) return tcwItemIndexPromise;
+    tcwItemIndexPromise = fetch(`${TCW_RAW_BASE}items.json`,{cache:'force-cache'})
+      .then(r=>{if(!r.ok) throw new Error(`TCW items ${r.status}`); return r.json();})
       .then(j=>{
         const rows=[...(Array.isArray(j?.items)?j.items:[]),...(Array.isArray(j?.scrolls)?j.scrolls:[])];
         return new Map(rows.filter(x=>x?.name).map(x=>[String(x.name).trim().toLowerCase(),x]));
       })
       .catch(()=>new Map());
-    return osmsItemIndexPromise;
+    return tcwItemIndexPromise;
   }
   async function hydrateEtcIcons(root){
     if(!root) return;
     const nodes=[...root.querySelectorAll('[data-etc-icon-name]')];
     if(!nodes.length) return;
-    const idx=await osmsItemIndex();
+    const idx=await tcwItemIndex();
     nodes.forEach(node=>{
       const item=idx.get(String(node.dataset.etcIconName||'').trim().toLowerCase());
       if(!item?.id) return;
       const id=String(item.id).padStart(8,'0');
-      node.innerHTML=`<img src="${OSMS_RAW_BASE}images/items/${id}.png" alt="${esc(item.name)}">`;
+      node.innerHTML=`<img src="${TCW_RAW_BASE}images/items/${id}.png" alt="${esc(item.name)}">`;
     });
   }
   function pendingActive(map,id){ return Number(map.get(id)||0) > Date.now(); }
@@ -119,7 +119,7 @@
     }catch(e){ /* localStorage remains the fallback when not launched by launcher.py */ }
   }
   function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
-  function isBeta(s){ return /BETA|COT2|PRE-LAUNCH|VERIFY/i.test(String(s||'')); }
+  function isBeta(s){ return /BETA|CURRENT|PRE-LAUNCH|VERIFY/i.test(String(s||'')); }
   function isHighlyRecommended(item){ return !!(item && item['Highly Recommended']); }
   function recommendationBadge(item, cls=''){ return isHighlyRecommended(item) ? `<span class="highly-recommended-badge ${cls}">HIGHLY RECOMMENDED</span>` : ''; }
   function priorityClass(p){ return String(p||'').startsWith('Low')?'Low':String(p||''); }
@@ -132,10 +132,10 @@
   // Legacy GMS/v83 sprites are acceptable as artwork when the item/monster itself has
   // been confirmed against MapleStory Classic data. They are never used as proof of stats,
   // availability, quests, drops, recipes, or mechanics.
-  function meowIcon(id){ return id ? `/game-art/meow/icons/${Math.trunc(Number(id))}` : ''; }
-  function dreamItemIcon(id, resize=2){ return id ? `/game-art/dream/item/${Math.trunc(Number(id))}/icon?format=png&resize=${resize}` : ''; }
-  function mapleIoItemIcon(id){ return id ? `/game-art/mapleio/item/${Math.trunc(Number(id))}/icon` : ''; }
-  function dreamPetIcon(id, resize=2){ return id ? `/game-art/dream/pet/${Math.trunc(Number(id))}/move/0?format=png&resize=${resize}` : ''; }
+  function meowIcon(id){ return id ? `/game-media/icons/${Math.trunc(Number(id))}` : ''; }
+  function dreamItemIcon(id, resize=2){ return id ? `/game-media/items/primary/${Math.trunc(Number(id))}/icon?format=png&resize=${resize}` : ''; }
+  function mapleIoItemIcon(id){ return id ? `/game-media/items/fallback/${Math.trunc(Number(id))}/icon` : ''; }
+  function dreamPetIcon(id, resize=2){ return id ? `/game-media/pets/${Math.trunc(Number(id))}/move/0?format=png&resize=${resize}` : ''; }
   function visualCandidates(item){
     if(!item || !item['Item ID'] || Number(item['Item ID'])===0) return [];
     const id=item['Item ID'];
@@ -176,7 +176,7 @@
   function mapleIoSkillIcon(skill){
     const id=Number(skill?.id||0); if(!id) return '';
     const book=Math.trunc(id/10000);
-    return `/game-art/mapleio/skill/${book}.img/skill/${id}/icon`;
+    return `/game-media/skills/${book}.img/skill/${id}/icon`;
   }
   function skillVisualCandidates(skill){
     if(!skill) return [];
@@ -226,7 +226,7 @@
     const map={Ring1:'Ring',Ring2:'Ring'};
     const s=map[slot]||slot;
     // Old-school artwork is fine; old-school-only DATA is not. A row stays out of the
-    // actionable picker until the entity is confirmed in Classic/COT2.
+    // actionable picker until the entity is confirmed in Classic/CURRENT.
     return D.gear.filter(g=>g.Item==='None'||(g.Slot===s && !['HISTORICAL ONLY','UNVERIFIED'].includes(String(g['Evidence Class']||''))));
   }
   function evidenceLabel(){ return ''; }
@@ -317,8 +317,8 @@
     equipment:['Equipment & Crafting','Breakpoint-driven upgrades and a real slot-based build builder.'],
     skills:['Skill Tree','One definitive SP path built around efficient I/L progression.'],
     etc:['ETC Master Planner','Know the full future requirement before you vendor the first drop.'],
-    classicdb:['Classic Database','Broad current COT2 client-export metadata, kept separate from curated guide decisions.'],
-    cashshop:['Cash Shop','COT2 client catalog with beta pricing and availability warnings.'],
+    classicdb:['Classic Database','Broad current CURRENT client-export metadata, kept separate from curated guide decisions.'],
+    cashshop:['Cash Shop','CURRENT client catalog with beta pricing and availability warnings.'],
     beauty:['Beauty','Hair and face catalogs with exact exported IDs and artwork.'],
     formulas:['Formula Lab','Client-audited magical damage math for I/L planning.'],
     research:['Research & Sources','What is official, what is beta, and why each major decision exists.'],
@@ -598,7 +598,7 @@
     const ee=document.getElementById('v5-etc'); if(ee) ee.textContent=`${urgent} urgent`;
     const range=document.getElementById('level-range'); if(range)range.value=String(state.level);
     const hsel=document.getElementById('hero-level-select'); if(hsel)hsel.value=String(state.level);
-    const beta=document.getElementById('atlas-beta-pill'); if(beta) beta.textContent=isBeta(l.Confidence||srow.Status)?'COT2 / VERIFY':'CURRENT PLAN';
+    const beta=document.getElementById('atlas-beta-pill'); if(beta) beta.textContent=isBeta(l.Confidence||srow.Status)?'CURRENT / VERIFY':'CURRENT PLAN';
     const ev=D.gear||[]; const curr=ev.filter(x=>String(x['Evidence Class']||'').includes('CURRENT')).length, ver=ev.filter(x=>String(x['Evidence Class']||'').includes('PRE-LAUNCH')).length, hist=ev.filter(x=>String(x['Evidence Class']||'').includes('HISTORICAL')).length; [['audit-current',curr],['audit-verify',ver],['audit-historical',hist]].forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v});
 
     renderAtlasAvatar();
@@ -707,7 +707,7 @@
       const highly=isHighlyRecommended(item);
       return `<button class="gear-option ${highly?'highly-recommended':''}" data-item="${esc(item.Item)}">
         <div>${none?'—':imgTag(item)}</div>
-        <div><h4>${esc(item.Item)}</h4><div class="gear-badges">${none?'':`<span class="plan-tag ${slug(item.Plan)}">${esc(item.Plan)}</span><span class="class-tag">${esc(item['Class Fit']||'Mage')}</span>`}</div><p>${esc(highly?(item['Recommendation Reason']||item.Notes||''):item.Notes||'Empty slot')}</p>${none?'':`<span class="evidence-tag ${String(item['Evidence Class']||'').includes('HISTORICAL')?'historical':String(item['Evidence Class']||'').includes('PRE-LAUNCH')?'verify':''}" title="${esc(item['Parity Check']||'Current Classic/COT2 cross-check status')}">${esc(evidenceLabel(item))}</span>`}</div>
+        <div><h4>${esc(item.Item)}</h4><div class="gear-badges">${none?'':`<span class="plan-tag ${slug(item.Plan)}">${esc(item.Plan)}</span><span class="class-tag">${esc(item['Class Fit']||'Mage')}</span>`}</div><p>${esc(highly?(item['Recommendation Reason']||item.Notes||''):item.Notes||'Empty slot')}</p>${none?'':`<span class="evidence-tag ${String(item['Evidence Class']||'').includes('HISTORICAL')?'historical':String(item['Evidence Class']||'').includes('PRE-LAUNCH')?'verify':''}" title="${esc(item['Parity Check']||'Current Classic/CURRENT cross-check status')}">${esc(evidenceLabel(item))}</span>`}</div>
         <div class="stats">${none?'':`Lv ${item['Req Lv']||0}<br>INT ${item.INT||0} · LUK ${item.LUK||0}<br>M.ATK ${item['M.ATK']||0}<br>Crit ${item['Crit%']||0}% · CDMG ${item['Crit DMG']||0}%`}</div>
         ${recommendationBadge(item,'bottom-left')}
       </button>`;
@@ -814,7 +814,7 @@
     });
     const doneCount=D.quests.filter((x,i)=>state.quests[questId(x,i)]).length;
     const coverage=D.meta.questCoverage||{};
-    document.getElementById('quest-summary').innerHTML=`<span class="pill">${rows.length} shown</span><span class="pill">${doneCount}/${D.quests.length} completed</span><span class="pill">${D.quests.filter(x=>x.Priority==='High').length} high-priority total</span>${coverage.currentCot2DirectoryCount?`<span class="pill audit-pill" title="${esc(coverage.policy||'')}">Curated ${D.quests.length} / ${esc(coverage.currentCot2DirectoryCount)} COT2 quests</span>`:''}`;
+    document.getElementById('quest-summary').innerHTML=`<span class="pill">${rows.length} shown</span><span class="pill">${doneCount}/${D.quests.length} completed</span><span class="pill">${D.quests.filter(x=>x.Priority==='High').length} high-priority total</span>${coverage.currentCurrentDirectoryCount?`<span class="pill audit-pill" title="${esc(coverage.policy||'')}">Curated ${D.quests.length} / ${esc(coverage.currentCurrentDirectoryCount)} CURRENT quests</span>`:''}`;
     document.getElementById('quest-list').innerHTML=rows.map(x=>{
       const done=!!state.quests[x._id];
       return `<div class="quest-row ${done?'done':''}">
@@ -896,7 +896,7 @@
   }
 
 
-  const OSMS_DATASETS = {
+  const TCW_DATASETS = {
     items:{label:'Items',file:'items.json'},
     equipment:{label:'Equipment',file:'items.json'},
     monsters:{label:'Monsters',file:'monsters.json'},
@@ -907,37 +907,37 @@
     portals:{label:'Portals',file:'portals.json'},
     patch_notes:{label:'Patch Notes',file:'patch_notes.json'}
   };
-  function fetchOsms(key){
-    const file=OSMS_DATASETS[key]?.file||key;
-    if(osmsDataCache.has(file)) return osmsDataCache.get(file);
-    const p=fetch(`${OSMS_RAW_BASE}${file}`,{cache:'force-cache'})
+  function fetchTcw(key){
+    const file=TCW_DATASETS[key]?.file||key;
+    if(tcwDataCache.has(file)) return tcwDataCache.get(file);
+    const p=fetch(`${TCW_RAW_BASE}${file}`,{cache:'force-cache'})
       .then(r=>{if(!r.ok) throw new Error(`${file} HTTP ${r.status}`);return r.json();});
-    osmsDataCache.set(file,p);
+    tcwDataCache.set(file,p);
     return p;
   }
-  function osmsImage(path){
+  function tcwImage(path){
     if(!path) return '';
     const clean=String(path).replace(/^\.?\//,'');
     if(/^https?:/i.test(clean)) return clean;
-    if(clean.startsWith('images/')) return `${OSMS_RAW_BASE}${clean}`;
-    return `${OSMS_RAW_BASE}${clean}`;
+    if(clean.startsWith('images/')) return `${TCW_RAW_BASE}${clean}`;
+    return `${TCW_RAW_BASE}${clean}`;
   }
-  function collectOsmsRows(value,group='',depth=0,out=[]){
+  function collectTcwRows(value,group='',depth=0,out=[]){
     if(depth>5 || value==null) return out;
     if(Array.isArray(value)){
       value.forEach(v=>{
         if(v && typeof v==='object' && !Array.isArray(v)){
           const looksEntity=('id' in v)||('name' in v)||('title' in v)||('description' in v)||('quest' in v)||('map_name' in v);
           if(looksEntity) out.push({...v,__group:group});
-          else collectOsmsRows(v,group,depth+1,out);
+          else collectTcwRows(v,group,depth+1,out);
         }
       });
       return out;
     }
     if(typeof value==='object'){
       for(const [k,v] of Object.entries(value)){
-        if(Array.isArray(v)) collectOsmsRows(v,group||k,depth+1,out);
-        else if(v && typeof v==='object') collectOsmsRows(v,group||k,depth+1,out);
+        if(Array.isArray(v)) collectTcwRows(v,group||k,depth+1,out);
+        else if(v && typeof v==='object') collectTcwRows(v,group||k,depth+1,out);
       }
     }
     return out;
@@ -949,12 +949,12 @@
     return row.name||row.title||row.quest_name||row.map_name||row.skill_name||row.item_name||row.description||`ID ${row.id??'—'}`;
   }
   function entityThumb(row,dataset){
-    if(row.thumbnail) return osmsImage(row.thumbnail);
+    if(row.thumbnail) return tcwImage(row.thumbnail);
     const id=Number(row.id);
     if(!Number.isFinite(id)) return '';
-    if(dataset==='items'||dataset==='equipment') return `${OSMS_RAW_BASE}images/items/${String(Math.trunc(id)).padStart(8,'0')}.png`;
-    if(dataset==='skills') return `${OSMS_RAW_BASE}images/skills/${String(Math.trunc(id)).padStart(7,'0')}.png`;
-    if(dataset==='maps') return `${OSMS_RAW_BASE}images/maps/${String(Math.trunc(id)).padStart(9,'0')}.png`;
+    if(dataset==='items'||dataset==='equipment') return `${TCW_RAW_BASE}images/items/${String(Math.trunc(id)).padStart(8,'0')}.png`;
+    if(dataset==='skills') return `${TCW_RAW_BASE}images/skills/${String(Math.trunc(id)).padStart(7,'0')}.png`;
+    if(dataset==='maps') return `${TCW_RAW_BASE}images/maps/${String(Math.trunc(id)).padStart(9,'0')}.png`;
     return '';
   }
   function recordFacts(row){
@@ -972,7 +972,7 @@
     }
     return facts.slice(0,8);
   }
-  function renderOsmsCards(rows,dataset,limit){
+  function renderTcwCards(rows,dataset,limit){
     return rows.slice(0,limit).map(row=>{
       const name=entityName(row);
       const thumb=entityThumb(row,dataset);
@@ -980,7 +980,7 @@
       const desc=String(row.description||row.desc||row.summary||'').replace(/\\n/g,' ').trim();
       return `<article class="db-card">
         <div class="db-card-top">${thumb?`<div class="db-thumb"><img src="${esc(thumb)}" alt="${esc(name)}" loading="lazy"></div>`:'<div class="db-thumb db-thumb-empty">DB</div>'}
-          <div class="db-card-title"><small>${esc(row.__group||OSMS_DATASETS[dataset]?.label||dataset)}</small><h3>${esc(name)}</h3>${row.id!==undefined?`<code>#${esc(row.id)}</code>`:''}</div>
+          <div class="db-card-title"><small>${esc(row.__group||TCW_DATASETS[dataset]?.label||dataset)}</small><h3>${esc(name)}</h3>${row.id!==undefined?`<code>#${esc(row.id)}</code>`:''}</div>
         </div>
         ${desc?`<p>${esc(desc.slice(0,280))}${desc.length>280?'…':''}</p>`:''}
         ${facts.length?`<div class="db-facts">${facts.map(([k,v])=>`<span><small>${esc(k)}</small><b>${esc(v)}</b></span>`).join('')}</div>`:''}
@@ -993,26 +993,26 @@
     const select=document.getElementById('db-dataset'), input=document.getElementById('db-search'), results=document.getElementById('db-results'), status=document.getElementById('db-status');
     if(!select||!input||!results||!status) return;
     if(!classicDbWired){
-      select.addEventListener('change',()=>{osmsRenderLimit.classicdb=80;renderClassicDb();});
-      input.addEventListener('input',()=>{osmsRenderLimit.classicdb=80;renderClassicDb();});
-      document.getElementById('db-more')?.addEventListener('click',()=>{osmsRenderLimit.classicdb+=80;renderClassicDb();});
+      select.addEventListener('change',()=>{tcwRenderLimit.classicdb=80;renderClassicDb();});
+      input.addEventListener('input',()=>{tcwRenderLimit.classicdb=80;renderClassicDb();});
+      document.getElementById('db-more')?.addEventListener('click',()=>{tcwRenderLimit.classicdb+=80;renderClassicDb();});
       classicDbWired=true;
     }
-    if(resetLimit) osmsRenderLimit.classicdb=80;
+    if(resetLimit) tcwRenderLimit.classicdb=80;
     const key=select.value, q=input.value.trim().toLowerCase();
-    status.innerHTML='<span class="db-loading">Loading current COT2 metadata…</span>';
+    status.innerHTML='<span class="db-loading">Loading current CURRENT metadata…</span>';
     try{
-      const data=await fetchOsms(key);
-      let rows=collectOsmsRows(data);
+      const data=await fetchTcw(key);
+      let rows=collectTcwRows(data);
       if(key==='equipment') rows=rows.filter(r=>String(r.category||'').toLowerCase()==='equipment'||r.equip_slot||r.slot);
       if(q) rows=rows.filter(r=>searchableRecord(r).includes(q));
-      const limit=osmsRenderLimit.classicdb;
+      const limit=tcwRenderLimit.classicdb;
       status.innerHTML=`<b>${rows.length.toLocaleString()}</b> matching records · showing ${Math.min(limit,rows.length).toLocaleString()} · <span>Top Classic World database</span>`;
-      results.innerHTML=renderOsmsCards(rows,key,limit)||'<div class="db-empty">No matching records.</div>';
+      results.innerHTML=renderTcwCards(rows,key,limit)||'<div class="db-empty">No matching records.</div>';
       const more=document.getElementById('db-more'); if(more) more.hidden=rows.length<=limit;
       hookImageFallback(results);
     }catch(err){
-      status.innerHTML=`<span class="db-error">Could not load ${esc(OSMS_DATASETS[key]?.label||key)}. ${esc(err.message)}</span>`;
+      status.innerHTML=`<span class="db-error">Could not load ${esc(TCW_DATASETS[key]?.label||key)}. ${esc(err.message)}</span>`;
       results.innerHTML='';
     }
   }
@@ -1027,7 +1027,7 @@
     }
     status.innerHTML='<span class="db-loading">Loading Cash Shop catalog…</span>';
     try{
-      const data=await fetchOsms('cash_shop.json');
+      const data=await fetchTcw('cash_shop.json');
       const categories=Array.isArray(data.categories)?data.categories:[];
       if(cat.options.length===1){
         categories.forEach(c=>{const o=document.createElement('option');o.value=c.category;o.textContent=c.category;cat.appendChild(o);});
@@ -1037,10 +1037,10 @@
       if(cat.value!=='all') rows=rows.filter(r=>r.__group===cat.value);
       if(sale.checked) rows=rows.filter(r=>r.on_sale);
       if(q) rows=rows.filter(r=>searchableRecord(r).includes(q));
-      status.innerHTML=`<b>${rows.length.toLocaleString()}</b> items · <span>prices/availability are COT2 beta values, not launch promises</span>`;
+      status.innerHTML=`<b>${rows.length.toLocaleString()}</b> items · <span>prices/availability are CURRENT beta values, not launch promises</span>`;
       results.innerHTML=rows.slice(0,240).map(r=>{
-        const thumb=osmsImage(r.thumbnail);
-        return `<article class="cash-card">${thumb?`<img src="${esc(thumb)}" alt="${esc(r.name)}" loading="lazy">`:''}<div><small>${esc(r.__group)}${r.sub_category?` · ${esc(r.sub_category)}`:''}</small><h3>${esc(r.name)}</h3><code>#${esc(r.id)}</code><p>${esc(String(r.description||'').replace(/\\n/g,' ').slice(0,180))}</p><div class="cash-meta"><b>${Number(r.price||0).toLocaleString()} NX</b><span>${r.on_sale?'COT2 on sale':'Not marked on sale'}</span>${Number(r.period)>0?`<span>${esc(r.period)} days</span>`:''}</div></div></article>`;
+        const thumb=tcwImage(r.thumbnail);
+        return `<article class="cash-card">${thumb?`<img src="${esc(thumb)}" alt="${esc(r.name)}" loading="lazy">`:''}<div><small>${esc(r.__group)}${r.sub_category?` · ${esc(r.sub_category)}`:''}</small><h3>${esc(r.name)}</h3><code>#${esc(r.id)}</code><p>${esc(String(r.description||'').replace(/\\n/g,' ').slice(0,180))}</p><div class="cash-meta"><b>${Number(r.price||0).toLocaleString()} NX</b><span>${r.on_sale?'CURRENT on sale':'Not marked on sale'}</span>${Number(r.period)>0?`<span>${esc(r.period)} days</span>`:''}</div></div></article>`;
       }).join('')||'<div class="db-empty">No matching Cash Shop items.</div>';
       hookImageFallback(results);
     }catch(err){status.innerHTML=`<span class="db-error">${esc(err.message)}</span>`;results.innerHTML='';}
@@ -1057,13 +1057,13 @@
     }
     status.innerHTML='<span class="db-loading">Loading beauty catalog…</span>';
     try{
-      const data=await fetchOsms('beauty.json');
+      const data=await fetchTcw('beauty.json');
       let rows=Array.isArray(data[type.value])?data[type.value]:[];
       if(gender.value!=='all') rows=rows.filter(r=>String(r.gender).toLowerCase()===gender.value);
       const q=input.value.trim().toLowerCase();
       if(q) rows=rows.filter(r=>searchableRecord(r).includes(q));
       status.innerHTML=`<b>${rows.length.toLocaleString()}</b> ${esc(type.value)} styles · exact exported IDs`;
-      results.innerHTML=rows.slice(0,360).map(r=>`<article class="beauty-card"><div class="beauty-image"><img src="${esc(osmsImage(r.thumbnail))}" alt="${esc(r.name)}" loading="lazy"></div><b>${esc(r.name)}</b><span>${esc(r.gender||'')}</span><code>#${esc(r.id)}</code></article>`).join('')||'<div class="db-empty">No matching styles.</div>';
+      results.innerHTML=rows.slice(0,360).map(r=>`<article class="beauty-card"><div class="beauty-image"><img src="${esc(tcwImage(r.thumbnail))}" alt="${esc(r.name)}" loading="lazy"></div><b>${esc(r.name)}</b><span>${esc(r.gender||'')}</span><code>#${esc(r.id)}</code></article>`).join('')||'<div class="db-empty">No matching styles.</div>';
       hookImageFallback(results);
     }catch(err){status.innerHTML=`<span class="db-error">${esc(err.message)}</span>`;results.innerHTML='';}
   }
@@ -1096,7 +1096,7 @@
   }
 
   function renderData(){
-    document.getElementById('data-status').innerHTML=`<div class="data-stat"><small>Headless maintenance source</small><b>Connected · backend swappable</b></div><div class="data-stat"><small>Website snapshot</small><b>v${esc(D.meta.version)} · ${new Date(D.meta.builtAt).toLocaleString()}</b></div><div class="data-stat"><small>Quest coverage</small><b>${esc(D.meta.questCoverage?.status||'Curated')} · ${D.quests.length}/${esc(D.meta.questCoverage?.currentCot2DirectoryCount||'—')}</b></div><div class="data-stat"><small>Progress persistence</small><b>${launcherStateReady?'Browser + PC mirror':'Browser localStorage'}</b></div><div class="data-stat"><small>Local state</small><b>${Object.values(state.quests).filter(Boolean).length} quests · Lv${state.level} · ${computeBuild().chosen.length} equipped items</b></div>`;
+    document.getElementById('data-status').innerHTML=`<div class="data-stat"><small>Headless maintenance source</small><b>Connected · backend swappable</b></div><div class="data-stat"><small>Website snapshot</small><b>v${esc(D.meta.version)} · ${new Date(D.meta.builtAt).toLocaleString()}</b></div><div class="data-stat"><small>Quest coverage</small><b>${esc(D.meta.questCoverage?.status||'Curated')} · ${D.quests.length}/${esc(D.meta.questCoverage?.currentCurrentDirectoryCount||'—')}</b></div><div class="data-stat"><small>Progress persistence</small><b>${launcherStateReady?'Browser + PC mirror':'Browser localStorage'}</b></div><div class="data-stat"><small>Local state</small><b>${Object.values(state.quests).filter(Boolean).length} quests · Lv${state.level} · ${computeBuild().chosen.length} equipped items</b></div>`;
   }
   document.getElementById('export-progress').addEventListener('click',()=>{
     const blob=new Blob([JSON.stringify({project:D.meta.title,version:1,exportedAt:new Date().toISOString(),state},null,2)],{type:'application/json'});

@@ -1,5 +1,5 @@
 (() => {
-  const RAW='/game-origin/data/current/';
+  const RAW='/game-data/data/current/';
   let skillIndexPromise=null;
   let timer=null;
   const norm=v=>String(v??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
@@ -54,7 +54,7 @@
       const req=requiredSkill(idx,skill);const panel=document.createElement('div');panel.className='visual-skill-meta';
       const path=document.createElement('div');path.className='visual-skill-path';
       if(req){path.appendChild(node(req.skill,'Requires',`${req.name} Lv${req.level}`));const arrow=document.createElement('i');arrow.textContent='→';path.appendChild(arrow);}
-      path.appendChild(node(skill,'COT2 skill',`Max Lv${skill.max_level||'—'} · ${skill.job||skill.class_name||''}`));panel.appendChild(path);
+      path.appendChild(node(skill,'CURRENT skill',`Max Lv${skill.max_level||'—'} · ${skill.job||skill.class_name||''}`));panel.appendChild(path);
       const stats=document.createElement('div');stats.className='visual-skill-stats';
       const mid=midpointStat(skill),max=maxStat(skill);
       if(skill.passive)stats.insertAdjacentHTML('beforeend','<span>PASSIVE</span>');
@@ -71,13 +71,13 @@
     const cards=[...document.querySelectorAll('#atlas-skill-grid [data-skill-name]')];if(!cards.length)return;
     const idx=await skillIndex();
     cards.forEach(card=>{
-      if(card.querySelector('.visual-cot2-skill-badge'))return;
+      if(card.querySelector('.visual-current-skill-badge'))return;
       const skill=idx.byName.get(norm(card.dataset.skillName));if(!skill)return;
-      const badge=document.createElement('span');badge.className='visual-cot2-skill-badge';badge.textContent=`COT2 · ${skill.max_level||'—'}`;badge.title=`Current COT2 metadata · ${skill.job||skill.class_name||''}`;card.appendChild(badge);
-      const existing=card.querySelector('img');if(existing&&iconUrl(skill)){existing.src=iconUrl(skill);existing.dataset.cot2Skill='1';}
+      const badge=document.createElement('span');badge.className='visual-current-skill-badge';badge.textContent=`CURRENT · ${skill.max_level||'—'}`;badge.title=`Current CURRENT metadata · ${skill.job||skill.class_name||''}`;card.appendChild(badge);
+      const existing=card.querySelector('img');if(existing&&iconUrl(skill)){existing.src=iconUrl(skill);existing.dataset.currentSkill='1';}
     });
     const detail=document.getElementById('atlas-skill-detail');if(detail&&!detail.querySelector('.visual-skill-source')){
-      const source=document.createElement('small');source.className='visual-skill-source';source.textContent='Skill icons / prerequisite metadata: current COT2 client export via OSMS';detail.appendChild(source);
+      const source=document.createElement('small');source.className='visual-skill-source';source.textContent='Skill icons / prerequisite metadata: current CURRENT client export via TCW';detail.appendChild(source);
     }
   }
 

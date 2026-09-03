@@ -1,5 +1,5 @@
 (() => {
-  const RAW='/game-origin/data/current/';
+  const RAW='/game-data/data/current/';
   let mapsPromise=null,portalsPromise=null,timer=null;
   const norm=v=>String(v??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));

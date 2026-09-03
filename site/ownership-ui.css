@@ -12,11 +12,12 @@ html[data-level-update="1"] .page.active img{transition:none!important;animation
 
 /* Dashboard hierarchy: loadout + character first, then three equally weighted action queues. */
 .dashboard-v72 .v72-hero-grid{grid-template-columns:minmax(300px,.82fr) minmax(0,1.18fr)!important;gap:12px;margin-bottom:12px}
-.dashboard-v72 .v5-character-hero{grid-template-columns:176px minmax(0,1fr)!important;grid-template-rows:1fr!important;min-height:286px}
+.dashboard-v72 .v5-character-hero{grid-template-columns:176px minmax(0,1fr)!important;grid-template-rows:auto auto!important;min-height:286px}
 .dashboard-v72 .v5-avatar{grid-column:1!important;grid-row:1!important}
 .dashboard-v72 .v5-character-copy{grid-column:2!important;grid-row:1!important}
 #dashboard-level-state-host{display:none!important}
-.dashboard-v72 .v5-level-hero,.dashboard-v72 .v72-level-hero,.dashboard-v72 .progression-avatar-level-controls{display:none!important}
+.dashboard-v72 .v5-level-hero,.dashboard-v72 .v72-level-hero{display:none!important}
+.dashboard-v72 .progression-avatar-level-controls{display:grid!important;grid-column:1/-1!important;grid-row:2!important}
 
 .dashboard-v72 .v72-command-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;margin:0 0 12px!important;align-items:stretch}
 .dashboard-v72 .v72-command-grid>.panel{height:318px;min-height:318px;max-height:318px;display:flex;flex-direction:column;overflow:hidden}
@@ -47,8 +48,9 @@ html[data-level-update="1"] .page.active img{transition:none!important;animation
   .dashboard-v72 .v72-etc-panel .v72-etc-icons{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 }
 @media(max-width:620px){
-  .dashboard-v72 .v5-character-hero{grid-template-columns:1fr!important;grid-template-rows:auto auto!important}
+  .dashboard-v72 .v5-character-hero{grid-template-columns:1fr!important;grid-template-rows:auto auto auto!important}
   .dashboard-v72 .v5-avatar{grid-column:1!important;grid-row:1!important}
   .dashboard-v72 .v5-character-copy{grid-column:1!important;grid-row:2!important}
+  .dashboard-v72 .progression-avatar-level-controls{grid-column:1!important;grid-row:3!important}
   .dashboard-v72 .v72-etc-panel .v72-etc-icons{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }

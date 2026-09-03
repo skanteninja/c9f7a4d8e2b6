@@ -2,7 +2,7 @@
   const D = window.GUIDE_DATA;
   if (!D) return;
 
-  const REPO_RAW = '/game-origin/';
+  const REPO_RAW = '/game-data/';
   const RAW = `${REPO_RAW}data/current/`;
   const cache = new Map();
   const indexes = new Map();
@@ -155,8 +155,8 @@
     if (!maps.length && !mobs.length) return null;
     const media = document.createElement('div');
     media.className = `visual-media-strip${compact ? ' compact' : ''}`;
-    maps.forEach(row => media.appendChild(assetCard('map', row, entityName(row), 'COT2 map')));
-    mobs.forEach(row => media.appendChild(assetCard('mob', row, entityName(row), 'COT2 monster')));
+    maps.forEach(row => media.appendChild(assetCard('map', row, entityName(row), 'CURRENT map')));
+    mobs.forEach(row => media.appendChild(assetCard('mob', row, entityName(row), 'CURRENT monster')));
     return media;
   }
 
@@ -235,7 +235,7 @@
       const item = exactItem(idx, name); if (!item) return;
       const holder = document.createElement('span');
       holder.className = 'visual-inline-item visual-asset';
-      holder.title = `${name} · current COT2 client visual`;
+      holder.title = `${name} · current CURRENT client visual`;
       holder.appendChild(imageNode(itemImage(item), name, 'item'));
       nameEl.before(holder);
       row.classList.add('visualized-item-row');
@@ -271,15 +271,15 @@
         }
       }
 
-      if (row.querySelector('.visual-quest-cot2')) return;
-      const cot2 = questsIdx.exact.get(norm(title)); if (!cot2) return;
-      const requirements = Array.isArray(cot2.requirements_list) ? cot2.requirements_list : [];
-      const rewards = Array.isArray(cot2.rewards) ? cot2.rewards.filter(x => x?.type === 'item') : [];
+      if (row.querySelector('.visual-quest-current')) return;
+      const current = questsIdx.exact.get(norm(title)); if (!current) return;
+      const requirements = Array.isArray(current.requirements_list) ? current.requirements_list : [];
+      const rewards = Array.isArray(current.rewards) ? current.rewards.filter(x => x?.type === 'item') : [];
       if (!requirements.length && !rewards.length) return;
-      const panel = document.createElement('div'); panel.className = 'visual-quest-cot2';
+      const panel = document.createElement('div'); panel.className = 'visual-quest-current';
       if (requirements.length) {
         const block = document.createElement('div'); block.className = 'visual-quest-block';
-        const label = document.createElement('small'); label.className = 'visual-section-label'; label.textContent = 'COT2 needs'; block.appendChild(label);
+        const label = document.createElement('small'); label.className = 'visual-section-label'; label.textContent = 'CURRENT needs'; block.appendChild(label);
         requirements.forEach(req => {
           const source = req.type === 'mob' ? mobsIdx.byId.get(Number(req.id)) : req.type === 'item' ? itemsIdx.byId.get(Number(req.id)) : null;
           if (source) block.appendChild(assetCard(req.type === 'mob' ? 'mob' : 'item', source, req.name || entityName(source), `×${req.count || 1}`));
@@ -288,7 +288,7 @@
       }
       if (rewards.length) {
         const block = document.createElement('div'); block.className = 'visual-quest-block';
-        const label = document.createElement('small'); label.className = 'visual-section-label'; label.textContent = 'COT2 rewards'; block.appendChild(label);
+        const label = document.createElement('small'); label.className = 'visual-section-label'; label.textContent = 'CURRENT rewards'; block.appendChild(label);
         rewards.forEach(reward => {
           const item = itemsIdx.byId.get(Number(reward.id));
           if (item) block.appendChild(assetCard('item', item, reward.name || entityName(item), `×${reward.count || 1}`));
@@ -335,7 +335,7 @@
       thumb.classList.remove('db-thumb-empty');
       thumb.dataset.visualized = '1';
       thumb.appendChild(imageNode(mobImage(monster), label, 'mob', mobFallback(monster)));
-      thumb.title = 'Current COT2 client visual via OSMS.';
+      thumb.title = 'Current CURRENT client visual via TCW.';
     });
   }
 

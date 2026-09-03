@@ -1,5 +1,5 @@
 (() => {
-  const REPO_RAW = '/game-origin/';
+  const REPO_RAW = '/game-data/';
   const RAW = `${REPO_RAW}data/current/`;
   let lookupsPromise = null;
   let questsPromise = null;
@@ -73,7 +73,7 @@
       const title = row.querySelector('.quest-name')?.textContent?.trim();
       const quest = questIndex.get(norm(title)); if (!quest) return;
       const npc = resolveNpc(byName,quest); if (!npc) return;
-      const card = npcCard(npc,'COT2 quest giver');
+      const card = npcCard(npc,'CURRENT quest giver');
       const name = row.querySelector('.quest-name');
       name?.parentElement?.insertBefore(card,name);
       row.classList.add('visualized-npc-quest');
@@ -95,7 +95,7 @@
       }
       if (!quest) return;
       const npc = resolveNpc(byName,quest); if (!npc) return;
-      const holder = document.createElement('span'); holder.className = 'visual-npc-mini'; holder.title = `${npc.name} · COT2 quest giver`;
+      const holder = document.createElement('span'); holder.className = 'visual-npc-mini'; holder.title = `${npc.name} · CURRENT quest giver`;
       const img = document.createElement('img'); img.src=npcUrl(npc.id); img.alt=npc.name; img.loading='lazy';
       img.addEventListener('error',()=>holder.remove()); holder.appendChild(img); card.prepend(holder);
     });
@@ -111,7 +111,7 @@
       const title = card.querySelector('h3')?.textContent?.trim();
       const quest = questIndex.get(norm(title)); if (!quest) return;
       const npc = resolveNpc(byName,quest); if (!npc) return;
-      const cardNpc = npcCard(npc,'Current COT2 NPC'); cardNpc.classList.add('visual-db-npc');
+      const cardNpc = npcCard(npc,'Current CURRENT NPC'); cardNpc.classList.add('visual-db-npc');
       const relations = card.querySelector('.visual-db-relations');
       relations ? card.insertBefore(cardNpc,relations) : card.appendChild(cardNpc);
     });

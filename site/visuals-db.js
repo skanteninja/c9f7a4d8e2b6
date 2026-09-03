@@ -1,5 +1,5 @@
 (() => {
-  const REPO_RAW = '/game-origin/';
+  const REPO_RAW = '/game-data/';
   const RAW = `${REPO_RAW}data/current/`;
   const cache = new Map();
   const indices = new Map();
@@ -97,7 +97,7 @@
       const badge = document.createElement('i'); badge.className = 'visual-db-quest-badge'; badge.textContent = 'Q'; wrap.appendChild(badge);
     }
     const text = document.createElement('span');
-    text.innerHTML = `<b>${String(quest?.name || quest?.quest_name || `Quest #${quest?.id ?? '—'}`).replace(/[&<>"']/g,'')}</b><small>${String(note || quest?.npc_name || 'COT2 quest').replace(/[&<>"']/g,'')}</small>`;
+    text.innerHTML = `<b>${String(quest?.name || quest?.quest_name || `Quest #${quest?.id ?? '—'}`).replace(/[&<>"']/g,'')}</b><small>${String(note || quest?.npc_name || 'CURRENT quest').replace(/[&<>"']/g,'')}</small>`;
     wrap.appendChild(text); return wrap;
   }
 
@@ -267,9 +267,9 @@
       const id=cardId(card), item=items.byId.get(id); if(!item) return;
       const p=panel(card);
       const required=questLinks.requiredBy.get(id)||[];
-      const reqRel=relation('COT2 quest requirements',required.slice(0,12).map(x=>questAsset(x.quest,npcs,`needs ×${x.count}`)),required.length); if(reqRel)p.appendChild(reqRel);
+      const reqRel=relation('CURRENT quest requirements',required.slice(0,12).map(x=>questAsset(x.quest,npcs,`needs ×${x.count}`)),required.length); if(reqRel)p.appendChild(reqRel);
       const rewarded=questLinks.rewardedBy.get(id)||[];
-      const rewRel=relation('COT2 quest rewards',rewarded.slice(0,12).map(x=>questAsset(x.quest,npcs,`rewards ×${x.count}`)),rewarded.length); if(rewRel)p.appendChild(rewRel);
+      const rewRel=relation('CURRENT quest rewards',rewarded.slice(0,12).map(x=>questAsset(x.quest,npcs,`rewards ×${x.count}`)),rewarded.length); if(rewRel)p.appendChild(rewRel);
       const produced=craftLinks.producedBy.get(id)||[];
       const producedAssets=produced.slice(0,8).flatMap(recipe=>(recipe.ingredients||[]).map(ing=>({ing,row:items.exact.get(norm(ing.item_name))})).filter(x=>x.row).slice(0,6).map(x=>asset('item',x.row,`×${x.ing.count||1}`)));
       const prodRel=relation('Crafted from',producedAssets,producedAssets.length); if(prodRel)p.appendChild(prodRel);
@@ -277,7 +277,7 @@
       const consumeAssets=consumed.slice(0,12).map(x=>items.byId.get(Number(x.recipe.output_id))).filter(Boolean).map(row=>asset('item',row,'craft result'));
       const consumeRel=relation('Used to craft',consumeAssets,consumed.length); if(consumeRel)p.appendChild(consumeRel);
       if(p.children.length){
-        const note=document.createElement('small');note.className='visual-db-evidence-note';note.textContent='Relationships shown from the COT2 client export; they do not prove live server drops or shop inventory.';p.appendChild(note);
+        const note=document.createElement('small');note.className='visual-db-evidence-note';note.textContent='Relationships shown from the CURRENT client export; they do not prove live server drops or shop inventory.';p.appendChild(note);
       }
       card.dataset.visualDbDone=dataset;
     });

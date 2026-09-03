@@ -1,5 +1,5 @@
 (() => {
-  const RAW = '/game-origin/data/current/';
+  const RAW = '/game-data/data/current/';
   let timer = null;
   let mapsPromise = null;
   let cashResultsObserver = null;
@@ -74,12 +74,12 @@
       let img = preview.querySelector('img');
       if (!img) { img = document.createElement('img'); preview.appendChild(img); }
       if (img.src !== wanted) img.src = wanted;
-      img.alt = `${match.name} current COT2 map`;
+      img.alt = `${match.name} current CURRENT map`;
       img.loading = 'lazy';
       img.decoding = 'async';
-      img.dataset.dashboardMapSource = 'osms-current-cot2';
+      img.dataset.dashboardMapSource = 'tcw-current-current';
       img.onerror = () => removeBrokenPreview(row, preview);
-      preview.title = `${match.name} · current COT2 map`;
+      preview.title = `${match.name} · current CURRENT map`;
       row.classList.add('has-route-map');
       return;
     }
@@ -149,7 +149,7 @@
       card.dataset.cashAvailability = 'unavailable';
       if (price && priceText.toUpperCase() !== 'UNAVAILABLE') {
         price.textContent = 'UNAVAILABLE';
-        price.setAttribute('aria-label', 'Unavailable in the current COT2 Cash Shop catalog');
+        price.setAttribute('aria-label', 'Unavailable in the current CURRENT Cash Shop catalog');
       }
     });
     if (cards.length) {
