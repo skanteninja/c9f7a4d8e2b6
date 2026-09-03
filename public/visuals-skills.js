@@ -42,9 +42,7 @@
     const book=String(Math.trunc(id/10000)).padStart(3,'0');
     return `${MAPLE_WZ}${book}.img/skill/${id}/icon`;
   }
-  function iconSources(skill){
-    return [...new Set([iconUrl(skill),legacyWzIcon(skill)].filter(Boolean))];
-  }
+  function iconSources(skill){return [...new Set([iconUrl(skill),legacyWzIcon(skill)].filter(Boolean))];}
   function matchSkill(idx,text){
     const exact=idx.byName.get(norm(text));if(exact)return exact;
     const hay=` ${norm(text)} `;
@@ -98,9 +96,7 @@
   }
   function maxStat(skill){const arr=Array.isArray(skill?.all_level_stats)?skill.all_level_stats:[];return arr.length?String(arr[arr.length-1]):'';}
   function midpointStat(skill){const arr=Array.isArray(skill?.all_level_stats)?skill.all_level_stats:[];return arr.length?String(arr[Math.floor((arr.length-1)/2)]):'';}
-  function cleanDescription(skill){
-    return String(skill?.description||'').replace(/^\[Master Level\s*:?\s*\d+\]\s*/i,'').replace(/\s+/g,' ').trim();
-  }
+  function cleanDescription(skill){return String(skill?.description||'').replace(/^\[Master Level\s*:?\s*\d+\]\s*/i,'').replace(/\s+/g,' ').trim();}
 
   function makeSkillTreeInformational(){
     const list=document.getElementById('skill-list');if(!list)return;
@@ -143,6 +139,37 @@
     document.documentElement.classList.toggle('full-skill-beginner-ready',ready);
   }
 
+  function resolveDbSkill(idx,card){
+    if(!card)return null;
+    const title=String(card.querySelector('h3')?.textContent||'').trim();
+    const im=card.querySelector('.db-thumb img');
+    const titleMatch=idx.byName.get(norm(title));
+    if(titleMatch)return titleMatch;
+    const altMatch=idx.byName.get(norm(im?.alt||''));
+    if(altMatch)return altMatch;
+    const fuzzy=matchSkill(idx,title)||matchSkill(idx,im?.alt||'');
+    if(fuzzy)return fuzzy;
+    const numericCodes=[...card.querySelectorAll('code')].map(code=>String(code.textContent||'').trim()).filter(v=>/^\d+$/.test(v));
+    for(const value of numericCodes){const byId=idx.byId.get(Number(value));if(byId)return byId;}
+    return null;
+  }
+  function ensureDbSkillImage(card,skill){
+    if(!card||!skill)return null;
+    let thumb=card.querySelector('.db-thumb');
+    if(!thumb){thumb=document.createElement('div');thumb.className='db-thumb';card.prepend(thumb);}
+    let im=thumb.querySelector('img');
+    if(!im){im=img(skill);thumb.appendChild(im);}else applyCanonicalImage(im,skill);
+    card.dataset.canonicalSkillId=String(skill.id||'');
+    card.dataset.canonicalSkillName=String(skill.name||'');
+    return im;
+  }
+  function canonicalizeDbSkills(idx){
+    if(document.getElementById('db-dataset')?.value!=='skills')return;
+    document.querySelectorAll('#db-results .db-card').forEach(card=>{
+      const skill=resolveDbSkill(idx,card);if(skill)ensureDbSkillImage(card,skill);
+    });
+  }
+
   function canonicalizeSkillImages(idx){
     const selectors=[
       '#skill-list .skill-row img[alt]',
@@ -155,13 +182,7 @@
     document.querySelectorAll(selectors.join(',')).forEach(im=>{
       const skill=idx.byName.get(norm(im.alt))||matchSkill(idx,im.alt);if(skill)applyCanonicalImage(im,skill);
     });
-    if(document.getElementById('db-dataset')?.value==='skills'){
-      document.querySelectorAll('#db-results .db-card').forEach(card=>{
-        const im=card.querySelector('.db-thumb img');if(!im)return;
-        const rawId=card.querySelector('code')?.textContent?.replace(/\D/g,'');
-        const skill=idx.byId.get(Number(rawId))||idx.byName.get(norm(im.alt));if(skill)applyCanonicalImage(im,skill);
-      });
-    }
+    canonicalizeDbSkills(idx);
     document.documentElement.classList.add('canonical-skill-icons-ready');
   }
 
@@ -204,10 +225,12 @@
     if(document.getElementById('db-dataset')?.value!=='skills')return;
     const cards=[...document.querySelectorAll('#db-results .db-card')];if(!cards.length)return;
     cards.forEach(card=>{
-      const rawId=card.querySelector('code')?.textContent?.replace(/\D/g,'');const id=Number(rawId);const skill=idx.byId.get(id);if(!skill)return;
-      const mainImg=card.querySelector('.db-thumb img');if(mainImg)applyCanonicalImage(mainImg,skill);
-      if(card.querySelector('.visual-db-skill-chain'))return;
-      const req=requiredSkill(idx,skill);const panel=document.createElement('div');panel.className='visual-db-skill-chain';
+      const skill=resolveDbSkill(idx,card);if(!skill)return;
+      ensureDbSkillImage(card,skill);
+      const existingPanel=card.querySelector('.visual-db-skill-chain');
+      if(existingPanel&&existingPanel.dataset.skillId===String(skill.id))return;
+      existingPanel?.remove();
+      const req=requiredSkill(idx,skill);const panel=document.createElement('div');panel.className='visual-db-skill-chain';panel.dataset.skillId=String(skill.id||'');
       const path=document.createElement('div');path.className='visual-skill-path';
       if(req){path.appendChild(node(req.skill,'Prerequisite',`${req.name} Lv${req.level}`));const arrow=document.createElement('i');arrow.textContent='→';path.appendChild(arrow);}
       path.appendChild(node(skill,'Skill',`Max Lv${skill.max_level||'—'}`));panel.appendChild(path);
