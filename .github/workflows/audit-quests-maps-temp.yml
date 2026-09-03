@@ -11,14 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Print ETC planner source fields
+      - name: Audit missing bankable quest materials
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github.raw+json' \
+            'https://api.github.com/repos/ohmi69/osms_datamine_dashboard/contents/data/current/quests.json?ref=main' -o /tmp/quests.json
           node - <<'NODE'
-          const fs=require('fs'),zlib=require('zlib');const root=process.cwd();
-          function chunk(name){const d=`${root}/public/repairs/${name}`;if(fs.existsSync(d))return fs.readFileSync(d,'utf8');const stem=name.replace(/\.txt$/,'');let r='';for(let i=0;;i++){const p=`${root}/public/repairs/${stem}.part${i}.txt`;if(!fs.existsSync(p))break;r+=fs.readFileSync(p,'utf8')}return r||fs.readFileSync(`${root}/public/assets/runtime/${name}`,'utf8')}
-          let b='';for(let i=0;i<6;i++)b+=chunk(`guide.${String(i).padStart(2,'0')}.txt`).replace(/\s+/g,'');const g=JSON.parse(zlib.gunzipSync(Buffer.from(b,'base64')).toString('utf8'));
-          for(const x of g.etc||[])console.log(JSON.stringify(x));
+          const q=JSON.parse(require('fs').readFileSync('/tmp/quests.json','utf8')).quests||[];
+          const wanted=["Cursed Doll","Stone Golem Rubble","Tablecloth","Lorang Claw","Star Pixie's Starpiece","Hector Tail","White Fang Tail","Cerebes Tooth","Drake Skull","Lupin's Banana","Dragon Skin","Curse Eye Tail","Clang Claw","Coconut","Bubbling's Huge Bubble","Cold Eye Tail","Squishy Liquid","Stirge Wing","Fire Boar's Tooth","Dark Stone Golem Rubble","Croco Skin","Lunar Pixie's Moonpiece","Zombie's Lost Tooth","Zombie's Lost Gold Tooth","Processed Wood","Stiff Feather","Jr. Sentinel Shellpiece","Iron Hog's Metal Hoof","Lupin Doll","Tortie Shell","Evil Eye Tail","Firewood","Luster Pixie's Sunpiece","Leather"];
+          for(const name of wanted){
+            const rows=[];
+            for(const quest of q){for(const r of quest.requirements_list||[]){if(r.type==='item'&&r.name===name&&(+quest.level_min||0)<=70)rows.push({quest:quest.name,count:+r.count||0,level:+quest.level_min||0,weekly:!!quest.is_weekly,region:quest.region||'',id:String(quest.id)})}}
+            const one=rows.filter(x=>!x.weekly).reduce((s,x)=>s+x.count,0),weekly=Math.max(0,...rows.filter(x=>x.weekly).map(x=>x.count)),start=Math.min(...rows.filter(x=>!x.weekly).map(x=>x.level).filter(Number.isFinite));
+            console.log([name,one,one>0?Math.ceil(one*1.15):0,weekly,Number.isFinite(start)?start:'',rows.filter(x=>!x.weekly).map(x=>`${x.quest} x${x.count}`).join('; ')].join('|'));
+          }
           NODE
