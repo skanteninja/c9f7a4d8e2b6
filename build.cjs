@@ -152,6 +152,19 @@ function patchApp(raw) {
   const etcChipNamed = '<span class="etc-icon-shell" data-etc-icon-name="${esc(x.Item)}">◌</span><span class="tcw-etc-name">${esc(x.Item)}</span><b>';
   if (!app.includes(etcChipNeedle)) throw new Error('ETC queue chip markup patch target missing');
   app = app.replaceAll(etcChipNeedle, etcChipNamed);
+
+  // The full Skill Tree is informational: the core renderer never emits completion checkboxes.
+  const skillRenderer=fs.readFileSync(path.join(root,'patches','skill-renderer.txt'),'utf8').trimEnd();
+  const skillStart=app.indexOf('  function renderSkills(){');
+  const skillEnd=app.indexOf("\n\n  ['etc-search'",skillStart);
+  if(skillStart<0||skillEnd<0) throw new Error('Skill Tree renderer patch target missing');
+  app=app.slice(0,skillStart)+skillRenderer+app.slice(skillEnd);
+
+  // Never use the generic icon endpoint for skills; it can resolve to unrelated item artwork.
+  const genericSkillCandidates="return [...new Set([String(skill.url||'').trim(),mapleIoSkillIcon(skill)].filter(Boolean))];";
+  const safeSkillCandidates="return [...new Set([mapleIoSkillIcon(skill)].filter(Boolean))];";
+  if(!app.includes(genericSkillCandidates)) throw new Error('generic skill icon candidate patch target missing');
+  app=app.replace(genericSkillCandidates,safeSkillCandidates);
   return app;
 }
 
