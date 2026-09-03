@@ -1,70 +1,77 @@
-/* Equipment progression now lives directly on the clickable inventory slots. */
+/* Equipment progression lives directly on the clickable inventory slots. */
 .progression-loadout-strip{display:none!important}
 .v5-avatar .avatar-equipped-icons,.dashboard-v72 .v5-avatar .avatar-equipped-icons{display:none!important}
-.gear-slot.progression-recommended-equipped{box-shadow:0 0 0 1px rgba(96,165,250,.3) inset}
-.gear-slot.progression-new-equipped{box-shadow:0 0 0 2px rgba(251,191,36,.45) inset,0 0 12px rgba(251,191,36,.08)}
-.progression-slot-marker{position:absolute;left:3px;bottom:3px;z-index:4;padding:2px 3px;border-radius:4px;background:rgba(30,64,175,.9);border:1px solid rgba(147,197,253,.3);font-size:6px;font-weight:900;line-height:1;color:#dbeafe;letter-spacing:.02em;pointer-events:none}
-.gear-slot.progression-new-equipped .progression-slot-marker{background:rgba(146,64,14,.94);border-color:rgba(253,230,138,.42);color:#fef3c7}
-.gear-slot.progression-target-mismatch:not(.progression-recommended-equipped){outline:1px dashed rgba(96,165,250,.18);outline-offset:-2px}
+.gear-slot.progression-recommended-equipped{box-shadow:0 0 0 1px rgba(96,165,250,.24) inset}
+.gear-slot.progression-new-equipped{box-shadow:0 0 0 1px rgba(251,191,36,.38) inset,0 0 9px rgba(251,191,36,.06)}
+.progression-slot-marker{position:absolute;left:3px;bottom:3px;z-index:4;padding:2px 3px;border-radius:4px;background:rgba(30,64,175,.88);border:1px solid rgba(147,197,253,.24);font-size:6px;font-weight:900;line-height:1;color:#dbeafe;letter-spacing:.02em;pointer-events:none}
+.gear-slot.progression-new-equipped .progression-slot-marker{background:rgba(146,64,14,.9);border-color:rgba(253,230,138,.34);color:#fef3c7}
+.gear-slot.progression-target-mismatch:not(.progression-recommended-equipped){outline:1px dashed rgba(96,165,250,.13);outline-offset:-2px}
 
-/* Compact dashboard hero: less framing, more page content above the fold. */
-.dashboard-v72 .v72-hero-grid{grid-template-columns:minmax(330px,1fr) minmax(320px,.92fr) minmax(190px,.52fr);gap:9px}
-.dashboard-v72 .v72-hero-grid>.panel{border-radius:13px;box-shadow:0 7px 18px rgba(0,0,0,.08)}
-.dashboard-v72 .v5-panel-heading{margin-bottom:7px;gap:8px}
-.dashboard-v72 .v5-panel-heading h3{font-size:15px;margin-top:2px}
-.dashboard-v72 .v5-panel-heading small{font-size:8px;line-height:1.3}
-.dashboard-v72 .v5-panel-heading .eyebrow{font-size:8px}
-.dashboard-v72 .auto-gear-badge{padding:3px 5px;font-size:6px}
+/* Dashboard hero now has two cards only: equipment + character progression. */
+.dashboard-v72 .v72-hero-grid{grid-template-columns:minmax(285px,.68fr) minmax(500px,1.32fr);gap:7px}
+.dashboard-v72 .v72-hero-grid>.panel{border-color:rgba(126,164,215,.09);border-radius:11px;box-shadow:0 5px 14px rgba(0,0,0,.06)}
+.dashboard-v72 .v5-panel-heading{margin-bottom:5px;gap:7px}
+.dashboard-v72 .v5-panel-heading h3{font-size:14px;margin-top:1px}
+.dashboard-v72 .v5-panel-heading small{font-size:8px;line-height:1.25}
+.dashboard-v72 .v5-panel-heading .eyebrow{font-size:7px}
+.dashboard-v72 .auto-gear-badge{padding:2px 5px;font-size:6px;border-color:rgba(98,212,154,.16)}
 
-.dashboard-v72 .v5-equipment-hero{min-height:292px;padding:11px}
-.dashboard-v72 .v5-equipment-window{min-height:0}
-.dashboard-v72 .v5-equipment-window .slot-grid{grid-template-columns:repeat(5,48px);grid-template-rows:repeat(5,48px);gap:5px;min-height:248px;padding:7px;max-width:276px;margin:0 auto}
-.dashboard-v72 .v5-equipment-window .gear-slot{padding:4px;border-radius:6px}
-.dashboard-v72 .v5-equipment-window .gear-slot img{max-width:34px;max-height:34px}
+/* Equipment: reduce framing further; the slots are the interface. */
+.dashboard-v72 .v5-equipment-hero{min-height:278px;padding:8px;border-color:rgba(126,164,215,.075)}
+.dashboard-v72 .v5-equipment-window{min-height:0;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.dashboard-v72 .v5-equipment-window .slot-grid{grid-template-columns:repeat(5,46px);grid-template-rows:repeat(5,46px);gap:4px;min-height:234px;padding:4px;max-width:254px;margin:0 auto;border:0!important;border-radius:7px;background:rgba(7,10,17,.42);box-shadow:none!important}
+.dashboard-v72 .v5-equipment-window .gear-slot{padding:3px;border-radius:5px;border-color:rgba(126,164,215,.13);box-shadow:none}
+.dashboard-v72 .v5-equipment-window .gear-slot:hover{border-color:rgba(115,217,255,.28);box-shadow:0 5px 12px rgba(0,0,0,.14)}
+.dashboard-v72 .v5-equipment-window .gear-slot img{max-width:33px;max-height:33px}
 .dashboard-v72 .v5-equipment-window .gear-slot .slot-name{font-size:6px}
 .dashboard-v72 .v5-equipment-window .gear-slot em{font-size:5px;bottom:2px;left:3px}
-.dashboard-v72 .v5-equipment-window .core-orb{border-radius:8px}
-.dashboard-v72 .v5-equipment-window .core-orb img{width:27px;height:27px}
+.dashboard-v72 .v5-equipment-window .core-orb{border-color:rgba(115,217,255,.1);border-radius:7px;background:rgba(9,15,24,.45)}
+.dashboard-v72 .v5-equipment-window .core-orb img{width:26px;height:26px}
 .dashboard-v72 .v5-equipment-window .core-orb span{font-size:5px}
 
-.dashboard-v72 .v5-character-hero{min-height:292px;grid-template-columns:132px minmax(0,1fr);gap:11px;padding:13px}
-.dashboard-v72 .v5-character-hero:before{width:250px;height:250px;right:-55px;bottom:-85px}
-.dashboard-v72 .v5-avatar{height:190px}
-.dashboard-v72 .v5-avatar .avatar-aura{width:132px;height:132px}
-.dashboard-v72 .v5-avatar .avatar-character{max-width:142px;max-height:172px;filter:drop-shadow(0 10px 14px rgba(0,0,0,.36))}
-.dashboard-v72 .v5-avatar .avatar-job-badge{bottom:8px;right:2px;font-size:7px;padding:3px 5px}
-.dashboard-v72 .v5-character-copy h3{font-size:24px;margin:3px 0 5px}
-.dashboard-v72 .v5-character-copy>p{font-size:12px;margin:0 0 10px;line-height:1.3}
+/* Combined character + level progression card. */
+.dashboard-v72 .v5-character-hero{min-height:278px;grid-template-columns:176px minmax(0,1fr);align-items:center;gap:14px;padding:11px 13px}
+.dashboard-v72 .v5-character-hero:before{width:240px;height:240px;right:-55px;bottom:-88px;opacity:.72}
+.dashboard-v72 .progression-avatar-column{display:grid;grid-template-rows:auto auto;align-content:center;gap:3px;min-width:0;position:relative;z-index:2}
+.dashboard-v72 .v5-avatar{height:162px}
+.dashboard-v72 .v5-avatar .avatar-aura{width:118px;height:118px}
+.dashboard-v72 .v5-avatar .avatar-character{max-width:134px;max-height:154px;filter:drop-shadow(0 9px 12px rgba(0,0,0,.32))}
+.dashboard-v72 .v5-avatar .avatar-job-badge{bottom:4px;right:5px;font-size:6px;padding:3px 4px}
+
+.dashboard-v72 .progression-avatar-level-controls{min-width:0;padding:6px 3px 1px;border-top:1px solid rgba(126,164,215,.07)}
+.dashboard-v72 .progression-avatar-level-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}
+.dashboard-v72 .progression-avatar-level-head span{font-size:6px;font-weight:900;letter-spacing:.11em;color:#777f91}
+.dashboard-v72 .progression-avatar-level-head b{font-size:8px;color:#ff9856}
+.dashboard-v72 .progression-avatar-level-controls .v5-level-stepper{grid-template-columns:27px minmax(0,1fr) 27px;gap:5px}
+.dashboard-v72 .progression-avatar-level-controls .v5-level-stepper .level-round{width:27px;height:27px;font-size:15px;border-radius:6px;border-color:rgba(126,164,215,.14)}
+.dashboard-v72 .progression-avatar-level-controls .v5-level-stepper select{height:27px;padding:0 6px;font-size:9px;border-radius:6px;border-color:rgba(126,164,215,.14)}
+.dashboard-v72 .progression-avatar-level-controls .v5-level-range{width:100%;margin:8px 0 4px;height:3px}
+.dashboard-v72 .progression-avatar-level-controls .v5-milestones{font-size:6px}
+.dashboard-v72 .progression-avatar-level-controls .v5-milestones b{font-size:7px}
+.dashboard-v72 .progression-avatar-level-controls .v5-milestones small{font-size:5px}
+
+.dashboard-v72 .v5-character-copy h3{font-size:23px;margin:3px 0 5px}
+.dashboard-v72 .v5-character-copy>p{font-size:12px;margin:0 0 9px;line-height:1.28}
 .dashboard-v72 .v5-quick-metrics{gap:5px}
-.dashboard-v72 .v5-quick-metrics button{min-height:53px;padding:7px 8px;border-radius:8px}
+.dashboard-v72 .v5-quick-metrics button{min-height:50px;padding:6px 8px;border-radius:7px}
 .dashboard-v72 .v5-quick-metrics small{font-size:7px;margin-bottom:3px}
-.dashboard-v72 .v5-quick-metrics b{font-size:9px;line-height:1.25}
+.dashboard-v72 .v5-quick-metrics b{font-size:9px;line-height:1.22}
 
-.dashboard-v72 .v5-level-hero{min-height:292px;padding:14px}
-.dashboard-v72 .v5-level-caption{font-size:8px}
-.dashboard-v72 .v5-level-number{gap:5px;margin:6px 0 0}
-.dashboard-v72 .v5-level-number span{font-size:19px}
-.dashboard-v72 .v5-level-number strong{font-size:58px}
-.dashboard-v72 .v5-job-line{font-size:12px;margin:4px 0 11px}
-.dashboard-v72 .v5-level-stepper{grid-template-columns:31px 1fr 31px;gap:6px}
-.dashboard-v72 .v5-level-stepper .level-round{width:31px;height:31px;font-size:17px;border-radius:7px}
-.dashboard-v72 .v5-level-stepper select{height:31px;padding:0 8px;font-size:11px;border-radius:7px}
-.dashboard-v72 .v5-level-range{margin:12px 0 7px;height:3px}
-.dashboard-v72 .v5-milestones{font-size:7px}
-.dashboard-v72 .v5-milestones b{font-size:8px}.dashboard-v72 .v5-milestones small{font-size:6px}
+/* The original standalone level panel is removed by JS after its real controls are moved. */
+.dashboard-v72 .v5-level-hero,.dashboard-v72 .v72-level-hero{display:none!important}
 
-@media(max-width:1250px){
-  .dashboard-v72 .v72-hero-grid{grid-template-columns:minmax(300px,1fr) minmax(300px,1fr)}
-  .dashboard-v72 .v72-level-hero{grid-column:1/-1;min-height:220px}
+@media(max-width:1100px){
+  .dashboard-v72 .v72-hero-grid{grid-template-columns:minmax(270px,.72fr) minmax(420px,1.28fr)}
+  .dashboard-v72 .v5-character-hero{grid-template-columns:166px minmax(0,1fr)}
 }
 @media(max-width:850px){
   .dashboard-v72 .v72-hero-grid{grid-template-columns:1fr}
-  .dashboard-v72 .v72-level-hero{grid-column:auto}
-  .dashboard-v72 .v5-character-hero{grid-template-columns:120px minmax(0,1fr)}
+  .dashboard-v72 .v5-character-hero{grid-template-columns:166px minmax(0,1fr)}
 }
 @media(max-width:560px){
-  .dashboard-v72 .v5-equipment-hero,.dashboard-v72 .v5-character-hero,.dashboard-v72 .v5-level-hero{min-height:0}
+  .dashboard-v72 .v5-equipment-hero,.dashboard-v72 .v5-character-hero{min-height:0}
   .dashboard-v72 .v5-character-hero{grid-template-columns:1fr;text-align:center}
-  .dashboard-v72 .v5-avatar{height:160px}
+  .dashboard-v72 .progression-avatar-column{max-width:190px;width:100%;margin:0 auto}
+  .dashboard-v72 .v5-avatar{height:150px}
   .dashboard-v72 .v5-quick-metrics{text-align:left}
 }
