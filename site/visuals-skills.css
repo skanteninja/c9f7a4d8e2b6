@@ -1,1 +1,56 @@
-.visual-skill-meta{grid-column:3/-1;display:grid;gap:7px;margin-top:7px;padding:8px;border:1px solid rgba(140,165,210,.13);border-radius:10px;background:rgba(255,255,255,.02)}.visual-skill-path{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.visual-skill-path>i{font-style:normal;font-size:14px;opacity:.5}.visual-skill-node{display:flex;align-items:center;gap:7px;min-width:145px;padding:6px 8px;border:1px solid rgba(140,165,210,.16);border-radius:9px;background:rgba(255,255,255,.024)}.visual-skill-node img{width:34px;height:34px;object-fit:contain;flex:0 0 auto}.visual-skill-node span{display:flex;flex-direction:column;min-width:0}.visual-skill-node small{font-size:7px;letter-spacing:.08em;text-transform:uppercase;opacity:.55}.visual-skill-node b{font-size:10px;line-height:1.15}.visual-skill-node em{font-size:8px;opacity:.62;font-style:normal;margin-top:2px}.visual-skill-missing{display:none!important}.visual-skill-stats{display:flex;gap:5px;flex-wrap:wrap}.visual-skill-stats span,.visual-cot2-skill-badge{display:inline-flex;align-items:center;padding:4px 6px;border-radius:7px;border:1px solid rgba(140,165,210,.14);background:rgba(255,255,255,.025);font-size:7px;line-height:1.2;opacity:.78}.visual-cot2-skill-badge{position:absolute;right:5px;bottom:5px;font-size:6px;letter-spacing:.04em}.atlas-skill-card{position:relative}.visual-skill-source{display:block;margin-top:7px;font-size:7px;opacity:.5}.visual-db-skill-chain{display:grid;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(140,165,210,.12)}.visual-skill-level-preview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.visual-skill-level-preview>div{padding:7px;border:1px solid rgba(140,165,210,.13);border-radius:8px;background:rgba(255,255,255,.02)}.visual-skill-level-preview b{display:block;font-size:8px;color:#a9dfff;margin-bottom:3px}.visual-skill-level-preview span{display:block;font-size:8px;line-height:1.25;opacity:.7}@media(max-width:720px){.visual-skill-meta{grid-column:1/-1}.visual-skill-node{min-width:128px}.visual-skill-level-preview{grid-template-columns:1fr}}
+/* Full Skill Tree is a reference surface, not a completion checklist. */
+.page[data-page="skills"] .skill-row{grid-template-columns:55px 42px 42px minmax(180px,.9fr) minmax(220px,1.45fr) 96px!important;align-items:center}
+.page[data-page="skills"] .skill-row.done{opacity:1!important;filter:none!important}
+.page[data-page="skills"] .skill-row .skill-check,.page[data-page="skills"] .skill-row input[type="checkbox"]{display:none!important}
+.page[data-page="skills"] .skill-row>div:nth-child(3){display:grid;place-items:center;min-width:38px}
+.page[data-page="skills"] .skill-row .skill-result{grid-column:4/-1!important}
+.page[data-page="skills"] .skill-icon{width:34px;height:34px;object-fit:contain}
+.canonical-skill-icon{object-fit:contain!important}
+.skill-icon-unavailable{display:none!important}
+
+.skill-beginner-reference{display:grid;gap:12px;margin:0 0 12px;padding:15px;border:1px solid rgba(115,217,255,.22);border-radius:15px;background:linear-gradient(135deg,rgba(115,217,255,.075),rgba(140,124,255,.045))}
+.skill-beginner-head{display:flex;justify-content:space-between;align-items:end;gap:18px}
+.skill-beginner-head h3{margin:3px 0 0;font-size:16px}
+.skill-beginner-head p{max-width:510px;margin:0;color:#aeb8cb;font-size:10px;line-height:1.4;text-align:right}
+.skill-beginner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.skill-beginner-card{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:center;min-width:0;padding:11px;border:1px solid rgba(140,165,210,.16);border-radius:11px;background:#0e1420}
+.skill-beginner-icon{width:40px;height:40px;display:grid;place-items:center;border:1px solid rgba(115,217,255,.12);border-radius:9px;background:#0a101a}
+.skill-beginner-icon img{width:34px!important;height:34px!important;object-fit:contain}
+.skill-beginner-title{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.skill-beginner-title b{font-size:12px;color:#eef5ff}
+.skill-beginner-title span{font-size:9px;font-weight:900;color:#82dcff;white-space:nowrap}
+.skill-beginner-card p{margin:4px 0 5px;color:#aab5c8;font-size:9px;line-height:1.35}
+.skill-beginner-card small{display:block;color:#758197;font-size:8px;line-height:1.25}
+
+.visual-skill-meta{grid-column:3/-1;display:grid;gap:7px;margin-top:7px;padding:8px;border:1px solid rgba(140,165,210,.13);border-radius:10px;background:rgba(255,255,255,.02)}
+.visual-skill-path{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.visual-skill-path>i{font-style:normal;font-size:14px;opacity:.5}
+.visual-skill-node{display:flex;align-items:center;gap:7px;min-width:145px;padding:6px 8px;border:1px solid rgba(140,165,210,.16);border-radius:9px;background:rgba(255,255,255,.024)}
+.visual-skill-node img{width:34px;height:34px;object-fit:contain;flex:0 0 auto}
+.visual-skill-node span{display:flex;flex-direction:column;min-width:0}
+.visual-skill-node small{font-size:7px;letter-spacing:.08em;text-transform:uppercase;opacity:.55}
+.visual-skill-node b{font-size:10px;line-height:1.15}
+.visual-skill-node em{font-size:8px;opacity:.62;font-style:normal;margin-top:2px}
+.visual-skill-missing{display:none!important}
+.visual-skill-stats{display:flex;gap:5px;flex-wrap:wrap}
+.visual-skill-stats span,.visual-cot2-skill-badge{display:inline-flex;align-items:center;padding:4px 6px;border-radius:7px;border:1px solid rgba(140,165,210,.14);background:rgba(255,255,255,.025);font-size:7px;line-height:1.2;opacity:.78}
+.visual-cot2-skill-badge{position:absolute;right:5px;bottom:5px;font-size:6px;letter-spacing:.04em}
+.atlas-skill-card{position:relative}
+.visual-skill-source{display:block;margin-top:7px;font-size:7px;opacity:.5}
+.visual-db-skill-chain{display:grid;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(140,165,210,.12)}
+.visual-skill-level-preview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.visual-skill-level-preview>div{padding:7px;border:1px solid rgba(140,165,210,.13);border-radius:8px;background:rgba(255,255,255,.02)}
+.visual-skill-level-preview b{display:block;font-size:8px;color:#a9dfff;margin-bottom:3px}
+.visual-skill-level-preview span{display:block;font-size:8px;line-height:1.25;opacity:.7}
+
+@media(max-width:900px){
+  .skill-beginner-grid{grid-template-columns:1fr}
+  .skill-beginner-head{align-items:start;flex-direction:column;gap:6px}
+  .skill-beginner-head p{text-align:left;max-width:none}
+}
+@media(max-width:760px){
+  .page[data-page="skills"] .skill-row{grid-template-columns:45px 32px 38px minmax(0,1fr)!important}
+  .page[data-page="skills"] .skill-row .skill-why,.page[data-page="skills"] .skill-row .skill-result{grid-column:4!important}
+  .page[data-page="skills"] .skill-row>div:nth-child(6){grid-column:4}
+}
+@media(max-width:720px){.visual-skill-meta{grid-column:1/-1}.visual-skill-node{min-width:128px}.visual-skill-level-preview{grid-template-columns:1fr}}
