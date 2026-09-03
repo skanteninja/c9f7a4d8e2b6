@@ -1,0 +1,41 @@
+name: Patch dashboard queue counts temp
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/patch-queue-counts-temp.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch core build transform
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('build.cjs')
+          s=p.read_text()
+          marker='\n  return app;\n}\n\nfunction patchHtml'
+          assert marker in s, 'patchApp return marker missing'
+          block=r'''
+  // Dashboard queues use the physical space available in the equal-height action row.
+  app = app.replace(
+    `.sort((a,b)=>(rank[a.Priority]??9)-(rank[b.Priority]??9)||Number(a.Lv||0)-Number(b.Lv||0)).slice(0,4);`,
+    `.sort((a,b)=>(rank[a.Priority]??9)-(rank[b.Priority]??9)||Number(a.Lv||0)-Number(b.Lv||0)).slice(0,8);`
+  );
+  app = app.replace(
+    `.sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,6);`,
+    `.sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,12);`
+  );
+'''
+          s=s.replace(marker,'\n'+block+'  return app;\n}\n\nfunction patchHtml',1)
+          p.write_text(s)
+          PY
+          git rm .github/workflows/patch-queue-counts-temp.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add build.cjs
+          git commit -m 'Dashboard: expand quest and ETC queue limits'
+          git push
