@@ -39,6 +39,7 @@ function ownedUrls(text) {
     .replaceAll('https://meowdb.com/msclassic/api/assets/icons/', '/game-media/icons/')
     .replaceAll('https://api.dreamms.gg/api/GMS/latest/item/', '/game-media/items/primary/')
     .replaceAll('https://api.dreamms.gg/api/GMS/latest/pet/', '/game-media/pets/')
+    .replaceAll('https://api.dreamms.gg/api/GMS/latest/character/', '/game-media/characters/')
     .replaceAll('https://maplestory.io/api/GMS/83/item/', '/game-media/items/fallback/')
     .replaceAll('https://maplestory.io/api/wz/img/GMS/83/Skill/', '/game-media/skills/');
 }
