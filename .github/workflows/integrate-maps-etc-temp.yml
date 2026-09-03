@@ -1,0 +1,120 @@
+name: Integrate maps and quest audit temp
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate missing current quest snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github.raw+json' \
+            'https://api.github.com/repos/ohmi69/osms_datamine_dashboard/contents/data/current/quests.json?ref=main' -o /tmp/current-quests.json
+          node - <<'NODE'
+          const fs=require('fs'),zlib=require('zlib');
+          function readChunk(name){const d=`public/repairs/${name}`;if(fs.existsSync(d))return fs.readFileSync(d,'utf8');const stem=name.replace(/\.txt$/,'');let r='';for(let i=0;;i++){const p=`public/repairs/${stem}.part${i}.txt`;if(!fs.existsSync(p))break;r+=fs.readFileSync(p,'utf8');}return r||fs.readFileSync(`public/assets/runtime/${name}`,'utf8');}
+          let b='';for(let i=0;i<6;i++)b+=readChunk(`guide.${String(i).padStart(2,'0')}.txt`).replace(/\s+/g,'');const guide=JSON.parse(zlib.gunzipSync(Buffer.from(b,'base64')).toString('utf8'));
+          const current=JSON.parse(fs.readFileSync('/tmp/current-quests.json','utf8')).quests||[];
+          const existing=new Set((guide.quests||[]).map(q=>`${String(q.Quest||'').trim()}|${String(q.Region||'').trim()}`));
+          const otherJob=/\b(?:Dances with Balrog|Athena Pierce|Dark Lord)\b/i;
+          const otherJobParents=/\b(?:Path of the Warrior|Path of the Bowman|Path of the Thief)\b/i;
+          const isAllowed=q=>{
+            if(q.is_weekly||(+q.level_min||0)>70)return false;
+            const text=[q.name,q.parent,q.npc_name,q.description].join(' ');
+            if(otherJobParents.test(text))return false;
+            if(/^(?:Finding the Instructor|Test of Qualification|Proof of Qualification)$/i.test(String(q.name||''))&&otherJob.test(text))return false;
+            return true;
+          };
+          const clean=s=>String(s||'').replace(/\s+/g,' ').trim();
+          const additions=[];
+          for(const q of current){
+            if(!isAllowed(q))continue;
+            const key=`${clean(q.name)}|${clean(q.region)}`;if(existing.has(key))continue;
+            const itemReq=(q.requirements_list||[]).filter(r=>r.type==='item'&&r.name&&+r.count);
+            const reward=clean(q.rewards_items||'');
+            const save=itemReq.map(r=>`${r.name} ×${r.count}`).join(' · ');
+            additions.push({
+              'Done?':false,'Priority':'Low / Optional','Lv':q.level_min??null,'Quest':clean(q.name),'Region':clean(q.region)||'Current World','Eligibility':/Grendel the Really Old|Magician/i.test([q.parent,q.npc_name,q.description].join(' '))?'Magician':'Any class','Repeatable':'No','EXP':q.rewards_exp??null,'Mesos':q.rewards_money??null,'Reward / Unlock':reward||null,'Why Do It':'Added by the September 2026 current-quest re-audit so the tracker and lifetime ETC totals stay complete.','Status':'Current quest data','Your Note':null,'ETC / Item To Save':save||null,'Qty':itemReq.length===1?itemReq[0].count:null,'Save Guidance':save?`Bank ${save} before reaching this quest to avoid backtracking.`:null,'Evidence Class':'CONFIRMED / CURRENT-SCOPE'
+            });
+            existing.add(key);
+          }
+          additions.sort((a,b)=>(Number(a.Lv)||0)-(Number(b.Lv)||0)||String(a.Region).localeCompare(String(b.Region))||String(a.Quest).localeCompare(String(b.Quest)));
+          const js=`(() => {\n  const D=window.GUIDE_DATA;if(!D||!Array.isArray(D.quests))return;\n  const additions=${JSON.stringify(additions)};\n  const key=q=>\`${'${String(q.Quest||\'\').trim()}|${String(q.Region||\'\').trim()}'}\`;\n  const seen=new Set(D.quests.map(key));\n  for(const q of additions)if(!seen.has(key(q))){D.quests.push(q);seen.add(key(q));}\n  D.quests.sort((a,b)=>(Number(a.Lv)||0)-(Number(b.Lv)||0)||String(a.Region||'').localeCompare(String(b.Region||''))||String(a.Quest||'').localeCompare(String(b.Quest||'')));\n  window.TCW_QUEST_AUDIT={revision:'2026-09-04',added:additions.length,total:D.quests.length};\n  document.documentElement.classList.add('quest-catalog-audit-ready');\n})();\n`;
+          fs.writeFileSync('public/quest-audit-additions.js',js);
+          console.log(`Generated ${additions.length} missing current quest records; total after merge ${guide.quests.length+additions.length}`);
+          NODE
+      - name: Wire audited data and Maps into static build
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('public/index.html'); s=p.read_text()
+          if 'data-page="maps" class="nav-btn"' not in s:
+              needle='<button data-page="equipment" class="nav-btn"><span>◆</span> Equipment</button>'
+              s=s.replace(needle,'<button data-page="maps" class="nav-btn"><span>⌖</span> Maps</button>\n        '+needle)
+          if '<section data-page="maps" class="page"></section>' not in s:
+              needle='      <section data-page="equipment" class="page">'
+              s=s.replace(needle,'      <section data-page="maps" class="page"></section>\n\n'+needle)
+          if 'etc-audit-data.js?v=0.8.0' not in s:
+              s=s.replace('  <script src="app.js?v=0.8.0"></script>','  <script src="etc-audit-data.js?v=0.8.0"></script>\n  <script src="quest-audit-additions.js?v=0.8.0"></script>\n  <script src="app.js?v=0.8.0"></script>')
+          p.write_text(s)
+
+          p=Path('public/maps-tab.js'); s=p.read_text(); s=s.replace("setWorldZoom(state.zoom+(v==='+'?.15:-.15));","setWorldZoom(state.zoom + (v==='+' ? .15 : -.15));"); p.write_text(s)
+
+          p=Path('build.cjs'); s=p.read_text()
+          read_needle="const ownershipUi = fs.readFileSync(path.join(source, 'ownership-ui.js'), 'utf8');"
+          read_insert=read_needle+"\nconst mapsTabCss = fs.readFileSync(path.join(source, 'maps-tab.css'), 'utf8');\nconst mapsTab = publicScript(fs.readFileSync(path.join(source, 'maps-tab.js'), 'utf8'));\nconst etcAuditData = fs.readFileSync(path.join(source, 'etc-audit-data.js'), 'utf8');\nconst questAuditAdditions = fs.readFileSync(path.join(source, 'quest-audit-additions.js'), 'utf8');\nconst etcAuditUiCss = fs.readFileSync(path.join(source, 'etc-audit-ui.css'), 'utf8');\nconst etcAuditUi = fs.readFileSync(path.join(source, 'etc-audit-ui.js'), 'utf8');"
+          if 'const mapsTabCss =' not in s:s=s.replace(read_needle,read_insert)
+          head_needle='  <link rel="stylesheet" href="ownership-ui.css?v=${assetVersion}">\\n</head>`);'
+          head_replace='  <link rel="stylesheet" href="ownership-ui.css?v=${assetVersion}">\\n  <link rel="stylesheet" href="maps-tab.css?v=${assetVersion}">\\n  <link rel="stylesheet" href="etc-audit-ui.css?v=${assetVersion}">\\n</head>`);'
+          if 'maps-tab.css?v=${assetVersion}' not in s:s=s.replace(head_needle,head_replace)
+          body_needle='  <script src="ownership-ui.js?v=${assetVersion}"></script>\\n</body>`);'
+          body_replace='  <script src="ownership-ui.js?v=${assetVersion}"></script>\\n  <script src="maps-tab.js?v=${assetVersion}"></script>\\n  <script src="etc-audit-ui.js?v=${assetVersion}"></script>\\n</body>`);'
+          if 'maps-tab.js?v=${assetVersion}' not in s:s=s.replace(body_needle,body_replace)
+          copy_needle="fs.writeFileSync(path.join(out, 'ownership-ui.css'), ownershipUiCss);"
+          copy_insert=copy_needle+"\nfs.writeFileSync(path.join(out, 'maps-tab.css'), mapsTabCss);\nfs.writeFileSync(path.join(out, 'etc-audit-ui.css'), etcAuditUiCss);"
+          if "path.join(out, 'maps-tab.css')" not in s:s=s.replace(copy_needle,copy_insert)
+          data_needle="fs.writeFileSync(path.join(out, 'guide-data.js'), `window.GUIDE_DATA = ${guideJson};\\n`);"
+          data_insert=data_needle+"\nfs.writeFileSync(path.join(out, 'etc-audit-data.js'), etcAuditData);\nfs.writeFileSync(path.join(out, 'quest-audit-additions.js'), questAuditAdditions);"
+          if "path.join(out, 'etc-audit-data.js')" not in s:s=s.replace(data_needle,data_insert)
+          js_needle="fs.writeFileSync(path.join(out, 'ownership-ui.js'), ownershipUi);"
+          js_insert=js_needle+"\nfs.writeFileSync(path.join(out, 'maps-tab.js'), mapsTab);\nfs.writeFileSync(path.join(out, 'etc-audit-ui.js'), etcAuditUi);"
+          if "path.join(out, 'maps-tab.js')" not in s:s=s.replace(js_needle,js_insert)
+          core_needle="'./ownership-ui.js?v=${assetVersion}','./manifest.webmanifest'"
+          core_replace="'./ownership-ui.js?v=${assetVersion}','./maps-tab.css?v=${assetVersion}','./maps-tab.js?v=${assetVersion}','./etc-audit-data.js?v=${assetVersion}','./quest-audit-additions.js?v=${assetVersion}','./etc-audit-ui.css?v=${assetVersion}','./etc-audit-ui.js?v=${assetVersion}','./manifest.webmanifest'"
+          if "'./maps-tab.js?v=${assetVersion}'" not in s:s=s.replace(core_needle,core_replace)
+          p.write_text(s)
+          PY
+      - name: Verify integration build
+        run: |
+          node --check public/maps-tab.js
+          node --check public/etc-audit-data.js
+          node --check public/quest-audit-additions.js
+          node --check public/etc-audit-ui.js
+          node build.cjs
+          grep -q 'data-page="maps"' dist/index.html
+          grep -q 'maps-tab.js' dist/index.html
+          grep -q 'etc-audit-data.js' dist/index.html
+          grep -q 'quest-audit-additions.js' dist/index.html
+          test -s dist/maps-tab.css
+          test -s dist/maps-tab.js
+          test -s dist/etc-audit-data.js
+          test -s dist/etc-audit-ui.js
+      - name: Commit integrated source
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/index.html public/maps-tab.js public/quest-audit-additions.js build.cjs
+          git diff --cached --quiet || git commit -m 'Integrate audited quests ETC targets and Victoria maps'
+          git push
