@@ -44,7 +44,7 @@ jobs:
             try{
               const w=frame.contentWindow,d=frame.contentDocument;
               for(let i=0;i<70&&!d.documentElement.classList.contains('dashboard-avatar-level-footer-ready');i++)await wait(120);
-              const required=['navigation-cleanup-ready','visual-asset-audit-ready','dashboard-skill-immediate-ready','dashboard-queues-after-hero-ready','dashboard-avatar-level-footer-ready','top-classic-world-ready','public-source-clean-ready','owned-image-urls-ready'];
+              const required=['navigation-cleanup-ready','visual-asset-audit-ready','dashboard-skill-immediate-ready','dashboard-queues-after-hero-ready','dashboard-avatar-level-footer-ready','top-classic-world-ready','public-source-clean-ready','owned-image-urls-ready','progression-level-scale-correct-ready','dashboard-queues-readable-ready'];
               for(const cls of required){if(!d.documentElement.classList.contains(cls))throw Error('missing '+cls);}
 
               if(d.title!=='Top Classic World Maplestory')throw Error('brand title incorrect');
@@ -75,13 +75,39 @@ jobs:
               if(d.querySelectorAll('#atlas-skill-grid .beginner-skill-card').length!==3)throw Error('Beginner skill cards not stable');
 
               const level=d.getElementById('level-select');
-              level.value='30';level.dispatchEvent(new w.Event('change',{bubbles:true}));
-              await wait(1800);
+              level.value='44';level.dispatchEvent(new w.Event('change',{bubbles:true}));
+              await wait(1900);
               const controlsAfter=dashboard.querySelector('.v5-character-hero > .progression-avatar-level-controls');
               if(!controlsAfter||getComputedStyle(controlsAfter).display==='none')throw Error('avatar level footer lost after level change');
-              if(String(d.getElementById('hero-level')?.textContent)!=='30')throw Error('avatar level footer did not sync to 30');
-              if(d.querySelectorAll('#atlas-quest-queue .atlas-queue-row').length<5)throw Error('Quest Queue still capped at four rows');
-              if(d.querySelectorAll('#atlas-etc-queue .v72-etc-chip').length<7)throw Error('ETC Queue still capped at six targets');
+              if(String(d.getElementById('hero-level')?.textContent)!=='44')throw Error('avatar level footer did not sync to 44');
+              if(String(d.getElementById('level-range')?.value)!=='44')throw Error('level range did not sync to 44');
+              const track=controlsAfter.querySelector('.progression-level-track');
+              const readout=track?.querySelector('.progression-level-slider-value');
+              if(!track||String(readout?.textContent||'').trim()!=='LV 44')throw Error('exact LV 44 slider marker missing');
+              const milestones=[...(track.querySelector('.v5-milestones')?.children||[])];
+              if(milestones.length!==4)throw Error('level milestones missing');
+              const tr=track.getBoundingClientRect(),m30=milestones[2].getBoundingClientRect(),rr=readout.getBoundingClientRect();
+              const m30pct=((m30.left+m30.width/2)-tr.left)/tr.width;
+              const readpct=((rr.left+rr.width/2)-tr.left)/tr.width;
+              if(Math.abs(m30pct-(29/69))>.035)throw Error('Lv30 milestone is not on the true numeric scale: '+m30pct.toFixed(3));
+              if(Math.abs(readpct-(43/69))>.045)throw Error('Lv44 marker is not on the true numeric scale: '+readpct.toFixed(3));
+              if(!(readpct>m30pct+.12))throw Error('Lv44 still visually overlaps the Lv30 milestone');
+
+              const questRows=[...d.querySelectorAll('#atlas-quest-queue .atlas-queue-row')];
+              const etcRows=[...d.querySelectorAll('#atlas-etc-queue .v72-etc-chip')];
+              if(questRows.length<5)throw Error('Quest Queue still capped at four rows');
+              if(etcRows.length<7)throw Error('ETC Queue still capped at six targets');
+              const qName=questRows.find(x=>x.querySelector('b'))?.querySelector('b');
+              const qMeta=questRows.find(x=>x.querySelector('small'))?.querySelector('small');
+              const etcName=etcRows.find(x=>x.querySelector('.tcw-etc-name'))?.querySelector('.tcw-etc-name');
+              const etcQty=etcRows.find(x=>x.querySelector(':scope > b'))?.querySelector(':scope > b');
+              if(!qName||parseFloat(getComputedStyle(qName).fontSize)<11)throw Error('Quest primary text is too small');
+              if(!qMeta||parseFloat(getComputedStyle(qMeta).fontSize)<9)throw Error('Quest secondary text is too small');
+              if(!etcName||parseFloat(getComputedStyle(etcName).fontSize)<10)throw Error('ETC item names are missing or too small');
+              if(!etcQty||parseFloat(getComputedStyle(etcQty).fontSize)<11)throw Error('ETC target text is too small');
+              const qScroll=d.getElementById('atlas-quest-queue'),eScroll=d.getElementById('atlas-etc-queue');
+              if(qScroll.scrollHeight<=qScroll.clientHeight)throw Error('Quest Queue is not using internal scroll for extra rows');
+              if(eScroll.scrollHeight<=eScroll.clientHeight)throw Error('ETC Queue is not using internal scroll for extra rows');
 
               d.querySelector('#nav .nav-btn[data-page="cashshop"]')?.click();
               await wait(2600);
