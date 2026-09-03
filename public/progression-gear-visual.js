@@ -8,8 +8,9 @@
 
   function level() {
     const select = Number(document.getElementById('level-select')?.value);
+    const heroSelect = Number(document.getElementById('hero-level-select')?.value);
     const hero = Number(document.getElementById('hero-level')?.textContent);
-    return Math.max(1, Math.min(Number(D.meta?.maxLevel) || 70, select || hero || 1));
+    return Math.max(1, Math.min(Number(D.meta?.maxLevel) || 70, select || heroSelect || hero || 1));
   }
 
   function loadoutAt(lv) {
@@ -67,6 +68,52 @@
     document.querySelectorAll('.v5-avatar .avatar-equipped-icons').forEach(node => node.remove());
   }
 
+  function mergeAvatarAndLevel() {
+    const dashboard = document.querySelector('.dashboard-v72');
+    const character = dashboard?.querySelector('.v5-character-hero');
+    if (!dashboard || !character) return false;
+
+    let column = character.querySelector('.progression-avatar-column');
+    const avatar = character.querySelector('.v5-avatar');
+    if (!column && avatar) {
+      column = document.createElement('div');
+      column.className = 'progression-avatar-column';
+      avatar.parentNode.insertBefore(column, avatar);
+      column.appendChild(avatar);
+    }
+    if (!column) return false;
+
+    let controls = column.querySelector('.progression-avatar-level-controls');
+    const oldLevelPanel = dashboard.querySelector('.v5-level-hero, .v72-level-hero');
+    if (oldLevelPanel) {
+      if (!controls) {
+        controls = document.createElement('div');
+        controls.className = 'progression-avatar-level-controls';
+        column.appendChild(controls);
+      }
+      const stepper = oldLevelPanel.querySelector('.v5-level-stepper');
+      const range = oldLevelPanel.querySelector('.v5-level-range');
+      const milestones = oldLevelPanel.querySelector('.v5-milestones');
+      if (stepper) controls.appendChild(stepper);
+      if (range) controls.appendChild(range);
+      if (milestones) controls.appendChild(milestones);
+      oldLevelPanel.remove();
+    }
+    if (!controls) return false;
+
+    let head = controls.querySelector('.progression-avatar-level-head');
+    if (!head) {
+      head = document.createElement('div');
+      head.className = 'progression-avatar-level-head';
+      controls.insertBefore(head, controls.firstChild);
+    }
+    head.innerHTML = `<span>LEVEL PROGRESSION</span><b>Lv${level()}</b>`;
+
+    document.documentElement.classList.add('progression-avatar-level-merged-ready');
+    document.documentElement.dataset.progressionAvatarLevel = String(level());
+    return true;
+  }
+
   function annotateEquipment(root) {
     if (!root) return;
     const lv = level();
@@ -99,8 +146,10 @@
   function enhance() {
     if (!verifyDecisionData()) return;
     removeDuplicateGearUi();
+    const merged = mergeAvatarAndLevel();
     ['equipment-window','equipment-window-page'].forEach(id => annotateEquipment(document.getElementById(id)));
     document.documentElement.classList.add('progression-gear-visual-ready','progression-compact-dashboard-ready');
+    document.documentElement.classList.toggle('progression-avatar-level-merge-missing', !merged && !!document.querySelector('.dashboard-v72'));
     document.documentElement.dataset.progressionGearVisualLevel = String(level());
   }
 
