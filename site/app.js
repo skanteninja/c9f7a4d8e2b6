@@ -852,6 +852,18 @@
   }
 
   function renderSkills(){
+    const currentSkillIds={
+      'Nimble Feet':'0001002','Three Snails':'0001000','Recovery':'0001001',
+      'Improved MP Recovery':'2000000','Max MP Increase':'2000001','Magic Guard':'2001000','Magic Armor':'2001001','Energy Bolt':'2001002','Magic Claw':'2001003',
+      'MP Eater':'2200000','Meditation':'2201000','Teleport':'2201001','Slow':'2201002','Cold Beam':'2201003','Thunder Bolt':'2201004'
+    };
+    const coreSkillIcon=name=>{
+      const id=currentSkillIds[name];
+      if(!id)return name?skillImgTag(name):'';
+      const legacy=Number(D.skillIcons?.[name]?.id||Number(id));
+      const book=String(Math.trunc(legacy/10000)).padStart(3,'0');
+      return `<img class="skill-icon canonical-skill-icon" src="/game-data/data/current/images/skills/${id}.png" data-asset-fallbacks="/game-media/skills/${book}.img/skill/${legacy}/icon" data-skill-id="${id}" data-skill-name="${esc(name)}" data-skill-icon-policy="current-classic-first-name-matched-wz-fallback" alt="${esc(name)}">`;
+    };
     const beginnerSkills=[
       {name:'Nimble Feet',id:'0001002'},
       {name:'Three Snails',id:'0001000'},
@@ -859,7 +871,7 @@
     ];
     const beginnerHtml=`<section class="skill-beginner-reference" data-core-beginner="1">
       <div class="skill-beginner-head"><div><span class="eyebrow">BEGINNER · LV1–10</span><h3>Beginner Skills</h3></div><p>Reference only · your build target is 3/3 in all three before the Magician progression below.</p></div>
-      <div class="skill-beginner-grid">${beginnerSkills.map(skill=>`<article class="skill-beginner-card" data-full-skill-name="${esc(skill.name)}"><span class="skill-beginner-icon" data-skill-icon-name="${esc(skill.name)}"><img class="skill-icon canonical-skill-icon" src="/game-data/data/current/images/skills/${skill.id}.png" data-asset-fallbacks="/game-media/skills/000.img/skill/${Number(skill.id)}/icon" data-skill-id="${skill.id}" data-skill-name="${esc(skill.name)}" data-skill-icon-policy="current-classic-first-name-matched-wz-fallback" alt="${esc(skill.name)}"></span><div><div class="skill-beginner-title"><b>${esc(skill.name)}</b><span>3 / 3</span></div><p class="skill-beginner-description">Beginner skill reference.</p><small class="skill-beginner-meta">Beginner · ID ${skill.id}</small></div></article>`).join('')}</div>
+      <div class="skill-beginner-grid">${beginnerSkills.map(skill=>`<article class="skill-beginner-card" data-full-skill-name="${esc(skill.name)}"><span class="skill-beginner-icon" data-skill-icon-name="${esc(skill.name)}">${coreSkillIcon(skill.name)}</span><div><div class="skill-beginner-title"><b>${esc(skill.name)}</b><span>3 / 3</span></div><p class="skill-beginner-description">Beginner skill reference.</p><small class="skill-beginner-meta">Beginner · ID ${skill.id}</small></div></article>`).join('')}</div>
     </section>`;
     const rows=D.skills.map(s=>{
       const cur=Number(s.Level)===state.level;
@@ -867,7 +879,7 @@
       return `<div class="skill-row ${cur?'current':''}" data-informational="1">
         <b style="color:#8bdfff">Lv${esc(s.Level)}</b>
         <b>${esc(s.SP)}</b>
-        <div class="skill-icon-host" data-skill-icon-name="${esc(skillName)}">${skillName?skillImgTag(skillName):''}</div>
+        <div class="skill-icon-host" data-skill-icon-name="${esc(skillName)}">${coreSkillIcon(skillName)}</div>
         <div class="skill-spend">${esc(s.Spend)}</div>
         <div class="skill-why">${esc(s['Why This Is The Action'])}</div>
         <div>${isBeta(s.Status)?`<span class="beta-tag">verify</span>`:`<span class="status-tag">${esc(s.Status||'')}</span>`}</div>
