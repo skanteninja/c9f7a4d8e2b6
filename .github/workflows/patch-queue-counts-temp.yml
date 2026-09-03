@@ -13,26 +13,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Patch core build transform
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('build.cjs')
-          s=p.read_text()
-          marker='\n  return app;\n}\n\nfunction patchHtml'
-          assert marker in s, 'patchApp return marker missing'
-          block=r'''
-  // Dashboard queues use the physical space available in the equal-height action row.
-  app = app.replace(
-    `.sort((a,b)=>(rank[a.Priority]??9)-(rank[b.Priority]??9)||Number(a.Lv||0)-Number(b.Lv||0)).slice(0,4);`,
-    `.sort((a,b)=>(rank[a.Priority]??9)-(rank[b.Priority]??9)||Number(a.Lv||0)-Number(b.Lv||0)).slice(0,8);`
-  );
-  app = app.replace(
-    `.sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,6);`,
-    `.sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,12);`
-  );
-'''
-          s=s.replace(marker,'\n'+block+'  return app;\n}\n\nfunction patchHtml',1)
-          p.write_text(s)
-          PY
+          echo ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCmltcG9ydCBiYXNlNjQKcD1QYXRoKCdidWlsZC5janMnKQpzPXAucmVhZF90ZXh0KCkKbWFya2VyPSdcbiAgcmV0dXJuIGFwcDtcbn1cblxuZnVuY3Rpb24gcGF0Y2hIdG1sJwphc3NlcnQgbWFya2VyIGluIHMsICdwYXRjaEFwcCByZXR1cm4gbWFya2VyIG1pc3NpbmcnCmJsb2NrPWJhc2U2NC5iNjRkZWNvZGUoJ0lDQXZMeUJFWVhOb1ltOWhjbVFnY1hWbGRXVnpJSFZ6WlNCMGFHVWdjR2g1YzJsallXd2djM0JoWTJVZ1lYWmhhV3hoWW14bElHbHVJSFJvWlNCbGNYVmhiQzFvWldsbmFIUWdZV04wYVc5dUlISnZkeTRLSUNCaGNIQWdQU0JoY0hBdWNtVndiR0ZqWlNnS0lDQWdJR0F1YzI5eWRDZ29ZU3hpS1QwK0tISmhibXRiWVM1UWNtbHZjbWwwZVYwL1B6a3BMU2h5WVc1clcySXVVSEpwYjNKcGRIbGRQejg1S1h4OFRuVnRZbVZ5S0dFdVRIWjhmREFwTFU1MWJXSmxjaWhpTGt4MmZId3dLU2t1YzJ4cFkyVW9NQ3cwS1R0Z0xBb2dJQ0FnWUM1emIzSjBLQ2hoTEdJcFBUNG9jbUZ1YTF0aExsQnlhVzl5YVhSNVhUOC9PU2t0S0hKaGJtdGJZaTVRY21sdmNtbDBlVjAvUHprcGZIeE9kVzFpWlhJb1lTNU1kbng4TUNrdFRuVnRZbVZ5S0dJdVRIWjhmREFwS1M1emJHbGpaU2d3TERncE8yQUtJQ0FwT3dvZ0lHRndjQ0E5SUdGd2NDNXlaWEJzWVdObEtBb2dJQ0FnWUM1emIzSjBLQ2hoTEdJcFBUNU9kVzFpWlhJb1lWc25VM1JoY25RZ1RIWW5YWHg4T1RrcExVNTFiV0psY2loaVd5ZFRkR0Z5ZENCTWRpZGRmSHc1T1NrcExuTnNhV05sS0RBc05pazdZQ3dLSUNBZ0lHQXVjMjl5ZENnb1lTeGlLVDArVG5WdFltVnlLR0ZiSjFOMFlYSjBJRXgySjExOGZEazVLUzFPZFcxaVpYSW9ZbHNuVTNSaGNuUWdUSFluWFh4OE9Ua3BLUzV6YkdsalpTZ3dMREV5S1R0Z0NpQWdLVHNLJykuZGVjb2RlKCkKYXNzZXJ0ICdzbGljZSgwLDgpJyBub3QgaW4gcywgJ3F1ZXVlIHBhdGNoIGFscmVhZHkgcHJlc2VudCcKcz1zLnJlcGxhY2UobWFya2VyLCdcbicrYmxvY2srJyAgcmV0dXJuIGFwcDtcbn1cblxuZnVuY3Rpb24gcGF0Y2hIdG1sJywxKQpwLndyaXRlX3RleHQocykK | base64 -d > /tmp/patch.py
+          python3 /tmp/patch.py
           git rm .github/workflows/patch-queue-counts-temp.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
