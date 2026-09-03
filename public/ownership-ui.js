@@ -41,25 +41,29 @@
     const dashboard=document.querySelector('.dashboard-v72');
     const hero=dashboard?.querySelector('.v72-hero-grid');
     const command=dashboard?.querySelector('.v72-command-grid');
+    const character=dashboard?.querySelector('.v5-character-hero');
     if(!dashboard||!hero||!command)return;
 
     if(hero.nextElementSibling!==command)hero.insertAdjacentElement('afterend',command);
 
-    let host=dashboard.querySelector('#dashboard-level-state-host');
-    if(!host){
-      host=document.createElement('div');
-      host.id='dashboard-level-state-host';
-      host.hidden=true;
-      host.setAttribute('aria-hidden','true');
-      dashboard.appendChild(host);
+    // The level progression belongs in the lower part of the Avatar card.
+    // A previous ownership pass moved it into a hidden state host; recover it if that stale host exists.
+    const host=dashboard.querySelector('#dashboard-level-state-host');
+    const stashed=host?.querySelector('.progression-avatar-level-controls');
+    if(stashed&&character)character.appendChild(stashed);
+    host?.remove();
+
+    const footer=character?.querySelector(':scope > .progression-avatar-level-controls');
+    if(footer){
+      footer.hidden=false;
+      footer.removeAttribute('aria-hidden');
+      footer.classList.add('progression-character-footer');
     }
-    const merged=dashboard.querySelector('.v5-character-hero > .progression-avatar-level-controls');
-    if(merged)host.appendChild(merged);
-    dashboard.querySelectorAll('.v5-level-hero,.v72-level-hero').forEach(el=>{
-      el.hidden=true;el.setAttribute('aria-hidden','true');
-    });
-    document.documentElement.classList.add('dashboard-queues-after-hero-ready','dashboard-topbar-level-only-ready');
-    document.documentElement.classList.remove('progression-avatar-level-merge-missing');
+
+    document.documentElement.classList.add('dashboard-queues-after-hero-ready');
+    document.documentElement.classList.toggle('dashboard-avatar-level-footer-ready',!!footer);
+    document.documentElement.classList.remove('dashboard-topbar-level-only-ready');
+    if(footer)document.documentElement.classList.remove('progression-avatar-level-merge-missing');
   }
 
   function cleanStaticSourceChrome(){
@@ -112,12 +116,12 @@
       .replace(new RegExp(`\\b${legacyTagA}\\b`,'ig'),'')
       .replace(new RegExp(`\\b${legacyTagB}\\b`,'ig'),'')
       .replace(/pre[- ]launch/ig,'')
-      .replace(/launch[- ]scope\s+pending/ig,'')
-      .replace(/verify\s+(?:launch|live)/ig,'')
-      .replace(/evidence\s*&?\s*sources?/ig,'')
-      .replace(/\s+·\s*·/g,' ·')
-      .replace(/[ \t]{2,}/g,' ')
-      .replace(/^\s*[·|]\s*|\s*[·|]\s*$/g,'')
+      .replace(/launch[- ]scope\\s+pending/ig,'')
+      .replace(/verify\\s+(?:launch|live)/ig,'')
+      .replace(/evidence\\s*&?\\s*sources?/ig,'')
+      .replace(/\\s+·\\s*·/g,' ·')
+      .replace(/[ \\t]{2,}/g,' ')
+      .replace(/^\\s*[·|]\\s*|\\s*[·|]\\s*$/g,'')
       .trim();
   }
 
