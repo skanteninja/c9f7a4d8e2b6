@@ -178,7 +178,7 @@
     brand();cleanNavigation();arrangeDashboard();cleanStaticSourceChrome();cleanDatabaseHeroes();ownRenderedImages();scrubDynamicCopy();protectPublicPages();
   }
   function schedule(){clearTimeout(timer);timer=setTimeout(enhance,90);}
-  new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,characterData:true});
+  new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['src']});
   document.addEventListener('click',schedule,true);
   document.addEventListener('change',schedule,true);
   enhance();
