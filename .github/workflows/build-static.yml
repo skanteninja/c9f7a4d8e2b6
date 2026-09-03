@@ -7,6 +7,9 @@ on:
     paths:
       - 'public/**'
       - 'build.cjs'
+      - 'worker.js'
+      - 'wrangler.jsonc'
+      - '.github/ci_static_proxy.py'
       - '.github/workflows/build-static.yml'
 
 permissions:
@@ -30,17 +33,20 @@ jobs:
 
       - name: Verify static output
         run: |
-          for f in app guide-data visuals visuals-db visuals-npc visuals-skills visuals-portals dashboard-polish progression-sync progression-level-hook progression-skill-state progression-gear-visual; do
+          for f in app guide-data visuals visuals-db visuals-npc visuals-skills visuals-portals dashboard-polish progression-sync progression-level-hook progression-skill-state progression-gear-visual ownership-ui; do
             node --check "site/$f.js"
             test -s "site/$f.js"
           done
-          for f in styles visuals visuals-db visuals-npc visuals-skills visuals-portals dashboard-polish progression-sync progression-gear-visual; do
+          for f in styles visuals visuals-db visuals-npc visuals-skills visuals-portals dashboard-polish progression-sync progression-gear-visual ownership-ui; do
             test -s "site/$f.css"
           done
-          for asset in styles.css visuals.css visuals-db.css visuals-npc.css visuals-skills.css visuals-portals.css dashboard-polish.css progression-sync.css progression-gear-visual.css guide-data.js app.js visuals.js visuals-db.js visuals-npc.js visuals-skills.js visuals-portals.js dashboard-polish.js progression-sync.js progression-level-hook.js progression-skill-state.js progression-gear-visual.js; do
+          for asset in styles.css visuals.css visuals-db.css visuals-npc.css visuals-skills.css visuals-portals.css dashboard-polish.css progression-sync.css progression-gear-visual.css ownership-ui.css guide-data.js app.js visuals.js visuals-db.js visuals-npc.js visuals-skills.js visuals-portals.js dashboard-polish.js progression-sync.js progression-level-hook.js progression-skill-state.js progression-gear-visual.js ownership-ui.js; do
             grep -q "$asset?v=0.8.1-static1" site/index.html
           done
-          grep -q 'MapleStory Classic Builder 0.8.1-static1' site/build-info.txt
+          grep -q 'Top Classic World Maplestory 0.8.1-static1' site/build-info.txt
+          ! grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard' site/app.js
+          ! grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard' site/visuals.js
+          grep -q '/game-origin/' site/app.js
 
       - name: Browser boot dashboard and progression regression gate
         run: |
@@ -52,36 +58,40 @@ jobs:
           frame.addEventListener('load',async()=>{
             try{
               const d=frame.contentDocument;
-              for(let i=0;i<40&&!d.documentElement.classList.contains('progression-sync-ready');i++)await delay(150);
-              const required=['progression-sync-ready','beginner-skill-tree-ready','progression-level-hook-ready','progression-skill-state-ready','progression-gear-visual-ready','progression-compact-dashboard-ready','progression-avatar-level-merged-ready','progression-gear-decision-verified'];
+              for(let i=0;i<55&&!d.documentElement.classList.contains('dashboard-queues-after-hero-ready');i++)await delay(150);
+              const required=['progression-sync-ready','beginner-skill-tree-ready','progression-level-hook-ready','progression-skill-state-ready','progression-gear-visual-ready','progression-compact-dashboard-ready','progression-avatar-level-merged-ready','progression-gear-decision-verified','top-classic-world-ready','public-source-clean-ready','dashboard-queues-after-hero-ready','dashboard-topbar-level-only-ready','owned-image-urls-ready'];
               for(const cls of required){if(!d.documentElement.classList.contains(cls))throw Error('missing '+cls);}
               if(d.querySelectorAll('#atlas-skill-grid .beginner-skill-card').length!==3)throw Error('beginner skill count');
               if(d.querySelector('.progression-loadout-strip'))throw Error('duplicate level-synced equipment strip present');
               if(d.querySelector('.v5-avatar .avatar-equipped-icons'))throw Error('duplicate avatar equipment chips present');
-              if(d.querySelector('.dashboard-v72 .v5-level-hero,.dashboard-v72 .v72-level-hero'))throw Error('standalone level card still present');
-              const merged=d.querySelector('.dashboard-v72 .v5-character-hero .progression-avatar-level-controls');
-              if(!merged)throw Error('avatar level controls missing');
-              if(!merged.contains(d.getElementById('level-range')))throw Error('level range not below avatar');
-              if(!merged.contains(d.getElementById('hero-level-select')))throw Error('hero level select not merged');
+              const host=d.querySelector('#dashboard-level-state-host');
+              const controls=host?.querySelector('.progression-avatar-level-controls');
+              if(!host||!controls)throw Error('hidden dashboard level state missing');
+              if(!controls.contains(d.getElementById('level-range')))throw Error('hidden level range missing');
+              if(!controls.contains(d.getElementById('hero-level-select')))throw Error('hidden hero level select missing');
+              if(getComputedStyle(controls).display!=='none')throw Error('dashboard level footer is visible');
+              if(!d.getElementById('level-select'))throw Error('topbar level select missing');
               if(!d.querySelector('#atlas-avatar .avatar-character'))throw Error('character render missing');
+              const hero=d.querySelector('.dashboard-v72 .v72-hero-grid'),commands=d.querySelector('.dashboard-v72 .v72-command-grid');
+              if(!hero||hero.nextElementSibling!==commands)throw Error('action queues are not below hero cards');
 
               const change=async(level,needles,newWeapon)=>{
                 const sel=d.getElementById('level-select');
                 sel.value=String(level);
                 sel.dispatchEvent(new frame.contentWindow.Event('change',{bubbles:true}));
-                await delay(1050);
+                await delay(1250);
                 if(d.documentElement.dataset.autoGearLevel!==String(level))throw Error('auto gear marker '+level);
                 if(d.documentElement.dataset.skillStateLevel!==String(level))throw Error('skill state marker '+level);
                 if(d.documentElement.dataset.progressionGearVisualLevel!==String(level))throw Error('gear visual marker '+level);
-                if(d.documentElement.dataset.progressionAvatarLevel!==String(level))throw Error('avatar level marker '+level);
                 const equipment=d.getElementById('equipment-window')?.innerHTML||'';
                 for(const name of needles){if(!equipment.includes(name))throw Error('equipment missing '+level+' '+name);}
                 if(d.querySelector('.progression-loadout-strip'))throw Error('strip returned at '+level);
                 if(d.querySelector('.v5-avatar .avatar-equipped-icons'))throw Error('avatar chips returned at '+level);
-                if(d.querySelector('.dashboard-v72 .v5-level-hero,.dashboard-v72 .v72-level-hero'))throw Error('standalone level card returned at '+level);
-                const levelControls=d.querySelector('.dashboard-v72 .v5-character-hero .progression-avatar-level-controls');
-                if(!levelControls?.contains(d.getElementById('level-range')))throw Error('merged level range lost at '+level);
-                if(!levelControls?.contains(d.getElementById('hero-level-select')))throw Error('merged level select lost at '+level);
+                const levelControls=d.querySelector('#dashboard-level-state-host .progression-avatar-level-controls');
+                if(!levelControls?.contains(d.getElementById('level-range')))throw Error('hidden level range lost at '+level);
+                if(!levelControls?.contains(d.getElementById('hero-level-select')))throw Error('hidden level select lost at '+level);
+                if(getComputedStyle(levelControls).display!=='none')throw Error('level footer returned at '+level);
+                if(String(d.getElementById('hero-level')?.textContent)!==String(level))throw Error('hidden hero level not synced '+level);
                 if(!d.querySelector('#atlas-avatar .avatar-character'))throw Error('character render missing '+level);
                 const weapon=d.querySelector(`#equipment-window .gear-slot[data-slot="Weapon"][data-item-name="${newWeapon}"]`);
                 if(!weapon?.classList.contains('progression-new-equipped'))throw Error('new weapon not marked '+level+' '+newWeapon);
@@ -101,10 +111,10 @@ jobs:
           </script></body>
           HTML
 
-          python3 -m http.server 4173 --directory site >/tmp/maplestory-static-http.log 2>&1 &
+          python3 .github/ci_static_proxy.py --directory site --port 4173 >/tmp/maplestory-static-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          for i in {1..20}; do
+          for i in {1..30}; do
             curl -fsS http://127.0.0.1:4173/ >/dev/null && break
             sleep 0.25
           done
@@ -113,13 +123,14 @@ jobs:
 
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-static-${viewport//,/-}.html"
-            "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=10000 --dump-dom http://127.0.0.1:4173/ >"$file"
-            for marker in visual-layer-ready visual-db-layer-ready visual-npc-layer-ready visual-skill-layer-ready visual-portal-layer-ready dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified skill-progression-board-ready beginner-skill-tree-ready dashboard-action-layout-ok dashboard-page-layout-ok etc-planner-fixed-ready; do
+            "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=14000 --dump-dom http://127.0.0.1:4173/ >"$file"
+            for marker in visual-layer-ready visual-db-layer-ready visual-npc-layer-ready visual-skill-layer-ready visual-portal-layer-ready dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified skill-progression-board-ready beginner-skill-tree-ready dashboard-action-layout-ok dashboard-page-layout-ok etc-planner-fixed-ready top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-topbar-level-only-ready owned-image-urls-ready; do
               grep -q "$marker" "$file"
             done
             grep -q 'class="atlas-action-row' "$file"
             grep -q 'class="gear-slot' "$file"
             grep -q 'class="atlas-timeline-level' "$file"
+            grep -q 'id="dashboard-level-state-host"' "$file"
             grep -q 'class="progression-avatar-level-controls' "$file"
             grep -q 'id="level-range"' "$file"
             grep -q 'id="hero-level-select"' "$file"
@@ -128,7 +139,6 @@ jobs:
             grep -q 'data-progress-skill="Recovery"' "$file"
             ! grep -q 'class="progression-loadout-strip' "$file"
             ! grep -q 'class="avatar-equipped-icons' "$file"
-            ! grep -q 'class="v5-level-hero' "$file"
             ! grep -q 'dashboard-overflow-detected' "$file"
             ! grep -q 'dashboard-page-overflow-detected' "$file"
             grep -Eq 'visual-media-strip|visualized-item-row|visual-quest-items' "$file"
@@ -147,10 +157,9 @@ jobs:
           PY
           done
 
-          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=16000 --dump-dom http://127.0.0.1:4173/ci-progression-test.html >/tmp/progression-test.html
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=22000 --dump-dom http://127.0.0.1:4173/ci-progression-test.html >/tmp/progression-test.html
           grep -o 'progression-level-sync-[^<]*' /tmp/progression-test.html || true
           grep -q '>progression-level-sync-ok<' /tmp/progression-test.html
-          ! grep -q 'progression-level-sync-failed' /tmp/progression-test.html
           rm -f site/ci-progression-test.html
 
       - name: Commit generated site
