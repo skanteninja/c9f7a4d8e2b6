@@ -1,18 +1,18 @@
-const ORIGIN_RAW = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/';
-const MEOW = 'https://meowdb.com/msclassic/api/assets/icons/';
-const DREAM_ITEM = 'https://api.dreamms.gg/api/GMS/latest/item/';
-const DREAM_PET = 'https://api.dreamms.gg/api/GMS/latest/pet/';
-const MAPLE_ITEM = 'https://maplestory.io/api/GMS/83/item/';
-const MAPLE_SKILL = 'https://maplestory.io/api/wz/img/GMS/83/Skill/';
+const CURRENT_DATA = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/';
+const ICON_MEDIA = 'https://meowdb.com/msclassic/api/assets/icons/';
+const ITEM_MEDIA_PRIMARY = 'https://api.dreamms.gg/api/GMS/latest/item/';
+const PET_MEDIA = 'https://api.dreamms.gg/api/GMS/latest/pet/';
+const ITEM_MEDIA_FALLBACK = 'https://maplestory.io/api/GMS/83/item/';
+const SKILL_MEDIA = 'https://maplestory.io/api/wz/img/GMS/83/Skill/';
 
 function upstreamFor(url) {
   const p = url.pathname;
-  if (p.startsWith('/game-origin/')) return ORIGIN_RAW + p.slice('/game-origin/'.length) + url.search;
-  if (p.startsWith('/game-art/meow/icons/')) return MEOW + p.slice('/game-art/meow/icons/'.length) + url.search;
-  if (p.startsWith('/game-art/dream/item/')) return DREAM_ITEM + p.slice('/game-art/dream/item/'.length) + url.search;
-  if (p.startsWith('/game-art/dream/pet/')) return DREAM_PET + p.slice('/game-art/dream/pet/'.length) + url.search;
-  if (p.startsWith('/game-art/mapleio/item/')) return MAPLE_ITEM + p.slice('/game-art/mapleio/item/'.length) + url.search;
-  if (p.startsWith('/game-art/mapleio/skill/')) return MAPLE_SKILL + p.slice('/game-art/mapleio/skill/'.length) + url.search;
+  if (p.startsWith('/game-data/')) return CURRENT_DATA + p.slice('/game-data/'.length) + url.search;
+  if (p.startsWith('/game-media/icons/')) return ICON_MEDIA + p.slice('/game-media/icons/'.length) + url.search;
+  if (p.startsWith('/game-media/items/primary/')) return ITEM_MEDIA_PRIMARY + p.slice('/game-media/items/primary/'.length) + url.search;
+  if (p.startsWith('/game-media/pets/')) return PET_MEDIA + p.slice('/game-media/pets/'.length) + url.search;
+  if (p.startsWith('/game-media/items/fallback/')) return ITEM_MEDIA_FALLBACK + p.slice('/game-media/items/fallback/'.length) + url.search;
+  if (p.startsWith('/game-media/skills/')) return SKILL_MEDIA + p.slice('/game-media/skills/'.length) + url.search;
   return null;
 }
 
@@ -29,10 +29,10 @@ async function ownedAsset(request, upstream, ctx) {
   });
   if (!response.ok) return new Response('Asset unavailable', { status: response.status });
 
-  const headers = new Headers(response.headers);
+  const headers = new Headers();
+  headers.set('Content-Type', response.headers.get('Content-Type') || 'application/octet-stream');
   headers.set('Cache-Control', 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000');
-  headers.delete('set-cookie');
-  headers.delete('server');
+  headers.set('X-Content-Type-Options', 'nosniff');
   const owned = new Response(response.body, { status: response.status, headers });
   ctx.waitUntil(cache.put(request, owned.clone()));
   return owned;
