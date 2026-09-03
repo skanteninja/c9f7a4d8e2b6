@@ -151,13 +151,13 @@ function removePageSection(html, page) {
   const startRe = new RegExp(`<section\\s+data-page=\"${page}\"\\b`, 'i');
   const match = startRe.exec(html);
   if (!match) return html;
-  const tokenRe = /<\\/?section\\b[^>]*>/gi;
+  const tokenRe = /<\/?section\b[^>]*>/gi;
   tokenRe.lastIndex = match.index;
   let depth = 0;
   let end = -1;
   let token;
   while ((token = tokenRe.exec(html))) {
-    if (/^<section\\b/i.test(token[0])) depth += 1;
+    if (/^<section\b/i.test(token[0])) depth += 1;
     else depth -= 1;
     if (depth === 0) { end = tokenRe.lastIndex; break; }
   }
