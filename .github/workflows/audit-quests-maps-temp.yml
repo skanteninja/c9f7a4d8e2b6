@@ -1,0 +1,110 @@
+name: Audit quests and maps temp
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  audit:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download current Classic datasets
+        run: |
+          mkdir -p /tmp/tcw-audit
+          base='https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/data/current'
+          for f in quests.json maps.json monsters.json lookups.json portals.json map_manifest.json; do
+            curl -fsSL "$base/$f" -o "/tmp/tcw-audit/$f"
+          done
+          curl -fsSL 'https://meowdb.com/msclassic/world-map' -o /tmp/tcw-audit/meow-world-map.html
+          curl -fsSL 'https://mxdgcw.dvg.cn/tools/maptools/?dataset=gms-cw&lng=EN' -o /tmp/tcw-audit/mxd-maptools.html || true
+      - name: Audit quest ETC totals and map schema
+        run: |
+          cat > /tmp/tcw-audit/audit.mjs <<'NODE'
+          import fs from 'fs';
+          import zlib from 'zlib';
+          const root=process.cwd();
+          const readChunk=(name)=>{
+            const direct=`${root}/public/repairs/${name}`;
+            if(fs.existsSync(direct))return fs.readFileSync(direct,'utf8');
+            const stem=name.replace(/\.txt$/,'');let repaired='';
+            for(let i=0;;i++){const p=`${root}/public/repairs/${stem}.part${i}.txt`;if(!fs.existsSync(p))break;repaired+=fs.readFileSync(p,'utf8');}
+            if(repaired)return repaired;
+            return fs.readFileSync(`${root}/public/assets/runtime/${name}`,'utf8');
+          };
+          const readChunks=(prefix,count)=>{let b='';for(let i=0;i<count;i++)b+=readChunk(`${prefix}.${String(i).padStart(2,'0')}.txt`).replace(/\s+/g,'');return zlib.gunzipSync(Buffer.from(b,'base64')).toString('utf8');};
+          const guide=JSON.parse(readChunks('guide',6));
+          const quests=JSON.parse(fs.readFileSync('/tmp/tcw-audit/quests.json','utf8')).quests||[];
+          const maps=JSON.parse(fs.readFileSync('/tmp/tcw-audit/maps.json','utf8'));
+          const lookups=JSON.parse(fs.readFileSync('/tmp/tcw-audit/lookups.json','utf8'));
+          const portals=JSON.parse(fs.readFileSync('/tmp/tcw-audit/portals.json','utf8'));
+          console.log('=== GUIDE TOP-LEVEL KEYS ===');
+          console.log(Object.keys(guide));
+          const candidates=[];
+          const walk=(v,path=[])=>{
+            if(Array.isArray(v)){
+              if(v.length&&v.some(x=>x&&typeof x==='object'&&('Item' in x||'Quest' in x||'Keep' in x||'Min' in x||'Start Lv' in x))){
+                candidates.push({path:path.join('.'),sample:v.slice(0,4)});
+              }
+              v.forEach((x,i)=>walk(x,[...path,String(i)]));return;
+            }
+            if(v&&typeof v==='object')for(const [k,x] of Object.entries(v))walk(x,[...path,k]);
+          };
+          walk(guide);
+          console.log('=== GUIDE ETC/QUEST-LIKE ARRAYS ===');
+          for(const c of candidates.slice(0,30)){console.log('\nPATH',c.path);console.log(JSON.stringify(c.sample,null,2));}
+
+          const allReq=new Map();
+          for(const q of quests){
+            for(const r of q.requirements_list||[]){
+              if(r.type!=='item'||!r.name||!Number(r.count))continue;
+              const key=r.name; if(!allReq.has(key))allReq.set(key,[]);
+              allReq.get(key).push({questId:q.id,quest:q.name,parent:q.parent||'',region:q.region||'',level:q.level_min??null,count:Number(r.count),weekly:!!q.is_weekly,rotation:q.rotation||null,npc:q.npc_name||'',job:q.job_name||q.job||q.class_name||null,jobMask:q.job_mask??null});
+            }
+          }
+          const focus=["Pig's Ribbon","Orange Mushroom Cap","Green Mushroom Cap","Blue Mushroom Cap","Horny Mushroom Cap","Leaf","Octopus Leg","Slime Bubble","Pig's Head","Jr. Necki Skin","Evil Eye Tail","Fire Boar's Tooth","Tablecloth","Bubbling's Huge Bubble","Red Snail Shell","Blue Snail Shell","Tree Branch","Cold Eye Tail","Tortie Shell","Lupin Doll","Stone Golem Rubble","Dark Stone Golem Rubble"];
+          console.log('\n=== CURRENT QUEST ETC TOTALS (<=70) ===');
+          for(const name of focus){
+            const rows=(allReq.get(name)||[]).filter(x=>x.level==null||x.level<=70);
+            const one=rows.filter(x=>!x.weekly).reduce((s,x)=>s+x.count,0);
+            const weeklyRows=rows.filter(x=>x.weekly);
+            console.log(`\n${name}: one-time=${one}; weekly-variants=${weeklyRows.reduce((s,x)=>s+x.count,0)}; recommended15=${Math.ceil(one*1.15)}`);
+            rows.forEach(x=>console.log(`  ${x.weekly?'[WEEKLY]':'[ONE]'} Lv${x.level??'?'} ${x.quest} (${x.region}) x${x.count} id=${x.questId}${x.job?` job=${x.job}`:''}`));
+          }
+
+          const ranked=[...allReq.entries()].map(([name,rows])=>({name,one:rows.filter(x=>!x.weekly&&(x.level==null||x.level<=70)).reduce((s,x)=>s+x.count,0),weekly:rows.filter(x=>x.weekly&&(x.level==null||x.level<=70)).reduce((s,x)=>s+x.count,0),quests:rows.filter(x=>x.level==null||x.level<=70).length})).filter(x=>x.one||x.weekly).sort((a,b)=>b.one-a.one||b.weekly-a.weekly);
+          console.log('\n=== TOP CURRENT ETC REQUIREMENTS <=70 ===');
+          console.log(ranked.slice(0,80));
+
+          console.log('\n=== MAPS TOP LEVEL ===');
+          console.log(Object.keys(maps));
+          console.log(JSON.stringify(maps,null,2).slice(0,12000));
+          console.log('\n=== LOOKUPS KEYS ==='); console.log(Object.keys(lookups));
+          console.log('\n=== PORTALS SAMPLE ==='); console.log(JSON.stringify(Object.entries(portals).slice(0,3),null,2));
+
+          const allMaps=[];
+          const collect=(v,region='')=>{
+            if(Array.isArray(v)){v.forEach(x=>collect(x,region));return;}
+            if(!v||typeof v!=='object')return;
+            const next=v.region||region;
+            if(v.id!=null&&v.name&&('npcs' in v||'mob_positions' in v||'return_map_name' in v||'exit_names' in v))allMaps.push({...v,__region:next});
+            for(const x of Object.values(v))if(x&&typeof x==='object')collect(x,next);
+          };
+          collect(maps);
+          const victoria=allMaps.filter(m=>/victoria|lith|henesys|ellinia|perion|kerning|sleepy|forgotten|nautilus/i.test(String(m.__region||m.region||'')) || (Number(m.id)>=10000000&&Number(m.id)<20000000));
+          console.log('\n=== COLLECTED MAP COUNTS ===',allMaps.length,'victoria-ish',victoria.length);
+          console.log('=== VICTORIA SAMPLE ===');
+          console.log(victoria.slice(0,30).map(m=>({id:m.id,name:m.name,region:m.__region||m.region,npcs:m.npcs,exits:m.exit_names,keys:Object.keys(m)})));
+          NODE
+          node /tmp/tcw-audit/audit.mjs
+      - name: Inspect world-map page source hints
+        run: |
+          echo '=== MEOW WORLD MAP ASSET / DATA HINTS ==='
+          grep -Eo '.{0,180}(victoria-island|worldmap|spot|marker|mapId|map_id|left:|top:).{0,240}' /tmp/tcw-audit/meow-world-map.html | head -n 160 || true
+          echo '=== MXD MAPTOOLS HINTS ==='
+          grep -Eo '.{0,180}(Victoria Island|world.?map|spot|marker|mapId|map_id|coordinate|position).{0,240}' /tmp/tcw-audit/mxd-maptools.html | head -n 120 || true
