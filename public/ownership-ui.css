@@ -1,0 +1,11 @@
+/* Public product surface: source/research implementation stays out of the customer UI. */
+.page[data-page="research"],.page[data-page="data"],.page[data-page="formulas"]{display:none!important}
+.db-provider-badge,.beta-banner,.v72-audit-top,#atlas-beta-pill,.visual-skill-source{display:none!important}
+
+/* Keep level changes visually steady while the active view updates in-place. */
+html[data-level-update="1"] .page.active{contain:layout paint}
+html[data-level-update="1"] .page.active img{transition:none!important;animation:none!important}
+
+/* Brand sizing after the longer product name. */
+.brand-title{letter-spacing:.08em}
+.brand-sub{max-width:150px;line-height:1.2}
