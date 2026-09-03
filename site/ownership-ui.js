@@ -87,8 +87,16 @@
     const raw=String(value||'');
     try{
       const u=new URL(raw,location.href);
-      if(u.origin!==location.origin&&u.pathname.startsWith('/api/GMS/latest/character/')){
-        return '/game-media/characters/'+u.pathname.slice('/api/GMS/latest/character/'.length)+u.search;
+      if(u.origin!==location.origin){
+        const families=[
+          ['/api/GMS/latest/character/','/game-media/characters/'],
+          ['/api/GMS/latest/mob/','/game-media/monsters/'],
+          ['/api/GMS/latest/item/','/game-media/items/primary/'],
+          ['/api/GMS/latest/pet/','/game-media/pets/']
+        ];
+        for(const [upstream,owned] of families){
+          if(u.pathname.startsWith(upstream))return owned+u.pathname.slice(upstream.length)+u.search;
+        }
       }
     }catch{}
     return raw

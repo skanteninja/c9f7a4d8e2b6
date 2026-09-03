@@ -427,7 +427,7 @@
     'Wraith':{id:4230102,name:'Wraith',weak:'Holy'},
     'Lorang':{id:3230102,name:'Lorang',weak:'Lightning'}
   };
-  function mobAsset(id){ return id?`https://api.dreamms.gg/api/GMS/latest/mob/${id}/render/stand?format=png&resize=2`:''; }
+  function mobAsset(id){ return id?`/game-media/monsters/${id}/render/stand?format=png&resize=2`:''; }
   function mapleIoMobAsset(id){ return id?`https://maplestory.io/api/GMS/83/mob/${id}/render/stand`:''; }
   const BASE_CHARACTER_IDS=['47077','21078']; // visual-only hair/face basis; never used as Classic game-data evidence
   function characterItemIds(){
