@@ -11,22 +11,19 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe candidate world map sources
+      - name: Map GMS83 world sheets
         run: |
-          set +e
-          urls=(
-            'https://maplestory.io/api/GMS/83/map/worldmap'
-            'https://maplestory.io/api/GMS/83/map/worldmap/MapleWorld'
-            'https://maplestory.io/api/GMS/83/map/worldmap/WorldMap'
-            'https://maplestory.io/api/wz/img/GMS/83/Map/WorldMap/MapleWorld.img/BaseImg/0'
-            'https://maplestory.io/api/wz/img/GMS/83/Map/WorldMap/WorldMap.img/BaseImg/0'
-            'https://strategywiki.org/wiki/File:MS_Maple_World.png'
-          )
-          for url in "${urls[@]}"; do
-            echo "=== $url ==="
-            curl -sS -L --max-time 35 -A 'Mozilla/5.0' -D /tmp/h "$url" -o /tmp/b
-            echo "curl=$? bytes=$(wc -c </tmp/b 2>/dev/null || echo 0) type=$(grep -i '^content-type:' /tmp/h | tail -1 | tr -d '\r')"
-            head -n 8 /tmp/h || true
-            head -c 500 /tmp/b | strings | head -5 || true
-            echo
+          set -e
+          base='https://maplestory.io/api/GMS/83/map/worldmap'
+          curl -fsSL --max-time 30 "$base" -o /tmp/names.json
+          echo '=== world map IDs ==='
+          cat /tmp/names.json
+          echo
+          jq -r '.[]' /tmp/names.json | while read -r name; do
+            echo "=== $name ==="
+            if curl -fsSL --max-time 40 "$base/$name" -o /tmp/w.json; then
+              jq -r '[.worldMapName // "", .parentWorld // "", ((.maps // []) | map(.title // .description // "") | unique | .[0:12] | join(" | "))] | @tsv' /tmp/w.json
+            else
+              echo 'unavailable'
+            fi
           done
