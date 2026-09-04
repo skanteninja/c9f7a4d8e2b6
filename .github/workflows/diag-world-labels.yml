@@ -1,0 +1,33 @@
+name: Identify GMS83 world sheets
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/diag-world-labels.yml']
+  workflow_dispatch:
+jobs:
+  identify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read world sheet labels in parallel
+        run: |
+          names='WorldMap WorldMap000 WorldMap010 WorldMap011 WorldMap012 WorldMap013 WorldMap020 WorldMap021 WorldMap030 WorldMap031 WorldMap040 WorldMap050 WorldMap051 WorldMap060 WorldMap070 WorldMap080 WorldMap090 WorldMap100 WorldMap140 WorldMap141 WorldMap142'
+          for n in $names; do
+            (
+              if curl -fsSL --max-time 15 "https://maplestory.io/api/GMS/83/map/worldmap/$n" -o "/tmp/$n.json"; then
+                python3 - "$n" "/tmp/$n.json" <<'PY'
+import json,sys
+n,p=sys.argv[1:]
+try:
+ d=json.load(open(p))
+ vals=[]
+ for m in d.get('maps') or []:
+  for k in ('title','description'):
+   v=m.get(k)
+   if v and v not in vals: vals.append(v)
+ print(n+'\t'+str(d.get('worldMapName',''))+'\t'+str(d.get('parentWorld',''))+'\t'+' | '.join(vals[:16]))
+except Exception as e: print(n+'\tERR '+str(e))
+PY
+              else echo -e "$n\tunavailable"; fi
+            ) &
+          done
+          wait
