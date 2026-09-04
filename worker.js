@@ -1,3 +1,4 @@
+const MAP_GATEWAY_REVISION = 'gms83-world-sheets-v2';
 const CURRENT_DATA = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/';
 const ICON_MEDIA = 'https://meowdb.com/msclassic/api/assets/icons/';
 const WORLD_MAP_MEDIA = 'https://meowdb.com/msclassic/worldmap/';
