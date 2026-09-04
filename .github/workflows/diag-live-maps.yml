@@ -11,21 +11,22 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe live endpoints
-        env:
-          BASE: https://maplestory-classic.ofri505.workers.dev
+      - name: Probe candidate world map sources
         run: |
           set +e
-          for path in \
-            /build-info.txt \
-            /maps-tab.js \
-            /game-data/legacy/maps.json \
-            /game-media/worldmap-legacy/maple-world.png \
-            /game-media/legacy-map/200000000/minimap; do
-            echo "=== $path ==="
-            curl -sS -L --max-time 35 -D /tmp/h "$BASE$path?diag=$GITHUB_RUN_ID" -o /tmp/b
-            code=$?
-            echo "curl=$code bytes=$(wc -c </tmp/b 2>/dev/null || echo 0)"
-            head -n 12 /tmp/h || true
-            if [[ "$path" == *.json || "$path" == *.js || "$path" == *.txt ]]; then head -c 300 /tmp/b; echo; fi
+          urls=(
+            'https://maplestory.io/api/GMS/83/map/worldmap'
+            'https://maplestory.io/api/GMS/83/map/worldmap/MapleWorld'
+            'https://maplestory.io/api/GMS/83/map/worldmap/WorldMap'
+            'https://maplestory.io/api/wz/img/GMS/83/Map/WorldMap/MapleWorld.img/BaseImg/0'
+            'https://maplestory.io/api/wz/img/GMS/83/Map/WorldMap/WorldMap.img/BaseImg/0'
+            'https://strategywiki.org/wiki/File:MS_Maple_World.png'
+          )
+          for url in "${urls[@]}"; do
+            echo "=== $url ==="
+            curl -sS -L --max-time 35 -A 'Mozilla/5.0' -D /tmp/h "$url" -o /tmp/b
+            echo "curl=$? bytes=$(wc -c </tmp/b 2>/dev/null || echo 0) type=$(grep -i '^content-type:' /tmp/h | tail -1 | tr -d '\r')"
+            head -n 8 /tmp/h || true
+            head -c 500 /tmp/b | strings | head -5 || true
+            echo
           done
