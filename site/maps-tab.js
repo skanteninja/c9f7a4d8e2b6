@@ -13,19 +13,21 @@
   const CONTINENTS=[
     {id:'maple-island',name:'Maple Island',subtitle:'Amherst · Southperry',image:'/game-media/worldmap-legacy/maple-island.png',aliases:'maple island amherst southperry beginner island'},
     {id:'victoria',name:'Victoria Island',subtitle:'Henesys · Ellinia · Perion · Kerning · Sleepywood',image:'/game-media/worldmap/victoria-island.webp',aliases:'victoria henesys ellinia perion kerning lith sleepywood dungeon ant tunnel florina nautilus'},
-    {id:'ossyria',name:'Orbis / El Nath Mts.',subtitle:'Orbis · El Nath · Dead Mine',image:'/game-media/worldmap-legacy/el-nath-mts.png',aliases:'ossyria orbis el nath elnath dead mine snow mountain zakum'},
+    {id:'ossyria',name:'Orbis / El Nath Mts.',subtitle:'Orbis · El Nath · Dead Mine',image:'/game-media/worldmap-legacy/orbis-el-nath.png',aliases:'ossyria orbis el nath elnath dead mine snow mountain zakum'},
     {id:'ludus',name:'Ludus Lake',subtitle:'Ludibrium · Omega Sector · Korean Folk Town',image:'/game-media/worldmap-legacy/ludus-lake.png',aliases:'ludus lake ludibrium omega sector korean folk town eos helios clocktower'},
     {id:'aqua',name:'Aqua Road',subtitle:'Aquarium · Deep Sea',image:'/game-media/worldmap-legacy/aqua-road.png',aliases:'aqua road aquarium deep sea ocean'},
     {id:'minar',name:'Minar Forest',subtitle:'Leafre · Dragon Forest',image:'/game-media/worldmap-legacy/minar-forest.png',aliases:'minar forest leafre dragon canyon'},
     {id:'mulung',name:'Mu Lung Garden',subtitle:'Mu Lung · Herb Town',image:'/game-media/worldmap-legacy/mu-lung-garden.png',aliases:'mu lung mulung herb town garden'},
     {id:'nihal',name:'Nihal Desert',subtitle:'Ariant · Magatia',image:'/game-media/worldmap-legacy/nihal-desert.png',aliases:'nihal desert ariant magatia alchemy'},
     {id:'temple',name:'Temple of Time',subtitle:'Three Doors · Time Lane',image:'/game-media/worldmap-legacy/temple-of-time.png',aliases:'temple of time three doors time lane memory road'},
-    {id:'world-tour',name:'World Tour',subtitle:'Zipangu · Showa · Singapore and more',image:'/game-media/worldmap-legacy/zipangu.png',aliases:'world tour zipangu mushroom shrine showa singapore malaysia thailand taiwan'},
+    {id:'ereve',name:'Ereve',subtitle:'Cygnus Knights · Forest of Beginning',image:'/game-media/worldmap-legacy/ereve.png',aliases:'ereve cygnus knights forest of beginning'},
+    {id:'rien',name:'Rien',subtitle:'Aran · Snow Island',image:'/game-media/worldmap-legacy/rien.png',aliases:'rien aran snow island'},
+    {id:'world-tour',name:'World Tour',subtitle:'Zipangu · Showa · Singapore and more',image:'',aliases:'world tour zipangu mushroom shrine showa singapore malaysia thailand taiwan'},
     {id:'masteria',name:'Masteria',subtitle:'New Leaf City · Haunted House',image:'/game-media/worldmap-legacy/masteria.png',aliases:'masteria new leaf city nlc haunted house crimsonwood'},
     {id:'other',name:'Other / Event',subtitle:'PQ · event · special maps',image:'',aliases:'event pq party quest hidden special'}
   ];
   const WORLD_HOTSPOTS={
-    'maple-island':[17,72],'victoria':[34,62],'ossyria':[58,26],'ludus':[74,44],'aqua':[71,64],'minar':[88,32],'mulung':[84,52],'nihal':[51,74],'temple':[91,13],'world-tour':[13,34],'masteria':[28,18]
+    'maple-island':[17,72],'victoria':[34,62],'ossyria':[58,26],'ludus':[74,44],'aqua':[71,64],'minar':[88,32],'mulung':[84,52],'nihal':[51,74],'temple':[91,13],'ereve':[68,12],'rien':[48,12],'world-tour':[13,34],'masteria':[28,18]
   };
   const state={loaded:false,loading:null,current:[],legacy:[],maps:[],byRef:new Map(),byId:new Map(),npcNames:{},mobNames:{},portals:{},monsters:new Map(),view:'world',continent:null,selected:null,returnView:'world',returnContinent:null,zoom:1,showNpcs:true,showMobs:true,showPortals:true,explorerLimit:120};
   const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -74,10 +76,14 @@
       if(/nihal|ariant|magatia/.test(t))return'nihal';
       if(/temple of time/.test(t))return'temple';
       if(/masteria|new leaf/.test(t))return'masteria';
+      if(/ereve|cygnus/.test(t))return'ereve';
+      if(/rien|aran/.test(t))return'rien';
       if(/world tour|zipangu|showa|singapore|malaysia/.test(t))return'world-tour';
     }
     const n=Number(id);
     if(n>=0&&n<100000000)return'maple-island';
+    if(n>=130000000&&n<140000000)return'ereve';
+    if(n>=140000000&&n<150000000)return'rien';
     if(n>=100000000&&n<200000000)return'victoria';
     if(n>=200000000&&n<220000000||n>=280000000&&n<290000000)return'ossyria';
     if(n>=220000000&&n<230000000)return'ludus';
