@@ -1,0 +1,164 @@
+name: Apply world maps expansion
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apply-world-maps.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install staged world maps implementation
+        run: |
+          cat .tcw-staging/maps-tab.js.gz.b64.part0 .tcw-staging/maps-tab.js.gz.b64.part1 | base64 -d | gzip -d > public/maps-tab.js
+          cat .tcw-staging/maps-tab.css.gz.b64 | base64 -d | gzip -d > public/maps-tab.css
+          cat .tcw-staging/worker.js.gz.b64 | base64 -d | gzip -d > worker.js
+          cat .tcw-staging/ci_static_proxy.py.gz.b64 | base64 -d | gzip -d > .github/ci_static_proxy.py
+          node --check public/maps-tab.js
+          node --check worker.js
+          python3 -m py_compile .github/ci_static_proxy.py
+          grep -q "const LEGACY_INDEX='/game-data/legacy/maps.json'" public/maps-tab.js
+          grep -q "name:'Orbis / El Nath Mts.'" public/maps-tab.js
+          grep -q "data-map-keyword=\"sleepywood\"" public/maps-tab.js
+          grep -q "e.key!=='Escape'" public/maps-tab.js
+
+      - name: Upgrade permanent Maps regression gate
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/maps-etc-regression.yml')
+          s=p.read_text()
+          s=s.replace('Browser gate for audited ETC totals and Victoria travel','Browser gate for audited ETC totals and world map navigation')
+          start=s.index('              const mapsBtn=')
+          end=s.index("              result.textContent='maps-etc-regression-ok';",start)
+          new='''              const mapsBtn=d.querySelector('#nav .nav-btn[data-page="maps"]');if(!mapsBtn)throw Error('Maps nav missing');mapsBtn.click();
+              await waitFor(()=>d.querySelector('section[data-page="maps"]')?.classList.contains('active'),'Maps page active',40);
+              await waitFor(()=>d.documentElement.classList.contains('maps-world-ready'),'Maple World',100);
+              await waitFor(()=>d.documentElement.classList.contains('maps-legacy-data-ready'),'legacy map index',100);
+              const state=w.TCW_MAPS?.state;if(!state)throw Error('Maps API missing');
+              if(state.current.length<200)throw Error('too few current maps '+state.current.length);
+              if(state.legacy.length<10)throw Error('legacy map index missing '+state.legacy.length);
+              if(state.maps.length<=state.current.length)throw Error('old-school maps were not merged');
+              if(!d.getElementById('maps-world')?.classList.contains('active'))throw Error('Maps does not open at Maple World');
+              for(const c of ['victoria','ossyria','ludus','aqua','minar','mulung','nihal','temple'])if(!d.querySelector(`.maps-continent-card[data-continent="${c}"]`))throw Error('missing continent '+c);
+
+              d.querySelector('.maps-continent-card[data-continent="victoria"]').click();
+              await waitFor(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Victoria continent',40);
+              await waitFor(()=>d.documentElement.classList.contains('victoria-world-markers-ready'),'Victoria markers',60);
+              if(d.querySelectorAll('.world-map-marker').length<50)throw Error('too few Victoria travel markers');
+              const henesys=d.querySelector('.world-map-marker[data-map-id="010001000"]');if(!henesys)throw Error('Henesys marker missing');henesys.click();
+              await waitFor(()=>d.getElementById('maps-detail')?.classList.contains('active'),'Henesys detail',40);
+              await waitFor(()=>/Henesys/i.test(d.getElementById('map-detail-name')?.textContent||''),'Henesys title',40);
+              d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+              await waitFor(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Escape detail to Victoria',40);
+              d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+              await waitFor(()=>d.getElementById('maps-world')?.classList.contains('active'),'Escape Victoria to world',40);
+
+              d.getElementById('maps-open-explorer').click();
+              await waitFor(()=>d.getElementById('maps-explorer')?.classList.contains('active'),'All Maps',40);
+              const search=d.getElementById('maps-explorer-search');
+              const searchFor=async(text,needle)=>{search.value=text;search.dispatchEvent(new w.Event('input',{bubbles:true}));await waitFor(()=>new RegExp(needle,'i').test(d.getElementById('maps-explorer-list')?.textContent||''),'search '+text,40);};
+              await searchFor('sleepywood','Sleepywood|Ant Tunnel');
+              await searchFor('orbis','Orbis');
+              const orbis=[...d.querySelectorAll('#maps-explorer-list .maps-db-row')].find(x=>/Orbis/i.test(x.textContent));if(!orbis)throw Error('Orbis row missing');orbis.click();
+              await waitFor(()=>d.getElementById('maps-detail')?.classList.contains('active')&&/Orbis/i.test(d.getElementById('map-detail-name')?.textContent||''),'Orbis detail',40);
+              const legacyImage=d.getElementById('map-detail-image');await waitFor(()=>legacyImage?.complete&&legacyImage.naturalWidth>0,'legacy map image',60);
+              d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+              await waitFor(()=>d.getElementById('maps-explorer')?.classList.contains('active'),'Escape Orbis to All Maps',40);
+              await searchFor('el nath','El Nath');
+'''
+          s=s[:start]+new+s[end:]
+          p.write_text(s)
+          PY
+
+      - name: Upgrade permanent live verifier
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/verify-live.yml')
+          s=p.read_text()
+          s=s.replace('# Live gate v12: core dashboard plus audited ETC/quest data and the Victoria Island Maps explorer.','# Live gate v13: core dashboard plus merged Maple World navigator, all-maps search and audited ETC/quest data.')
+          s=s.replace("printf '%s' \"$maps_js\" | grep -q 'maps-tab-ready' && printf '%s' \"$maps_js\" | grep -q '010001000' && maps_ok=1 || true","printf '%s' \"$maps_js\" | grep -q 'maps-tab-ready' && printf '%s' \"$maps_js\" | grep -q 'LEGACY_INDEX' && printf '%s' \"$maps_js\" | grep -qi 'sleepywood' && maps_ok=1 || true")
+          s=s.replace("maps-nav-ready maps-data-ready maps-tab-ready victoria-world-markers-ready etc-lifetime-data-ready","maps-nav-ready maps-data-ready maps-tab-ready maps-world-ready maps-legacy-data-ready etc-lifetime-data-ready")
+          s=s.replace("            grep -q 'id=\"maps-world-stage\"' \"$file\"\n            grep -q 'data-map-id=\"010001000\"' \"$file\"","            grep -q 'id=\"maps-full-world-image\"' \"$file\"\n            grep -q 'data-continent=\"victoria\"' \"$file\"\n            grep -q 'data-continent=\"ossyria\"' \"$file\"\n            grep -q 'id=\"maps-open-explorer\"' \"$file\"")
+          s=s.replace("          assert len(re.findall(r'class=\"world-map-marker ',s)) >= 50","          assert len(re.findall(r'class=\"maps-continent-card',s)) >= 8")
+          needle="          test \"$(curl -fsSL --max-time 15 \"$BASE_URL/game-media/worldmap/victoria-island.webp?ci=$GITHUB_RUN_ID\" | wc -c)\" -gt 10000\n"
+          extra=needle+"          legacy_maps=\"$(curl -fsSL --max-time 30 \"$BASE_URL/game-data/legacy/maps.json?ci=$GITHUB_RUN_ID\")\"\n          test \"${#legacy_maps}\" -gt 10000\n          printf '%s' \"$legacy_maps\" | grep -qi '\"name\":\"Orbis\"'\n          printf '%s' \"$legacy_maps\" | grep -qi '\"name\":\"El Nath\"'\n          test \"$(curl -fsSL --max-time 30 \"$BASE_URL/game-media/worldmap-legacy/maple-world.png?ci=$GITHUB_RUN_ID\" | wc -c)\" -gt 10000\n          test \"$(curl -fsSL --max-time 30 \"$BASE_URL/game-media/legacy-map/200000000/minimap?ci=$GITHUB_RUN_ID\" | wc -c)\" -gt 100\n"
+          if needle not in s: raise SystemExit('live verifier gateway insertion point missing')
+          s=s.replace(needle,extra,1)
+          p.write_text(s)
+          PY
+
+      - name: Rebuild static site
+        run: |
+          node build.cjs
+          for f in maps-tab.js maps-tab.css; do test -s "dist/$f"; done
+          grep -q 'Maple World' dist/maps-tab.js
+          grep -q 'maps-explorer-ready' dist/maps-tab.js
+
+      - name: Browser regression for world continent search and Escape navigation
+        run: |
+          cat > dist/ci-world-maps-test.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><body><iframe id="app" src="/"></iframe><div id="ci-result">pending</div><script>
+          const delay=ms=>new Promise(r=>setTimeout(r,ms));const result=document.getElementById('ci-result'),frame=document.getElementById('app');
+          frame.addEventListener('load',async()=>{try{const d=frame.contentDocument,w=frame.contentWindow;const wait=async(fn,label,n=140)=>{for(let i=0;i<n;i++){if(fn())return;await delay(250)}throw Error('timeout '+label)};
+          await wait(()=>d.documentElement.classList.contains('maps-tab-ready'),'maps tab');await wait(()=>d.documentElement.classList.contains('maps-world-ready'),'world');await wait(()=>d.documentElement.classList.contains('maps-legacy-data-ready'),'legacy');
+          const btn=d.querySelector('#nav .nav-btn[data-page="maps"]');btn.click();await wait(()=>d.querySelector('section[data-page="maps"]')?.classList.contains('active'),'maps active');
+          if(!d.getElementById('maps-world')?.classList.contains('active'))throw Error('not world-first');if(d.querySelectorAll('.maps-continent-card').length<8)throw Error('continents missing');
+          d.querySelector('.maps-continent-card[data-continent="victoria"]').click();await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'victoria');await wait(()=>d.documentElement.classList.contains('victoria-world-markers-ready'),'victoria markers');
+          const h=d.querySelector('.world-map-marker[data-map-id="010001000"]');if(!h)throw Error('henesys marker');h.click();await wait(()=>d.getElementById('maps-detail')?.classList.contains('active')&&/Henesys/i.test(d.getElementById('map-detail-name')?.textContent||''),'henesys detail');
+          d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'escape to victoria');d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-world')?.classList.contains('active'),'escape to world');
+          d.getElementById('maps-open-explorer').click();await wait(()=>d.getElementById('maps-explorer')?.classList.contains('active'),'explorer');const s=d.getElementById('maps-explorer-search');const find=async(v,r)=>{s.value=v;s.dispatchEvent(new w.Event('input',{bubbles:true}));await wait(()=>new RegExp(r,'i').test(d.getElementById('maps-explorer-list')?.textContent||''),'search '+v)};
+          await find('sleepywood','Sleepywood|Ant Tunnel');await find('orbis','Orbis');let row=[...d.querySelectorAll('#maps-explorer-list .maps-db-row')].find(x=>/Orbis/i.test(x.textContent));if(!row)throw Error('Orbis result');row.click();await wait(()=>d.getElementById('maps-detail')?.classList.contains('active')&&/Orbis/i.test(d.getElementById('map-detail-name')?.textContent||''),'orbis detail');await wait(()=>d.getElementById('map-detail-image')?.complete&&d.getElementById('map-detail-image').naturalWidth>0,'orbis image');d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-explorer')?.classList.contains('active'),'escape to explorer');await find('el nath','El Nath');
+          result.textContent='world-maps-regression-ok';}catch(e){result.textContent='world-maps-regression-failed: '+e.message}});
+          </script></body>
+          HTML
+          python3 .github/ci_static_proxy.py --directory dist --port 4173 >/tmp/world-maps-http.log 2>&1 &
+          server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in {1..40}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep .25; done
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"; test -n "$chrome"
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=50000 --dump-dom http://127.0.0.1:4173/ci-world-maps-test.html >/tmp/world-maps-test.html
+          grep -o 'world-maps-regression-[^<]*' /tmp/world-maps-test.html || true
+          grep -q '>world-maps-regression-ok<' /tmp/world-maps-test.html
+          rm -f dist/ci-world-maps-test.html
+
+      - name: Commit verified world maps and generated site
+        run: |
+          rm -rf site
+          mv dist site
+          rm -rf .tcw-staging
+          rm -f .github/workflows/apply-world-maps.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A -f site
+          git commit -m 'Expand Maps to Maple World and full map search'
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
+
+      - name: Verify Cloudflare received world maps build
+        env:
+          BASE_URL: https://maplestory-classic.ofri505.workers.dev
+        run: |
+          ready=0
+          for i in {1..50}; do
+            js="$(curl -fsSL --max-time 15 "$BASE_URL/maps-tab.js?world=$GITHUB_RUN_ID" || true)"
+            legacy="$(curl -fsSL --max-time 30 "$BASE_URL/game-data/legacy/maps.json?world=$GITHUB_RUN_ID" || true)"
+            if printf '%s' "$js" | grep -q 'maps-world-ready' && printf '%s' "$js" | grep -q 'maps-explorer-ready' && printf '%s' "$legacy" | grep -qi '"name":"Orbis"' && printf '%s' "$legacy" | grep -qi '"name":"El Nath"'; then ready=1; break; fi
+            sleep 6
+          done
+          test "$ready" -eq 1
+          test "$(curl -fsSL --max-time 30 "$BASE_URL/game-media/worldmap-legacy/maple-world.png?world=$GITHUB_RUN_ID" | wc -c)" -gt 10000
+          test "$(curl -fsSL --max-time 30 "$BASE_URL/game-media/legacy-map/200000000/minimap?world=$GITHUB_RUN_ID" | wc -c)" -gt 100
