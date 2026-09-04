@@ -1,0 +1,31 @@
+name: Diagnose live Maple World gateway
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diag-live-maps.yml'
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe live endpoints
+        env:
+          BASE: https://maplestory-classic.ofri505.workers.dev
+        run: |
+          set +e
+          for path in \
+            /build-info.txt \
+            /maps-tab.js \
+            /game-data/legacy/maps.json \
+            /game-media/worldmap-legacy/maple-world.png \
+            /game-media/legacy-map/200000000/minimap; do
+            echo "=== $path ==="
+            curl -sS -L --max-time 35 -D /tmp/h "$BASE$path?diag=$GITHUB_RUN_ID" -o /tmp/b
+            code=$?
+            echo "curl=$code bytes=$(wc -c </tmp/b 2>/dev/null || echo 0)"
+            head -n 12 /tmp/h || true
+            if [[ "$path" == *.json || "$path" == *.js || "$path" == *.txt ]]; then head -c 300 /tmp/b; echo; fi
+          done
