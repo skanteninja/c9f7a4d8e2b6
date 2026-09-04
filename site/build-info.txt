@@ -1,1 +1,2 @@
 Top Classic World Maplestory 0.8.1-static1
+Maple World navigator deployment
