@@ -1,0 +1,52 @@
+name: Apply final Maple World UI corrections
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-map-world-ui.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Patch map navigator
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('public/maps-tab.js')
+          s=p.read_text()
+          s=s.replace("image:'/game-media/worldmap-legacy/el-nath-mts.png'","image:'/game-media/worldmap-legacy/orbis-el-nath.png'")
+          s=s.replace("{id:'world-tour',name:'World Tour',subtitle:'Zipangu · Showa · Singapore and more',image:'/game-media/worldmap-legacy/zipangu.png',aliases:'world tour zipangu mushroom shrine showa singapore malaysia thailand taiwan'},", "{id:'ereve',name:'Ereve',subtitle:'Cygnus Knights · Forest of Beginning',image:'/game-media/worldmap-legacy/ereve.png',aliases:'ereve cygnus knights forest of beginning'},\n    {id:'rien',name:'Rien',subtitle:'Aran · Snow Island',image:'/game-media/worldmap-legacy/rien.png',aliases:'rien aran snow island'},\n    {id:'world-tour',name:'World Tour',subtitle:'Zipangu · Showa · Singapore and more',image:'',aliases:'world tour zipangu mushroom shrine showa singapore malaysia thailand taiwan'},")
+          s=s.replace("'temple':[91,13],'world-tour':[13,34],'masteria':[28,18]", "'temple':[91,13],'ereve':[68,12],'rien':[48,12],'world-tour':[13,34],'masteria':[28,18]")
+          s=s.replace("if(/masteria|new leaf/.test(t))return'masteria';\n      if(/world tour|zipangu|showa|singapore|malaysia/.test(t))return'world-tour';", "if(/masteria|new leaf/.test(t))return'masteria';\n      if(/ereve|cygnus/.test(t))return'ereve';\n      if(/rien|aran/.test(t))return'rien';\n      if(/world tour|zipangu|showa|singapore|malaysia/.test(t))return'world-tour';")
+          s=s.replace("if(n>=0&&n<100000000)return'maple-island';\n    if(n>=100000000&&n<200000000)return'victoria';", "if(n>=0&&n<100000000)return'maple-island';\n    if(n>=130000000&&n<140000000)return'ereve';\n    if(n>=140000000&&n<150000000)return'rien';\n    if(n>=100000000&&n<200000000)return'victoria';")
+          p.write_text(s)
+          PY
+          node --check public/maps-tab.js
+          grep -q "id:'ereve'" public/maps-tab.js
+          grep -q "id:'rien'" public/maps-tab.js
+          grep -q "orbis-el-nath.png" public/maps-tab.js
+          ! grep -q "worldmap-legacy/zipangu.png" public/maps-tab.js
+      - name: Rebuild and commit source plus site
+        run: |
+          node build.cjs
+          rm -rf site
+          mv dist site
+          rm -f .github/workflows/patch-map-world-ui.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git add -f site
+          git commit -m 'Finalize Maple World continent navigation'
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
