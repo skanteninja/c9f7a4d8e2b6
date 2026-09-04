@@ -6,6 +6,7 @@ import argparse
 
 CURRENT_DATA='https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/'
 ICON_MEDIA='https://meowdb.com/msclassic/api/assets/icons/'
+WORLD_MAP_MEDIA='https://meowdb.com/msclassic/worldmap/'
 ITEM_MEDIA_PRIMARY='https://api.dreamms.gg/api/GMS/latest/item/'
 PET_MEDIA='https://api.dreamms.gg/api/GMS/latest/pet/'
 CHARACTER_MEDIA='https://api.dreamms.gg/api/GMS/latest/character/'
@@ -21,6 +22,7 @@ def upstream(path):
     routes=(
         ('/game-data/',CURRENT_DATA),
         ('/game-media/icons/',ICON_MEDIA),
+        ('/game-media/worldmap/',WORLD_MAP_MEDIA),
         ('/game-media/items/primary/',ITEM_MEDIA_PRIMARY),
         ('/game-media/pets/',PET_MEDIA),
         ('/game-media/characters/',CHARACTER_MEDIA),
