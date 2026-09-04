@@ -49,7 +49,6 @@ async function ownedAsset(request, upstream, ctx) {
   const cache = caches.default;
   const cached = await cache.match(request);
   if (cached) return cached;
-
   const response = await fetch(upstream, {
     redirect: 'follow',
     headers: {
@@ -58,7 +57,6 @@ async function ownedAsset(request, upstream, ctx) {
     }
   });
   if (!response.ok) return new Response('Asset unavailable', { status: response.status });
-
   const headers = new Headers();
   headers.set('Content-Type', response.headers.get('Content-Type') || 'application/octet-stream');
   headers.set('Cache-Control', 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000');
@@ -102,8 +100,12 @@ async function legacyMapIndex(request, ctx) {
     }
   }
 
-  const body = JSON.stringify({ revision: 'gms-v83', source: 'andrenogrib/gms_v83_wztoweb', count: maps.length, maps });
-  const response = new Response(body, { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000', 'X-Content-Type-Options': 'nosniff' } });
+  const body = JSON.stringify({ revision: 'old-school-map-catalog', count: maps.length, maps });
+  const response = new Response(body, { headers: {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000',
+    'X-Content-Type-Options': 'nosniff'
+  }});
   ctx.waitUntil(cache.put(cacheKey, response.clone()));
   return response;
 }
@@ -124,14 +126,12 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (request.method === 'GET' && url.pathname === '/game-data/legacy/maps.json') return legacyMapIndex(request, ctx);
-
     if (request.method === 'GET') {
       const legacyWorld = legacyWorldMapUpstream(url.pathname);
       if (legacyWorld) return ownedAsset(request, legacyWorld, ctx);
       const legacyMap = legacyMapImageUpstream(url.pathname);
       if (legacyMap) return ownedAsset(request, legacyMap, ctx);
     }
-
     const upstream = upstreamFor(url);
     if (upstream && request.method === 'GET') return ownedAsset(request, upstream, ctx);
     if (url.pathname.startsWith('/game-media/worldmap/') || url.pathname.startsWith('/game-media/worldmap-legacy/') || url.pathname.startsWith('/game-media/legacy-map/')) return new Response('Invalid map asset path', { status: 400 });
