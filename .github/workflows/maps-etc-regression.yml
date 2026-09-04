@@ -1,0 +1,124 @@
+name: Maps and ETC regression
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'public/index.html'
+      - 'public/maps-tab.js'
+      - 'public/maps-tab.css'
+      - 'public/etc-audit-data.js'
+      - 'public/etc-audit-ui.js'
+      - 'public/etc-audit-ui.css'
+      - 'public/quest-audit-additions.js'
+      - 'build.cjs'
+      - 'worker.js'
+      - '.github/ci_static_proxy.py'
+      - '.github/workflows/maps-etc-regression.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify source scripts
+        run: |
+          for f in maps-tab etc-audit-data etc-audit-ui quest-audit-additions; do
+            node --check "public/$f.js"
+            test -s "public/$f.js"
+          done
+          test -s public/maps-tab.css
+          test -s public/etc-audit-ui.css
+
+      - name: Build current static site
+        run: node build.cjs
+
+      - name: Verify Maps and audit assets are wired in the correct order
+        run: |
+          for f in maps-tab.js maps-tab.css etc-audit-data.js quest-audit-additions.js etc-audit-ui.js etc-audit-ui.css; do
+            test -s "dist/$f"
+            grep -q "$f?v=0.8.1-static1" dist/index.html
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('dist/index.html').read_text()
+          q=s.index('data-page="quests" class="nav-btn"')
+          m=s.index('data-page="maps" class="nav-btn"')
+          e=s.index('data-page="equipment" class="nav-btn"')
+          assert q < m < e, 'Maps navigation is not between Quests and Equipment'
+          guide=s.index('guide-data.js?v=0.8.1-static1')
+          audit=s.index('etc-audit-data.js?v=0.8.1-static1')
+          quests=s.index('quest-audit-additions.js?v=0.8.1-static1')
+          app=s.index('app.js?v=0.8.1-static1')
+          assert guide < audit < quests < app, 'Audited quest/ETC data must load before app.js'
+          PY
+
+      - name: Browser gate for audited ETC totals and Victoria travel
+        run: |
+          cat > dist/ci-maps-etc-test.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><body><iframe id="app" src="/"></iframe><div id="ci-result">pending</div><script>
+          const delay=ms=>new Promise(r=>setTimeout(r,ms));
+          const result=document.getElementById('ci-result');
+          const frame=document.getElementById('app');
+          frame.addEventListener('load',async()=>{
+            try{
+              const d=frame.contentDocument,w=frame.contentWindow;
+              const waitFor=async(fn,label,tries=120)=>{for(let i=0;i<tries;i++){if(fn())return;await delay(250);}throw Error('timeout '+label);};
+              await waitFor(()=>d.documentElement.classList.contains('etc-lifetime-data-ready'),'ETC data');
+              await waitFor(()=>d.documentElement.classList.contains('quest-catalog-audit-ready'),'quest audit');
+              await waitFor(()=>d.documentElement.classList.contains('maps-tab-ready'),'maps data');
+              const D=w.GUIDE_DATA;
+              if(!D)throw Error('GUIDE_DATA missing');
+              const item=name=>D.etc.find(x=>x.Item===name);
+              const expected={"Pig's Ribbon":58,'Orange Mushroom Cap':48,'Green Mushroom Cap':98,'Leaf':121,'Octopus Leg':92,'Cursed Doll':690,'Stone Golem Rubble':173,'Tablecloth':115};
+              for(const [name,keep] of Object.entries(expected)){
+                const row=item(name);if(!row)throw Error('missing ETC '+name);
+                if(Number(row['Permanent Keep'])!==keep||Number(row['All-In Total'])!==keep)throw Error(`${name} KEEP ${row['Permanent Keep']} != ${keep}`);
+              }
+              const pig=item("Pig's Ribbon");
+              if(Number(pig['Optional / Donation'])!==100)throw Error('Pig weekly request missing');
+              if(Number(pig['All-In Total'])===158)throw Error('weekly donation leaked into permanent KEEP');
+              const blue=item('Blue Mushroom Cap');
+              if(Number(blue['Crafting Need'])!==30||Number(blue['Permanent Keep'])!==115)throw Error('I/L crafting reserve not preserved');
+              if(!w.TCW_ETC_AUDIT||w.TCW_ETC_AUDIT.rule.indexOf('weekly')<0)throw Error('ETC audit metadata missing');
+              if(!w.TCW_QUEST_AUDIT||Number(w.TCW_QUEST_AUDIT.total)<=176)throw Error('quest catalog was not expanded');
+
+              const mapsBtn=d.querySelector('#nav .nav-btn[data-page="maps"]');if(!mapsBtn)throw Error('Maps nav missing');mapsBtn.click();
+              await waitFor(()=>d.querySelector('section[data-page="maps"]')?.classList.contains('active'),'Maps page active',40);
+              await waitFor(()=>d.documentElement.classList.contains('victoria-world-markers-ready'),'world markers',80);
+              const state=w.TCW_MAPS?.state;if(!state)throw Error('Maps API missing');
+              if(state.victoria.length<200)throw Error('too few Victoria maps '+state.victoria.length);
+              if(!state.byId.has('010001000'))throw Error('Henesys current map ID missing');
+              if(d.querySelectorAll('.world-map-marker').length<50)throw Error('too few world travel markers');
+              const world=d.getElementById('maps-world-image');
+              await waitFor(()=>world?.complete&&world.naturalWidth>0,'Victoria world image',80);
+              const henesys=d.querySelector('.world-map-marker[data-map-id="010001000"]');if(!henesys)throw Error('Henesys marker missing');henesys.click();
+              await waitFor(()=>d.getElementById('maps-detail')?.classList.contains('active'),'detail view',40);
+              await waitFor(()=>/Henesys/i.test(d.getElementById('map-detail-name')?.textContent||''),'Henesys detail',40);
+              const mapImg=d.getElementById('map-detail-image');await waitFor(()=>mapImg?.complete&&mapImg.naturalWidth>0,'Henesys map image',80);
+              if(Number(d.getElementById('map-npc-count')?.textContent||0)<1)throw Error('Henesys NPCs missing');
+              if(Number(d.getElementById('map-exit-count')?.textContent||0)<1)throw Error('Henesys connections missing');
+              result.textContent='maps-etc-regression-ok';
+            }catch(e){result.textContent='maps-etc-regression-failed: '+e.message;}
+          });
+          </script></body>
+          HTML
+
+          python3 .github/ci_static_proxy.py --directory dist --port 4173 >/tmp/maps-etc-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in {1..40}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep .25; done
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=45000 --dump-dom http://127.0.0.1:4173/ci-maps-etc-test.html >/tmp/maps-etc-test.html
+          grep -o 'maps-etc-regression-[^<]*' /tmp/maps-etc-test.html || true
+          grep -q '>maps-etc-regression-ok<' /tmp/maps-etc-test.html
