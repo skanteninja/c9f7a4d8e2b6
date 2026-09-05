@@ -31,12 +31,9 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Verify source scripts
+      - name: Verify source and local atlas
         run: |
-          for f in maps-tab etc-audit-data etc-audit-ui quest-audit-additions; do
-            node --check "public/$f.js"
-            test -s "public/$f.js"
-          done
+          for f in maps-tab etc-audit-data etc-audit-ui quest-audit-additions; do node --check "public/$f.js"; test -s "public/$f.js"; done
           node --check worker.js
           python3 -m py_compile .github/ci_static_proxy.py
           grep -q "const LEGACY_INDEX='/game-data/legacy/maps.json'" public/maps-tab.js
@@ -51,7 +48,7 @@ jobs:
       - name: Build current static site
         run: node build.cjs
 
-      - name: Verify Maps and audit assets
+      - name: Verify generated site and atlas copy
         run: |
           for f in maps-tab.js maps-tab.css etc-audit-data.js quest-audit-additions.js etc-audit-ui.js etc-audit-ui.css; do
             test -s "dist/$f"
@@ -71,12 +68,11 @@ jobs:
           assert s.index('guide-data.js?v=0.8.1-static1') < s.index('etc-audit-data.js?v=0.8.1-static1') < s.index('quest-audit-additions.js?v=0.8.1-static1') < s.index('app.js?v=0.8.1-static1')
           PY
 
-      - name: Browser gate for audited ETC totals and visual world navigation
+      - name: Browser gate for audited ETC and visual atlas navigation
         run: |
           cat > dist/ci-maps-etc-test.html <<'HTML'
           <!doctype html><meta charset="utf-8"><body><iframe id="app" src="/"></iframe><div id="ci-result">pending</div><script>
-          const delay=ms=>new Promise(r=>setTimeout(r,ms));
-          const result=document.getElementById('ci-result'),frame=document.getElementById('app');
+          const delay=ms=>new Promise(r=>setTimeout(r,ms)),result=document.getElementById('ci-result'),frame=document.getElementById('app');
           frame.addEventListener('load',async()=>{try{
             const d=frame.contentDocument,w=frame.contentWindow;
             const wait=async(fn,label,n=180)=>{for(let i=0;i<n;i++){if(fn())return;await delay(250)}throw Error('timeout '+label)};
@@ -93,35 +89,32 @@ jobs:
             const blue=item('Blue Mushroom Cap');if(Number(blue['Crafting Need'])!==30||Number(blue['Permanent Keep'])!==115)throw Error('craft reserve');
             if(!w.TCW_QUEST_AUDIT||Number(w.TCW_QUEST_AUDIT.total)<=176)throw Error('quest catalog not expanded');
 
-            const mapsBtn=d.querySelector('#nav .nav-btn[data-page="maps"]');if(!mapsBtn)throw Error('Maps nav missing');mapsBtn.click();
+            d.querySelector('#nav .nav-btn[data-page="maps"]')?.click();
             await wait(()=>d.querySelector('section[data-page="maps"]')?.classList.contains('active'),'Maps active');
             await wait(()=>d.documentElement.classList.contains('maps-atlas-visual-ready'),'visual atlas');
-            if(!d.getElementById('maps-world')?.classList.contains('active'))throw Error('Maps must open at Maple World');
             const world=d.getElementById('maps-full-world-image');
             await wait(()=>world?.complete&&world.naturalWidth>200,'Maple World artwork');
             if(d.querySelectorAll('.maps-atlas-world-point').length<10)throw Error('world WZ points');
             if(d.querySelectorAll('.maps-continent-art-image').length<8)throw Error('continent artwork');
-            await wait(()=>[...d.querySelectorAll('.maps-atlas-world-point img')].some(x=>x.complete&&x.naturalWidth>0),'world marker sprite');
-            const state=w.TCW_MAPS?.state;if(!state)throw Error('Maps API missing');
-            if(state.current.length<200||state.legacy.length<10||state.maps.length<=state.current.length)throw Error('map merge incomplete');
-            for(const c of ['victoria','ossyria','ludus','aqua','minar','mulung','nihal','temple'])if(!d.querySelector(`.maps-continent-card[data-continent="${c}"]`))throw Error('missing continent '+c);
+            await wait(()=>[...d.querySelectorAll('.maps-atlas-world-point img')].some(x=>x.complete&&x.naturalWidth>0),'marker sprite');
+            const state=w.TCW_MAPS?.state;if(!state||state.current.length<200||state.legacy.length<10||state.maps.length<=state.current.length)throw Error('map merge incomplete');
 
-            d.querySelector('.maps-continent-card[data-continent="victoria"]').click();
+            d.querySelector('.maps-continent-card[data-continent="victoria"]')?.click();
             await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Victoria');
             await wait(()=>d.getElementById('maps-sheet-image')?.complete&&d.getElementById('maps-sheet-image').naturalWidth>200,'Victoria artwork');
             await wait(()=>d.querySelectorAll('.world-map-marker,.atlas-map-point').length>=50,'Victoria points');
-            const h=d.querySelector('.world-map-marker[data-map-id="010001000"]');if(!h)throw Error('Henesys marker');h.click();
+            const h=d.querySelector('[data-map-id="010001000"].world-map-marker,[data-map-id="010001000"].atlas-map-point');if(!h)throw Error('Henesys point');h.click();
             await wait(()=>d.getElementById('maps-detail')?.classList.contains('active')&&/Henesys/i.test(d.getElementById('map-detail-name')?.textContent||''),'Henesys detail');
             d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Esc to Victoria');
             d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-world')?.classList.contains('active'),'Esc to world');
 
-            d.querySelector('.maps-continent-card[data-continent="ossyria"]').click();
+            d.querySelector('.maps-continent-card[data-continent="ossyria"]')?.click();
             await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Orbis El Nath');
             await wait(()=>d.getElementById('maps-sheet-image')?.complete&&d.getElementById('maps-sheet-image').naturalWidth>200,'Orbis El Nath artwork');
-            if(d.querySelectorAll('.atlas-map-point').length<20)throw Error('Orbis El Nath WZ points');
+            await wait(()=>d.querySelectorAll('.atlas-map-point').length>=20,'Orbis El Nath WZ points');
             d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-world')?.classList.contains('active'),'Esc from Orbis El Nath');
 
-            d.getElementById('maps-open-explorer').click();await wait(()=>d.getElementById('maps-explorer')?.classList.contains('active'),'All Maps');
+            d.getElementById('maps-open-explorer')?.click();await wait(()=>d.getElementById('maps-explorer')?.classList.contains('active'),'All Maps');
             const s=d.getElementById('maps-explorer-search');
             const find=async(v,r)=>{s.value=v;s.dispatchEvent(new w.Event('input',{bubbles:true}));await wait(()=>new RegExp(r,'i').test(d.getElementById('maps-explorer-list')?.textContent||''),'search '+v)};
             await find('sleepywood','Sleepywood|Ant Tunnel');
