@@ -8,6 +8,7 @@ on:
       - 'public/monster-integrity.js'
       - 'public/monster-integrity.css'
       - 'public/monster-drop-evidence.js'
+      - 'public/visuals-db.js'
       - 'public/bootstrap.js'
       - 'build.cjs'
       - '.github/ci_static_proxy.py'
@@ -30,9 +31,14 @@ jobs:
           grep -q "community-documented" public/monster-drop-evidence.js
           ! grep -Eqi "v83.*(drop|rate)|legacy.*(drop|rate).*current" public/monster-drop-evidence.js
           grep -q "older v83/GMS tables are excluded" public/monster-integrity.js
-          grep -q "monster-drop-evidence.js" public/bootstrap.js
+          grep -q "currentClientHasDropTable:false" public/visuals-db.js
+          grep -q "legacyTablesAllowedAsCurrent:false" public/visuals-db.js
+          grep -q "monster-integrity-ready" public/visuals-db.js
       - name: Build site
-        run: node build.cjs
+        run: |
+          node build.cjs
+          grep -q "monster-integrity-ready" dist/visuals-db.js
+          grep -q "legacyTablesAllowedAsCurrent:false" dist/visuals-db.js
       - name: Browser monster evidence audit
         run: |
           python3 .github/ci_static_proxy.py --directory dist --port 4174 >/tmp/maplestory-monster-http.log 2>&1 &
