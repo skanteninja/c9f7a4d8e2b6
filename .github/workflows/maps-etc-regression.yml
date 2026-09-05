@@ -8,6 +8,7 @@ on:
       - 'public/index.html'
       - 'public/maps-tab.js'
       - 'public/maps-tab.css'
+      - 'public/assets/map-atlas/**'
       - 'public/etc-audit-data.js'
       - 'public/etc-audit-ui.js'
       - 'public/etc-audit-ui.css'
@@ -40,7 +41,12 @@ jobs:
           python3 -m py_compile .github/ci_static_proxy.py
           grep -q "const LEGACY_INDEX='/game-data/legacy/maps.json'" public/maps-tab.js
           grep -q 'maps-explorer-ready' public/maps-tab.js
+          grep -q 'maps-atlas-visual-ready' public/maps-tab.js
           grep -q "name:'Orbis / El Nath Mts.'" public/maps-tab.js
+          test "$(wc -c < public/assets/map-atlas/sheets/maple-world.png)" -gt 100000
+          test "$(wc -c < public/assets/map-atlas/sheets/victoria-island.png)" -gt 5000
+          test "$(wc -c < public/assets/map-atlas/sheets/orbis-el-nath.png)" -gt 5000
+          test -s public/assets/map-atlas/data/markers.json
 
       - name: Build current static site
         run: node build.cjs
@@ -51,14 +57,21 @@ jobs:
             test -s "dist/$f"
             grep -q "$f?v=0.8.1-static1" dist/index.html
           done
+          test "$(wc -c < dist/assets/map-atlas/sheets/maple-world.png)" -gt 100000
+          test "$(wc -c < dist/assets/map-atlas/sheets/victoria-island.png)" -gt 5000
+          test "$(wc -c < dist/assets/map-atlas/sheets/orbis-el-nath.png)" -gt 5000
+          test -s dist/assets/map-atlas/data/markers.json
+          grep -q '"world"' dist/assets/map-atlas/data/markers.json
+          grep -q '"victoria"' dist/assets/map-atlas/data/markers.json
+          grep -q '"ossyria"' dist/assets/map-atlas/data/markers.json
           python3 - <<'PY'
           from pathlib import Path
           s=Path('dist/index.html').read_text()
-          assert s.index('data-page="quests" class="nav-btn"') < s.index('data-page="maps" class="nav-btn"') < s.index('data-page="equipment" class="nav-btn"')
+          assert s.index('data-page="quests" class="nav-btn"') < s.index('data-page="maps" class="nav-btn') < s.index('data-page="equipment" class="nav-btn')
           assert s.index('guide-data.js?v=0.8.1-static1') < s.index('etc-audit-data.js?v=0.8.1-static1') < s.index('quest-audit-additions.js?v=0.8.1-static1') < s.index('app.js?v=0.8.1-static1')
           PY
 
-      - name: Browser gate for audited ETC totals and world navigation
+      - name: Browser gate for audited ETC totals and visual world navigation
         run: |
           cat > dist/ci-maps-etc-test.html <<'HTML'
           <!doctype html><meta charset="utf-8"><body><iframe id="app" src="/"></iframe><div id="ci-result">pending</div><script>
@@ -66,7 +79,7 @@ jobs:
           const result=document.getElementById('ci-result'),frame=document.getElementById('app');
           frame.addEventListener('load',async()=>{try{
             const d=frame.contentDocument,w=frame.contentWindow;
-            const wait=async(fn,label,n=160)=>{for(let i=0;i<n;i++){if(fn())return;await delay(250)}throw Error('timeout '+label)};
+            const wait=async(fn,label,n=180)=>{for(let i=0;i<n;i++){if(fn())return;await delay(250)}throw Error('timeout '+label)};
             await wait(()=>d.documentElement.classList.contains('etc-lifetime-data-ready'),'ETC data');
             await wait(()=>d.documentElement.classList.contains('quest-catalog-audit-ready'),'quest audit');
             await wait(()=>d.documentElement.classList.contains('maps-tab-ready'),'maps tab');
@@ -82,24 +95,38 @@ jobs:
 
             const mapsBtn=d.querySelector('#nav .nav-btn[data-page="maps"]');if(!mapsBtn)throw Error('Maps nav missing');mapsBtn.click();
             await wait(()=>d.querySelector('section[data-page="maps"]')?.classList.contains('active'),'Maps active');
+            await wait(()=>d.documentElement.classList.contains('maps-atlas-visual-ready'),'visual atlas');
             if(!d.getElementById('maps-world')?.classList.contains('active'))throw Error('Maps must open at Maple World');
+            const world=d.getElementById('maps-full-world-image');
+            await wait(()=>world?.complete&&world.naturalWidth>200,'Maple World artwork');
+            if(d.querySelectorAll('.maps-atlas-world-point').length<10)throw Error('world WZ points');
+            if(d.querySelectorAll('.maps-continent-art-image').length<8)throw Error('continent artwork');
+            await wait(()=>[...d.querySelectorAll('.maps-atlas-world-point img')].some(x=>x.complete&&x.naturalWidth>0),'world marker sprite');
             const state=w.TCW_MAPS?.state;if(!state)throw Error('Maps API missing');
             if(state.current.length<200||state.legacy.length<10||state.maps.length<=state.current.length)throw Error('map merge incomplete');
             for(const c of ['victoria','ossyria','ludus','aqua','minar','mulung','nihal','temple'])if(!d.querySelector(`.maps-continent-card[data-continent="${c}"]`))throw Error('missing continent '+c);
 
             d.querySelector('.maps-continent-card[data-continent="victoria"]').click();
             await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Victoria');
+            await wait(()=>d.getElementById('maps-sheet-image')?.complete&&d.getElementById('maps-sheet-image').naturalWidth>200,'Victoria artwork');
             await wait(()=>d.documentElement.classList.contains('victoria-world-markers-ready'),'Victoria markers');
-            if(d.querySelectorAll('.world-map-marker').length<50)throw Error('Victoria markers');
+            if(d.querySelectorAll('.world-map-marker,.atlas-map-point').length<50)throw Error('Victoria points');
             const h=d.querySelector('.world-map-marker[data-map-id="010001000"]');if(!h)throw Error('Henesys marker');h.click();
             await wait(()=>d.getElementById('maps-detail')?.classList.contains('active')&&/Henesys/i.test(d.getElementById('map-detail-name')?.textContent||''),'Henesys detail');
             d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Esc to Victoria');
             d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-world')?.classList.contains('active'),'Esc to world');
 
+            d.querySelector('.maps-continent-card[data-continent="ossyria"]').click();
+            await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Orbis El Nath');
+            await wait(()=>d.getElementById('maps-sheet-image')?.complete&&d.getElementById('maps-sheet-image').naturalWidth>200,'Orbis El Nath artwork');
+            if(d.querySelectorAll('.atlas-map-point').length<20)throw Error('Orbis El Nath WZ points');
+            d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-world')?.classList.contains('active'),'Esc from Orbis El Nath');
+
             d.getElementById('maps-open-explorer').click();await wait(()=>d.getElementById('maps-explorer')?.classList.contains('active'),'All Maps');
             const s=d.getElementById('maps-explorer-search');
             const find=async(v,r)=>{s.value=v;s.dispatchEvent(new w.Event('input',{bubbles:true}));await wait(()=>new RegExp(r,'i').test(d.getElementById('maps-explorer-list')?.textContent||''),'search '+v)};
             await find('sleepywood','Sleepywood|Ant Tunnel');
+            if(d.querySelectorAll('#maps-explorer-list .maps-db-thumb').length<1)throw Error('All Maps thumbnails');
             await find('orbis','Orbis');
             const orbis=[...d.querySelectorAll('#maps-explorer-list .maps-db-row')].find(x=>/Orbis/i.test(x.textContent));if(!orbis)throw Error('Orbis result');orbis.click();
             await wait(()=>d.getElementById('maps-detail')?.classList.contains('active')&&/Orbis/i.test(d.getElementById('map-detail-name')?.textContent||''),'Orbis detail');
@@ -114,6 +141,6 @@ jobs:
           server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           for i in {1..40}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep .25; done
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"; test -n "$chrome"
-          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=55000 --dump-dom http://127.0.0.1:4173/ci-maps-etc-test.html >/tmp/maps-etc-test.html
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=60000 --dump-dom http://127.0.0.1:4173/ci-maps-etc-test.html >/tmp/maps-etc-test.html
           grep -o 'maps-etc-regression-[^<]*' /tmp/maps-etc-test.html || true
           grep -q '>maps-etc-regression-ok<' /tmp/maps-etc-test.html
