@@ -257,6 +257,8 @@ html = html.replace('</head>', `  <link rel="stylesheet" href="visuals.css?v=${a
 html = html.replace('</body>', `  <script src="visuals.js?v=${assetVersion}"></script>\n  <script src="visuals-db.js?v=${assetVersion}"></script>\n  <script src="visuals-npc.js?v=${assetVersion}"></script>\n  <script src="visuals-skills.js?v=${assetVersion}"></script>\n  <script src="visuals-portals.js?v=${assetVersion}"></script>\n  <script src="dashboard-polish.js?v=${assetVersion}"></script>\n  <script src="progression-sync.js?v=${assetVersion}"></script>\n  <script src="progression-level-hook.js?v=${assetVersion}"></script>\n  <script src="progression-skill-state.js?v=${assetVersion}"></script>\n  <script src="progression-gear-visual.js?v=${assetVersion}"></script>\n  <script src="ownership-ui.js?v=${assetVersion}"></script>\n  <script src="maps-tab.js?v=${assetVersion}"></script>\n  <script src="etc-audit-ui.js?v=${assetVersion}"></script>\n</body>`);
 
 fs.writeFileSync(path.join(out, 'index.html'), html);
+const atlasAssets = path.join(source, 'assets', 'map-atlas');
+if (fs.existsSync(atlasAssets)) fs.cpSync(atlasAssets, path.join(out, 'assets', 'map-atlas'), { recursive: true });
 fs.copyFileSync(path.join(source, 'manifest.webmanifest'), path.join(out, 'manifest.webmanifest'));
 fs.writeFileSync(path.join(out, 'styles.css'), css);
 fs.writeFileSync(path.join(out, 'visuals.css'), visualCss);
