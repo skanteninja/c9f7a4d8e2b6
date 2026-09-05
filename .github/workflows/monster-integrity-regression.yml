@@ -9,6 +9,7 @@ on:
       - 'public/monster-integrity.css'
       - 'public/monster-drop-evidence.js'
       - 'public/visuals-db.js'
+      - 'public/ownership-ui.js'
       - 'public/bootstrap.js'
       - 'build.cjs'
       - '.github/ci_static_proxy.py'
@@ -31,14 +32,16 @@ jobs:
           grep -q "community-documented" public/monster-drop-evidence.js
           ! grep -Eqi "v83.*(drop|rate)|legacy.*(drop|rate).*current" public/monster-drop-evidence.js
           grep -q "older v83/GMS tables are excluded" public/monster-integrity.js
-          grep -q "currentClientHasDropTable:false" public/visuals-db.js
-          grep -q "legacyTablesAllowedAsCurrent:false" public/visuals-db.js
-          grep -q "monster-integrity-ready" public/visuals-db.js
+          grep -q "currentClientHasDropTable:false" public/ownership-ui.js
+          grep -q "legacyTablesAllowedAsCurrent:false" public/ownership-ui.js
+          grep -q "itemId:4000001" public/ownership-ui.js
+          grep -q "monster-integrity-ready" public/ownership-ui.js
       - name: Build site
         run: |
           node build.cjs
-          grep -q "monster-integrity-ready" dist/visuals-db.js
-          grep -q "legacyTablesAllowedAsCurrent:false" dist/visuals-db.js
+          grep -q "monster-integrity-ready" dist/ownership-ui.js
+          grep -q "legacyTablesAllowedAsCurrent:false" dist/ownership-ui.js
+          grep -q "itemId:4000001" dist/ownership-ui.js
       - name: Browser monster evidence audit
         run: |
           python3 .github/ci_static_proxy.py --directory dist --port 4174 >/tmp/maplestory-monster-http.log 2>&1 &
@@ -66,27 +69,27 @@ jobs:
               dataset.value='monsters';dataset.dispatchEvent(new w.Event('change',{bubbles:true}));dataset.dispatchEvent(new w.Event('input',{bubbles:true}));
               const search=d.getElementById('db-search');
               if(search){search.value='Snail';search.dispatchEvent(new w.Event('input',{bubbles:true}));search.dispatchEvent(new w.Event('change',{bubbles:true}));}
-              for(let i=0;i<70&&!d.documentElement.classList.contains('monster-integrity-ready');i++)await wait(120);
-              await wait(800);
+              for(let i=0;i<120&&!d.documentElement.classList.contains('monster-integrity-ready');i++)await wait(100);
               if(!d.documentElement.classList.contains('monster-drop-evidence-ready'))throw Error('drop evidence registry did not load');
               if(!d.documentElement.classList.contains('monster-integrity-ready'))throw Error('monster integrity audit did not load');
-              const cards=[...d.querySelectorAll('#db-results .db-card')];
-              const snail=cards.find(card=>String(card.querySelector('h3')?.textContent||'').trim()==='Snail');
+              let snail=null;
+              for(let i=0;i<50&&!snail;i++){snail=[...d.querySelectorAll('#db-results .db-card')].find(card=>String(card.querySelector('h3')?.textContent||'').trim()==='Snail');if(!snail)await wait(100);}
               if(!snail)throw Error('Snail card not found');
               const audit=snail.querySelector('.tcw-monster-integrity');
               if(!audit)throw Error('Snail integrity block missing');
               if(!/Drop evidence/i.test(audit.textContent||''))throw Error('drop evidence status missing');
               const chip=snail.querySelector('.tcw-monster-drop-chip');
               if(!chip||!/Snail Shell/i.test(chip.textContent||''))throw Error('Classic-specific Snail Shell evidence missing');
+              if(chip.dataset.dropItemId!=='4000001')throw Error('Snail Shell did not resolve to current item 4000001');
               if(/v83|legacy drop table/i.test(chip.textContent||''))throw Error('legacy drop copy leaked into current evidence chip');
               const img=chip.querySelector('img');
-              if(img){img.loading='eager';await wait(600);if(img.complete&&img.naturalWidth===0)throw Error('drop evidence item artwork broken: '+img.getAttribute('src'));}
-              if(Number(d.documentElement.dataset.monsterDropEvidenceItemMisses||'0')!==0)throw Error('evidence item names failed to resolve to current items');
+              if(img){img.loading='eager';for(let i=0;i<30&&!img.complete;i++)await wait(100);if(img.complete&&img.naturalWidth===0)throw Error('drop evidence item artwork broken: '+img.getAttribute('src'));}
+              if(Number(d.documentElement.dataset.monsterDropEvidenceItemMisses||'0')!==0)throw Error('evidence item resolution reported a miss');
               out.textContent='monster-integrity-regression-ok';
             }catch(e){out.textContent='monster-integrity-regression-failed: '+e.message;}
           });
           </script></body>
           HTML
-          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1280,900 --virtual-time-budget=45000 --dump-dom http://127.0.0.1:4174/ci-monster-integrity.html >/tmp/monster-integrity.html
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1280,900 --virtual-time-budget=60000 --dump-dom http://127.0.0.1:4174/ci-monster-integrity.html >/tmp/monster-integrity.html
           grep -o '<pre id="result">[^<]*' /tmp/monster-integrity.html || true
           grep -q '<pre id="result">monster-integrity-regression-ok</pre>' /tmp/monster-integrity.html
