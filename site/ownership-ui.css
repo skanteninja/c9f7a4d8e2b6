@@ -110,6 +110,22 @@ button,a,select,input{outline:none}
 button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--tcw-focus)!important;outline-offset:2px!important}
 button{touch-action:manipulation}
 
+/* Normalize the remaining interactive chrome so every tab feels like the same product. */
+button,.mini-btn,.ghost-btn,.primary-btn,.page-back{font:inherit}
+.mini-btn,.ghost-btn,.primary-btn,.page-back,.filters button,.db-toolbar button{border-radius:9px!important;min-height:34px;transition:border-color .16s ease,background-color .16s ease,box-shadow .16s ease,transform .16s ease!important}
+.mini-btn:hover,.ghost-btn:hover,.primary-btn:hover,.page-back:hover,.filters button:hover,.db-toolbar button:hover{box-shadow:0 6px 18px rgba(0,0,0,.16)}
+input[type="search"],input[type="text"],input[type="number"],select{border-radius:9px!important;border-color:var(--tcw-line)!important;background-color:#0d1420!important;color:#eef4ff!important;min-height:36px}
+input::placeholder{color:#6f7d92!important;opacity:1}
+.filters,.db-toolbar{gap:8px!important}
+.filters input,.filters select,.db-toolbar input,.db-toolbar select{box-shadow:inset 0 1px 0 rgba(255,255,255,.02)!important}
+.page.active{scrollbar-color:rgba(126,151,187,.38) transparent;scrollbar-width:thin}
+.page.active *::-webkit-scrollbar{width:8px;height:8px}
+.page.active *::-webkit-scrollbar-track{background:transparent}
+.page.active *::-webkit-scrollbar-thumb{background:rgba(126,151,187,.28);border:2px solid transparent;background-clip:padding-box;border-radius:999px}
+.page.active *::-webkit-scrollbar-thumb:hover{background:rgba(143,174,215,.42);border:2px solid transparent;background-clip:padding-box}
+.atlas-panel-head,.v5-panel-heading,.db-hero{border-color:var(--tcw-line)!important}
+.eyebrow,.v5-kicker-row,.class-pill,.job-pill{letter-spacing:.045em}
+
 /* Mobile is a first-class surface: larger taps, restrained animation, no squeezed media. */
 @media(max-width:1100px){
   .dashboard-v72 .v72-hero-grid{grid-template-columns:1fr!important}
@@ -124,6 +140,9 @@ button{touch-action:manipulation}
   .visual-media-strip,.visual-db-strip,.visual-quest-items{overflow-x:auto!important;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding-bottom:4px}
   .visual-media-strip>.visual-asset,.visual-db-strip>.visual-db-asset,.visual-quest-items>.visual-asset{flex:0 0 auto}
   .brand-mark{width:38px!important;height:38px!important;min-width:38px!important}
+  .mini-btn,.ghost-btn,.primary-btn,.page-back,.filters button,.db-toolbar button{min-height:42px}
+  input[type="search"],input[type="text"],input[type="number"],select{min-height:42px}
+  .filters,.db-toolbar{gap:10px!important}
 }
 @media(max-width:620px){
   .dashboard-v72 .v5-character-hero{grid-template-columns:1fr!important;grid-template-rows:auto auto auto!important}
@@ -134,4 +153,6 @@ button{touch-action:manipulation}
   .dashboard-v72 .v72-etc-panel .v72-etc-icons{grid-template-columns:repeat(2,minmax(0,1fr))!important}
   .panel{border-radius:12px!important}
   .visual-asset img,.visual-db-asset img{max-width:100%!important}
+  .db-toolbar,.filters{align-items:stretch!important}
+  .db-toolbar>*:not(label),.filters>*:not(label){max-width:100%!important}
 }
