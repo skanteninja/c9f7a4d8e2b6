@@ -8,11 +8,11 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe map mark WZ images
+      - name: Probe WZ world map marker sprites
         run: |
           set +e
-          base='https://maplestory.io/api/wz/img/GMS/83/Map/MapHelper.img/mark'
-          for mark in Henesys Ellinia Perion KerningCity SleepyWood Orbis ElNath Ludibrium Aquarium Leafre MuLung Ariant Magatia TempleOfTime NLC; do
-            code=$(curl -sS -L --max-time 25 -o /tmp/icon -w '%{http_code}' "$base/$mark")
-            echo "$mark code=$code bytes=$(wc -c </tmp/icon) type=$(file -b --mime-type /tmp/icon)"
+          base='https://maplestory.io/api/wz/img/GMS/83/Map/MapHelper.img/worldMap/mapImage'
+          for type in 0 1 2 3 4 5; do
+            code=$(curl -sS -L --max-time 25 -o /tmp/icon -w '%{http_code}' "$base/$type")
+            echo "type=$type code=$code bytes=$(wc -c </tmp/icon) mime=$(file -b --mime-type /tmp/icon)"
           done
