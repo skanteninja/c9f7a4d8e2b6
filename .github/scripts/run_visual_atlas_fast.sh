@@ -1,83 +1,49 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo '[atlas-fast] use already bundled MapleStory WZ sheets + metadata'
+echo '[atlas-fast] use bundled MapleStory WZ sheets + metadata only'
 for f in maple-world maple-island victoria-island orbis-el-nath ludus-lake aqua-road minar-forest mu-lung-garden nihal-desert temple-of-time ereve rien masteria; do
   test -s "public/assets/map-atlas/sheets/$f.png"
 done
 for f in WorldMap WorldMap010 WorldMap020; do test -s "public/assets/map-atlas/data/$f.json"; done
 
 rm -rf /tmp/atlas-json
-mkdir -p /tmp/atlas-json public/assets/map-atlas/{markers,marks}
+mkdir -p /tmp/atlas-json
 cp public/assets/map-atlas/data/WorldMap*.json /tmp/atlas-json/
-# Full API responses are build inputs only; the shipped atlas keeps the compact marker index.
+# Full WZ API payloads are build inputs only; the shipped atlas keeps compact marker data.
 rm -f public/assets/map-atlas/data/WorldMap*.json
 
-# Original WZ world-map marker sprites: verified types 0-3.
-base='https://maplestory.io/api/wz/img/GMS/83/Map/MapHelper.img/worldMap/mapImage'
-for type in 0 1 2 3; do
-  (
-    curl --retry 4 --retry-delay 1 --retry-all-errors -fsSL --max-time 25 "$base/$type" -o "public/assets/map-atlas/markers/wz-$type.png"
-    test "$(wc -c < "public/assets/map-atlas/markers/wz-$type.png")" -gt 500
-  ) &
-done
-wait
-
-# MapleStory town/map-mark logos, all from original GMS83 MapHelper WZ.
-cat > /tmp/atlas-fast-marks.txt <<'EOF'
-henesys Henesys
-ellinia Ellinia
-perion Perion
-kerning KerningCity
-el-nath ElNath
-ludibrium Ludibrium
-leafre Leafre
-ariant Ariant
-magatia Magatia
-nlc NLC
-EOF
-markbase='https://maplestory.io/api/wz/img/GMS/83/Map/MapHelper.img/mark'
-while read -r slug mark; do
-  (
-    if curl --retry 3 --retry-delay 1 --retry-all-errors -fsSL --max-time 25 "$markbase/$mark" -o "public/assets/map-atlas/marks/$slug.png"; then
-      test "$(wc -c < "public/assets/map-atlas/marks/$slug.png")" -gt 500 || rm -f "public/assets/map-atlas/marks/$slug.png"
-    fi
-  ) &
-done < /tmp/atlas-fast-marks.txt
-wait
-
-# Preserve current-Classic Victoria art + its marker sprites if available; WZ visual is the fallback.
-(
-  curl --retry 3 --retry-delay 1 --retry-all-errors -fsSL --max-time 25 'https://meowdb.com/msclassic/worldmap/victoria-island.webp' -o public/assets/map-atlas/sheets/victoria-current.webp || true
-  test "$(wc -c < public/assets/map-atlas/sheets/victoria-current.webp 2>/dev/null || echo 0)" -gt 5000 || rm -f public/assets/map-atlas/sheets/victoria-current.webp
-) &
-for kind in town spot cluster; do
-  (
-    curl --retry 3 --retry-delay 1 --retry-all-errors -fsSL --max-time 25 "https://meowdb.com/msclassic/worldmap/marker-$kind.png" -o "public/assets/map-atlas/markers/current-$kind.png" || true
-    test "$(wc -c < "public/assets/map-atlas/markers/current-$kind.png" 2>/dev/null || echo 0)" -gt 100 || rm -f "public/assets/map-atlas/markers/current-$kind.png"
-  ) &
-done
-wait
-
 python3 .github/scripts/finalize_map_atlas.py
+
+# The site already ships working same-origin Maple world-map marker artwork.
+# Reuse it instead of depending on remote runtime/build downloads.
+python3 - <<'PY'
+from pathlib import Path
+p=Path('public/maps-tab.js')
+s=p.read_text()
+s=s.replace("const atlasMarkerUrl=type=>`${ATLAS_ROOT}markers/wz-${Number(type)||0}.png`;", "const atlasMarkerUrl=type=>`/game-media/worldmap/marker-${Number(type)===3?'town':Number(type)===2?'cluster':'spot'}.png`;")
+s=s.replace("const cid=atlasContinentFor(point);if(cid==='other')continue;const c=continentConfig(cid)", "const cid=atlasContinentFor(point);const c=continentConfig(cid)")
+p.write_text(s)
+PY
 node --check public/maps-tab.js
 
-echo '[atlas-fast] build product with owned visual assets'
+echo '[atlas-fast] build product with local visual assets'
 node build.cjs
 test "$(wc -c < dist/assets/map-atlas/sheets/maple-world.png)" -gt 100000
 test "$(wc -c < dist/assets/map-atlas/sheets/orbis-el-nath.png)" -gt 5000
 test -s dist/assets/map-atlas/data/markers.json
-for type in 0 1 2 3; do test "$(wc -c < "dist/assets/map-atlas/markers/wz-$type.png")" -gt 500; done
 
 cat > dist/ci-visual-atlas.html <<'HTML'
 <!doctype html><meta charset="utf-8"><body><iframe id="app" src="/"></iframe><div id="ci-result">pending</div><script>
 const delay=ms=>new Promise(r=>setTimeout(r,ms)),frame=document.getElementById('app'),result=document.getElementById('ci-result');
 frame.addEventListener('load',async()=>{try{const d=frame.contentDocument;const wait=async(fn,label,n=180)=>{for(let i=0;i<n;i++){if(fn())return;await delay(250)}throw Error('timeout '+label)};
 await wait(()=>d.documentElement.classList.contains('maps-tab-ready'),'maps tab');d.querySelector('#nav .nav-btn[data-page="maps"]')?.click();
-await wait(()=>d.documentElement.classList.contains('maps-atlas-visual-ready'),'visual atlas');const img=d.getElementById('maps-full-world-image');if(!img?.complete||img.naturalWidth<200)throw Error('world art');if(d.querySelectorAll('.maps-atlas-world-point').length<10)throw Error('world icons');if(d.querySelectorAll('.maps-continent-art-image').length<9)throw Error('continent art');
+await wait(()=>d.documentElement.classList.contains('maps-atlas-visual-ready'),'visual atlas');const img=d.getElementById('maps-full-world-image');if(!img?.complete||img.naturalWidth<200)throw Error('world art');
+await wait(()=>d.querySelectorAll('.maps-atlas-world-point').length>=10,'world icons');if(d.querySelectorAll('.maps-continent-art-image').length<9)throw Error('continent art');
 const markerImgs=[...d.querySelectorAll('.maps-atlas-world-point img')];await wait(()=>markerImgs.some(x=>x.complete&&x.naturalWidth>0),'marker sprites');
 const vic=d.querySelector('.maps-continent-card[data-continent="victoria"]');if(!vic)throw Error('victoria card');vic.click();await wait(()=>d.getElementById('maps-sheet-image')?.complete&&d.getElementById('maps-sheet-image').naturalWidth>200,'victoria art');await wait(()=>d.querySelectorAll('.world-map-marker,.atlas-map-point').length>=50,'victoria points');
 d.getElementById('maps-local-back')?.click();await wait(()=>d.getElementById('maps-world')?.classList.contains('active'),'world back');d.querySelector('.maps-continent-card[data-continent="ossyria"]')?.click();await wait(()=>d.getElementById('maps-sheet-image')?.complete&&d.getElementById('maps-sheet-image').naturalWidth>200,'ossyria art');await wait(()=>d.querySelectorAll('.atlas-map-point').length>=20,'ossyria points');
+d.getElementById('maps-local-back')?.click();await wait(()=>d.getElementById('maps-world')?.classList.contains('active'),'world second back');d.querySelector('#maps-open-explorer')?.click();await wait(()=>d.getElementById('maps-explorer')?.classList.contains('active'),'all maps');const search=d.getElementById('maps-explorer-search');search.value='sleepywood';search.dispatchEvent(new Event('input',{bubbles:true}));await wait(()=>d.querySelectorAll('#maps-explorer-list .maps-db-row').length>0,'search sleepywood');await wait(()=>d.querySelectorAll('#maps-explorer-list .maps-db-thumb').length>0,'search thumbnails');
 result.textContent='visual-atlas-ok';}catch(e){result.textContent='visual-atlas-failed: '+e.message;}});
 </script></body>
 HTML
@@ -116,9 +82,8 @@ BASE='https://maplestory-classic.ofri505.workers.dev'; ready=0
 for i in {1..70}; do
  js="$(curl -fsSL --max-time 15 "$BASE/maps-tab.js?visual=$GITHUB_RUN_ID" || true)"
  wb="$(curl -fsSL --max-time 20 "$BASE/assets/map-atlas/sheets/maple-world.png?visual=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
- mb="$(curl -fsSL --max-time 20 "$BASE/assets/map-atlas/markers/wz-0.png?visual=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
  data="$(curl -fsSL --max-time 20 "$BASE/assets/map-atlas/data/markers.json?visual=$GITHUB_RUN_ID" || true)"
- if printf '%s' "$js" | grep -q 'maps-atlas-visual-ready' && [ "${wb:-0}" -gt 100000 ] && [ "${mb:-0}" -gt 500 ] && printf '%s' "$data" | grep -q '"ossyria"'; then ready=1; break; fi
+ if printf '%s' "$js" | grep -q 'maps-atlas-visual-ready' && [ "${wb:-0}" -gt 100000 ] && printf '%s' "$data" | grep -q '"ossyria"'; then ready=1; break; fi
  sleep 5
 done
 test "$ready" -eq 1
