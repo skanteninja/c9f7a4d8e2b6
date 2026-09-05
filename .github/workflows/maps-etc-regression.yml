@@ -1,5 +1,6 @@
 name: Maps and ETC regression
 
+# Atlas checkpoint: validate WZ point resolution against current Classic-first map records.
 on:
   workflow_dispatch:
   push:
