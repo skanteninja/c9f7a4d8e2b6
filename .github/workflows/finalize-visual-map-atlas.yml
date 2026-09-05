@@ -7,6 +7,7 @@ on:
       - '.github/workflows/finalize-visual-map-atlas.yml'
       - '.github/scripts/finalize_map_atlas.py'
       - '.github/scripts/run_visual_atlas_fast.sh'
+      - '.github/scripts/visual_atlas_preflight.sh'
   workflow_dispatch:
 
 permissions:
@@ -24,4 +25,6 @@ jobs:
         with:
           node-version: '22'
       - name: Build, verify, commit and deploy visual atlas
-        run: bash .github/scripts/run_visual_atlas_fast.sh
+        run: |
+          bash .github/scripts/visual_atlas_preflight.sh
+          bash .github/scripts/run_visual_atlas_fast.sh
