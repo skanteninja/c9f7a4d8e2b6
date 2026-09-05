@@ -302,3 +302,66 @@
   document.addEventListener('click',schedule,true);
   enhance();
 })();
+
+// Production-shipped monster integrity + Classic-only drop evidence layer.
+(() => {
+  const ROOT='/game-data/data/current/';
+  const normal=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  const evidenceRows=[
+    {monster:'Snail',item:'Snail Shell',status:'community-documented'},
+    {monster:'Blue Snail',item:'Blue Snail Shell',status:'community-documented'},
+    {monster:'Red Snail',item:'Red Snail Shell',status:'community-documented'}
+  ];
+  const evidenceByMonster=new Map();
+  evidenceRows.forEach(row=>{const k=normal(row.monster);if(!evidenceByMonster.has(k))evidenceByMonster.set(k,[]);evidenceByMonster.get(k).push(row)});
+  window.TCW_MONSTER_DROP_EVIDENCE=Object.freeze({
+    version:'2026-09-05.2',
+    currentClientHasDropTable:false,
+    legacyTablesAllowedAsCurrent:false,
+    rows:Object.freeze(evidenceRows.map(x=>Object.freeze({...x}))),
+    get(name){return evidenceByMonster.get(normal(name))||[]}
+  });
+  document.documentElement.classList.add('monster-drop-evidence-ready');
+
+  const style=document.createElement('style');
+  style.textContent='.tcw-monster-integrity{margin-top:10px;padding:10px 11px;border:1px solid rgba(143,168,207,.16);border-radius:10px;background:rgba(12,18,29,.55)}.tcw-monster-integrity-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.tcw-monster-integrity-head b{font-size:11px;color:#e8f1ff}.tcw-monster-integrity-head span{font-size:8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:3px 6px;border-radius:999px;border:1px solid rgba(115,191,140,.28);color:#9fe0b1;background:rgba(70,145,94,.08)}.tcw-monster-integrity-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.tcw-monster-integrity-grid>div{min-width:0;padding:7px 8px;border:1px solid rgba(143,168,207,.12);border-radius:8px;background:rgba(255,255,255,.015)}.tcw-monster-integrity-grid small{display:block;font-size:8px;color:#76859c;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}.tcw-monster-integrity-grid b{display:block;font-size:10px;line-height:1.25;color:#dfe8f6;overflow-wrap:anywhere}.tcw-monster-integrity-grid .warn b{color:#efc07b}.tcw-monster-integrity-grid .bad b{color:#f08c95}.tcw-monster-integrity-note{display:block;margin-top:8px;font-size:8px;line-height:1.4;color:#7f8ba0}.tcw-monster-integrity-note strong{color:#c8d4e6}.tcw-monster-drop-evidence{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.tcw-monster-drop-chip{display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid rgba(120,191,146,.17);border-radius:8px;background:rgba(73,140,95,.045)}.tcw-monster-drop-chip img{width:28px;height:28px;object-fit:contain}.tcw-monster-drop-chip span{display:grid;gap:1px}.tcw-monster-drop-chip b{font-size:9px;color:#dff2e5}.tcw-monster-drop-chip small{font-size:7px;color:#83a18d}@media(max-width:620px){.tcw-monster-integrity-grid{grid-template-columns:1fr}.tcw-monster-integrity{padding:9px}}';
+  document.head.appendChild(style);
+
+  let dataPromise=null,timer=null;
+  const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const cardId=card=>{const raw=card.querySelector('code')?.textContent?.replace(/\D/g,'');const n=Number(raw);return Number.isFinite(n)?n:null};
+  const rows=(raw,key)=>Array.isArray(raw?.[key])?raw[key]:Array.isArray(raw)?raw:[];
+  function load(){
+    if(!dataPromise)dataPromise=Promise.all([
+      fetch(`${ROOT}monsters.json`,{cache:'force-cache'}).then(r=>r.ok?r.json():Promise.reject(Error(`monsters ${r.status}`))),
+      fetch(`${ROOT}maps.json`,{cache:'force-cache'}).then(r=>r.ok?r.json():Promise.reject(Error(`maps ${r.status}`))),
+      fetch(`${ROOT}items.json`,{cache:'force-cache'}).then(r=>r.ok?r.json():Promise.reject(Error(`items ${r.status}`)))
+    ]).then(([mr,mar,ir])=>{
+      const mobs=rows(mr,'monsters'),maps=rows(mar,'maps'),items=rows(ir,'items');
+      const itemByName=new Map();items.forEach(i=>{const k=normal(i?.name||i?.item_name);if(k&&!itemByName.has(k))itemByName.set(k,i)});
+      return {mobs:new Map(mobs.map(x=>[Number(x.id),x])),maps:new Map(maps.map(x=>[Number(x.id),x])),itemByName};
+    });
+    return dataPromise;
+  }
+  function spriteState(mob){const p=mob?.gif||mob?.gifs?.move||mob?.gifs?.stand;if(p&&mob?.thumbnail)return ['Primary + fallback',''];if(p)return ['Primary sprite only','warn'];if(mob?.thumbnail)return ['Fallback thumbnail only','warn'];return ['No artwork reference','bad']}
+  function spawnState(mob,maps){const refs=Array.isArray(mob?.maps)?mob.maps:[];const valid=refs.filter(r=>maps.has(Number(r.id))).length;const miss=Math.max(0,refs.length-valid);return [`${valid}/${refs.length} resolved`,miss?'warn':refs.length?'':'warn',miss]}
+  function itemImg(item){const id=Number(item?.id);return Number.isFinite(id)?`${ROOT}images/items/${String(Math.trunc(id)).padStart(8,'0')}.png`:''}
+  function render(card,mob,maps,itemByName){
+    if(card.querySelector('.tcw-monster-integrity'))return;
+    const [art,artCls]=spriteState(mob),[spawn,spawnCls,miss]=spawnState(mob,maps),evidence=window.TCW_MONSTER_DROP_EVIDENCE.get(mob?.name),resolved=evidence.map(e=>({e,item:itemByName.get(normal(e.item))})).filter(x=>x.item);
+    const box=document.createElement('section');box.className='tcw-monster-integrity';
+    box.innerHTML=`<div class="tcw-monster-integrity-head"><b>Monster integrity</b><span>Current Classic</span></div><div class="tcw-monster-integrity-grid"><div class="${artCls}"><small>Artwork</small><b>${esc(art)}</b></div><div class="${spawnCls}"><small>Spawn maps</small><b>${esc(spawn)}</b></div><div class="${evidence.length?'':'warn'}"><small>Drop evidence</small><b>${evidence.length?`${resolved.length}/${evidence.length} Classic evidence resolved`:'No verified current drops'}</b></div></div><small class="tcw-monster-integrity-note"><strong>Drop safety:</strong> the client does not expose server drop tables. Only Classic-specific evidence is shown here; older v83/GMS tables are excluded from current-drop claims.</small>`;
+    if(resolved.length){const strip=document.createElement('div');strip.className='tcw-monster-drop-evidence';resolved.forEach(({e,item})=>{const chip=document.createElement('div');chip.className='tcw-monster-drop-chip';const img=document.createElement('img');img.src=itemImg(item);img.alt=e.item;img.loading='lazy';chip.appendChild(img);const text=document.createElement('span');text.innerHTML=`<b>${esc(e.item)}</b><small>Classic-specific community evidence</small>`;chip.appendChild(text);strip.appendChild(chip)});box.appendChild(strip)}
+    const rel=card.querySelector('.visual-db-relations');rel?rel.insertAdjacentElement('beforebegin',box):card.appendChild(box);
+    card.dataset.tcwMonsterIntegrity='1';
+    return {miss,evidence:resolved.length,evidenceMiss:evidence.length-resolved.length};
+  }
+  async function enhance(){
+    if(document.getElementById('db-dataset')?.value!=='monsters')return;
+    const cards=[...document.querySelectorAll('#db-results .db-card')];if(!cards.length)return;
+    try{const {mobs,maps,itemByName}=await load();let seen=0,mapIssues=0,evidenceItems=0,evidenceMisses=0;cards.forEach(card=>{const mob=mobs.get(cardId(card));if(!mob)return;seen++;const r=render(card,mob,maps,itemByName);if(r){if(r.miss)mapIssues++;evidenceItems+=r.evidence;evidenceMisses+=r.evidenceMiss}});document.documentElement.classList.add('monster-integrity-ready');document.documentElement.dataset.monsterIntegrityVisible=String(seen);document.documentElement.dataset.monsterIntegrityMapIssues=String(mapIssues);document.documentElement.dataset.monsterDropEvidenceItems=String(evidenceItems);document.documentElement.dataset.monsterDropEvidenceItemMisses=String(evidenceMisses)}catch(err){console.warn('Monster integrity audit unavailable',err)}
+  }
+  function schedule(){clearTimeout(timer);timer=setTimeout(enhance,120)}
+  new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true});
+  document.addEventListener('change',schedule,true);document.addEventListener('input',schedule,true);document.addEventListener('click',schedule,true);schedule();
+})();
