@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Live gate v18: Top Classic World dashboard, audited ETC/quests, visual atlas and same-origin Classic visual media.
+# Live gate v19: product, visual atlas, same-origin Classic media, and shipped monster integrity.
 on:
   workflow_run:
     workflows: ["Build static site"]
@@ -22,21 +22,30 @@ jobs:
         run: |
           ready=0
           for i in {1..60}; do
-            build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0; visuals_ok=0
+            build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0; visuals_ok=0; integrity_ok=0
             build_info="$(curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" || true)"
             [[ "$build_info" == *"Top Classic World Maplestory 0.8.1-static1"* ]] && build_ok=1 || true
+
             maps_js="$(curl -fsSL --max-time 15 "$BASE_URL/maps-tab.js?ci=$GITHUB_RUN_ID" || true)"
             if [[ "$maps_js" == *"maps-world-ready"* ]] && [[ "$maps_js" == *"maps-explorer-ready"* ]] && [[ "$maps_js" == *"maps-atlas-visual-ready"* ]] && [[ "$maps_js" == *"ATLAS_CURRENT_NAME_ALIASES"* ]] && [[ "$maps_js" == *"100000000':'henesys"* ]] && [[ "$maps_js" == *"LEGACY_INDEX"* ]]; then maps_ok=1; fi
+
             legacy="$(curl -fsSL --max-time 35 "$BASE_URL/game-data/legacy/maps.json?ci=$GITHUB_RUN_ID" || true)"
             legacy_lc="${legacy,,}"
             if [ "${#legacy}" -gt 10000 ] && [[ "$legacy_lc" == *'"name":"orbis"'* ]] && [[ "$legacy_lc" == *'"name":"el nath"'* ]]; then legacy_ok=1; fi
+
             world_bytes="$(curl -fsSL --max-time 30 "$BASE_URL/assets/map-atlas/sheets/maple-world.png?ci=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
             atlas_data="$(curl -fsSL --max-time 20 "$BASE_URL/assets/map-atlas/data/markers.json?ci=$GITHUB_RUN_ID" || true)"
             if [ "${world_bytes:-0}" -gt 100000 ] && [ "${#atlas_data}" -gt 1000 ] && [[ "$atlas_data" == *'"world"'* ]] && [[ "$atlas_data" == *'"victoria"'* ]] && [[ "$atlas_data" == *'"ossyria"'* ]]; then atlas_ok=1; fi
+
             visuals_js="$(curl -fsSL --max-time 15 "$BASE_URL/visuals.js?ci=$GITHUB_RUN_ID" || true)"
             monster_bytes="$(curl -fsSL --max-time 20 "$BASE_URL/game-data/data/images/monsters/03b8bda63a91a4f5c89dae6f6983caf0.webp?ci=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
             if [[ "$visuals_js" == *"const REPO_RAW = '/game-data/';"* ]] && [[ "$visuals_js" == *"const RAW = '/game-data/data/current/';"* ]] && [[ "$visuals_js" != *"raw.githubusercontent.com/ohmi69/osms_datamine_dashboard"* ]] && [ "${monster_bytes:-0}" -gt 500 ]; then visuals_ok=1; fi
-            if [ "$build_ok" -eq 1 ] && [ "$maps_ok" -eq 1 ] && [ "$legacy_ok" -eq 1 ] && [ "$atlas_ok" -eq 1 ] && [ "$visuals_ok" -eq 1 ]; then ready=1; break; fi
+
+            ownership_js="$(curl -fsSL --max-time 15 "$BASE_URL/ownership-ui.js?ci=$GITHUB_RUN_ID" || true)"
+            if [[ "$ownership_js" == *"version:'2026-09-05.4'"* ]] && [[ "$ownership_js" == *"itemId:4000001"* ]] && [[ "$ownership_js" == *"legacyTablesAllowedAsCurrent:false"* ]] && [[ "$ownership_js" == *"monster-integrity-ready"* ]]; then integrity_ok=1; fi
+
+            echo "live-check[$i] build=$build_ok maps=$maps_ok legacy=$legacy_ok atlas=$atlas_ok visuals=$visuals_ok integrity=$integrity_ok world_bytes=${world_bytes:-0} monster_bytes=${monster_bytes:-0}"
+            if [ "$build_ok" -eq 1 ] && [ "$maps_ok" -eq 1 ] && [ "$legacy_ok" -eq 1 ] && [ "$atlas_ok" -eq 1 ] && [ "$visuals_ok" -eq 1 ] && [ "$integrity_ok" -eq 1 ]; then ready=1; break; fi
             sleep 5
           done
           test "$ready" -eq 1
@@ -59,7 +68,7 @@ jobs:
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-live-${viewport//,/-}.html"
             "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=36000 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID&viewport=$viewport" >"$file"
-            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready maps-nav-ready maps-data-ready maps-tab-ready maps-world-ready maps-legacy-data-ready maps-atlas-visual-ready etc-lifetime-data-ready quest-catalog-audit-ready etc-lifetime-audit-ready; do
+            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready maps-nav-ready maps-data-ready maps-tab-ready maps-world-ready maps-legacy-data-ready maps-atlas-visual-ready etc-lifetime-data-ready quest-catalog-audit-ready etc-lifetime-audit-ready monster-drop-evidence-ready; do
               grep -q "$marker" "$file"
             done
             grep -q '<title>Top Classic World Maplestory</title>' "$file"
