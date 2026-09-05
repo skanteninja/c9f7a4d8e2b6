@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Live gate v17: Top Classic World dashboard, audited ETC/quests, visual atlas and same-origin Classic visual media.
+# Live gate v18: Top Classic World dashboard, audited ETC/quests, visual atlas and same-origin Classic visual media.
 on:
   workflow_run:
     workflows: ["Build static site"]
@@ -23,17 +23,19 @@ jobs:
           ready=0
           for i in {1..60}; do
             build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0; visuals_ok=0
-            curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" | grep -q 'Top Classic World Maplestory 0.8.1-static1' && build_ok=1 || true
+            build_info="$(curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" || true)"
+            [[ "$build_info" == *"Top Classic World Maplestory 0.8.1-static1"* ]] && build_ok=1 || true
             maps_js="$(curl -fsSL --max-time 15 "$BASE_URL/maps-tab.js?ci=$GITHUB_RUN_ID" || true)"
-            printf '%s' "$maps_js" | grep -q 'maps-world-ready' && printf '%s' "$maps_js" | grep -q 'maps-explorer-ready' && printf '%s' "$maps_js" | grep -q 'maps-atlas-visual-ready' && printf '%s' "$maps_js" | grep -q 'ATLAS_CURRENT_NAME_ALIASES' && printf '%s' "$maps_js" | grep -q "100000000':'henesys" && printf '%s' "$maps_js" | grep -q 'LEGACY_INDEX' && maps_ok=1 || true
+            if [[ "$maps_js" == *"maps-world-ready"* ]] && [[ "$maps_js" == *"maps-explorer-ready"* ]] && [[ "$maps_js" == *"maps-atlas-visual-ready"* ]] && [[ "$maps_js" == *"ATLAS_CURRENT_NAME_ALIASES"* ]] && [[ "$maps_js" == *"100000000':'henesys"* ]] && [[ "$maps_js" == *"LEGACY_INDEX"* ]]; then maps_ok=1; fi
             legacy="$(curl -fsSL --max-time 35 "$BASE_URL/game-data/legacy/maps.json?ci=$GITHUB_RUN_ID" || true)"
-            if [ "${#legacy}" -gt 10000 ] && printf '%s' "$legacy" | grep -qi '"name":"Orbis"' && printf '%s' "$legacy" | grep -qi '"name":"El Nath"'; then legacy_ok=1; fi
+            legacy_lc="${legacy,,}"
+            if [ "${#legacy}" -gt 10000 ] && [[ "$legacy_lc" == *'"name":"orbis"'* ]] && [[ "$legacy_lc" == *'"name":"el nath"'* ]]; then legacy_ok=1; fi
             world_bytes="$(curl -fsSL --max-time 30 "$BASE_URL/assets/map-atlas/sheets/maple-world.png?ci=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
             atlas_data="$(curl -fsSL --max-time 20 "$BASE_URL/assets/map-atlas/data/markers.json?ci=$GITHUB_RUN_ID" || true)"
-            if [ "${world_bytes:-0}" -gt 100000 ] && [ "${#atlas_data}" -gt 1000 ] && printf '%s' "$atlas_data" | grep -q '"world"' && printf '%s' "$atlas_data" | grep -q '"victoria"' && printf '%s' "$atlas_data" | grep -q '"ossyria"'; then atlas_ok=1; fi
+            if [ "${world_bytes:-0}" -gt 100000 ] && [ "${#atlas_data}" -gt 1000 ] && [[ "$atlas_data" == *'"world"'* ]] && [[ "$atlas_data" == *'"victoria"'* ]] && [[ "$atlas_data" == *'"ossyria"'* ]]; then atlas_ok=1; fi
             visuals_js="$(curl -fsSL --max-time 15 "$BASE_URL/visuals.js?ci=$GITHUB_RUN_ID" || true)"
             monster_bytes="$(curl -fsSL --max-time 20 "$BASE_URL/game-data/data/images/monsters/03b8bda63a91a4f5c89dae6f6983caf0.webp?ci=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
-            if printf '%s' "$visuals_js" | grep -q "const REPO_RAW = '/game-data/'" && printf '%s' "$visuals_js" | grep -q "const RAW = '/game-data/data/current/'" && ! printf '%s' "$visuals_js" | grep -q "raw.githubusercontent.com/ohmi69/osms_datamine_dashboard" && [ "${monster_bytes:-0}" -gt 500 ]; then visuals_ok=1; fi
+            if [[ "$visuals_js" == *"const REPO_RAW = '/game-data/';"* ]] && [[ "$visuals_js" == *"const RAW = '/game-data/data/current/';"* ]] && [[ "$visuals_js" != *"raw.githubusercontent.com/ohmi69/osms_datamine_dashboard"* ]] && [ "${monster_bytes:-0}" -gt 500 ]; then visuals_ok=1; fi
             if [ "$build_ok" -eq 1 ] && [ "$maps_ok" -eq 1 ] && [ "$legacy_ok" -eq 1 ] && [ "$atlas_ok" -eq 1 ] && [ "$visuals_ok" -eq 1 ]; then ready=1; break; fi
             sleep 5
           done
@@ -41,9 +43,12 @@ jobs:
           test "$(curl -fsSL --max-time 15 "$BASE_URL/maps-tab.css?ci=$GITHUB_RUN_ID" | wc -c)" -gt 4000
           test "$(curl -fsSL --max-time 15 "$BASE_URL/etc-audit-data.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 5000
           test "$(curl -fsSL --max-time 15 "$BASE_URL/quest-audit-additions.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 5000
-          ! curl -fsSL --max-time 15 "$BASE_URL/app.js?ci=$GITHUB_RUN_ID" | grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard'
-          ! curl -fsSL --max-time 15 "$BASE_URL/visuals-db.js?ci=$GITHUB_RUN_ID" | grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard'
-          ! curl -fsSL --max-time 15 "$BASE_URL/visuals-npc.js?ci=$GITHUB_RUN_ID" | grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard'
+          app_js="$(curl -fsSL --max-time 15 "$BASE_URL/app.js?ci=$GITHUB_RUN_ID")"
+          visuals_db_js="$(curl -fsSL --max-time 15 "$BASE_URL/visuals-db.js?ci=$GITHUB_RUN_ID")"
+          visuals_npc_js="$(curl -fsSL --max-time 15 "$BASE_URL/visuals-npc.js?ci=$GITHUB_RUN_ID")"
+          [[ "$app_js" != *"raw.githubusercontent.com/ohmi69/osms_datamine_dashboard"* ]]
+          [[ "$visuals_db_js" != *"raw.githubusercontent.com/ohmi69/osms_datamine_dashboard"* ]]
+          [[ "$visuals_npc_js" != *"raw.githubusercontent.com/ohmi69/osms_datamine_dashboard"* ]]
 
       - name: Verify live browser dashboard and visual Maple World atlas
         env:
