@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Live gate v14: Top Classic World dashboard, audited ETC/quests and visual Maple World atlas.
+# Live gate v15: Top Classic World dashboard, audited ETC/quests and visual Maple World atlas.
 on:
   workflow_run:
     workflows: ["Build static site"]
