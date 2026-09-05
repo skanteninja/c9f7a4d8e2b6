@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Live gate v15: Top Classic World dashboard, audited ETC/quests and visual Maple World atlas.
+# Live gate v16: Top Classic World dashboard, audited ETC/quests and visual Maple World atlas.
 on:
   workflow_run:
     workflows: ["Build static site"]
@@ -25,7 +25,7 @@ jobs:
             build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0
             curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" | grep -q 'Top Classic World Maplestory 0.8.1-static1' && build_ok=1 || true
             maps_js="$(curl -fsSL --max-time 15 "$BASE_URL/maps-tab.js?ci=$GITHUB_RUN_ID" || true)"
-            printf '%s' "$maps_js" | grep -q 'maps-world-ready' && printf '%s' "$maps_js" | grep -q 'maps-explorer-ready' && printf '%s' "$maps_js" | grep -q 'maps-atlas-visual-ready' && printf '%s' "$maps_js" | grep -q 'LEGACY_INDEX' && maps_ok=1 || true
+            printf '%s' "$maps_js" | grep -q 'maps-world-ready' && printf '%s' "$maps_js" | grep -q 'maps-explorer-ready' && printf '%s' "$maps_js" | grep -q 'maps-atlas-visual-ready' && printf '%s' "$maps_js" | grep -q 'ATLAS_CURRENT_NAME_ALIASES' && printf '%s' "$maps_js" | grep -q "100000000':'henesys" && printf '%s' "$maps_js" | grep -q 'LEGACY_INDEX' && maps_ok=1 || true
             legacy="$(curl -fsSL --max-time 35 "$BASE_URL/game-data/legacy/maps.json?ci=$GITHUB_RUN_ID" || true)"
             if [ "${#legacy}" -gt 10000 ] && printf '%s' "$legacy" | grep -qi '"name":"Orbis"' && printf '%s' "$legacy" | grep -qi '"name":"El Nath"'; then legacy_ok=1; fi
             world_bytes="$(curl -fsSL --max-time 30 "$BASE_URL/assets/map-atlas/sheets/maple-world.png?ci=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
