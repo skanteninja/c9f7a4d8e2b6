@@ -148,3 +148,5 @@ export default {
     return env.ASSETS.fetch(request);
   }
 };
+
+// Atlas resolver checkpoint: WZ Henesys maps to the current Classic record before legacy fallback.
