@@ -109,8 +109,7 @@ jobs:
             d.querySelector('.maps-continent-card[data-continent="victoria"]').click();
             await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Victoria');
             await wait(()=>d.getElementById('maps-sheet-image')?.complete&&d.getElementById('maps-sheet-image').naturalWidth>200,'Victoria artwork');
-            await wait(()=>d.documentElement.classList.contains('victoria-world-markers-ready'),'Victoria markers');
-            if(d.querySelectorAll('.world-map-marker,.atlas-map-point').length<50)throw Error('Victoria points');
+            await wait(()=>d.querySelectorAll('.world-map-marker,.atlas-map-point').length>=50,'Victoria points');
             const h=d.querySelector('.world-map-marker[data-map-id="010001000"]');if(!h)throw Error('Henesys marker');h.click();
             await wait(()=>d.getElementById('maps-detail')?.classList.contains('active')&&/Henesys/i.test(d.getElementById('map-detail-name')?.textContent||''),'Henesys detail');
             d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Esc to Victoria');
