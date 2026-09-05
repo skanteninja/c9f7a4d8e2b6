@@ -150,3 +150,4 @@ export default {
 };
 
 // Atlas resolver checkpoint: WZ Henesys maps to the current Classic record before legacy fallback.
+// Deployment checkpoint: force a fresh Cloudflare build from the verified main branch.
