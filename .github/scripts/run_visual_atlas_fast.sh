@@ -10,13 +10,10 @@ for f in WorldMap WorldMap010 WorldMap020; do test -s "public/assets/map-atlas/d
 rm -rf /tmp/atlas-json
 mkdir -p /tmp/atlas-json
 cp public/assets/map-atlas/data/WorldMap*.json /tmp/atlas-json/
-# Full WZ API payloads are build inputs only; the shipped atlas keeps compact marker data.
 rm -f public/assets/map-atlas/data/WorldMap*.json
 
 python3 .github/scripts/finalize_map_atlas.py
 
-# The site already ships working same-origin Maple world-map marker artwork.
-# Reuse it instead of depending on remote runtime/build downloads.
 python3 - <<'PY'
 from pathlib import Path
 p=Path('public/maps-tab.js')
@@ -59,15 +56,6 @@ kill "$server" 2>/dev/null || true; trap - EXIT
 echo '[atlas-fast] LOCAL BROWSER VISUAL CHECKPOINT PASSED'
 
 rm -rf site; mv dist site
-rm -f \
- .github/workflows/finalize-visual-map-atlas.yml \
- .github/workflows/install-map-atlas-assets.yml \
- .github/workflows/diag-world-entry.yml \
- .github/workflows/diag-mapmark-icons.yml \
- .github/workflows/diag-world-labels.yml \
- .github/workflows/diag-world-list.yml \
- .github/workflows/diag-live-maps.yml \
- .github/workflows/patch-map-world-ui.yml
 rm -f .github/scripts/finalize_map_atlas.py .github/scripts/run_visual_atlas_finalize.sh .github/scripts/run_visual_atlas_fast.sh
 
 git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
