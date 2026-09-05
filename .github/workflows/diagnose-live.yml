@@ -1,0 +1,30 @@
+name: Diagnose live deployment
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-live.yml'
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check live assets once
+        env:
+          BASE_URL: https://maplestory-classic.ofri505.workers.dev
+        run: |
+          build_info="$(curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?diag=$GITHUB_RUN_ID" || true)"
+          maps_js="$(curl -fsSL --max-time 15 "$BASE_URL/maps-tab.js?diag=$GITHUB_RUN_ID" || true)"
+          legacy="$(curl -fsSL --max-time 35 "$BASE_URL/game-data/legacy/maps.json?diag=$GITHUB_RUN_ID" || true)"
+          atlas_data="$(curl -fsSL --max-time 20 "$BASE_URL/assets/map-atlas/data/markers.json?diag=$GITHUB_RUN_ID" || true)"
+          world_bytes="$(curl -fsSL --max-time 30 "$BASE_URL/assets/map-atlas/sheets/maple-world.png?diag=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
+          visuals_js="$(curl -fsSL --max-time 15 "$BASE_URL/visuals.js?diag=$GITHUB_RUN_ID" || true)"
+          monster_bytes="$(curl -fsSL --max-time 20 "$BASE_URL/game-data/data/images/monsters/03b8bda63a91a4f5c89dae6f6983caf0.webp?diag=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
+          ownership_js="$(curl -fsSL --max-time 15 "$BASE_URL/ownership-ui.js?diag=$GITHUB_RUN_ID" || true)"
+          build=0; maps=0; old=0; atlas=0; visuals=0; integrity=0
+          [[ "$build_info" == *"Top Classic World Maplestory 0.8.1-static1"* ]] && build=1 || true
+          [[ "$maps_js" == *"maps-world-ready"* && "$maps_js" == *"maps-explorer-ready"* && "$maps_js" == *"maps-atlas-visual-ready"* && "$maps_js" == *"ATLAS_CURRENT_NAME_ALIASES"* && "$maps_js" == *"100000000':'henesys"* && "$maps_js" == *"LEGACY_INDEX"* ]] && maps=1 || true
+          legacy_lc="${legacy,,}"; [ "${#legacy}" -gt 10000 ] && [[ "$legacy_lc" == *'"name":"orbis"'* && "$legacy_lc" == *'"name":"el nath"'* ]] && old=1 || true
+          [ "${world_bytes:-0}" -gt 100000 ] && [ "${#atlas_data}" -gt 1000 ] && [[ "$atlas_data" == *'"world"'* && "$atlas_data" == *'"victoria"'* && "$atlas_data" == *'"ossyria"'* ]] && atlas=1 || true
+          [[ "$visuals_js" == *"const REPO_RAW = '/game-data/';"* && "$visuals_js" == *"const RAW = '/game-data/data/current/';"* && "$visuals_js" != *"raw.githubusercontent.com/ohmi69/osms_datamine_dashboard"* ]] && [ "${monster_bytes:-0}" -gt 500 ] && visuals=1 || true
+          [[ "$ownership_js" == *"version:'2026-09-05.4'"* && "$ownership_js" == *"itemId:4000001"* && "$ownership_js" == *"legacyTablesAllowedAsCurrent:false"* && "$ownership_js" == *"monster-integrity-ready"* ]] && integrity=1 || true
+          echo "DIAG build=$build maps=$maps legacy=$old atlas=$atlas visuals=$visuals integrity=$integrity world_bytes=$world_bytes monster_bytes=$monster_bytes build_len=${#build_info} maps_len=${#maps_js} legacy_len=${#legacy} atlas_len=${#atlas_data} visuals_len=${#visuals_js} ownership_len=${#ownership_js}"
