@@ -1,6 +1,7 @@
 name: Build static site
 
 # Dashboard contract: the level progression line is visible in the lower part of the Avatar card; no standalone level card.
+# Atlas checkpoint: rebuild source changes that affect bundled visual map navigation.
 on:
   workflow_dispatch:
   push:
