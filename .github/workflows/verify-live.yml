@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Live gate v19: product, visual atlas, same-origin Classic media, and shipped monster integrity.
+# Live gate v20: product, visual atlas, same-origin Classic media, and shipped monster integrity.
 on:
   workflow_run:
     workflows: ["Build static site"]
@@ -39,7 +39,9 @@ jobs:
 
             visuals_js="$(curl -fsSL --max-time 15 "$BASE_URL/visuals.js?ci=$GITHUB_RUN_ID" || true)"
             monster_bytes="$(curl -fsSL --max-time 20 "$BASE_URL/game-data/data/images/monsters/03b8bda63a91a4f5c89dae6f6983caf0.webp?ci=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
-            if [[ "$visuals_js" == *"const REPO_RAW = '/game-data/';"* ]] && [[ "$visuals_js" == *"const RAW = '/game-data/data/current/';"* ]] && [[ "$visuals_js" != *"raw.githubusercontent.com/ohmi69/osms_datamine_dashboard"* ]] && [ "${monster_bytes:-0}" -gt 500 ]; then visuals_ok=1; fi
+            raw_path_ok=0
+            if [[ "$visuals_js" == *"const RAW = '/game-data/data/current/';"* ]] || [[ "$visuals_js" == *'const RAW = `${REPO_RAW}data/current/`;'* ]]; then raw_path_ok=1; fi
+            if [[ "$visuals_js" == *"const REPO_RAW = '/game-data/';"* ]] && [ "$raw_path_ok" -eq 1 ] && [[ "$visuals_js" != *"raw.githubusercontent.com/ohmi69/osms_datamine_dashboard"* ]] && [ "${monster_bytes:-0}" -gt 500 ]; then visuals_ok=1; fi
 
             ownership_js="$(curl -fsSL --max-time 15 "$BASE_URL/ownership-ui.js?ci=$GITHUB_RUN_ID" || true)"
             if [[ "$ownership_js" == *"version:'2026-09-05.4'"* ]] && [[ "$ownership_js" == *"itemId:4000001"* ]] && [[ "$ownership_js" == *"legacyTablesAllowedAsCurrent:false"* ]] && [[ "$ownership_js" == *"monster-integrity-ready"* ]]; then integrity_ok=1; fi
