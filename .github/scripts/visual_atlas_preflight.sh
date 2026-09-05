@@ -14,6 +14,8 @@ old_sheet="  function renderAtlasSheetMarkers(id){const host=q('#maps-sheet-mark
 new_sheet="  function renderAtlasSheetMarkers(id){const host=q('#maps-sheet-markers'),meta=state.atlas?.[id];if(!host||!meta?.markers?.length)return;host.innerHTML='';for(const point of meta.markers){const map=atlasMapFor(point),label=point.label||map?.name||'Map point';const b=document.createElement('button');b.type='button';b.className=`atlas-map-point type-${point.type}${map?'':' unresolved'}`;if(map)b.dataset.mapId=padMap(map.id);b.style.left=`${point.x/meta.width*100}%`;b.style.top=`${point.y/meta.height*100}%`;b.title=map?`${map.name} · #${map.id}`:label;b.innerHTML=`<img src=\"${atlasMarkerUrl(point.type)}\" alt=\"\"><span>${esc(label)}</span>`;const icon=b.querySelector('img');icon?.addEventListener('error',()=>{icon.remove();b.classList.add('sprite-fallback')});b.addEventListener('click',()=>{if(map){showDetail(map.__ref,'continent',id);return;}openExplorer();const search=q('#maps-explorer-search');if(search){search.value=label;renderExplorer();}});host.appendChild(b);}document.documentElement.classList.add('maps-sheet-markers-ready');}"
 assert old_sheet in s, 'continent marker renderer target missing'
 s=s.replace(old_sheet,new_sheet,1)
+# The Actions bot lacks workflows permission; permanent verifier changes are applied separately after product deploy.
+s=s.replace("v = ROOT / '.github/workflows/verify-live.yml'", "v = ROOT / '.github/workflows/__verify-live-skip.yml'")
 p.write_text(s)
-print('preflight: all WZ world + continent points preserved')
+print('preflight: all WZ points preserved; workflow files excluded from bot commit')
 PY
