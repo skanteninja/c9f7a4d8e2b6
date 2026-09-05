@@ -75,6 +75,42 @@ html[data-level-update="1"] .page.active img{transition:none!important;animation
 .dashboard-v72 .v5-quick-metrics b{font-size:11px!important;line-height:1.3}
 .dashboard-v72 .v5-avatar .avatar-job-badge{font-size:8px!important}
 
+/* Visual consistency pass: one product language across brand, navigation, cards and media. */
+:root{--tcw-line:rgba(143,168,207,.16);--tcw-line-strong:rgba(143,168,207,.28);--tcw-panel:#0e1420;--tcw-panel-2:#111927;--tcw-muted:#8d9ab0;--tcw-focus:#8fc8ff}
+.brand{align-items:center!important;gap:11px!important}
+.brand-mark{position:relative!important;display:grid!important;place-items:center!important;width:42px!important;height:42px!important;min-width:42px!important;border-radius:12px!important;font-size:0!important;overflow:hidden!important;background:linear-gradient(145deg,#162238,#0d1422)!important;border:1px solid rgba(143,200,255,.34)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 6px 18px rgba(0,0,0,.24)!important}
+.brand-mark::before{content:'TCW';font-size:10px;line-height:1;font-weight:950;letter-spacing:.08em;color:#dceeff;text-shadow:0 0 14px rgba(119,190,255,.45)}
+.brand-title{font-weight:900!important;font-size:12px!important;color:#f2f7ff!important}
+.brand-sub{font-size:9px!important;color:#8290a8!important}
+
+#nav{display:flex;flex-direction:column;gap:3px}
+#nav .nav-btn{min-height:42px!important;border-radius:10px!important;transition:background-color .16s ease,border-color .16s ease,transform .16s ease!important;border:1px solid transparent!important}
+#nav .nav-btn>span:first-child{display:inline-grid!important;place-items:center!important;width:24px!important;height:24px!important;min-width:24px!important;margin-right:8px!important;border-radius:7px!important;border:1px solid rgba(146,171,210,.16)!important;background:rgba(116,145,187,.08)!important;font-size:12px!important;line-height:1!important;color:#aebbd0!important}
+#nav .nav-btn:hover{background:rgba(114,151,204,.08)!important;border-color:rgba(143,168,207,.12)!important;transform:translateX(1px)}
+#nav .nav-btn.active{border-color:rgba(129,190,245,.22)!important;background:linear-gradient(90deg,rgba(80,142,202,.15),rgba(80,142,202,.05))!important}
+#nav .nav-btn.active>span:first-child{color:#dceeff!important;border-color:rgba(124,192,249,.34)!important;background:rgba(87,157,216,.15)!important;box-shadow:0 0 15px rgba(63,139,210,.1)}
+
+.panel,.db-card,.route-card,.recipe-card,.maps-continent-card,.atlas-queue-row,.v72-etc-chip{border-color:var(--tcw-line)!important;box-shadow:0 8px 28px rgba(0,0,0,.14)!important}
+.panel,.db-card,.route-card,.recipe-card{background-image:linear-gradient(180deg,rgba(255,255,255,.012),rgba(255,255,255,0))!important}
+.db-card,.route-card,.recipe-card,.maps-continent-card{transition:border-color .16s ease,transform .16s ease,box-shadow .16s ease!important}
+.db-card:hover,.route-card:hover,.recipe-card:hover,.maps-continent-card:hover{border-color:var(--tcw-line-strong)!important;transform:translateY(-1px);box-shadow:0 11px 30px rgba(0,0,0,.2)!important}
+
+/* One consistent frame for game artwork, regardless of source family. */
+.visual-asset img,.visual-db-asset img,.visual-npc-card img,.visual-npc-mini img,.visual-inline-item img,.visual-mini img,.db-thumb img,.etc-icon-shell img,.atlas-skill-icon img,.equipment-slot img{object-fit:contain!important;image-rendering:auto}
+.visual-asset img,.visual-db-asset img,.visual-npc-card img,.db-thumb img{border-radius:9px!important;background:radial-gradient(circle at 50% 42%,rgba(123,159,207,.09),rgba(36,50,72,.03) 64%,transparent 65%)!important}
+.visual-asset,.visual-db-asset,.visual-npc-card{border-color:rgba(143,168,207,.14)!important}
+.visual-media-strip,.visual-db-strip,.visual-quest-items{gap:8px!important}
+
+/* Broken artwork should look intentional rather than like a browser failure icon. */
+.visual-missing,.visual-db-missing{position:relative!important;min-height:48px!important;border-style:dashed!important;border-color:rgba(147,163,190,.2)!important;background:rgba(92,108,135,.035)!important}
+.visual-missing img,.visual-db-missing img{visibility:hidden!important}
+.visual-missing::before,.visual-db-missing::before{content:'Artwork unavailable';display:grid;place-items:center;position:absolute;inset:5px;padding:5px;text-align:center;color:#6f7e95;font-size:8px;font-weight:800;letter-spacing:.03em;text-transform:uppercase}
+
+button,a,select,input{outline:none}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--tcw-focus)!important;outline-offset:2px!important}
+button{touch-action:manipulation}
+
+/* Mobile is a first-class surface: larger taps, restrained animation, no squeezed media. */
 @media(max-width:1100px){
   .dashboard-v72 .v72-hero-grid{grid-template-columns:1fr!important}
   .dashboard-v72 .v72-command-grid{grid-template-columns:1fr!important;grid-auto-rows:auto!important}
@@ -83,6 +119,11 @@ html[data-level-update="1"] .page.active img{transition:none!important;animation
 }
 @media(max-width:760px){
   .dashboard-v72 .progression-avatar-level-controls{grid-template-columns:108px 166px minmax(170px,1fr)!important;column-gap:10px!important}
+  #nav .nav-btn{min-height:46px!important}
+  #nav .nav-btn:hover,.db-card:hover,.route-card:hover,.recipe-card:hover,.maps-continent-card:hover{transform:none!important}
+  .visual-media-strip,.visual-db-strip,.visual-quest-items{overflow-x:auto!important;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .visual-media-strip>.visual-asset,.visual-db-strip>.visual-db-asset,.visual-quest-items>.visual-asset{flex:0 0 auto}
+  .brand-mark{width:38px!important;height:38px!important;min-width:38px!important}
 }
 @media(max-width:620px){
   .dashboard-v72 .v5-character-hero{grid-template-columns:1fr!important;grid-template-rows:auto auto auto!important}
@@ -91,4 +132,6 @@ html[data-level-update="1"] .page.active img{transition:none!important;animation
   .dashboard-v72 .progression-avatar-level-controls{grid-column:1!important;grid-row:3!important;grid-template-columns:1fr!important;grid-template-rows:auto auto auto!important;grid-template-areas:"head" "stepper" "track"!important;gap:8px!important}
   .dashboard-v72 .progression-level-track{padding-top:20px}
   .dashboard-v72 .v72-etc-panel .v72-etc-icons{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .panel{border-radius:12px!important}
+  .visual-asset img,.visual-db-asset img{max-width:100%!important}
 }
