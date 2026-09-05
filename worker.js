@@ -76,6 +76,20 @@ async function ownedAsset(request, upstream, ctx) {
   return owned;
 }
 
+async function rewriteClassicVisualScript(request, env) {
+  const asset = await env.ASSETS.fetch(request);
+  if (!asset.ok) return asset;
+  let body = await asset.text();
+  body = body
+    .replace("const REPO_RAW = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/';", "const REPO_RAW = '/game-data/';")
+    .replace("const RAW = `${REPO_RAW}data/current/`;", "const RAW = '/game-data/data/current/';");
+  const headers = new Headers(asset.headers);
+  headers.set('Content-Type', 'application/javascript; charset=utf-8');
+  headers.set('Cache-Control', 'public, max-age=300, s-maxage=300');
+  headers.set('X-Content-Type-Options', 'nosniff');
+  return new Response(body, { status: asset.status, headers });
+}
+
 async function legacyMapIndex(request, ctx) {
   const cache = caches.default;
   const cacheUrl = new URL(request.url);
@@ -135,6 +149,7 @@ function legacyMapImageUpstream(pathname) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (request.method === 'GET' && ['/visuals.js','/visuals-db.js','/visuals-npc.js'].includes(url.pathname)) return rewriteClassicVisualScript(request, env);
     if (request.method === 'GET' && url.pathname === '/game-data/legacy/maps.json') return legacyMapIndex(request, ctx);
     if (request.method === 'GET') {
       const legacyWorld = legacyWorldMapUpstream(url.pathname);
@@ -151,3 +166,4 @@ export default {
 
 // Atlas resolver checkpoint: WZ Henesys maps to the current Classic record before legacy fallback.
 // Deployment checkpoint: force a fresh Cloudflare build from the verified main branch.
+// Visual delivery checkpoint: Classic item/map/NPC/monster assets are same-origin through /game-data/.
