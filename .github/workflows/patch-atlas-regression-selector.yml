@@ -1,0 +1,32 @@
+name: Patch atlas regression selector
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-atlas-regression-selector.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update permanent Henesys assertion
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/maps-etc-regression.yml')
+          s=p.read_text()
+          old='.atlas-map-point[data-map-id="100000000"]'
+          new='.atlas-map-point[data-map-id="010001000"]'
+          if old not in s: raise SystemExit('old Henesys selector missing')
+          p.write_text(s.replace(old,new,1))
+          PY
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .github/workflows/maps-etc-regression.yml
+          git commit -m 'Assert resolved current Henesys WZ point'
+          git push
