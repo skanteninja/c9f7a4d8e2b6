@@ -1,0 +1,33 @@
+name: Patch atlas resolver
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-atlas-resolver.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch WZ point resolver and push
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('public/maps-tab.js')
+          s=p.read_text()
+          old="function atlasMapFor(point){for(const raw of point?.maps||[]){const digits=String(raw??'').replace(/\\D/g,''),id=padMap(digits),numeric=String(Number(digits));const cur=state.byId.get(id);if(cur)return cur;const direct=state.byRef.get(`l:${id}`)||state.byRef.get(`l:${numeric}`);if(direct)return direct;const any=state.maps.find(m=>String(Number(String(m.id||'').replace(/\\D/g,'')))===numeric||(m.legacy_ids||[]).some(x=>String(Number(String(x).replace(/\\D/g,'')))===numeric));if(any)return any;}return null;}"
+          new="function atlasMapFor(point){for(const raw of point?.maps||[]){const digits=String(raw??'').replace(/\\D/g,''),id=padMap(digits),numeric=String(Number(digits));const cur=state.byId.get(id);if(cur)return cur;const direct=state.byRef.get(`l:${id}`)||state.byRef.get(`l:${numeric}`);if(direct)return direct;const any=state.maps.find(m=>String(Number(String(m.id||'').replace(/\\D/g,'')))===numeric||(m.legacy_ids||[]).some(x=>String(Number(String(x).replace(/\\D/g,'')))===numeric));if(any)return any;}const label=norm(point?.label||'');if(label){const current=state.current.find(m=>norm(m.name)===label);if(current)return state.byRef.get(refFor(current))||current;const legacy=state.legacy.find(m=>norm(m.name)===label);if(legacy)return state.byRef.get(refFor(legacy))||legacy;}return null;}"
+          if old not in s: raise SystemExit('atlasMapFor target missing')
+          p.write_text(s.replace(old,new,1))
+          PY
+          node --check public/maps-tab.js
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add public/maps-tab.js
+          git commit -m 'Resolve WZ map points by current Classic label'
+          git push
