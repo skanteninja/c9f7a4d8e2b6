@@ -1,7 +1,7 @@
 (() => {
   const ROOT='/game-data/data/current/';
   let dataPromise=null,timer=null;
-  const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const norm=v=>String(v??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const idOfCard=card=>{const raw=card.querySelector('code')?.textContent?.replace(/\D/g,'');const n=Number(raw);return Number.isFinite(n)?n:null};
   function collectRows(raw,key){
