@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Live gate v13: Top Classic World dashboard, audited ETC/quests and merged Maple World map navigator.
+# Live gate v14: Top Classic World dashboard, audited ETC/quests and visual Maple World atlas.
 on:
   workflow_run:
     workflows: ["Build static site"]
@@ -16,22 +16,22 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for deployed product and merged map gateway
+      - name: Wait for deployed product and visual map atlas
         env:
           BASE_URL: https://maplestory-classic.ofri505.workers.dev
         run: |
           ready=0
           for i in {1..60}; do
-            build_ok=0; maps_ok=0; legacy_ok=0; media_ok=0
+            build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0
             curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" | grep -q 'Top Classic World Maplestory 0.8.1-static1' && build_ok=1 || true
             maps_js="$(curl -fsSL --max-time 15 "$BASE_URL/maps-tab.js?ci=$GITHUB_RUN_ID" || true)"
-            printf '%s' "$maps_js" | grep -q 'maps-world-ready' && printf '%s' "$maps_js" | grep -q 'maps-explorer-ready' && printf '%s' "$maps_js" | grep -q 'LEGACY_INDEX' && maps_ok=1 || true
+            printf '%s' "$maps_js" | grep -q 'maps-world-ready' && printf '%s' "$maps_js" | grep -q 'maps-explorer-ready' && printf '%s' "$maps_js" | grep -q 'maps-atlas-visual-ready' && printf '%s' "$maps_js" | grep -q 'LEGACY_INDEX' && maps_ok=1 || true
             legacy="$(curl -fsSL --max-time 35 "$BASE_URL/game-data/legacy/maps.json?ci=$GITHUB_RUN_ID" || true)"
             if [ "${#legacy}" -gt 10000 ] && printf '%s' "$legacy" | grep -qi '"name":"Orbis"' && printf '%s' "$legacy" | grep -qi '"name":"El Nath"'; then legacy_ok=1; fi
-            world_bytes="$(curl -fsSL --max-time 30 "$BASE_URL/game-media/worldmap-legacy/maple-world.png?ci=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
-            orbis_bytes="$(curl -fsSL --max-time 30 "$BASE_URL/game-media/legacy-map/200000000/minimap?ci=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
-            if [ "${world_bytes:-0}" -gt 10000 ] && [ "${orbis_bytes:-0}" -gt 100 ]; then media_ok=1; fi
-            if [ "$build_ok" -eq 1 ] && [ "$maps_ok" -eq 1 ] && [ "$legacy_ok" -eq 1 ] && [ "$media_ok" -eq 1 ]; then ready=1; break; fi
+            world_bytes="$(curl -fsSL --max-time 30 "$BASE_URL/assets/map-atlas/sheets/maple-world.png?ci=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
+            atlas_data="$(curl -fsSL --max-time 20 "$BASE_URL/assets/map-atlas/data/markers.json?ci=$GITHUB_RUN_ID" || true)"
+            if [ "${world_bytes:-0}" -gt 100000 ] && [ "${#atlas_data}" -gt 1000 ] && printf '%s' "$atlas_data" | grep -q '"world"' && printf '%s' "$atlas_data" | grep -q '"victoria"' && printf '%s' "$atlas_data" | grep -q '"ossyria"'; then atlas_ok=1; fi
+            if [ "$build_ok" -eq 1 ] && [ "$maps_ok" -eq 1 ] && [ "$legacy_ok" -eq 1 ] && [ "$atlas_ok" -eq 1 ]; then ready=1; break; fi
             sleep 5
           done
           test "$ready" -eq 1
@@ -40,7 +40,7 @@ jobs:
           test "$(curl -fsSL --max-time 15 "$BASE_URL/quest-audit-additions.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 5000
           ! curl -fsSL --max-time 15 "$BASE_URL/app.js?ci=$GITHUB_RUN_ID" | grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard'
 
-      - name: Verify live browser dashboard and Maple World shell
+      - name: Verify live browser dashboard and visual Maple World atlas
         env:
           BASE_URL: https://maplestory-classic.ofri505.workers.dev
         run: |
@@ -48,8 +48,8 @@ jobs:
           test -n "$chrome"
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-live-${viewport//,/-}.html"
-            "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=32000 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID&viewport=$viewport" >"$file"
-            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready maps-nav-ready maps-data-ready maps-tab-ready maps-world-ready maps-legacy-data-ready etc-lifetime-data-ready quest-catalog-audit-ready etc-lifetime-audit-ready; do
+            "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=36000 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID&viewport=$viewport" >"$file"
+            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready maps-nav-ready maps-data-ready maps-tab-ready maps-world-ready maps-legacy-data-ready maps-atlas-visual-ready etc-lifetime-data-ready quest-catalog-audit-ready etc-lifetime-audit-ready; do
               grep -q "$marker" "$file"
             done
             grep -q '<title>Top Classic World Maplestory</title>' "$file"
@@ -59,6 +59,9 @@ jobs:
             grep -q 'data-continent="victoria"' "$file"
             grep -q 'data-continent="ossyria"' "$file"
             grep -q 'data-continent="ludus"' "$file"
+            grep -q 'id="maps-full-world-image"' "$file"
+            grep -q 'maps-atlas-world-point' "$file"
+            grep -q 'maps-continent-art-image' "$file"
             grep -q 'id="level-range"' "$file"
             grep -q 'id="atlas-quest-queue"' "$file"
             grep -q 'id="atlas-etc-queue"' "$file"
@@ -77,5 +80,6 @@ jobs:
           assert 'data-page="data" class="nav-btn' not in s
           assert s.index('data-page="quests" class="nav-btn') < s.index('data-page="maps" class="nav-btn') < s.index('data-page="equipment" class="nav-btn')
           assert len(re.findall(r'class="maps-continent-card',s)) >= 8
+          assert len(re.findall(r'class="maps-atlas-world-point',s)) >= 10
           PY
           done
