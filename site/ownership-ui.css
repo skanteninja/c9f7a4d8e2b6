@@ -95,3 +95,11 @@ html[data-level-update="1"] .page.active img{transition:none!important;animation
 .dashboard-v72 .v5-skills-panel .atlas-skill-detail b{font-size:9px!important}
 .dashboard-v72 .v5-skills-panel .atlas-skill-detail p{font-size:8px!important;line-height:1.25!important;margin:2px 0!important}
 .dashboard-v72 .v5-skills-panel .atlas-skill-detail small{font-size:7px!important;line-height:1.2!important}
+
+/* Final dashboard Skill Tree footprint: only this module is narrowed/trimmed. */
+.dashboard-v72 .v72-secondary-content{grid-template-columns:minmax(420px,.68fr) minmax(0,1.32fr)!important;align-items:start!important}
+.dashboard-v72 .v6-skills-panel{align-self:start!important;padding:10px 12px!important}
+.dashboard-v72 .v6-skills-panel .atlas-panel-head small{display:none!important}
+.dashboard-v72 .v6-skills-panel .atlas-skill-detail{display:none!important}
+.dashboard-v72 .v6-skills-panel .atlas-skill-tabs{margin-bottom:7px!important}
+.dashboard-v72 .v6-skills-panel .atlas-skill-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
