@@ -41,3 +41,39 @@
   hook('level-next','click',false);
   document.documentElement.classList.add('progression-level-hook-ready');
 })();
+
+/* Dashboard composition: keep the existing compact Skill Tree intact, but place it inside Active Build. */
+(() => {
+  let timer = null;
+
+  function mergeSkillTreeIntoHero() {
+    const dashboard = document.querySelector('.dashboard-v72');
+    const character = dashboard?.querySelector('.v5-character-hero');
+    const skillTree = dashboard?.querySelector('.v6-skills-panel');
+    const secondary = dashboard?.querySelector('.v72-secondary-content');
+    if (!dashboard || !character || !skillTree) return;
+
+    if (skillTree.parentElement !== character) character.appendChild(skillTree);
+    skillTree.classList.add('tcw-hero-skill-tree');
+
+    if (secondary) {
+      const remainingPublicPanels = [...secondary.children].filter(el =>
+        el !== skillTree && !el.classList.contains('v6-stats-panel')
+      );
+      secondary.classList.toggle('tcw-secondary-vacated', remainingPublicPanels.length === 0);
+    }
+
+    document.documentElement.classList.add('dashboard-skill-in-hero-ready');
+  }
+
+  function schedule() {
+    clearTimeout(timer);
+    timer = setTimeout(mergeSkillTreeIntoHero, 60);
+  }
+
+  new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
+  document.addEventListener('click', schedule, true);
+  document.addEventListener('change', schedule, true);
+  document.addEventListener('input', schedule, true);
+  mergeSkillTreeIntoHero();
+})();
