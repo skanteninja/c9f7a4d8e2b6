@@ -201,9 +201,9 @@
     cards.forEach(card => {
       if (card.dataset.visualDbDone === 'monsters') return;
       const id = cardId(card), mob = mobs.byId.get(id); if (!mob) return;
-      const thumb = card.querySelector('.db-thumb-empty');
+      const thumb = card.querySelector('.db-thumb-empty, .db-thumb.asset-failed');
       if (thumb && mobUrl(mob)) {
-        thumb.textContent = ''; thumb.classList.remove('db-thumb-empty');
+        thumb.textContent = ''; thumb.classList.remove('db-thumb-empty','asset-failed');
         thumb.appendChild(image(mobUrl(mob),nameOf(mob),mobFallback(mob)));
       }
       const refs = (mob.maps || []).map(ref => maps.byId.get(Number(ref.id))).filter(Boolean);
