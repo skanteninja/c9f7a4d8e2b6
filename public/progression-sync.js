@@ -183,7 +183,16 @@
     const alreadyCards = grid.querySelectorAll('.beginner-skill-card').length === 3 && !grid.querySelector('.beginner-milestone-grid');
     const sameLevel = grid.dataset.beginnerRenderLevel === String(level);
     const currentMode = grid.dataset.beginnerRenderMode || '';
-    if (alreadyCards && sameLevel && (currentMode === 'cot2' || !enriched)) {
+    if (alreadyCards && (currentMode === 'cot2' || !enriched)) {
+      const allocation = latestAllocation('beginner',level);
+      grid.querySelectorAll('[data-skill-name]').forEach(card => {
+        const lv = Number(allocation[card.dataset.skillName] || 0);
+        card.classList.toggle('learned',lv > 0);
+        card.classList.toggle('unlearned',lv === 0);
+        const small = card.querySelector('small'), text = `Lv. ${lv}/3`;
+        if(small && small.textContent !== text) small.firstChild.data = text;
+      });
+      grid.dataset.beginnerRenderLevel = String(level);
       wireSkillImages(grid);
       wireSkillImages(detail);
       document.documentElement.classList.add('beginner-skill-tree-ready','dashboard-skill-immediate-ready');

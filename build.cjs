@@ -165,6 +165,36 @@ function patchApp(raw) {
   const safeSkillCandidates="return [...new Set([mapleIoSkillIcon(skill)].filter(Boolean))];";
   if(!app.includes(genericSkillCandidates)) throw new Error('generic skill icon candidate patch target missing');
   app=app.replace(genericSkillCandidates,safeSkillCandidates);
+
+  // The renderer owns node lifetime. Event-capture ID masking cannot protect native
+  // input: microtask checkpoints may restore IDs before target listeners run.
+  const atlasTabNeedle = "    const tab=activeAtlasSkillTab();";
+  if(!app.includes(atlasTabNeedle)) throw new Error('stable dashboard skills patch target missing');
+  app=app.replace(atlasTabNeedle, `${atlasTabNeedle}
+    // tcw-skill-renderer-inplace-v1
+    if(grid.dataset.renderedSkillTab===tab && grid.querySelector('.atlas-skill-card')){
+      if(tab!=='beginner'){
+        const alloc=parseSkillAllocation(latestSkillResult(tab,state.level)?.['Result After Level']);
+        grid.querySelectorAll('[data-skill-name]').forEach(card=>{
+          const info=atlasSkillInfo[card.dataset.skillName];
+          if(!info)return;
+          const lv=alloc[info.abbr]||0;
+          card.classList.toggle('learned',lv>0);
+          card.classList.toggle('unlearned',lv===0);
+          const small=card.querySelector('small'),text='Lv. '+lv+'/'+info.max;
+          if(small&&small.textContent!==text)small.firstChild.data=text;
+        });
+      }
+      window.TCW_REFRESH_SKILL_STATE?.();
+      return;
+    }
+    grid.dataset.renderedSkillTab=tab;`);
+  // Keep existing connected skill images out of the generic recycled-image pool.
+  app=app.replaceAll("      const key=[img.getAttribute('src')||'',img.alt||'',img.className||''].join('¦');",
+    "      if(img.closest('#atlas-skill-grid,#atlas-skill-detail'))return;\n      const key=[img.getAttribute('src')||'',img.alt||'',img.className||''].join('¦');");
+  // Detail click handlers must read current allocation, rather than their creation level.
+  app=app.replace("      const info=atlasSkillInfo[name], lv=alloc[info.abbr]||0;\n      detail.innerHTML=",
+    "      const info=atlasSkillInfo[name], lv=parseSkillAllocation(latestSkillResult(kind,state.level)?.['Result After Level'])[info.abbr]||0;\n      detail.innerHTML=");
   return app;
 }
 

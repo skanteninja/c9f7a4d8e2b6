@@ -1,0 +1,45 @@
+name: Real input skill stability
+on:
+  push:
+    branches: [main, fix/skill-renderer-stability]
+    paths: ['public/**', 'build.cjs', '.github/skill_stability.py', '.github/workflows/skill-stability.yml']
+  workflow_dispatch:
+jobs:
+  regression:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and validate JavaScript
+        run: |
+          node build.cjs
+          for file in dist/*.js; do node --check "$file"; done
+          python3 -m pip install --quiet websocket-client
+      - name: Verify real input on generated site
+        run: |
+          python3 .github/ci_static_proxy.py --directory dist --port 4173 >/tmp/skill-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          python3 .github/skill_stability.py http://127.0.0.1:4173
+      - name: Wait for exact deployed assets
+        if: github.ref == 'refs/heads/main'
+        run: |
+          python3 - <<'PY'
+          import pathlib,time,urllib.request,hashlib
+          names=['app.js','progression-level-hook.js','progression-skill-state.js','progression-sync.js']
+          expected={n:hashlib.sha256(pathlib.Path('dist',n).read_bytes()).hexdigest() for n in names}
+          for attempt in range(60):
+              try:
+                  actual={n:hashlib.sha256(urllib.request.urlopen('https://maplestory-classic.ofri505.workers.dev/'+n+'?skill-check='+str(time.time()),timeout=20).read()).hexdigest() for n in names}
+                  if actual==expected: break
+              except Exception as e: print(e,flush=True)
+              time.sleep(5)
+          else: raise SystemExit('live assets do not match tested build')
+          print('Exact tested assets deployed')
+          PY
+      - name: Verify real input on live Cloudflare site
+        if: github.ref == 'refs/heads/main'
+        run: python3 .github/skill_stability.py https://maplestory-classic.ofri505.workers.dev

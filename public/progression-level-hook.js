@@ -131,9 +131,8 @@
 
 /*
   Level-update stability shield.
-  Stable visual modules stay connected. During same-tier updates only their renderer lookup IDs
-  are masked, so the core renderer cannot destroy/recreate the skill cards or image nodes.
-  IDs are restored in a microtask before paint and allocation text/state is updated in place.
+  Avatar/equipment compatibility shield. Skill nodes are owned by the in-place core
+  renderer and never have their IDs masked. Keep the existing readiness markers for CI.
 */
 (() => {
   const D = window.GUIDE_DATA;
@@ -176,22 +175,13 @@
     document.documentElement.classList.add('tcw-ui-stability-ready','tcw-level-dom-stable-ready','tcw-skill-images-connected-ready');
   }
 
-  function maskSkills() {
-    return [
-      maskId('atlas-skill-tabs'),
-      maskId('atlas-skill-grid'),
-      maskId('atlas-skill-detail')
-    ].filter(Boolean);
-  }
-
   function beginLevelShield(nextLevel) {
     if (activeMask) return;
     const oldLevel = renderedLevel();
     const next = clamp(nextLevel);
     if (stage(oldLevel) !== stage(next)) return;
 
-    const records = maskSkills();
-    if (records.length) shieldedSkillUpdates += 1;
+    const records = [];
 
     if (gearBreakpoint(oldLevel) === gearBreakpoint(next)) {
       const avatar = maskId('atlas-avatar');
@@ -203,17 +193,6 @@
     if (!records.length) return;
     activeMask = records;
     shieldRuns += 1;
-    document.documentElement.dataset.uiStabilityShield = 'active';
-    queueMicrotask(() => finishMask(records));
-  }
-
-  function beginSkillOnlyShield() {
-    if (activeMask) return;
-    const records = maskSkills();
-    if (!records.length) return;
-    activeMask = records;
-    shieldRuns += 1;
-    shieldedSkillUpdates += 1;
     document.documentElement.dataset.uiStabilityShield = 'active';
     queueMicrotask(() => finishMask(records));
   }
@@ -234,8 +213,8 @@
     const old = renderedLevel();
     if (target.id === 'level-prev') beginLevelShield(old - 1);
     else if (target.id === 'level-next') beginLevelShield(old + 1);
-    else if (['preset-efficient','preset-luk','clear-gear'].includes(target.id)) beginSkillOnlyShield();
   }, true);
 
   document.documentElement.classList.add('tcw-ui-stability-ready','tcw-level-dom-stable-ready','tcw-skill-images-connected-ready');
 })();
+
