@@ -169,6 +169,10 @@
   }
 
   function stash(img) {
+    if (img.dataset.tcwContinuityDiscard === '1') {
+      delete img.dataset.tcwContinuityDiscard;
+      return;
+    }
     if (img.isConnected || !img.complete || img.naturalWidth <= 0 || !normalizedSrc(img)) return;
     const k = key(img);
     const pool = detached.get(k) || [];
@@ -186,7 +190,7 @@
     }
     for (const attr of from.attributes) {
       if (!attr.name.startsWith('data-')) continue;
-      if (/hooked|failed/i.test(attr.name)) continue;
+      if (/hooked|failed|continuity/i.test(attr.name)) continue;
       to.setAttribute(attr.name, attr.value);
     }
   }
@@ -212,6 +216,7 @@
       if (!pool.length) detached.delete(k);
       if (!old) continue;
       copyPresentation(img, old);
+      img.dataset.tcwContinuityDiscard = '1';
       img.replaceWith(old);
       reuseCount += 1;
     }
