@@ -98,3 +98,92 @@
   queueMicrotask(refresh);
   document.documentElement.classList.add('progression-skill-state-ready','dashboard-skill-inplace-ready');
 })();
+
+/*
+  Final skill-art stability layer.
+  Once a canonical skill image successfully decodes, that exact resolved URL is frozen for
+  the lifetime of that image node. This prevents visuals-skills.js from retrying its primary
+  URL after a fallback has already succeeded, which was causing the visible icon flash and
+  the apparent "two Magic Claws" effect on every level change.
+*/
+(() => {
+  if(window.__TCW_SKILL_SOURCE_LOCK_INSTALLED)return;
+  window.__TCW_SKILL_SOURCE_LOCK_INSTALLED=true;
+
+  const nativeSetAttribute=Element.prototype.setAttribute;
+  const nativeRemoveAttribute=Element.prototype.removeAttribute;
+  const srcDescriptor=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');
+  const lockedBySkill=new Map();
+
+  const normalize=value=>{
+    try{const u=new URL(String(value||''),location.href);return `${u.pathname}${u.search}`;}catch{return String(value||'');}
+  };
+  const isCanonical=img=>img instanceof HTMLImageElement&&img.classList.contains('canonical-skill-icon');
+  const skillKey=img=>String(img.dataset.skillId||img.dataset.skillName||img.alt||'').trim();
+  const requestedIsLocked=(img,value)=>{
+    if(!isCanonical(img))return false;
+    const locked=img.dataset.tcwResolvedSkillSrc||lockedBySkill.get(skillKey(img))||'';
+    return !!locked&&normalize(value)!==normalize(locked);
+  };
+
+  Element.prototype.setAttribute=function(name,value){
+    if(this instanceof HTMLImageElement&&String(name).toLowerCase()==='src'&&requestedIsLocked(this,value)){
+      this.dataset.tcwBlockedSkillSrcChanges=String(Number(this.dataset.tcwBlockedSkillSrcChanges||0)+1);
+      return;
+    }
+    return nativeSetAttribute.call(this,name,value);
+  };
+
+  Element.prototype.removeAttribute=function(name){
+    if(this instanceof HTMLImageElement&&String(name).toLowerCase()==='src'&&requestedIsLocked(this,'')){
+      this.dataset.tcwBlockedSkillSrcChanges=String(Number(this.dataset.tcwBlockedSkillSrcChanges||0)+1);
+      return;
+    }
+    return nativeRemoveAttribute.call(this,name);
+  };
+
+  if(srcDescriptor?.get&&srcDescriptor?.set){
+    Object.defineProperty(HTMLImageElement.prototype,'src',{
+      configurable:srcDescriptor.configurable,
+      enumerable:srcDescriptor.enumerable,
+      get:srcDescriptor.get,
+      set(value){
+        if(requestedIsLocked(this,value)){
+          this.dataset.tcwBlockedSkillSrcChanges=String(Number(this.dataset.tcwBlockedSkillSrcChanges||0)+1);
+          return;
+        }
+        srcDescriptor.set.call(this,value);
+      }
+    });
+  }
+
+  function lock(img){
+    if(!isCanonical(img)||!img.complete||img.naturalWidth<=0)return false;
+    const src=img.getAttribute('src')||'';
+    const key=skillKey(img);
+    if(!src||!key)return false;
+    if(key==='2001003'||String(img.dataset.skillName||img.alt||'')==='Magic Claw'){
+      img.dataset.skillId='2001003';
+      img.dataset.skillName='Magic Claw';
+    }
+    img.dataset.tcwResolvedSkillSrc=src;
+    lockedBySkill.set(skillKey(img),src);
+    img.dataset.tcwSkillSourceLocked='1';
+    return true;
+  }
+
+  document.addEventListener('load',event=>{if(event.target instanceof HTMLImageElement)lock(event.target);},true);
+
+  const sweep=()=>{
+    document.querySelectorAll('img.canonical-skill-icon').forEach(lock);
+    document.documentElement.dataset.lockedSkillSourceCount=String(document.querySelectorAll('img.canonical-skill-icon[data-tcw-skill-source-locked="1"]').length);
+    document.documentElement.classList.add('tcw-skill-source-lock-ready');
+  };
+
+  let timer=0;
+  new MutationObserver(()=>{
+    clearTimeout(timer);
+    timer=setTimeout(sweep,40);
+  }).observe(document.body,{childList:true,subtree:true});
+  sweep();
+})();
