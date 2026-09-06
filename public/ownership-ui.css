@@ -103,3 +103,6 @@ html[data-level-update="1"] .page.active img{transition:none!important;animation
 .dashboard-v72 .v6-skills-panel .atlas-skill-detail{display:none!important}
 .dashboard-v72 .v6-skills-panel .atlas-skill-tabs{margin-bottom:7px!important}
 .dashboard-v72 .v6-skills-panel .atlas-skill-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+
+/* Character Stats stays computed for internal logic but is no longer part of the public dashboard. */
+.dashboard-v72 .v6-stats-panel{display:none!important}
