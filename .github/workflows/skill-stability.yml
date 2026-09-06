@@ -44,12 +44,12 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           python3 - <<'PY'
-          import pathlib,time,urllib.request,hashlib
+          import pathlib,time,subprocess,hashlib
           names=['app.js','progression-level-hook.js','progression-skill-state.js','progression-sync.js']
           expected={n:hashlib.sha256(pathlib.Path('dist',n).read_bytes()).hexdigest() for n in names}
           for attempt in range(60):
               try:
-                  actual={n:hashlib.sha256(urllib.request.urlopen('https://maplestory-classic.ofri505.workers.dev/'+n+'?skill-check='+str(time.time()),timeout=20).read()).hexdigest() for n in names}
+                  actual={n:hashlib.sha256(subprocess.check_output(['curl','-fsSL','--max-time','20','https://maplestory-classic.ofri505.workers.dev/'+n+'?skill-check='+str(time.time())])).hexdigest() for n in names}
                   if actual==expected: break
               except Exception as e: print(e,flush=True)
               time.sleep(5)
