@@ -1,5 +1,5 @@
 (() => {
-  const REPO_RAW = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/';
+  const REPO_RAW = '/game-data/';
   const RAW = `${REPO_RAW}data/current/`;
   const cache = new Map();
   const indices = new Map();
