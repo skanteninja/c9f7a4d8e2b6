@@ -129,101 +129,110 @@
   mergeSkillTreeIntoHero();
 })();
 
-/* Preserve decoded image nodes across renderer innerHTML swaps so level changes do not flash artwork. */
+/*
+  Level-update stability shield.
+  The core renderer still owns the data update, but stable visual modules are temporarily
+  detached before same-tier level updates so their DOM/image nodes are never destroyed.
+  They are restored in the same event turn before the browser paints.
+*/
 (() => {
-  const root = document.getElementById('app');
-  if (!root) return;
+  const D = window.GUIDE_DATA;
+  if (!D) return;
 
-  const detached = new Map();
-  let reuseCount = 0;
+  let shieldRuns = 0;
+  let shieldedSkillUpdates = 0;
 
-  function normalizedSrc(img) {
-    const raw = img.getAttribute('src') || '';
-    if (!raw) return '';
-    try {
-      const url = new URL(raw, location.href);
-      return `${url.pathname}${url.search}`;
-    } catch {
-      return raw;
-    }
+  const clamp = n => Math.max(1, Math.min(70, Number(n) || 1));
+  const stage = n => n < 10 ? 'beginner' : n < 30 ? 'magician' : 'il';
+  const renderedLevel = () => clamp(Number(document.getElementById('hero-level')?.textContent || document.getElementById('level-select')?.value || 1));
+
+  function gearBreakpoint(n) {
+    const levels = D?.gearPresets?.efficient?.levels || [];
+    const eligible = levels.map(x => Number(x.min)).filter(x => Number.isFinite(x) && x <= n);
+    return eligible.length ? Math.max(...eligible) : 1;
   }
 
-  function imageRole(img) {
-    const skill = img.closest('[data-skill-name],[data-progress-skill]');
-    if (skill) return `skill:${skill.dataset.skillName || skill.dataset.progressSkill || img.alt || ''}`;
-    const slot = img.closest('[data-slot]');
-    if (slot) return `slot:${slot.dataset.slot || img.alt || ''}`;
-    return img.alt || '';
+  function park(node) {
+    if (!node?.parentNode) return null;
+    const record = { node, parent: node.parentNode, next: node.nextSibling };
+    node.remove();
+    return record;
   }
 
-  function key(img) {
-    return `${normalizedSrc(img)}¦${imageRole(img)}`;
+  function restore(record) {
+    if (!record?.node || record.node.isConnected || !record.parent?.isConnected) return;
+    if (record.next?.parentNode === record.parent) record.parent.insertBefore(record.node, record.next);
+    else record.parent.appendChild(record.node);
   }
 
-  function imagesIn(node) {
-    if (!(node instanceof Element)) return [];
-    const out = [];
-    if (node.tagName === 'IMG') out.push(node);
-    node.querySelectorAll?.('img').forEach(img => out.push(img));
-    return out;
+  function skillPanel() {
+    return document.querySelector('.dashboard-v72 .tcw-hero-skill-tree,.dashboard-v72 .v6-skills-panel');
   }
 
-  function stash(img) {
-    if (img.dataset.tcwContinuityDiscard === '1') {
-      delete img.dataset.tcwContinuityDiscard;
-      return;
+  function beginLevelShield(nextLevel) {
+    const oldLevel = renderedLevel();
+    const next = clamp(nextLevel);
+    if (stage(oldLevel) !== stage(next)) return;
+
+    const sameGear = gearBreakpoint(oldLevel) === gearBreakpoint(next);
+    const parked = [];
+
+    const skill = park(skillPanel());
+    if (skill) { parked.push(skill); shieldedSkillUpdates += 1; }
+
+    if (sameGear) {
+      const avatar = park(document.getElementById('atlas-avatar'));
+      const equipment = park(document.getElementById('equipment-window'));
+      if (avatar) parked.push(avatar);
+      if (equipment) parked.push(equipment);
     }
-    if (img.isConnected || !img.complete || img.naturalWidth <= 0 || !normalizedSrc(img)) return;
-    const k = key(img);
-    const pool = detached.get(k) || [];
-    if (!pool.includes(img)) pool.push(img);
-    while (pool.length > 6) pool.shift();
-    detached.set(k, pool);
+
+    if (!parked.length) return;
+    shieldRuns += 1;
+    document.documentElement.dataset.uiStabilityShield = 'active';
+
+    queueMicrotask(() => {
+      parked.forEach(restore);
+      window.TCW_REFRESH_SKILL_STATE?.();
+      document.documentElement.dataset.uiStabilityShield = 'ready';
+      document.documentElement.dataset.uiStabilityShieldRuns = String(shieldRuns);
+      document.documentElement.dataset.stableSkillLevelUpdates = String(shieldedSkillUpdates);
+      document.documentElement.classList.add('tcw-ui-stability-ready','tcw-level-dom-stable-ready');
+    });
   }
 
-  function copyPresentation(from, to) {
-    to.className = from.className;
-    to.alt = from.alt;
-    for (const name of ['title','loading','decoding','width','height','aria-hidden']) {
-      if (from.hasAttribute(name)) to.setAttribute(name, from.getAttribute(name));
-      else to.removeAttribute(name);
-    }
-    for (const attr of from.attributes) {
-      if (!attr.name.startsWith('data-')) continue;
-      if (/hooked|failed|continuity/i.test(attr.name)) continue;
-      to.setAttribute(attr.name, attr.value);
-    }
+  function beginSkillOnlyShield() {
+    const record = park(skillPanel());
+    if (!record) return;
+    shieldRuns += 1;
+    shieldedSkillUpdates += 1;
+    queueMicrotask(() => {
+      restore(record);
+      window.TCW_REFRESH_SKILL_STATE?.();
+      document.documentElement.dataset.uiStabilityShieldRuns = String(shieldRuns);
+      document.documentElement.dataset.stableSkillLevelUpdates = String(shieldedSkillUpdates);
+      document.documentElement.classList.add('tcw-ui-stability-ready','tcw-level-dom-stable-ready');
+    });
   }
 
-  const observer = new MutationObserver(records => {
-    const added = [];
-    for (const record of records) {
-      if (record.type !== 'childList') continue;
-      record.removedNodes.forEach(node => imagesIn(node).forEach(stash));
-      record.addedNodes.forEach(node => imagesIn(node).forEach(img => added.push(img)));
-    }
+  document.addEventListener('input', event => {
+    const target = event.target;
+    if (target?.id === 'level-range') beginLevelShield(Number(target.value));
+  }, true);
 
-    for (const img of added) {
-      if (!img.isConnected) continue;
-      const k = key(img);
-      const pool = detached.get(k);
-      if (!pool?.length) continue;
-      let old = null;
-      while (pool.length && !old) {
-        const candidate = pool.shift();
-        if (candidate && candidate !== img && candidate.complete && candidate.naturalWidth > 0 && !candidate.isConnected) old = candidate;
-      }
-      if (!pool.length) detached.delete(k);
-      if (!old) continue;
-      copyPresentation(img, old);
-      img.dataset.tcwContinuityDiscard = '1';
-      img.replaceWith(old);
-      reuseCount += 1;
-    }
+  document.addEventListener('change', event => {
+    const target = event.target;
+    if (target?.id === 'level-select' || target?.id === 'hero-level-select') beginLevelShield(Number(target.value));
+  }, true);
 
-    document.documentElement.dataset.stableImageReuses = String(reuseCount);
-  });
+  document.addEventListener('click', event => {
+    const target = event.target?.closest?.('button');
+    if (!target) return;
+    const old = renderedLevel();
+    if (target.id === 'level-prev') beginLevelShield(old - 1);
+    else if (target.id === 'level-next') beginLevelShield(old + 1);
+    else if (['preset-efficient','preset-luk','clear-gear'].includes(target.id)) beginSkillOnlyShield();
+  }, true);
 
-  observer.observe(root, { childList: true, subtree: true });
-  document.documentElement.classList.add('tcw-ui-stability-ready');
+  document.documentElement.classList.add('tcw-ui-stability-ready','tcw-level-dom-stable-ready');
 })();
