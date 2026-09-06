@@ -20,15 +20,9 @@ html.auto-gear-synced .equipment-window{box-shadow:inset 0 0 0 1px rgba(98,212,1
 .dashboard-v72 .v72-secondary-content.tcw-secondary-vacated{display:none!important}
 html.dashboard-skill-in-hero-ready .dashboard-v72 .v5-character-hero{min-height:286px!important}
 
-/* Level changes update rank/card state only. Dashboard skill artwork never fades, grays out, or changes color. */
-html.tcw-ui-stability-ready .dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card{transition:border-color .18s ease,background .18s ease!important}
-.dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card,
-.dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card:not(.learned),
+/* Keep the exact artwork node/source stable. Unlearned state is visual only: the card is greyed, never swapped to another icon. */
+html.tcw-ui-stability-ready .dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card{transition:filter .18s ease,opacity .18s ease,border-color .18s ease,background .18s ease!important}
+.dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card img{filter:none!important;opacity:1!important;transition:none!important}
 .dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card.unlearned,
-.dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card.learned{filter:none!important;opacity:1!important}
-.dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card img,
-.dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card:not(.learned) img,
-.dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card.unlearned img,
-.dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card.learned img{filter:none!important;opacity:1!important;transition:none!important}
-.dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card.unlearned{border-color:rgba(126,164,215,.10)!important;background:rgba(8,13,22,.74)!important}
-.dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card.learned{border-color:rgba(115,217,255,.28)!important;background:rgba(12,22,34,.86)!important}
+.dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card:not(.learned){filter:grayscale(1) saturate(.1)!important;opacity:.38!important;border-color:rgba(126,164,215,.10)!important;background:rgba(8,13,22,.74)!important}
+.dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card.learned{filter:none!important;opacity:1!important;border-color:rgba(115,217,255,.28)!important;background:rgba(12,22,34,.86)!important}
