@@ -101,10 +101,9 @@
 
 /*
   Final skill-art stability layer.
-  Once a canonical skill image successfully decodes, that exact resolved URL is frozen for
-  the lifetime of that image node. This prevents visuals-skills.js from retrying its primary
-  URL after a fallback has already succeeded, which was causing the visible icon flash and
-  the apparent "two Magic Claws" effect on every level change.
+  Freeze a skill image only after the canonical current-Classic URL for its resolved skill ID
+  has successfully decoded (or after a deliberate WZ fallback has actually succeeded). This
+  prevents level changes from cycling an already-resolved icon back through another source.
 */
 (() => {
   if(window.__TCW_SKILL_SOURCE_LOCK_INSTALLED)return;
@@ -113,16 +112,14 @@
   const nativeSetAttribute=Element.prototype.setAttribute;
   const nativeRemoveAttribute=Element.prototype.removeAttribute;
   const srcDescriptor=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');
-  const lockedBySkill=new Map();
 
   const normalize=value=>{
     try{const u=new URL(String(value||''),location.href);return `${u.pathname}${u.search}`;}catch{return String(value||'');}
   };
   const isCanonical=img=>img instanceof HTMLImageElement&&img.classList.contains('canonical-skill-icon');
-  const skillKey=img=>String(img.dataset.skillId||img.dataset.skillName||img.alt||'').trim();
   const requestedIsLocked=(img,value)=>{
     if(!isCanonical(img))return false;
-    const locked=img.dataset.tcwResolvedSkillSrc||lockedBySkill.get(skillKey(img))||'';
+    const locked=img.dataset.tcwResolvedSkillSrc||'';
     return !!locked&&normalize(value)!==normalize(locked);
   };
 
@@ -160,14 +157,15 @@
   function lock(img){
     if(!isCanonical(img)||!img.complete||img.naturalWidth<=0)return false;
     const src=img.getAttribute('src')||'';
-    const key=skillKey(img);
-    if(!src||!key)return false;
-    if(key==='2001003'||String(img.dataset.skillName||img.alt||'')==='Magic Claw'){
-      img.dataset.skillId='2001003';
-      img.dataset.skillName='Magic Claw';
-    }
+    const id=String(img.dataset.skillId||'').trim();
+    if(!src||!id)return false;
+    const path=normalize(src);
+    const currentSuffix=`/game-data/data/current/images/skills/${id}.png`;
+    const isCurrent=path.endsWith(currentSuffix);
+    const isSuccessfulFallback=img.dataset.skillIconFallbackUsed==='1'&&path.includes('/game-media/skills/');
+    if(!isCurrent&&!isSuccessfulFallback)return false;
+    if(String(img.dataset.skillName||img.alt||'')==='Magic Claw'&&id!=='2001003')return false;
     img.dataset.tcwResolvedSkillSrc=src;
-    lockedBySkill.set(skillKey(img),src);
     img.dataset.tcwSkillSourceLocked='1';
     return true;
   }
