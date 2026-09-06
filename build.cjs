@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.8.2-static1';
+const assetVersion = '0.8.3-static1';
 const BRAND = 'Top Classic World Maplestory';
 
 function readChunk(name) {

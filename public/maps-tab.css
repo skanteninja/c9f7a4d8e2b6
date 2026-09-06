@@ -30,8 +30,8 @@ section[data-page="maps"]{--map-cyan:#56d9ff;--map-blue:#5f8dff;--map-green:#60e
 
 /* Map details use the full content width; no sideways scrolling is required. */
 .maps-detail-layout{grid-template-columns:minmax(0,1fr)}
-.map-canvas-scroll{overflow-x:hidden;overflow-y:auto}
-.map-canvas{display:block;width:100%;min-width:0}
-.map-canvas>#map-detail-image{width:100%;max-width:100%;min-width:0;height:auto}
+.map-canvas-scroll{overflow:visible;max-height:none;min-height:0}
+.map-canvas{display:block;width:100%;min-width:0;min-height:0}
+.map-canvas>#map-detail-image{display:block;width:100%;max-width:100%;min-width:0;height:auto;object-fit:contain}
 .maps-detail-side{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:900px){.maps-detail-side{grid-template-columns:1fr}}
