@@ -127,7 +127,7 @@
       fetch(`${DATA_ROOT}portals.json`,{cache:'force-cache'}).then(r=>r.json()),
       fetch(`${DATA_ROOT}monsters.json`,{cache:'force-cache'}).then(r=>r.json()),fetch(`${DATA_ROOT}map_manifest.json`,{cache:'force-cache'}).then(r=>r.ok?r.json():{}).catch(()=>({})),legacyFetch
     ]).then(([maps,lookups,portals,monsters,mapManifest,legacy])=>{
-      state.mapManifest=mapManifest||{};state.current=flattenMaps(maps);state.legacy=(Array.isArray(legacy)?legacy:legacy?.maps||[]).map(legacyRow);
+      state.mapManifest=mapManifest||{};state.current=flattenMaps(maps).filter(m=>Boolean(state.mapManifest[padMap(m.id)]));state.legacy=(Array.isArray(legacy)?legacy:legacy?.maps||[]).map(legacyRow);
       state.npcNames=lookups?.npc_names||{};state.mobNames=lookups?.mob_names||{};state.portals=portals||{};state.monsters=new Map(flattenMonsters(monsters).map(m=>[String(m.id),m]));
       const currentKeys=new Map();for(const m of state.current){const k=identityKey(m);if(k!=='|'&&!currentKeys.has(k))currentKeys.set(k,m);}
       const merged=[...state.current];for(const old of state.legacy){const hit=currentKeys.get(identityKey(old));if(hit){hit.legacy_ids=hit.legacy_ids||[];if(!hit.legacy_ids.includes(String(old.id)))hit.legacy_ids.push(String(old.id));hit.legacy=true;}else merged.push(old);}
