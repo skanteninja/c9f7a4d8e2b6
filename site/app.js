@@ -183,7 +183,7 @@
     return [...new Set([mapleIoSkillIcon(skill)].filter(Boolean))];
   }
   function skillImgTag(name, cls='skill-icon'){
-    const skill=D.skillIcons[name], urls=skillVisualCandidates(skill);
+    const skill=D.skillIcons[name], urls=name==='Magic Claw'?['/game-data/data/current/images/skills/2001003.png',...skillVisualCandidates(skill)]:skillVisualCandidates(skill);
     if(!urls.length) return '';
     const [primary,...fallbacks]=urls;
     return `<img class="${cls}" src="${esc(primary)}" data-asset-fallbacks="${esc(fallbacks.join('|'))}" data-visual-source="verified-skill-id-legacy-sprite-fallback" alt="${esc(name)}">`;
