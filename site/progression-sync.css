@@ -4,3 +4,11 @@
 .auto-gear-badge{display:inline-flex;align-items:center;margin-left:auto;padding:4px 7px;border:1px solid rgba(98,212,154,.24);border-radius:999px;background:rgba(98,212,154,.07);color:#8ee6b7;font-size:7px;line-height:1;letter-spacing:.08em;white-space:nowrap}.v5-equipment-hero .v5-panel-heading>.auto-gear-badge{align-self:flex-start}
 html.auto-gear-synced .equipment-window{box-shadow:inset 0 0 0 1px rgba(98,212,154,.06)}
 @media(max-width:1050px){.progress-skill-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.skill-progression-head,.progress-tier-title{align-items:flex-start;flex-direction:column}.progress-skill-grid{grid-template-columns:1fr}.progress-skill-card{grid-template-columns:42px minmax(0,1fr) auto}.auto-gear-badge{margin-left:0}}
+
+/* Active Build + Skill Tree composition. This changes placement only: no font or icon scaling. */
+.dashboard-v72 .v5-character-hero{position:relative!important;overflow:hidden!important}
+.dashboard-v72 .v5-character-hero .v5-character-copy{position:static!important;padding-right:clamp(310px,43%,390px)!important;transform:translateY(7px)}
+.dashboard-v72 .v5-character-hero .v5-quick-metrics{position:absolute!important;left:204px!important;right:16px!important;top:136px!important;width:auto!important;margin:0!important}
+.dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree{position:absolute!important;top:14px!important;right:14px!important;width:clamp(300px,39%,360px)!important;max-width:360px!important;margin:0!important;z-index:3!important;box-sizing:border-box!important}
+.dashboard-v72 .v72-secondary-content.tcw-secondary-vacated{display:none!important}
+html.dashboard-skill-in-hero-ready .dashboard-v72 .v5-character-hero{min-height:286px!important}
