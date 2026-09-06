@@ -329,7 +329,7 @@
     const idx = await index('monsters.json');
     document.querySelectorAll('#db-results .db-card').forEach(card => {
       const thumb = card.querySelector('.db-thumb-empty'); if (!thumb || thumb.dataset.visualized) return;
-      const rawId = card.querySelector('code')?.textContent?.replace(/\D/g,'');
+      const rawId = card.dataset.recordId || card.querySelector('code')?.textContent?.replace(/\D/g,'');
       const id = Number(rawId); if (!Number.isFinite(id)) return;
       const monster = idx.byId.get(id); if (!monster) return;
       const label = card.querySelector('h3')?.textContent || entityName(monster);

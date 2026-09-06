@@ -120,7 +120,7 @@
   }
 
   function cardId(card) {
-    const raw = card.querySelector('code')?.textContent?.replace(/\D/g,'');
+    const raw = card.dataset.recordId || card.querySelector('code')?.textContent?.replace(/\D/g,'');
     const n = Number(raw); return Number.isFinite(n) ? n : null;
   }
 
@@ -331,7 +331,7 @@
 
   let dataPromise=null,timer=null;
   const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  const cardId=card=>{const raw=card.querySelector('code')?.textContent?.replace(/\D/g,'');const n=Number(raw);return Number.isFinite(n)?n:null};
+  const cardId=card=>{const raw=card.dataset.recordId || card.querySelector('code')?.textContent?.replace(/\D/g,'');const n=Number(raw);return Number.isFinite(n)?n:null};
   const rows=(raw,key)=>Array.isArray(raw?.[key])?raw[key]:Array.isArray(raw)?raw:[];
   function load(){
     if(!dataPromise)dataPromise=Promise.all([

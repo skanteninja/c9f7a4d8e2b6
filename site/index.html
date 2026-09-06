@@ -7,19 +7,19 @@
   <meta name="theme-color" content="#090b13">
   <title>Top Classic World Maplestory</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=0.8.3-static1">
-  <link rel="stylesheet" href="visuals.css?v=0.8.3-static1">
-  <link rel="stylesheet" href="visuals-db.css?v=0.8.3-static1">
-  <link rel="stylesheet" href="visuals-npc.css?v=0.8.3-static1">
-  <link rel="stylesheet" href="visuals-skills.css?v=0.8.3-static1">
-  <link rel="stylesheet" href="visuals-portals.css?v=0.8.3-static1">
-  <link rel="stylesheet" href="dashboard-polish.css?v=0.8.3-static1">
-  <link rel="stylesheet" href="progression-sync.css?v=0.8.3-static1">
-  <link rel="stylesheet" href="progression-gear-visual.css?v=0.8.3-static1">
-  <link rel="stylesheet" href="ownership-ui.css?v=0.8.3-static1">
-  <link rel="stylesheet" href="maps-tab.css?v=0.8.3-static1">
-  <link rel="stylesheet" href="etc-audit-ui.css?v=0.8.3-static1">
-</head>
+  <link rel="stylesheet" href="styles.css?v=0.8.4-static1">
+  <link rel="stylesheet" href="visuals.css?v=0.8.4-static1">
+  <link rel="stylesheet" href="visuals-db.css?v=0.8.4-static1">
+  <link rel="stylesheet" href="visuals-npc.css?v=0.8.4-static1">
+  <link rel="stylesheet" href="visuals-skills.css?v=0.8.4-static1">
+  <link rel="stylesheet" href="visuals-portals.css?v=0.8.4-static1">
+  <link rel="stylesheet" href="dashboard-polish.css?v=0.8.4-static1">
+  <link rel="stylesheet" href="progression-sync.css?v=0.8.4-static1">
+  <link rel="stylesheet" href="progression-gear-visual.css?v=0.8.4-static1">
+  <link rel="stylesheet" href="ownership-ui.css?v=0.8.4-static1">
+  <link rel="stylesheet" href="maps-tab.css?v=0.8.4-static1">
+  <link rel="stylesheet" href="etc-audit-ui.css?v=0.8.4-static1">
+<link rel="stylesheet" href="readability.css?v=0.8.4-static1"></head>
 <body>
   <div id="app">
     <aside class="sidebar">
@@ -82,9 +82,9 @@
 
       <section data-page="builds" class="page"><section class="build-library-hero"><div><span class="eyebrow">MULTI-BUILD INFRASTRUCTURE</span><h2>Build Library</h2><p>Ice / Lightning is the active personalized build today; future class cards stay infrastructure-only until researched and verified.</p></div><div class="library-count"><strong id="active-build-count">1</strong><span>active build</span></div></section><div id="build-library" class="build-library"></div><section class="panel build-schema-panel"><span class="eyebrow">HOW THIS SCALES</span><h3>Shared game data, separate build decisions</h3><div class="schema-flow"><div><b>Class</b><span>Magician</span></div><i>→</i><div><b>Build</b><span>I/L Wizard</span></div><i>→</i><div><b>Guide modules</b><span>Routes · quests · skills · gear · ETCs</span></div><i>→</i><div><b>Your state</b><span>Level · checks · loadout · held items</span></div></div></section></section>
 
-      <section data-page="leveling" class="page"><div class="section-head"><div><span class="eyebrow">DEDUPLICATED</span><h2>Training Route</h2></div><button class="mini-btn" data-goto="classicdb" data-db-jump="maps">Full Maps DB</button></div><div id="route-cards" class="route-cards"></div><div class="section-head"><div><span class="eyebrow">EXACT LEVEL</span><h2>Current-level detail</h2></div></div><div id="level-detail" class="panel"></div></section>
+      <section data-page="leveling" class="page"><div class="section-head"><div><span class="eyebrow">DEDUPLICATED</span><h2>Training Route</h2></div><button class="mini-btn" data-goto="classicdb" data-db-jump="maps">Full Maps DB</button></div><div id="route-cards" class="route-cards"></div></section>
 
-      <section data-page="quests" class="page"><div class="section-head"><div><span class="eyebrow">CURATED ROUTE</span><h2>Quest Tracker</h2></div><button class="mini-btn" data-goto="classicdb" data-db-jump="quests">Full Quests DB</button></div><div class="filters"><input id="quest-search" placeholder="Search quests, rewards, ETCs..."><select id="quest-priority"><option value="all">All priorities</option><option>High</option><option>Medium</option><option>Low / Optional</option></select><select id="quest-region"><option value="all">All regions</option></select><label class="toggle"><input id="quest-relevant" type="checkbox" checked> I/L relevant only</label><label class="toggle"><input id="quest-available" type="checkbox" checked> Available by current level</label><label class="toggle"><input id="quest-hide-done" type="checkbox"> Hide completed</label></div><div class="quest-summary" id="quest-summary"></div><div id="quest-list" class="quest-list"></div></section>
+      <section data-page="quests" class="page"><div class="section-head"><div><span class="eyebrow">CURATED ROUTE</span><h2>Quest Tracker</h2></div><button class="mini-btn" data-goto="classicdb" data-db-jump="quests">Full Quests DB</button></div><div class="filters"><input id="quest-search" placeholder="Search quests, rewards, ETCs..."><select id="quest-priority"><option value="all">All priorities</option><option>High</option><option>Medium</option><option>Low / Optional</option></select><select id="quest-region"><option value="all">All regions</option></select><label class="toggle"><input id="quest-available" type="checkbox" checked> Available by current level</label><label class="toggle"><input id="quest-hide-done" type="checkbox"> Hide completed</label></div><div class="quest-summary" id="quest-summary"></div><div id="quest-list" class="quest-list"></div></section>
 
       <section data-page="maps" class="page"></section>
 
@@ -94,7 +94,7 @@
 
       <section data-page="etc" class="page"><div class="section-head"><div><span class="eyebrow">ANTI-BACKTRACKING</span><h2>Cumulative ETC Planner</h2></div></div><div class="filters"><input id="etc-search" placeholder="Search ETCs or quests..."><label class="toggle"><input id="etc-current-only" type="checkbox"> Started by current level</label><label class="toggle"><input id="etc-hide-done" type="checkbox"> Hide satisfied</label></div><div id="etc-list" class="etc-list"></div></section>
 
-      <section data-page="classicdb" class="page"><div class="db-hero"><div><span class="eyebrow">TOP CLASSIC WORLD</span><h2>Database</h2><p>Search items, equipment, monsters, maps, quests, skills, crafting and portals in one place.</p></div></div><div class="db-toolbar"><select id="db-dataset" aria-label="Database dataset"><option value="items">Items</option><option value="equipment">Equipment</option><option value="monsters">Monsters</option><option value="maps">Maps</option><option value="quests">Quests</option><option value="skills">Skills</option><option value="crafting">Crafting</option><option value="portals">Portals</option><option value="patch_notes">Patch Notes</option></select><input id="db-search" type="search" placeholder="Search names, IDs, descriptions, fields..."><button id="db-more" class="mini-btn" type="button">Show more</button></div><div id="db-status" class="db-status"></div><div id="db-results" class="db-results"></div></section>
+      <section data-page="classicdb" class="page"><div class="db-hero"><div><span class="eyebrow">TOP CLASSIC WORLD</span><h2>Database</h2><p>Search items, equipment, monsters, maps, quests, skills, crafting and portals in one place.</p></div></div><div class="db-toolbar"><select id="db-dataset" aria-label="Database dataset"><option value="items">Items</option><option value="equipment">Equipment</option><option value="monsters">Monsters</option><option value="maps">Maps</option><option value="quests">Quests</option><option value="skills">Skills</option><option value="crafting">Crafting</option></select><input id="db-search" type="search" placeholder="Search names or jobs: Magician, Cleric, Warrior…"><button id="db-more" class="mini-btn" type="button">Show more</button></div><div id="db-status" class="db-status"></div><div id="db-results" class="db-results"></div></section>
 
       <section data-page="cashshop" class="page"><div class="db-hero"><div><span class="eyebrow">TOP CLASSIC WORLD</span><h2>Cash Shop</h2><p>Browse the current catalog, prices and availability.</p></div></div><div class="db-toolbar"><select id="cash-category" aria-label="Cash Shop category"><option value="all">All categories</option></select><input id="cash-search" type="search" placeholder="Search Cash Shop items..."><label class="toggle"><input id="cash-sale-only" type="checkbox"> On-sale only</label></div><div id="cash-status" class="db-status"></div><div id="cash-results" class="db-card-grid"></div></section>
 
@@ -110,22 +110,23 @@
 
   <div id="gear-modal" class="modal" aria-hidden="true"><div class="modal-backdrop" data-close-modal></div><div class="modal-card"><div class="modal-head"><div><span class="eyebrow">EQUIPMENT SLOT</span><h2 id="modal-title">Choose item</h2></div><button class="close-btn" data-close-modal>×</button></div><div class="modal-filter-row"><label class="toggle"><input id="modal-show-future" type="checkbox"> Show future-level items</label><label class="toggle"><input id="modal-show-optional" type="checkbox" checked> Show all curated Mage options</label></div><div id="gear-options" class="gear-options"></div></div></div>
   <div id="toast" class="toast"></div>
-  <script src="guide-data.js?v=0.8.3-static1"></script>
-  <script src="etc-audit-data.js?v=0.8.3-static1"></script>
-  <script src="quest-audit-additions.js?v=0.8.3-static1"></script>
-  <script src="app.js?v=0.8.3-static1"></script>
-  <script src="visuals.js?v=0.8.3-static1"></script>
-  <script src="visuals-db.js?v=0.8.3-static1"></script>
-  <script src="visuals-npc.js?v=0.8.3-static1"></script>
-  <script src="visuals-skills.js?v=0.8.3-static1"></script>
-  <script src="visuals-portals.js?v=0.8.3-static1"></script>
-  <script src="dashboard-polish.js?v=0.8.3-static1"></script>
-  <script src="progression-sync.js?v=0.8.3-static1"></script>
-  <script src="progression-level-hook.js?v=0.8.3-static1"></script>
-  <script src="progression-skill-state.js?v=0.8.3-static1"></script>
-  <script src="progression-gear-visual.js?v=0.8.3-static1"></script>
-  <script src="ownership-ui.js?v=0.8.3-static1"></script>
-  <script src="maps-tab.js?v=0.8.3-static1"></script>
-  <script src="etc-audit-ui.js?v=0.8.3-static1"></script>
-</body>
+  <script src="guide-data.js?v=0.8.4-static1"></script>
+  <script src="etc-audit-data.js?v=0.8.4-static1"></script>
+  <script src="quest-audit-additions.js?v=0.8.4-static1"></script>
+  <script src="job-search.js?v=0.8.4-static1"></script>
+<script src="app.js?v=0.8.4-static1"></script>
+  <script src="visuals.js?v=0.8.4-static1"></script>
+  <script src="visuals-db.js?v=0.8.4-static1"></script>
+  <script src="visuals-npc.js?v=0.8.4-static1"></script>
+  <script src="visuals-skills.js?v=0.8.4-static1"></script>
+  <script src="visuals-portals.js?v=0.8.4-static1"></script>
+  <script src="dashboard-polish.js?v=0.8.4-static1"></script>
+  <script src="progression-sync.js?v=0.8.4-static1"></script>
+  <script src="progression-level-hook.js?v=0.8.4-static1"></script>
+  <script src="progression-skill-state.js?v=0.8.4-static1"></script>
+  <script src="progression-gear-visual.js?v=0.8.4-static1"></script>
+  <script src="ownership-ui.js?v=0.8.4-static1"></script>
+  <script src="maps-tab.js?v=0.8.4-static1"></script>
+  <script src="etc-audit-ui.js?v=0.8.4-static1"></script>
+<script src="navigation-history.js?v=0.8.4-static1"></script></body>
 </html>

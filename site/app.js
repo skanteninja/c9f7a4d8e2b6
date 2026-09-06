@@ -326,6 +326,7 @@
     research:['Research & Sources','What is official, what is beta, and why each major decision exists.'],
     data:['Agent / Data','The canonical database stays attached; your personal progress stays yours.']
   };
+  window.TCW_NAV={setPage};
   function setPage(p,persist=true){
     if(!pageMeta[p]) p='dashboard';
     state.page=p;if(persist)save();
@@ -803,10 +804,7 @@
         <p><b>Bank:</b> ${esc(r['Major ETCs to Bank'])}</p>
       </article>`;
     }).join('');
-    const l=currentLevelRow()||{};
-    document.getElementById('level-detail').innerHTML=`<div class="kv-grid">
-      ${[['Job',l.Job],['Primary route',l['Primary Route']],['Monsters',l['Main Monsters']],['I/L method',l['I/L Method']],['Alternative',l.Alternative],['Quest / PQ',l['Quest / PQ Tie-In']],['Gear hunt',l['Gear Hunt Tie-In']],['Save now',l['SAVE ETC / ITEM NOW']],['Quantity',l['Target Qty']],['Stop saving',l['When You Can Stop Saving']]].map(([k,v])=>`<div class="kv"><small>${esc(k)}</small><b>${esc(v||'—')}</b></div>`).join('')}
-    </div>`;
+
   }
 
   function questRelevant(q){return !/only/i.test(String(q.Eligibility||''));}
@@ -815,12 +813,12 @@
     const sel=document.getElementById('quest-region');
     if(sel.options.length<=1) regions.forEach(r=>sel.add(new Option(r,r)));
   }
-  ['quest-search','quest-priority','quest-region','quest-relevant','quest-available','quest-hide-done'].forEach(id=>document.getElementById(id).addEventListener('input',renderQuests));
+  ['quest-search','quest-priority','quest-region','quest-available','quest-hide-done'].forEach(id=>document.getElementById(id).addEventListener('input',renderQuests));
   function renderQuests(){
     const q=document.getElementById('quest-search').value.trim().toLowerCase();
     const p=document.getElementById('quest-priority').value;
     const region=document.getElementById('quest-region').value;
-    const relevant=document.getElementById('quest-relevant').checked;
+    const relevant=false;
     const available=document.getElementById('quest-available').checked;
     const hideDone=document.getElementById('quest-hide-done').checked;
     const rows=D.quests.map((x,i)=>({...x,_i:i,_id:questId(x,i)})).filter(x=>{
@@ -987,7 +985,7 @@
     try{return JSON.stringify(row).toLowerCase();}catch(e){return String(row).toLowerCase();}
   }
   function entityName(row){
-    return row.name||row.title||row.quest_name||row.map_name||row.skill_name||row.item_name||row.description||`ID ${row.id??'—'}`;
+    return row.name||row.title||row.quest_name||row.map_name||row.skill_name||row.item_name||row.description||'Unnamed record';
   }
   function entityThumb(row,dataset){
     if(dataset==='monsters'){ const hash=row.gif||row.gifs?.move||row.gifs?.stand; if(hash) return `/game-data/data/images/monsters/${hash}.webp`; if(row.thumbnail) return `/game-data/data/images/monsters/${row.thumbnail}.png`; }
@@ -1019,15 +1017,15 @@
     return rows.slice(0,limit).map(row=>{
       const name=entityName(row);
       const thumb=entityThumb(row,dataset);
-      const facts=recordFacts(row);
+      const facts=recordFacts(row).filter(([k,v])=>!/(?:^|[ _])(?:id|hash|url|source|provider|thumbnail|gif)(?:$|[ _])/i.test(k)&&!/^\d{6,}$/.test(String(v)));
       const desc=String(row.description||row.desc||row.summary||'').replace(/\\n/g,' ').trim();
-      return `<article class="db-card">
+      return `<article class="db-card" data-record-id="${esc(row.id??'')}">
         <div class="db-card-top">${thumb?`<div class="db-thumb"><img src="${esc(thumb)}" alt="${esc(name)}" loading="lazy"></div>`:'<div class="db-thumb db-thumb-empty">DB</div>'}
-          <div class="db-card-title"><small>${esc(row.__group||TCW_DATASETS[dataset]?.label||dataset)}</small><h3>${esc(name)}</h3>${row.id!==undefined?`<code>#${esc(row.id)}</code>`:''}</div>
+          <div class="db-card-title"><small>${esc(row.__group||TCW_DATASETS[dataset]?.label||dataset)}</small><h3>${esc(name)}</h3></div>
         </div>
         ${desc?`<p>${esc(desc.slice(0,280))}${desc.length>280?'…':''}</p>`:''}
         ${facts.length?`<div class="db-facts">${facts.map(([k,v])=>`<span><small>${esc(k)}</small><b>${esc(v)}</b></span>`).join('')}</div>`:''}
-        <details><summary>Full metadata</summary><pre>${esc(JSON.stringify(Object.fromEntries(Object.entries(row).filter(([k])=>!k.startsWith('__')&&!/(?:source|provider|origin|url|thumbnail|gif|hash)/i.test(k))),null,2))}</pre></details>
+
       </article>`;
     }).join('');
   }
@@ -1048,7 +1046,7 @@
       const data=await fetchTcw(key);
       let rows=collectTcwRows(data);
       if(key==='equipment') rows=rows.filter(r=>String(r.category||'').toLowerCase()==='equipment'||r.equip_slot||r.slot);
-      if(q) rows=rows.filter(r=>searchableRecord(r).includes(q));
+      if(q) rows=rows.filter(r=>window.TCW_JOB_SEARCH ? window.TCW_JOB_SEARCH.matches(r,q,key) : searchableRecord(r).includes(q));
       const limit=tcwRenderLimit.classicdb;
       status.innerHTML=`<b>${rows.length.toLocaleString()}</b> matching records · showing ${Math.min(limit,rows.length).toLocaleString()} · <span>Top Classic World database</span>`;
       results.innerHTML=renderTcwCards(rows,key,limit)||'<div class="db-empty">No matching records.</div>';

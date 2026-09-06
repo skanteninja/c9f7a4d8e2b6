@@ -34,7 +34,7 @@
     const group=card.querySelector('.db-card-title small')?.textContent?.trim()||'';
     const m=group.match(/\b(\d{9})\b/);return m?.[1]||'';
   }
-  function portalId(card){const raw=card.querySelector('code')?.textContent?.replace(/\D/g,'');const n=Number(raw);return Number.isFinite(n)?n:null;}
+  function portalId(card){const raw=card.dataset.recordId || card.querySelector('code')?.textContent?.replace(/\D/g,'');const n=Number(raw);return Number.isFinite(n)?n:null;}
 
   async function enhancePortalDb(){
     if(document.getElementById('db-dataset')?.value!=='portals')return;
@@ -74,3 +74,4 @@
   function schedule(){clearTimeout(timer);timer=setTimeout(enhance,120);}
   new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});document.addEventListener('click',schedule,true);document.addEventListener('change',schedule,true);document.addEventListener('input',schedule,true);enhance();
 })();
+

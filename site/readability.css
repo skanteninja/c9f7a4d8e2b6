@@ -1,0 +1,32 @@
+/* Text and controls should remain legible without browser zoom. */
+[hidden]{display:none!important}
+body{font-size:15px;line-height:1.5}
+.page{min-width:0}
+.page p,.page li,.page .muted{font-size:15px;line-height:1.6}
+.page input,.page select,.page button,.nav-btn{font-size:14px}
+.page input,.page select,.mini-btn{min-height:38px}
+.page h2{font-size:26px}.page h3{font-size:19px}
+.page .eyebrow,.page .pill,.page .status-tag,.page .beta-tag{font-size:12px}
+.page .route-card p,.page .quest-row,.page .quest-row small,.page .etc-note{font-size:14px;line-height:1.6}
+.page .db-card-title h3{font-size:19px;overflow-wrap:anywhere}
+.page .db-card-title small,.page .db-facts small,.page .db-status{font-size:13px}
+.page .db-facts b,.page .db-card p,.page .visual-db-relation-head{font-size:14px;line-height:1.5}
+.page .db-results{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.page .maps-db-main b,.page .map-entity-row b,.page .map-exit-list b{font-size:15px;white-space:normal}
+.page .maps-db-main small,.page .map-entity-row small,.page .maps-layer-controls label,.page .maps-explorer-status{font-size:13px;white-space:normal}
+.maps-database-all{max-height:none;overflow:visible;padding-right:0}
+.maps-more{min-width:180px;padding:12px 20px}
+.page .maps-continent-copy b{font-size:16px}.page .maps-continent-copy small,.page .maps-continent-copy em{font-size:12px;white-space:normal}
+.page[data-page="skills"]{font-size:16px}
+.page[data-page="skills"] :is(p,small,b,span,button,select,.skill-why,.skill-spend,.skill-result){font-size:14px;line-height:1.55}
+.page[data-page="skills"] :is(h2){font-size:28px}.page[data-page="skills"] :is(h3){font-size:21px}
+.page[data-page="skills"] :is(.skill-row,.skill-plan-row){padding:14px;gap:12px}
+.page[data-page="skills"] :is(.skill-card,.atlas-skill-card){padding:12px;min-width:0}
+.page[data-page="skills"] :is(.atlas-skill-grid,.skill-grid){grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.page[data-page="skills"] :is(b,small){white-space:normal;overflow-wrap:anywhere}
+.page[data-page="skills"] img{object-fit:contain}
+.page :is(.atlas-action-row b,.atlas-queue-row b,.buff-chip b){font-size:13px;white-space:normal}
+.page :is(.atlas-action-row small,.atlas-queue-row small,.buff-chip small){font-size:12px;white-space:normal}
+.page .atlas-skill-card b{font-size:12px;white-space:normal}.page .atlas-skill-card small{font-size:12px}
+.page .atlas-skill-detail p{font-size:14px}.page .atlas-skill-detail b{font-size:16px}
+@media(max-width:700px){.page .db-toolbar{flex-wrap:wrap}.page .db-toolbar input{min-width:0;width:100%}.page[data-page="skills"] .skill-row{grid-template-columns:48px 38px 42px minmax(0,1fr)}.page[data-page="skills"] .skill-why,.page[data-page="skills"] .skill-result{grid-column:1/-1!important}}
