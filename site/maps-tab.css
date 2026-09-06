@@ -28,3 +28,10 @@ section[data-page="maps"]{--map-cyan:#56d9ff;--map-blue:#5f8dff;--map-green:#60e
 @media(max-width:700px){.maps-full-world-stage{padding:5px}.maps-world-visual-key{display:grid}.maps-continent-grid{grid-template-columns:1fr}.maps-continent-card{grid-template-columns:108px minmax(0,1fr)}.maps-continent-art{width:108px;height:72px}.maps-atlas-world-point{width:22px;height:26px}.maps-atlas-world-point.major span{display:none}.maps-atlas-world-point:hover span{display:block}.maps-db-row{grid-template-columns:42px minmax(0,1fr) auto}.maps-db-row code{display:none}}
 
 
+/* Map details use the full content width; no sideways scrolling is required. */
+.maps-detail-layout{grid-template-columns:minmax(0,1fr)}
+.map-canvas-scroll{overflow:visible;max-height:none;min-height:0}
+.map-canvas{display:block;width:100%;min-width:0;min-height:0}
+.map-canvas>#map-detail-image{display:block;width:100%;max-width:100%;min-width:0;height:auto;object-fit:contain}
+.maps-detail-side{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:900px){.maps-detail-side{grid-template-columns:1fr}}
