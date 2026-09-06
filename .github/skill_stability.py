@@ -65,7 +65,7 @@ try:
         ev("""(()=>{
           const grid=document.getElementById('atlas-skill-grid');
           window.__skillCheck={grid,panel:grid.closest('.tcw-hero-skill-tree'),cards:[...grid.children],images:[...grid.querySelectorAll('img')],loads:0,children:0,sources:0,trusted:false};
-          const s=window.__skillCheck;s.urls=s.images.map(i=>i.getAttribute('src'));
+          const s=window.__skillCheck;s.urls=s.images.map(i=>i.getAttribute('src'));s.height=Math.round(grid.closest('.v5-character-hero').getBoundingClientRect().height);
           s.onLoad=()=>s.loads++;s.onClick=e=>{if(e.isTrusted)s.trusted=true;};
           grid.addEventListener('load',s.onLoad,true);document.addEventListener('click',s.onClick,true);
           s.observer=new MutationObserver(rs=>rs.forEach(r=>{if(r.type==='childList')s.children++;else if(r.attributeName==='src')s.sources++;}));
@@ -81,7 +81,7 @@ try:
           urls:s.images.every((im,i)=>im.getAttribute('src')===s.urls[i]),loads:s.loads,children:s.children,sources:s.sources,trusted:s.trusted,
           states:[...g.children].map(c=>({name:c.dataset.skillName,sp:Number(c.querySelector('small').textContent.match(/Lv. (\\d+)/)[1]),filter:getComputedStyle(c).filter,opacity:getComputedStyle(c).opacity})),
           magic:[...g.querySelectorAll('[data-skill-name="Magic Claw"] img')].map(im=>({id:im.dataset.skillId,src:im.getAttribute('src')})),
-          height:Math.round(g.closest('.v5-character-hero').getBoundingClientRect().height)
+          height:Math.round(g.closest('.v5-character-hero').getBoundingClientRect().height),beforeHeight:s.height
         }})()""")
         assert result['level'] == str(n), result
         for key in ('panel', 'grid', 'cards', 'images', 'urls'):
@@ -97,7 +97,7 @@ try:
                 assert c['filter'] == 'none' and c['opacity'] == '1', c
         if result['magic']:
             assert result['magic'] == [dict(id='2001003', src='/game-data/data/current/images/skills/2001003.png')], result
-        assert result['height'] <= 289, result
+        assert result['height'] == result['beforeHeight'], result
         print(json.dumps(dict(base=base, level=n, stable=True, loads=0, child_mutations=0, states=result['states'])), flush=True)
 
     def finish():

@@ -181,7 +181,6 @@
     const level = currentLevel();
     const enriched = !!(idx && idx.size);
     const alreadyCards = grid.querySelectorAll('.beginner-skill-card').length === 3 && !grid.querySelector('.beginner-milestone-grid');
-    const sameLevel = grid.dataset.beginnerRenderLevel === String(level);
     const currentMode = grid.dataset.beginnerRenderMode || '';
     if (alreadyCards && (currentMode === 'cot2' || !enriched)) {
       const allocation = latestAllocation('beginner',level);
