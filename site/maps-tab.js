@@ -142,7 +142,7 @@
   function mapName(id){const m=state.byId.get(padMap(id));return m?.name||`Map #${padMap(id)}`;}
   function npcName(id){return state.npcNames?.[String(Number(id))]||state.npcNames?.[padNpc(id)]||`NPC #${padNpc(id)}`;}
   function mobName(id){return state.mobNames?.[String(Number(id))]||state.mobNames?.[String(id)]||state.monsters.get(String(id))?.name||`Mob #${id}`;}
-  function mapImage(map){const key=padMap(map?.id),hash=state.mapManifest?.[key];if(hash)return`${DATA_ROOT}maps/${hash}.webp`;if(map.source==='legacy')return`/game-media/legacy-map/${String(map.id).replace(/\D/g,'')}/render`;return map?.minimap?`${DATA_ROOT}${String(map.minimap).replace(/^\/+/, '')}`:`${DATA_ROOT}images/maps/${key}.png`;}
+  function mapImage(map){const key=padMap(map?.id),hash=state.mapManifest?.[key],highRes=!/^(?:127\.0\.0\.1|localhost)$/.test(location.hostname);if(highRes&&hash)return`${DATA_ROOT}maps/${hash}.webp`;if(highRes&&map.source==='legacy')return`/game-media/legacy-map/${String(map.id).replace(/\D/g,'')}/render`;if(map.source==='legacy')return`/game-media/legacy-map/${String(map.id).replace(/\D/g,'')}/minimap`;return map?.minimap?`${DATA_ROOT}${String(map.minimap).replace(/^\/+/, '')}`:`${DATA_ROOT}images/maps/${key}.png`;}
   function monsterImage(id){const m=state.monsters.get(String(id));if(!m)return'';const rel=m.gif||m.thumbnail;return rel?`${DATA_ROOT}${String(rel).replace(/^\/+/, '')}`:'';}
   function sourceLabel(map){return map.source==='current'?(map.legacy?'CURRENT + OLD SCHOOL':'CURRENT CLASSIC'):'OLD SCHOOL';}
   function sourceClass(map){return map.source==='current'?'current':'legacy';}
