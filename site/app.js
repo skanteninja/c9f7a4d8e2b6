@@ -990,7 +990,7 @@
     return row.name||row.title||row.quest_name||row.map_name||row.skill_name||row.item_name||row.description||`ID ${row.id??'—'}`;
   }
   function entityThumb(row,dataset){
-    if(dataset==='monsters'){ const hash=row.gif||row.gifs?.move||row.gifs?.stand; if(hash) return `${TCW_RAW_BASE}images/monsters/${hash}.webp`; if(row.thumbnail) return `${TCW_RAW_BASE}images/monsters/${row.thumbnail}.png`; }
+    if(dataset==='monsters'){ const hash=row.gif||row.gifs?.move||row.gifs?.stand; if(hash) return `/game-data/data/images/monsters/${hash}.webp`; if(row.thumbnail) return `/game-data/data/images/monsters/${row.thumbnail}.png`; }
     if(row.thumbnail) return tcwImage(row.thumbnail);
     const id=Number(row.id);
     if(!Number.isFinite(id)) return '';
