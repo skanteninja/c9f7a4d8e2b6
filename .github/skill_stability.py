@@ -114,6 +114,15 @@ try:
         time.sleep(.1)
     else:
         raise AssertionError('dashboard not ready')
+    ev("""(()=>{
+      window.__magicSources=[];
+      const scan=()=>document.querySelectorAll('#atlas-skill-grid [data-skill-name="Magic Claw"] img').forEach(im=>{
+        const src=im.getAttribute('src');if(src&&!window.__magicSources.includes(src))window.__magicSources.push(src);
+      });
+      window.__magicObserver=new MutationObserver(scan);
+      window.__magicObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['src']});
+      scan();
+    })()""")
     # Real native clicks expose the capture-listener/microtask bug missed by dispatchEvent.
     for start, steps in ((15,(16,17)), (10,(11,)), (2,(3,4)), (31,(32,33))):
         set_level(start)
@@ -137,6 +146,8 @@ try:
         ready()
         assert ev("document.documentElement.dataset.classProgressionStage") == tier
         assert ev("document.getElementById('hero-level').textContent") == str(end)
+    sources=ev("window.__magicObserver.disconnect();window.__magicSources")
+    assert sources == ['/game-data/data/current/images/skills/2001003.png'], sources
     print('real-input-skill-stability-ok', base, flush=True)
     ws.close()
 finally:

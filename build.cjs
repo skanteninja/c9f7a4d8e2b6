@@ -165,6 +165,11 @@ function patchApp(raw) {
   const safeSkillCandidates="return [...new Set([mapleIoSkillIcon(skill)].filter(Boolean))];";
   if(!app.includes(genericSkillCandidates)) throw new Error('generic skill icon candidate patch target missing');
   app=app.replace(genericSkillCandidates,safeSkillCandidates);
+  // Magic Claw must request its current artwork on the very first render too,
+  // before the asynchronous canonical image layer has loaded the skill index.
+  const clawNeedle = '    const skill=D.skillIcons[name], urls=skillVisualCandidates(skill);';
+  if(!app.includes(clawNeedle)) throw new Error('canonical Magic Claw patch target missing');
+  app=app.replace(clawNeedle, "    const skill=D.skillIcons[name], urls=name==='Magic Claw'?['/game-data/data/current/images/skills/2001003.png',...skillVisualCandidates(skill)]:skillVisualCandidates(skill);");
 
   // The renderer owns node lifetime. Event-capture ID masking cannot protect native
   // input: microtask checkpoints may restore IDs before target listeners run.
