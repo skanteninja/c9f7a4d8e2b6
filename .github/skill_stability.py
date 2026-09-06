@@ -11,7 +11,7 @@ import websocket
 
 base = sys.argv[1].rstrip('/')
 chrome = next(filter(None, (shutil.which(n) for n in ('google-chrome', 'chromium', 'chromium-browser'))))
-profile = tempfile.TemporaryDirectory(prefix='tcw-skill-test-')
+profile = tempfile.TemporaryDirectory(prefix='tcw-skill-test-', ignore_cleanup_errors=True)
 process = subprocess.Popen([chrome, '--headless', '--no-sandbox', '--disable-gpu',
     '--window-size=1440,1000', '--remote-debugging-port=9333', '--remote-allow-origins=*',
     '--user-data-dir=' + profile.name, base + '/?skill-regression=real-input'],
