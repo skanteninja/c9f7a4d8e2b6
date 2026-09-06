@@ -6,7 +6,7 @@
   let skillIndexPromise=null;
   let timer=null;
   const norm=v=>String(v??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-  const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
   function installDashboardCompactStyle(){
     if(document.getElementById('tcw-dashboard-skill-compact'))return;
@@ -81,19 +81,45 @@
     const m=raw.match(/^(.*?)\s+Lv\.?\s*(\d+)/i);const name=(m?.[1]||raw).trim();const level=Number(m?.[2]||0);
     return{skill:idx.byName.get(norm(name))||null,name,level};
   }
+
+  function markResolvedSkillSource(im){
+    if(!im?.complete||im.naturalWidth<=0)return;
+    const id=String(im.dataset.skillId||'');
+    const src=im.getAttribute('src')||'';
+    if(!id||!src)return;
+    im.dataset.resolvedSkillId=id;
+    im.dataset.resolvedSkillSrc=src;
+    im.dataset.skillSourceStable='1';
+  }
+
   function applyCanonicalImage(im,skill){
     if(!im||!skill)return false;
     const sources=iconSources(skill);if(!sources.length)return false;
     const [primary,...fallbacks]=sources;
+    const nextId=String(skill.id||'');
+    const identityChanged=!!im.dataset.canonicalSkillIdentity&&im.dataset.canonicalSkillIdentity!==nextId;
+    if(identityChanged){
+      delete im.dataset.resolvedSkillId;
+      delete im.dataset.resolvedSkillSrc;
+      delete im.dataset.skillSourceStable;
+      delete im.dataset.skillIconFallbackUsed;
+    }
+
     im.classList.add('canonical-skill-icon');
     im.alt=skill.name||im.alt||'Skill';
-    im.dataset.skillId=String(skill.id||'');
+    im.dataset.canonicalSkillIdentity=nextId;
+    im.dataset.skillId=nextId;
     im.dataset.skillName=String(skill.name||'');
     im.dataset.skillIconPolicy='current-classic-first-name-matched-wz-fallback';
     im.dataset.assetFallbacks=fallbacks.join('|');
-    if(im.getAttribute('src')!==primary)im.setAttribute('src',primary);
+
+    const current=im.getAttribute('src')||'';
+    const resolvedSameSkill=im.dataset.resolvedSkillId===nextId&&!!im.dataset.resolvedSkillSrc&&current===im.dataset.resolvedSkillSrc;
+    if(!resolvedSameSkill&&current!==primary)im.setAttribute('src',primary);
+
     if(!im.dataset.canonicalSkillHooked){
       im.dataset.canonicalSkillHooked='1';
+      im.addEventListener('load',()=>markResolvedSkillSource(im));
       im.onerror=()=>{
         const rest=String(im.dataset.assetFallbacks||'').split('|').filter(Boolean);
         if(rest.length){
@@ -103,11 +129,15 @@
           im.src=next;
           return;
         }
+        delete im.dataset.resolvedSkillId;
+        delete im.dataset.resolvedSkillSrc;
+        delete im.dataset.skillSourceStable;
         im.classList.add('skill-icon-unavailable');
         im.removeAttribute('src');
         im.closest('.visual-skill-node,.skill-beginner-card,.db-thumb')?.classList.add('visual-skill-missing');
       };
     }
+    markResolvedSkillSource(im);
     return true;
   }
   function img(skill,cls=''){
@@ -281,6 +311,20 @@
     if(timer)return;
     timer=setTimeout(()=>{timer=null;enhance();},90);
   }
-  new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});
-  document.addEventListener('click',schedule,true);document.addEventListener('change',schedule,true);document.addEventListener('input',schedule,true);enhance();
+  function isLevelControl(target){
+    const el=target instanceof Element?target:null;
+    return !!el?.closest('#level-select,#hero-level-select,#level-range,#level-prev,#level-next,.progression-avatar-level-controls');
+  }
+  function mutationNeedsEnhance(records){
+    return records.some(record=>[...record.addedNodes].some(node=>{
+      if(!(node instanceof Element))return false;
+      return node.matches?.('#atlas-skill-grid,.atlas-skill-card,#skill-list,.skill-row,#db-results,.db-card,.v6-skills-panel')||
+        !!node.querySelector?.('#atlas-skill-grid,.atlas-skill-card,#skill-list .skill-row,#db-results .db-card,.v6-skills-panel');
+    }));
+  }
+  new MutationObserver(records=>{if(mutationNeedsEnhance(records))schedule();}).observe(document.body,{childList:true,subtree:true});
+  document.addEventListener('click',event=>{if(!isLevelControl(event.target))schedule();},true);
+  document.addEventListener('change',event=>{if(!isLevelControl(event.target))schedule();},true);
+  document.addEventListener('input',event=>{if(!isLevelControl(event.target))schedule();},true);
+  enhance();
 })();
