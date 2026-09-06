@@ -30,7 +30,7 @@
   const WORLD_HOTSPOTS={
     'maple-island':[17,72],'victoria':[34,62],'ossyria':[58,26],'ludus':[74,44],'aqua':[71,64],'minar':[88,32],'mulung':[84,52],'nihal':[51,74],'temple':[91,13],'ereve':[68,12],'rien':[48,12],'world-tour':[13,34],'masteria':[28,18]
   };
-  const state={loaded:false,loading:null,current:[],legacy:[],maps:[],byRef:new Map(),byId:new Map(),npcNames:{},mobNames:{},portals:{},monsters:new Map(),view:'world',continent:null,selected:null,returnView:'world',returnContinent:null,zoom:1,showNpcs:true,showMobs:true,showPortals:true,explorerLimit:120,atlas:null,atlasLoading:null};
+  const state={loaded:false,loading:null,current:[],legacy:[],maps:[],byRef:new Map(),byId:new Map(),npcNames:{},mobNames:{},portals:{},monsters:new Map(),view:'world',continent:null,selected:null,returnView:'world',returnContinent:null,zoom:1,showNpcs:true,showMobs:true,showPortals:true,explorerLimit:120,mapManifest:{},atlas:null,atlasLoading:null};
   const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const norm=v=>String(v??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const padMap=v=>String(v??'').replace(/\D/g,'').padStart(9,'0');
@@ -125,9 +125,9 @@
       fetch(`${DATA_ROOT}maps.json`,{cache:'force-cache'}).then(r=>r.json()),
       fetch(`${DATA_ROOT}lookups.json`,{cache:'force-cache'}).then(r=>r.json()),
       fetch(`${DATA_ROOT}portals.json`,{cache:'force-cache'}).then(r=>r.json()),
-      fetch(`${DATA_ROOT}monsters.json`,{cache:'force-cache'}).then(r=>r.json()),legacyFetch
-    ]).then(([maps,lookups,portals,monsters,legacy])=>{
-      state.current=flattenMaps(maps);state.legacy=(Array.isArray(legacy)?legacy:legacy?.maps||[]).map(legacyRow);
+      fetch(`${DATA_ROOT}monsters.json`,{cache:'force-cache'}).then(r=>r.json()),fetch(`${DATA_ROOT}map_manifest.json`,{cache:'force-cache'}).then(r=>r.ok?r.json():{}).catch(()=>({})),legacyFetch
+    ]).then(([maps,lookups,portals,monsters,mapManifest,legacy])=>{
+      state.mapManifest=mapManifest||{};state.current=flattenMaps(maps);state.legacy=(Array.isArray(legacy)?legacy:legacy?.maps||[]).map(legacyRow);
       state.npcNames=lookups?.npc_names||{};state.mobNames=lookups?.mob_names||{};state.portals=portals||{};state.monsters=new Map(flattenMonsters(monsters).map(m=>[String(m.id),m]));
       const currentKeys=new Map();for(const m of state.current){const k=identityKey(m);if(k!=='|'&&!currentKeys.has(k))currentKeys.set(k,m);}
       const merged=[...state.current];for(const old of state.legacy){const hit=currentKeys.get(identityKey(old));if(hit){hit.legacy_ids=hit.legacy_ids||[];if(!hit.legacy_ids.includes(String(old.id)))hit.legacy_ids.push(String(old.id));hit.legacy=true;}else merged.push(old);}
@@ -142,7 +142,7 @@
   function mapName(id){const m=state.byId.get(padMap(id));return m?.name||`Map #${padMap(id)}`;}
   function npcName(id){return state.npcNames?.[String(Number(id))]||state.npcNames?.[padNpc(id)]||`NPC #${padNpc(id)}`;}
   function mobName(id){return state.mobNames?.[String(Number(id))]||state.mobNames?.[String(id)]||state.monsters.get(String(id))?.name||`Mob #${id}`;}
-  function mapImage(map){if(map.source==='legacy')return`/game-media/legacy-map/${String(map.id).replace(/\D/g,'')}/minimap`;return map?.minimap?`${DATA_ROOT}${String(map.minimap).replace(/^\/+/, '')}`:`${DATA_ROOT}images/maps/${padMap(map?.id)}.png`;}
+  function mapImage(map){const key=padMap(map?.id),hash=state.mapManifest?.[key];if(hash)return`${DATA_ROOT}maps/${hash}.webp`;if(map.source==='legacy')return`/game-media/legacy-map/${String(map.id).replace(/\D/g,'')}/render`;return map?.minimap?`${DATA_ROOT}${String(map.minimap).replace(/^\/+/, '')}`:`${DATA_ROOT}images/maps/${key}.png`;}
   function monsterImage(id){const m=state.monsters.get(String(id));if(!m)return'';const rel=m.gif||m.thumbnail;return rel?`${DATA_ROOT}${String(rel).replace(/^\/+/, '')}`:'';}
   function sourceLabel(map){return map.source==='current'?(map.legacy?'CURRENT + OLD SCHOOL':'CURRENT CLASSIC'):'OLD SCHOOL';}
   function sourceClass(map){return map.source==='current'?'current':'legacy';}
