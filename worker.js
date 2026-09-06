@@ -142,8 +142,8 @@ function legacyWorldMapUpstream(pathname) {
 }
 
 function legacyMapImageUpstream(pathname) {
-  const match = pathname.match(/^\/game-media\/legacy-map\/(\d{1,9})\/minimap$/);
-  return match ? `${LEGACY_MAP_MEDIA}${match[1]}/minimap` : null;
+  const match = pathname.match(/^\/game-media\/legacy-map\/(\d{1,9})\/(minimap|render)$/);
+  return match ? `${LEGACY_MAP_MEDIA}${match[1]}/${match[2]}` : null;
 }
 
 export default {
@@ -167,3 +167,4 @@ export default {
 // Atlas resolver checkpoint: WZ Henesys maps to the current Classic record before legacy fallback.
 // Deployment checkpoint: force a fresh Cloudflare build from the verified main branch.
 // Visual delivery checkpoint: Classic item/map/NPC/monster assets are same-origin through /game-data/.
+
