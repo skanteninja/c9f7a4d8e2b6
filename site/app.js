@@ -996,6 +996,7 @@
     if(dataset==='items'||dataset==='equipment') return `${TCW_RAW_BASE}images/items/${String(Math.trunc(id)).padStart(8,'0')}.png`;
     if(dataset==='skills') return `${TCW_RAW_BASE}images/skills/${String(Math.trunc(id)).padStart(7,'0')}.png`;
     if(dataset==='maps') return `${TCW_RAW_BASE}images/maps/${String(Math.trunc(id)).padStart(9,'0')}.png`;
+    if(dataset==='monsters') return `/game-media/monsters/${Math.trunc(id)}/render/stand?format=png&resize=2`;
     return '';
   }
   function recordFacts(row){
