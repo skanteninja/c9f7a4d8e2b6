@@ -169,6 +169,7 @@ function patchApp(raw) {
   const monsterMapPos = app.indexOf(monsterMapReturn);
   const monsterEmptyPos = monsterMapPos >= 0 ? app.indexOf("    return '';", monsterMapPos) : -1;
   if(monsterEmptyPos >= 0) app = app.slice(0,monsterEmptyPos) + "    if(dataset==='monsters') return `/game-media/monsters/${Math.trunc(id)}/render/stand?format=png&resize=2`;\n" + app.slice(monsterEmptyPos);
+  app=app.replace(/(function entityThumb\(row,dataset\)\{)\n    if\(row\.thumbnail\) return osmsImage\(row\.thumbnail\);\n    const id=Number\(row\.id\);/, "$1\n    if(dataset==='monsters'){ const hash=row.gif||row.gifs?.move||row.gifs?.stand; if(hash) return `${OSMS_RAW_BASE}images/monsters/${hash}.webp`; if(row.thumbnail) return `${OSMS_RAW_BASE}images/monsters/${row.thumbnail}.png`; }\n    if(row.thumbnail) return osmsImage(row.thumbnail);\n    const id=Number(row.id);");
   // Magic Claw must request its current artwork on the very first render too,
   // before the asynchronous canonical image layer has loaded the skill index.
   const clawNeedle = '    const skill=D.skillIcons[name], urls=skillVisualCandidates(skill);';
