@@ -23,11 +23,11 @@
     const tab=document.querySelector(`#atlas-skill-tabs [data-skill-tab="${s.tab}"]`);
     if(tab&&!tab.classList.contains('active'))tab.click();
 
-    const title=document.getElementById('v5-job-title');if(title)title.textContent=s.job;
-    const jobLine=document.getElementById('atlas-job-line');if(jobLine)jobLine.textContent=`Lv${n} ${s.job}`;
-    const badge=document.querySelector('.dashboard-v72 #atlas-avatar .avatar-job-badge');if(badge)badge.textContent=s.badge;
-    const classPill=document.querySelector('.dashboard-v72 .v5-buildbar .class-pill');if(classPill)classPill.textContent=s.classPill;
-    const jobPill=document.querySelector('.dashboard-v72 .v5-buildbar .job-pill');if(jobPill)jobPill.textContent=s.jobPill;
+    const title=document.getElementById('v5-job-title');if(title&&title.textContent!==s.job)title.textContent=s.job;
+    const jobLine=document.getElementById('atlas-job-line');const nextJobLine=`Lv${n} ${s.job}`;if(jobLine&&jobLine.textContent!==nextJobLine)jobLine.textContent=nextJobLine;
+    const badge=document.querySelector('.dashboard-v72 #atlas-avatar .avatar-job-badge');if(badge&&badge.textContent!==s.badge)badge.textContent=s.badge;
+    const classPill=document.querySelector('.dashboard-v72 .v5-buildbar .class-pill');if(classPill&&classPill.textContent!==s.classPill)classPill.textContent=s.classPill;
+    const jobPill=document.querySelector('.dashboard-v72 .v5-buildbar .job-pill');if(jobPill&&jobPill.textContent!==s.jobPill)jobPill.textContent=s.jobPill;
 
     document.documentElement.dataset.classProgressionLevel=String(n);
     document.documentElement.dataset.classProgressionStage=s.id;
@@ -36,14 +36,21 @@
 
   function refresh(){
     const n=lvl(),bvals=beginner[Math.min(10,n)]||beginner[1],b=Object.fromEntries(bnames.map((x,i)=>[x,bvals[i]])),a=alloc('magician',n),z=alloc('il',n);
-    document.querySelectorAll('[data-progress-skill]').forEach(c=>{const name=c.dataset.progressSkill||'',v=Number((b[name]??a[name]??z[name])||0),locked=(first.has(name)&&n<10)||(second.has(name)&&n<30);c.classList.toggle('learned',v>0&&!locked);c.classList.toggle('unlearned',v===0);c.classList.toggle('tier-locked',locked);const s=c.querySelector('.progress-skill-state');if(s)s.textContent=locked?'LOCKED':v>0?'ACTIVE':'0 SP';const small=c.querySelector('small');if(small){const max=small.textContent.match(/\/(\d+)/)?.[1]||(bnames.includes(name)?3:20);small.textContent=`Lv ${v}/${max}`;}});
+    document.querySelectorAll('[data-progress-skill]').forEach(c=>{const name=c.dataset.progressSkill||'',v=Number((b[name]??a[name]??z[name])||0),locked=(first.has(name)&&n<10)||(second.has(name)&&n<30);c.classList.toggle('learned',v>0&&!locked);c.classList.toggle('unlearned',v===0);c.classList.toggle('tier-locked',locked);const s=c.querySelector('.progress-skill-state');const nextState=locked?'LOCKED':v>0?'ACTIVE':'0 SP';if(s&&s.textContent!==nextState)s.textContent=nextState;const small=c.querySelector('small');if(small){const max=small.textContent.match(/\/(\d+)/)?.[1]||(bnames.includes(name)?3:20);const next=`Lv ${v}/${max}`;if(small.textContent!==next)small.textContent=next;}});
     syncClassProgression(n);
     document.documentElement.dataset.skillStateLevel=String(n);
   }
 
-  ['level-select','hero-level-select'].forEach(id=>document.getElementById(id)?.addEventListener('change',()=>setTimeout(refresh,260)));
-  document.getElementById('level-range')?.addEventListener('input',()=>setTimeout(refresh,260));
-  ['level-prev','level-next'].forEach(id=>document.getElementById(id)?.addEventListener('click',()=>setTimeout(refresh,260)));
-  setTimeout(refresh,900);
+  let refreshQueued=false;
+  function queueRefresh(){
+    if(refreshQueued)return;
+    refreshQueued=true;
+    queueMicrotask(()=>{refreshQueued=false;refresh();});
+  }
+
+  ['level-select','hero-level-select'].forEach(id=>document.getElementById(id)?.addEventListener('change',queueRefresh));
+  document.getElementById('level-range')?.addEventListener('input',queueRefresh);
+  ['level-prev','level-next'].forEach(id=>document.getElementById(id)?.addEventListener('click',queueRefresh));
+  queueMicrotask(refresh);
   document.documentElement.classList.add('progression-skill-state-ready');
 })();
