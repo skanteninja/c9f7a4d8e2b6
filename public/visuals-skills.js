@@ -6,7 +6,34 @@
   let skillIndexPromise=null;
   let timer=null;
   const norm=v=>String(v??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-  const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
+
+  function installDashboardCompactStyle(){
+    if(document.getElementById('tcw-dashboard-skill-compact'))return;
+    const style=document.createElement('style');style.id='tcw-dashboard-skill-compact';
+    style.textContent=`
+      .dashboard-v72 .v6-skills-panel{padding:10px 12px!important}
+      .dashboard-v72 .v6-skills-panel .atlas-panel-head{margin-bottom:6px!important;padding-bottom:6px!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-tabs{margin-bottom:6px!important;padding-bottom:5px!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-tab{font-size:8px!important;padding:5px 8px!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-card{min-height:52px!important;height:52px!important;padding:4px 6px!important;gap:1px!important;border-radius:8px!important}
+      .dashboard-v72 .v6-skills-panel .skill-img-wrap{width:25px!important;height:25px!important;border-radius:5px!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-card img{max-width:22px!important;max-height:22px!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-card b{font-size:7px!important;line-height:1!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-card small{font-size:7px!important;line-height:1!important;margin:0!important}
+      .dashboard-v72 .v6-skills-panel .visual-cot2-skill-badge{display:none!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-detail{min-height:46px!important;margin-top:6px!important;padding:6px 8px!important;gap:7px!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-detail .skill-img-wrap{width:28px!important;height:28px!important;flex:0 0 28px!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-detail .skill-img-wrap img{max-width:25px!important;max-height:25px!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-detail .detail-kicker{display:none!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-detail b{font-size:8px!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-detail p{font-size:7px!important;line-height:1.2!important;margin:2px 0!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-detail small{font-size:7px!important;line-height:1.15!important}
+    `;
+    document.head.appendChild(style);
+    document.documentElement.classList.add('dashboard-skill-compact-ready');
+  }
 
   function collectSkills(value,out=[]){
     if(Array.isArray(value)){value.forEach(v=>collectSkills(v,out));return out;}
@@ -211,12 +238,11 @@
   }
 
   async function enhanceDashboardSkillCards(idx){
+    installDashboardCompactStyle();
     const cards=[...document.querySelectorAll('#atlas-skill-grid [data-skill-name]')];
     cards.forEach(card=>{
+      card.querySelector('.visual-cot2-skill-badge')?.remove();
       const skill=idx.byName.get(norm(card.dataset.skillName));if(!skill)return;
-      let badge=card.querySelector('.visual-cot2-skill-badge');
-      if(!badge){badge=document.createElement('span');badge.className='visual-cot2-skill-badge';card.appendChild(badge);}
-      badge.textContent=`MAX ${skill.max_level||'—'}`;badge.title=`${skill.job||skill.class_name||''} · skill ID ${skill.id}`;
       const existing=card.querySelector('img');if(existing)applyCanonicalImage(existing,skill);
     });
   }
@@ -245,6 +271,7 @@
 
   async function enhance(){
     document.documentElement.classList.add('visual-skill-layer-ready');
+    installDashboardCompactStyle();
     makeSkillTreeInformational();
     const idx=await skillIndex();
     await Promise.allSettled([enhanceSkillTracker(idx),enhanceDashboardSkillCards(idx),enhanceClassicDb(idx)]);
