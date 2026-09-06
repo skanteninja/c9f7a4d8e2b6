@@ -165,6 +165,10 @@ function patchApp(raw) {
   const safeSkillCandidates="return [...new Set([mapleIoSkillIcon(skill)].filter(Boolean))];";
   if(!app.includes(genericSkillCandidates)) throw new Error('generic skill icon candidate patch target missing');
   app=app.replace(genericSkillCandidates,safeSkillCandidates);
+  const monsterMapReturn = "    if(dataset==='maps') return";
+  const monsterMapPos = app.indexOf(monsterMapReturn);
+  const monsterEmptyPos = monsterMapPos >= 0 ? app.indexOf("    return '';", monsterMapPos) : -1;
+  if(monsterEmptyPos >= 0) app = app.slice(0,monsterEmptyPos) + "    if(dataset==='monsters') return `/game-media/monsters/${Math.trunc(id)}/render/stand?format=png&resize=2`;\n" + app.slice(monsterEmptyPos);
   // Magic Claw must request its current artwork on the very first render too,
   // before the asynchronous canonical image layer has loaded the skill index.
   const clawNeedle = '    const skill=D.skillIcons[name], urls=skillVisualCandidates(skill);';

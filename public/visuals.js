@@ -68,7 +68,9 @@
   }
   function mobImage(row) {
     const hash = row?.gif || row?.gifs?.move || row?.gifs?.stand;
-    return hash ? `${REPO_RAW}data/images/monsters/${hash}.webp` : '';
+    if (hash) return `${REPO_RAW}data/images/monsters/${hash}.webp`;
+    const id = idNum(row);
+    return id == null ? '' : `/game-media/monsters/${id}/render/stand?format=png&resize=2`;
   }
   function mobFallback(row) {
     return row?.thumbnail ? `${REPO_RAW}data/images/monsters/${row.thumbnail}.png` : '';
