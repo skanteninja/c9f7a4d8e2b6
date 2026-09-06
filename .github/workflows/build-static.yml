@@ -49,6 +49,9 @@ jobs:
           ! grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard' site/app.js
           ! grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard' site/visuals.js
           grep -q '/game-data/' site/app.js
+          grep -q 'tcw-skill-images-connected-ready' site/progression-level-hook.js
+          ! grep -q 'node.remove()' site/progression-level-hook.js
+          grep -q 'Dashboard skill artwork never fades' site/progression-sync.css
 
       - name: Browser boot dashboard and progression regression gate
         run: |
@@ -60,8 +63,9 @@ jobs:
           frame.addEventListener('load',async()=>{
             try{
               const d=frame.contentDocument;
+              const w=frame.contentWindow;
               for(let i=0;i<55&&!d.documentElement.classList.contains('dashboard-avatar-level-footer-ready');i++)await delay(150);
-              const required=['progression-sync-ready','beginner-skill-tree-ready','progression-level-hook-ready','progression-skill-state-ready','progression-gear-visual-ready','progression-compact-dashboard-ready','progression-avatar-level-merged-ready','progression-gear-decision-verified','top-classic-world-ready','public-source-clean-ready','dashboard-queues-after-hero-ready','dashboard-avatar-level-footer-ready','owned-image-urls-ready'];
+              const required=['progression-sync-ready','beginner-skill-tree-ready','progression-level-hook-ready','progression-skill-state-ready','progression-gear-visual-ready','progression-compact-dashboard-ready','progression-avatar-level-merged-ready','progression-gear-decision-verified','top-classic-world-ready','public-source-clean-ready','dashboard-queues-after-hero-ready','dashboard-avatar-level-footer-ready','owned-image-urls-ready','tcw-skill-images-connected-ready'];
               for(const cls of required){if(!d.documentElement.classList.contains(cls))throw Error('missing '+cls);}
               if(d.querySelectorAll('#atlas-skill-grid .beginner-skill-card').length!==3)throw Error('beginner skill count');
               if(d.querySelector('.progression-loadout-strip'))throw Error('duplicate level-synced equipment strip present');
@@ -78,13 +82,51 @@ jobs:
               const hero=d.querySelector('.dashboard-v72 .v72-hero-grid'),commands=d.querySelector('.dashboard-v72 .v72-command-grid');
               if(!hero||hero.nextElementSibling!==commands)throw Error('action queues are not below hero cards');
 
-              const change=async(level,needles,newWeapon)=>{
+              const setLevelOnly=async(level,wait=850)=>{
                 const sel=d.getElementById('level-select');
                 sel.value=String(level);
-                sel.dispatchEvent(new frame.contentWindow.Event('change',{bubbles:true}));
-                await delay(1250);
-                if(d.documentElement.dataset.autoGearLevel!==String(level))throw Error('auto gear marker '+level);
+                sel.dispatchEvent(new w.Event('change',{bubbles:true}));
+                await delay(wait);
+                if(String(d.getElementById('hero-level')?.textContent)!==String(level))throw Error('hero level not synced '+level);
                 if(d.documentElement.dataset.skillStateLevel!==String(level))throw Error('skill state marker '+level);
+                if(d.documentElement.dataset.autoGearLevel!==String(level))throw Error('auto gear marker '+level);
+              };
+
+              const waitCanonicalMagicClaw=async()=>{
+                for(let i=0;i<30;i++){
+                  const img=d.querySelector('#atlas-skill-grid [data-skill-name="Magic Claw"] img');
+                  if(img?.dataset.skillId==='2001003'&&img.complete&&img.naturalWidth>0)return img;
+                  await delay(100);
+                }
+                const img=d.querySelector('#atlas-skill-grid [data-skill-name="Magic Claw"] img');
+                throw Error('Magic Claw canonical icon not ready: '+(img?.dataset.skillId||'missing'));
+              };
+
+              /* Exact Magic Claw stability test: Lv10 -> Lv11 changes allocation, never image identity/source/color. */
+              await setLevelOnly(10,1200);
+              const magicianPanel=d.querySelector('.dashboard-v72 .tcw-hero-skill-tree');
+              const magicCard10=d.querySelector('#atlas-skill-grid [data-skill-name="Magic Claw"]');
+              const magicImg10=await waitCanonicalMagicClaw();
+              if(!magicianPanel||!magicCard10||!magicImg10)throw Error('Magician skill tree missing at 10');
+              if(magicImg10.dataset.skillId!=='2001003')throw Error('Magic Claw wrong canonical ID '+magicImg10.dataset.skillId);
+              const magicSrc10=magicImg10.getAttribute('src')||'';
+              const magicFilter10=w.getComputedStyle(magicImg10).filter;
+              if(magicFilter10!=='none')throw Error('Magic Claw icon recolored at 10: '+magicFilter10);
+              if(w.getComputedStyle(magicImg10).opacity!=='1')throw Error('Magic Claw icon faded at 10');
+              let magicReloads=0;
+              magicImg10.addEventListener('load',()=>magicReloads++);
+              await setLevelOnly(11);
+              const magicCard11=d.querySelector('#atlas-skill-grid [data-skill-name="Magic Claw"]');
+              const magicImg11=magicCard11?.querySelector('img');
+              if(d.querySelector('.dashboard-v72 .tcw-hero-skill-tree')!==magicianPanel)throw Error('skill panel replaced 10->11');
+              if(magicCard11!==magicCard10)throw Error('Magic Claw card replaced 10->11');
+              if(magicImg11!==magicImg10)throw Error('Magic Claw image node replaced 10->11');
+              if((magicImg11?.getAttribute('src')||'')!==magicSrc10)throw Error('Magic Claw image source changed 10->11');
+              if(magicReloads!==0)throw Error('Magic Claw image reloaded 10->11');
+              if(w.getComputedStyle(magicImg11).filter!=='none'||w.getComputedStyle(magicImg11).opacity!=='1')throw Error('Magic Claw image appearance changed 10->11');
+
+              const change=async(level,needles,newWeapon)=>{
+                await setLevelOnly(level,1250);
                 if(d.documentElement.dataset.progressionGearVisualLevel!==String(level))throw Error('gear visual marker '+level);
                 const equipment=d.getElementById('equipment-window')?.innerHTML||'';
                 for(const name of needles){if(!equipment.includes(name))throw Error('equipment missing '+level+' '+name);}
@@ -94,7 +136,6 @@ jobs:
                 if(!levelControls?.contains(d.getElementById('level-range')))throw Error('avatar level range lost at '+level);
                 if(!levelControls?.contains(d.getElementById('hero-level-select')))throw Error('avatar level select lost at '+level);
                 if(getComputedStyle(levelControls).display==='none')throw Error('avatar level footer hidden at '+level);
-                if(String(d.getElementById('hero-level')?.textContent)!==String(level))throw Error('avatar hero level not synced '+level);
                 if(!d.querySelector('#atlas-avatar .avatar-character'))throw Error('character render missing '+level);
                 const weapon=d.querySelector(`#equipment-window .gear-slot[data-slot="Weapon"][data-item-name="${newWeapon}"]`);
                 if(!weapon?.classList.contains('progression-new-equipped'))throw Error('new weapon not marked '+level+' '+newWeapon);
@@ -104,6 +145,42 @@ jobs:
               await change(15,['Blue Plain Robe','Hardwood Wand'],'Hardwood Wand');
               if(!d.querySelector('[data-progress-skill="Magic Guard"]')?.classList.contains('unlearned'))throw Error('Magic Guard should be grey at 15');
               if(!d.querySelector('[data-progress-skill="Magic Claw"]')?.classList.contains('learned'))throw Error('Magic Claw should be active at 15');
+
+              /* Whole dashboard Skill Tree stability test: all six cards/images must be the exact same nodes at 15/16/17. */
+              for(let i=0;i<30&&!d.querySelector('#atlas-skill-grid [data-skill-name="Magic Claw"] img')?.complete;i++)await delay(100);
+              const stablePanel=d.querySelector('.dashboard-v72 .tcw-hero-skill-tree');
+              const stableGrid=d.getElementById('atlas-skill-grid');
+              if(!stablePanel||!stableGrid)throw Error('stable skill panel missing at 15');
+              const stableCards=new Map([...stableGrid.querySelectorAll('.atlas-skill-card[data-skill-name]')].map(card=>{
+                const img=card.querySelector('img');
+                return [card.dataset.skillName,{card,img,src:img?.getAttribute('src')||'',loads:0}];
+              }));
+              if(stableCards.size!==6)throw Error('expected 6 Magician skill cards, got '+stableCards.size);
+              for(const entry of stableCards.values()){
+                if(!entry.img||!entry.img.complete||entry.img.naturalWidth<=0)throw Error('skill icon not decoded before stability test');
+                entry.img.addEventListener('load',()=>entry.loads++);
+              }
+              let directGridRebuilds=0;
+              const gridObserver=new w.MutationObserver(records=>{directGridRebuilds+=records.filter(r=>r.type==='childList').length;});
+              gridObserver.observe(stableGrid,{childList:true,subtree:false});
+
+              for(const level of [16,17]){
+                await setLevelOnly(level);
+                if(d.querySelector('.dashboard-v72 .tcw-hero-skill-tree')!==stablePanel)throw Error('skill panel node replaced at '+level);
+                if(d.getElementById('atlas-skill-grid')!==stableGrid)throw Error('skill grid node replaced at '+level);
+                for(const [name,before] of stableCards){
+                  const card=[...stableGrid.querySelectorAll('.atlas-skill-card[data-skill-name]')].find(x=>x.dataset.skillName===name);
+                  const img=card?.querySelector('img');
+                  if(card!==before.card)throw Error('skill card replaced '+level+' '+name);
+                  if(img!==before.img)throw Error('skill image node replaced '+level+' '+name);
+                  if((img?.getAttribute('src')||'')!==before.src)throw Error('skill image src changed '+level+' '+name);
+                  if(before.loads!==0)throw Error('skill image reloaded '+level+' '+name);
+                  if(w.getComputedStyle(img).filter!=='none'||w.getComputedStyle(img).opacity!=='1')throw Error('skill image recolored/faded '+level+' '+name);
+                }
+              }
+              gridObserver.disconnect();
+              if(directGridRebuilds!==0)throw Error('skill grid children rebuilt during same-tier level changes: '+directGridRebuilds);
+
               await change(30,['Golden Pride','Blue Wizard Robe','Mithril Wand'],'Mithril Wand');
               if(!d.querySelector('[data-progress-skill="Teleport"]')?.classList.contains('learned'))throw Error('Teleport should be active at 30');
               if(!d.querySelector('[data-progress-skill="Thunder Bolt"]')?.classList.contains('unlearned'))throw Error('Thunder Bolt should be grey at 30');
@@ -127,7 +204,7 @@ jobs:
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-static-${viewport//,/-}.html"
             "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=14000 --dump-dom http://127.0.0.1:4173/ >"$file"
-            for marker in visual-layer-ready visual-db-layer-ready visual-npc-layer-ready visual-skill-layer-ready visual-portal-layer-ready dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified skill-progression-board-ready beginner-skill-tree-ready dashboard-action-layout-ok dashboard-page-layout-ok etc-planner-fixed-ready top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready; do
+            for marker in visual-layer-ready visual-db-layer-ready visual-npc-layer-ready visual-skill-layer-ready visual-portal-layer-ready dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified skill-progression-board-ready beginner-skill-tree-ready dashboard-action-layout-ok dashboard-page-layout-ok etc-planner-fixed-ready top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready tcw-skill-images-connected-ready; do
               grep -q "$marker" "$file"
             done
             grep -q 'class="atlas-action-row' "$file"
@@ -161,7 +238,7 @@ jobs:
           PY
           done
 
-          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=22000 --dump-dom http://127.0.0.1:4173/ci-progression-test.html >/tmp/progression-test.html
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=30000 --dump-dom http://127.0.0.1:4173/ci-progression-test.html >/tmp/progression-test.html
           grep -o 'progression-level-sync-[^<]*' /tmp/progression-test.html || true
           grep -q '>progression-level-sync-ok<' /tmp/progression-test.html
           rm -f site/ci-progression-test.html
