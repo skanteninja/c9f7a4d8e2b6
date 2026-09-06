@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Live gate v20: product, visual atlas, same-origin Classic media, and shipped monster integrity.
+# Live gate v21: product, visual atlas, same-origin Classic media, monster integrity, and zero-reload dashboard skill icons.
 on:
   workflow_run:
     workflows: ["Build static site"]
@@ -22,7 +22,7 @@ jobs:
         run: |
           ready=0
           for i in {1..60}; do
-            build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0; visuals_ok=0; integrity_ok=0
+            build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0; visuals_ok=0; integrity_ok=0; stability_ok=0
             build_info="$(curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" || true)"
             [[ "$build_info" == *"Top Classic World Maplestory 0.8.1-static1"* ]] && build_ok=1 || true
 
@@ -46,8 +46,12 @@ jobs:
             ownership_js="$(curl -fsSL --max-time 15 "$BASE_URL/ownership-ui.js?ci=$GITHUB_RUN_ID" || true)"
             if [[ "$ownership_js" == *"version:'2026-09-05.4'"* ]] && [[ "$ownership_js" == *"itemId:4000001"* ]] && [[ "$ownership_js" == *"legacyTablesAllowedAsCurrent:false"* ]] && [[ "$ownership_js" == *"monster-integrity-ready"* ]]; then integrity_ok=1; fi
 
-            echo "live-check[$i] build=$build_ok maps=$maps_ok legacy=$legacy_ok atlas=$atlas_ok visuals=$visuals_ok integrity=$integrity_ok world_bytes=${world_bytes:-0} monster_bytes=${monster_bytes:-0}"
-            if [ "$build_ok" -eq 1 ] && [ "$maps_ok" -eq 1 ] && [ "$legacy_ok" -eq 1 ] && [ "$atlas_ok" -eq 1 ] && [ "$visuals_ok" -eq 1 ] && [ "$integrity_ok" -eq 1 ]; then ready=1; break; fi
+            level_hook="$(curl -fsSL --max-time 15 "$BASE_URL/progression-level-hook.js?ci=$GITHUB_RUN_ID" || true)"
+            sync_css="$(curl -fsSL --max-time 15 "$BASE_URL/progression-sync.css?ci=$GITHUB_RUN_ID" || true)"
+            if [[ "$level_hook" == *"tcw-skill-images-connected-ready"* ]] && [[ "$level_hook" != *"node.remove()"* ]] && [[ "$sync_css" == *"Dashboard skill artwork never fades"* ]] && [[ "$sync_css" == *"filter:none!important;opacity:1!important"* ]]; then stability_ok=1; fi
+
+            echo "live-check[$i] build=$build_ok maps=$maps_ok legacy=$legacy_ok atlas=$atlas_ok visuals=$visuals_ok integrity=$integrity_ok stability=$stability_ok world_bytes=${world_bytes:-0} monster_bytes=${monster_bytes:-0}"
+            if [ "$build_ok" -eq 1 ] && [ "$maps_ok" -eq 1 ] && [ "$legacy_ok" -eq 1 ] && [ "$atlas_ok" -eq 1 ] && [ "$visuals_ok" -eq 1 ] && [ "$integrity_ok" -eq 1 ] && [ "$stability_ok" -eq 1 ]; then ready=1; break; fi
             sleep 5
           done
           test "$ready" -eq 1
@@ -70,7 +74,7 @@ jobs:
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-live-${viewport//,/-}.html"
             "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=36000 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID&viewport=$viewport" >"$file"
-            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready maps-nav-ready maps-data-ready maps-tab-ready maps-world-ready maps-legacy-data-ready maps-atlas-visual-ready etc-lifetime-data-ready quest-catalog-audit-ready etc-lifetime-audit-ready monster-drop-evidence-ready; do
+            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready maps-nav-ready maps-data-ready maps-tab-ready maps-world-ready maps-legacy-data-ready maps-atlas-visual-ready etc-lifetime-data-ready quest-catalog-audit-ready etc-lifetime-audit-ready monster-drop-evidence-ready tcw-skill-images-connected-ready; do
               grep -q "$marker" "$file"
             done
             grep -q '<title>Top Classic World Maplestory</title>' "$file"
@@ -104,3 +108,99 @@ jobs:
           assert len(re.findall(r'class="maps-atlas-world-point',s)) >= 10
           PY
           done
+
+      - name: Verify live skill icons never reload on same-tier levels
+        env:
+          BASE_URL: https://maplestory-classic.ofri505.workers.dev
+        run: |
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          python3 -m pip install --quiet websocket-client
+          rm -rf /tmp/tcw-live-cdp
+          "$chrome" --headless --no-sandbox --disable-gpu --remote-debugging-port=9222 --remote-allow-origins='*' --user-data-dir=/tmp/tcw-live-cdp "$BASE_URL/?ci=$GITHUB_RUN_ID&skill-stability=1" >/tmp/tcw-live-chrome.log 2>&1 &
+          chrome_pid=$!
+          trap 'kill "$chrome_pid" 2>/dev/null || true' EXIT
+          for i in {1..80}; do
+            curl -fsS http://127.0.0.1:9222/json >/tmp/tcw-cdp-tabs.json 2>/dev/null && break
+            sleep .1
+          done
+          test -s /tmp/tcw-cdp-tabs.json
+          python3 - <<'PY'
+          import json, os, time, urllib.request
+          import websocket
+
+          tabs=json.load(open('/tmp/tcw-cdp-tabs.json',encoding='utf-8'))
+          page=next((x for x in tabs if x.get('type')=='page' and 'maplestory-classic.ofri505.workers.dev' in x.get('url','')),None)
+          if not page:
+              raise SystemExit('live page CDP target missing')
+          ws=websocket.create_connection(page['webSocketDebuggerUrl'],timeout=20)
+          seq=0
+
+          def send(method,params=None):
+              global seq
+              seq+=1
+              ident=seq
+              ws.send(json.dumps({'id':ident,'method':method,'params':params or {}}))
+              while True:
+                  msg=json.loads(ws.recv())
+                  if msg.get('id')==ident:
+                      if 'error' in msg:
+                          raise RuntimeError(f"CDP {method}: {msg['error']}")
+                      return msg.get('result',{})
+
+          def ev(expr, await_promise=True):
+              out=send('Runtime.evaluate',{
+                  'expression':expr,
+                  'awaitPromise':await_promise,
+                  'returnByValue':True,
+                  'userGesture':True
+              })
+              if out.get('exceptionDetails'):
+                  raise RuntimeError(out['exceptionDetails'].get('text','evaluation failed'))
+              return out.get('result',{}).get('value')
+
+          send('Runtime.enable')
+          ready=ev("""new Promise((resolve,reject)=>{let n=0;const t=setInterval(()=>{n++;const d=document.documentElement;const ok=d.classList.contains('tcw-skill-images-connected-ready')&&d.classList.contains('dashboard-skill-in-hero-ready')&&document.getElementById('level-select')&&document.querySelector('.dashboard-v72 .tcw-hero-skill-tree');if(ok){clearInterval(t);resolve(true)}else if(n>160){clearInterval(t);reject(new Error('live dashboard not ready'))}},100)})""")
+          assert ready is True
+
+          ev("""window.__tcwSetLevel=async n=>{const sel=document.getElementById('level-select');sel.value=String(n);sel.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,1100));if(String(document.getElementById('hero-level')?.textContent)!==String(n))throw new Error('level '+n+' did not sync');return true}""")
+
+          assert ev("window.__tcwSetLevel(10)") is True
+          magic_ready=ev("""new Promise((resolve,reject)=>{let n=0;const t=setInterval(()=>{n++;const img=document.querySelector('#atlas-skill-grid [data-skill-name="Magic Claw"] img');if(img?.dataset.skillId==='2001003'&&img.complete&&img.naturalWidth>0){clearInterval(t);resolve(true)}else if(n>80){clearInterval(t);reject(new Error('canonical Magic Claw not ready'))}},100)})""")
+          assert magic_ready is True
+          baseline=ev("""(()=>{window.__mcPanel=document.querySelector('.dashboard-v72 .tcw-hero-skill-tree');window.__mcCard=document.querySelector('#atlas-skill-grid [data-skill-name="Magic Claw"]');window.__mcImg=window.__mcCard?.querySelector('img');window.__mcSrc=window.__mcImg?.getAttribute('src')||'';window.__mcLoads=0;window.__mcImg?.addEventListener('load',()=>window.__mcLoads++);const cs=getComputedStyle(window.__mcImg);return {id:window.__mcImg?.dataset.skillId,src:window.__mcSrc,filter:cs.filter,opacity:cs.opacity,complete:window.__mcImg?.complete,naturalWidth:window.__mcImg?.naturalWidth}})()""")
+          assert baseline['id']=='2001003', baseline
+          assert baseline['src'], baseline
+          assert baseline['filter']=='none', baseline
+          assert baseline['opacity']=='1', baseline
+          assert baseline['complete'] and baseline['naturalWidth']>0, baseline
+
+          assert ev("window.__tcwSetLevel(11)") is True
+          magic_after=ev("""(()=>{const card=document.querySelector('#atlas-skill-grid [data-skill-name="Magic Claw"]');const img=card?.querySelector('img');const cs=getComputedStyle(img);return {samePanel:document.querySelector('.dashboard-v72 .tcw-hero-skill-tree')===window.__mcPanel,sameCard:card===window.__mcCard,sameImg:img===window.__mcImg,sameSrc:(img?.getAttribute('src')||'')===window.__mcSrc,loads:window.__mcLoads,id:img?.dataset.skillId,filter:cs.filter,opacity:cs.opacity}})()""")
+          assert all(magic_after[k] for k in ['samePanel','sameCard','sameImg','sameSrc']), magic_after
+          assert magic_after['loads']==0, magic_after
+          assert magic_after['id']=='2001003', magic_after
+          assert magic_after['filter']=='none' and magic_after['opacity']=='1', magic_after
+
+          assert ev("window.__tcwSetLevel(15)") is True
+          stable_count=ev("""(()=>{window.__stablePanel=document.querySelector('.dashboard-v72 .tcw-hero-skill-tree');window.__stableGrid=document.getElementById('atlas-skill-grid');window.__stableSkills={};for(const card of window.__stableGrid.querySelectorAll('.atlas-skill-card[data-skill-name]')){const name=card.dataset.skillName,img=card.querySelector('img');const entry={card,img,src:img?.getAttribute('src')||'',loads:0};img?.addEventListener('load',()=>entry.loads++);window.__stableSkills[name]=entry}window.__gridChildMutations=0;window.__gridObserver=new MutationObserver(rs=>window.__gridChildMutations+=rs.filter(r=>r.type==='childList').length);window.__gridObserver.observe(window.__stableGrid,{childList:true,subtree:false});return Object.keys(window.__stableSkills).length})()""")
+          assert stable_count==6, stable_count
+          decoded=ev("""Object.values(window.__stableSkills).every(x=>x.img&&x.img.complete&&x.img.naturalWidth>0&&getComputedStyle(x.img).filter==='none'&&getComputedStyle(x.img).opacity==='1')""")
+          assert decoded is True
+
+          for lvl in (16,17):
+              assert ev(f"window.__tcwSetLevel({lvl})") is True
+              status=ev("""(()=>{const out={samePanel:document.querySelector('.dashboard-v72 .tcw-hero-skill-tree')===window.__stablePanel,sameGrid:document.getElementById('atlas-skill-grid')===window.__stableGrid,skills:{}};for(const [name,before] of Object.entries(window.__stableSkills)){const card=[...window.__stableGrid.querySelectorAll('.atlas-skill-card[data-skill-name]')].find(x=>x.dataset.skillName===name),img=card?.querySelector('img'),cs=getComputedStyle(img);out.skills[name]={sameCard:card===before.card,sameImg:img===before.img,sameSrc:(img?.getAttribute('src')||'')===before.src,loads:before.loads,filter:cs.filter,opacity:cs.opacity}}return out})()""")
+              assert status['samePanel'] and status['sameGrid'], status
+              for name,s in status['skills'].items():
+                  assert s['sameCard'] and s['sameImg'] and s['sameSrc'], (lvl,name,s)
+                  assert s['loads']==0, (lvl,name,s)
+                  assert s['filter']=='none' and s['opacity']=='1', (lvl,name,s)
+
+          grid_mutations=ev("window.__gridObserver.disconnect();window.__gridChildMutations")
+          assert grid_mutations==0, f'live skill grid rebuilt {grid_mutations} times'
+          magic_count=ev("document.querySelectorAll('#atlas-skill-grid [data-skill-name=\"Magic Claw\"] img[data-skill-id=\"2001003\"]').length")
+          assert magic_count==1, f'expected one canonical Magic Claw icon, got {magic_count}'
+          print('live-skill-icon-stability-ok')
+          ws.close()
+          PY
