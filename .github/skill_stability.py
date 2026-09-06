@@ -103,7 +103,17 @@ try:
     def finish():
         ev("""(()=>{const s=window.__skillCheck;s.observer.disconnect();s.grid.removeEventListener('load',s.onLoad,true);document.removeEventListener('click',s.onClick,true);})()""")
 
-    ev("""new Promise((resolve,reject)=>{let n=0;const t=setInterval(()=>{if(document.getElementById('level-select')&&document.querySelector('.tcw-hero-skill-tree')){clearInterval(t);resolve(true)}else if(++n>400){clearInterval(t);reject(Error('dashboard not ready'))}},100)})""")
+    # Navigation may replace about:blank after the debugger endpoint becomes available.
+    for _ in range(400):
+        try:
+            if ev("!!document.getElementById('level-select') && !!document.querySelector('.tcw-hero-skill-tree')"):
+                break
+        except AssertionError as error:
+            if 'Execution context was destroyed' not in str(error):
+                raise
+        time.sleep(.1)
+    else:
+        raise AssertionError('dashboard not ready')
     # Real native clicks expose the capture-listener/microtask bug missed by dispatchEvent.
     for start, steps in ((15,(16,17)), (10,(11,)), (2,(3,4)), (31,(32,33))):
         set_level(start)
