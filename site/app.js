@@ -254,6 +254,7 @@
   function preserveLoadedImages(root,render){
     const pool=new Map();
     if(root) root.querySelectorAll('img[src]').forEach(img=>{
+      if(img.closest('#atlas-skill-grid,#atlas-skill-detail'))return;
       const key=[img.getAttribute('src')||'',img.alt||'',img.className||''].join('¦');
       if(!pool.has(key))pool.set(key,[]);
       pool.get(key).push(img);
@@ -261,6 +262,7 @@
     render();
     if(!root)return;
     root.querySelectorAll('img[src]').forEach(img=>{
+      if(img.closest('#atlas-skill-grid,#atlas-skill-detail'))return;
       const key=[img.getAttribute('src')||'',img.alt||'',img.className||''].join('¦');
       const old=pool.get(key)?.shift();
       if(old&&old!==img&&old.complete&&old.naturalWidth>0)img.replaceWith(old);
@@ -473,6 +475,24 @@
     const tabs=document.getElementById('atlas-skill-tabs'), grid=document.getElementById('atlas-skill-grid'), detail=document.getElementById('atlas-skill-detail');
     if(!tabs||!grid||!detail)return;
     const tab=activeAtlasSkillTab();
+    // tcw-skill-renderer-inplace-v1
+    if(grid.dataset.renderedSkillTab===tab && grid.querySelector('.atlas-skill-card')){
+      if(tab!=='beginner'){
+        const alloc=parseSkillAllocation(latestSkillResult(tab,state.level)?.['Result After Level']);
+        grid.querySelectorAll('[data-skill-name]').forEach(card=>{
+          const info=atlasSkillInfo[card.dataset.skillName];
+          if(!info)return;
+          const lv=alloc[info.abbr]||0;
+          card.classList.toggle('learned',lv>0);
+          card.classList.toggle('unlearned',lv===0);
+          const small=card.querySelector('small'),text='Lv. '+lv+'/'+info.max;
+          if(small&&small.textContent!==text)small.firstChild.data=text;
+        });
+      }
+      window.TCW_REFRESH_SKILL_STATE?.();
+      return;
+    }
+    grid.dataset.renderedSkillTab=tab;
     tabs.innerHTML=[['beginner','Beginner'],['magician','Magician'],['il','Wizard (I/L)']].map(([id,label])=>`<button class="atlas-skill-tab ${tab===id?'active':''}" data-skill-tab="${id}">${label}${id==='il'&&state.level<30?'<small>Lv30</small>':''}</button>`).join('');
     tabs.querySelectorAll('[data-skill-tab]').forEach(b=>b.addEventListener('click',()=>{state.skillTab=b.dataset.skillTab;save();renderAtlasSkills()}));
     if(tab==='beginner'){
@@ -491,7 +511,7 @@
     const next=(kind==='magician'?skillRows('magician'):skillRows('il')).find(x=>Number(x.Level)>=state.level && Number(x.Level)<=Math.max(state.level,kind==='magician'?30:70));
     const defaultName=skillNameFromSpend(next?.Spend)||names.find(n=>(alloc[atlasSkillInfo[n].abbr]||0)>0)||names[0];
     function show(name){
-      const info=atlasSkillInfo[name], lv=alloc[info.abbr]||0;
+      const info=atlasSkillInfo[name], lv=parseSkillAllocation(latestSkillResult(kind,state.level)?.['Result After Level'])[info.abbr]||0;
       detail.innerHTML=`<span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><div><span class="detail-kicker">${esc(info.role)}</span><b>${esc(name)} · Lv ${lv}/${info.max}</b><p>${esc(info.desc)}</p>${next?`<small>Current/next SP instruction: <strong>${esc(next.Spend)}</strong></small>`:''}</div>`;
       hookImageFallback(detail);
     }

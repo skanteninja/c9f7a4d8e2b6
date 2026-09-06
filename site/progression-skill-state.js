@@ -65,7 +65,7 @@
       if(small){
         const max=Number((small.textContent.match(/\/(\d+)/)||[])[1]||maxes[name]||20);
         const next=`Lv. ${v}/${max}`;
-        if(small.textContent!==next)small.textContent=next;
+        if(small.textContent!==next)small.firstChild.data=next;
       }
     });
     document.documentElement.dataset.dashboardSkillStateLevel=String(n);
