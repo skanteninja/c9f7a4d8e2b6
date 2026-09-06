@@ -131,9 +131,9 @@
 
 /*
   Level-update stability shield.
-  The core renderer still owns the data update, but stable visual modules are temporarily
-  detached before same-tier level updates so their DOM/image nodes are never destroyed.
-  They are restored in the same event turn before the browser paints.
+  Stable visual modules stay connected. During same-tier updates only their renderer lookup IDs
+  are masked, so the core renderer cannot destroy/recreate the skill cards or image nodes.
+  IDs are restored in a microtask before paint and allocation text/state is updated in place.
 */
 (() => {
   const D = window.GUIDE_DATA;
@@ -141,6 +141,7 @@
 
   let shieldRuns = 0;
   let shieldedSkillUpdates = 0;
+  let activeMask = null;
 
   const clamp = n => Math.max(1, Math.min(70, Number(n) || 1));
   const stage = n => n < 10 ? 'beginner' : n < 30 ? 'magician' : 'il';
@@ -152,67 +153,69 @@
     return eligible.length ? Math.max(...eligible) : 1;
   }
 
-  function park(node) {
-    if (!node?.parentNode) return null;
-    const record = { node, parent: node.parentNode, next: node.nextSibling };
-    node.remove();
-    return record;
+  function maskId(id) {
+    const node = document.getElementById(id);
+    if (!node) return null;
+    const masked = `tcw-stable-${id}`;
+    node.id = masked;
+    return { node, id, masked };
   }
 
-  function restore(record) {
-    if (!record?.node || record.node.isConnected || !record.parent?.isConnected) return;
-    if (record.next?.parentNode === record.parent) record.parent.insertBefore(record.node, record.next);
-    else record.parent.appendChild(record.node);
+  function restoreId(record) {
+    if (!record?.node) return;
+    if (record.node.id === record.masked) record.node.id = record.id;
   }
 
-  function skillPanel() {
-    return document.querySelector('.dashboard-v72 .tcw-hero-skill-tree,.dashboard-v72 .v6-skills-panel');
+  function finishMask(records) {
+    records.forEach(restoreId);
+    activeMask = null;
+    window.TCW_REFRESH_SKILL_STATE?.();
+    document.documentElement.dataset.uiStabilityShield = 'ready';
+    document.documentElement.dataset.uiStabilityShieldRuns = String(shieldRuns);
+    document.documentElement.dataset.stableSkillLevelUpdates = String(shieldedSkillUpdates);
+    document.documentElement.classList.add('tcw-ui-stability-ready','tcw-level-dom-stable-ready','tcw-skill-images-connected-ready');
+  }
+
+  function maskSkills() {
+    return [
+      maskId('atlas-skill-tabs'),
+      maskId('atlas-skill-grid'),
+      maskId('atlas-skill-detail')
+    ].filter(Boolean);
   }
 
   function beginLevelShield(nextLevel) {
+    if (activeMask) return;
     const oldLevel = renderedLevel();
     const next = clamp(nextLevel);
     if (stage(oldLevel) !== stage(next)) return;
 
-    const sameGear = gearBreakpoint(oldLevel) === gearBreakpoint(next);
-    const parked = [];
+    const records = maskSkills();
+    if (records.length) shieldedSkillUpdates += 1;
 
-    const skill = park(skillPanel());
-    if (skill) { parked.push(skill); shieldedSkillUpdates += 1; }
-
-    if (sameGear) {
-      const avatar = park(document.getElementById('atlas-avatar'));
-      const equipment = park(document.getElementById('equipment-window'));
-      if (avatar) parked.push(avatar);
-      if (equipment) parked.push(equipment);
+    if (gearBreakpoint(oldLevel) === gearBreakpoint(next)) {
+      const avatar = maskId('atlas-avatar');
+      const equipment = maskId('equipment-window');
+      if (avatar) records.push(avatar);
+      if (equipment) records.push(equipment);
     }
 
-    if (!parked.length) return;
+    if (!records.length) return;
+    activeMask = records;
     shieldRuns += 1;
     document.documentElement.dataset.uiStabilityShield = 'active';
-
-    queueMicrotask(() => {
-      parked.forEach(restore);
-      window.TCW_REFRESH_SKILL_STATE?.();
-      document.documentElement.dataset.uiStabilityShield = 'ready';
-      document.documentElement.dataset.uiStabilityShieldRuns = String(shieldRuns);
-      document.documentElement.dataset.stableSkillLevelUpdates = String(shieldedSkillUpdates);
-      document.documentElement.classList.add('tcw-ui-stability-ready','tcw-level-dom-stable-ready');
-    });
+    queueMicrotask(() => finishMask(records));
   }
 
   function beginSkillOnlyShield() {
-    const record = park(skillPanel());
-    if (!record) return;
+    if (activeMask) return;
+    const records = maskSkills();
+    if (!records.length) return;
+    activeMask = records;
     shieldRuns += 1;
     shieldedSkillUpdates += 1;
-    queueMicrotask(() => {
-      restore(record);
-      window.TCW_REFRESH_SKILL_STATE?.();
-      document.documentElement.dataset.uiStabilityShieldRuns = String(shieldRuns);
-      document.documentElement.dataset.stableSkillLevelUpdates = String(shieldedSkillUpdates);
-      document.documentElement.classList.add('tcw-ui-stability-ready','tcw-level-dom-stable-ready');
-    });
+    document.documentElement.dataset.uiStabilityShield = 'active';
+    queueMicrotask(() => finishMask(records));
   }
 
   document.addEventListener('input', event => {
@@ -234,5 +237,5 @@
     else if (['preset-efficient','preset-luk','clear-gear'].includes(target.id)) beginSkillOnlyShield();
   }, true);
 
-  document.documentElement.classList.add('tcw-ui-stability-ready','tcw-level-dom-stable-ready');
+  document.documentElement.classList.add('tcw-ui-stability-ready','tcw-level-dom-stable-ready','tcw-skill-images-connected-ready');
 })();
