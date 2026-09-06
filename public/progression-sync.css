@@ -20,7 +20,7 @@ html.auto-gear-synced .equipment-window{box-shadow:inset 0 0 0 1px rgba(98,212,1
 .dashboard-v72 .v72-secondary-content.tcw-secondary-vacated{display:none!important}
 html.dashboard-skill-in-hero-ready .dashboard-v72 .v5-character-hero{min-height:286px!important}
 
-/* Keep the exact artwork node/source stable. Unlearned state is visual only: the card is greyed, never swapped to another icon. */
+/* Dashboard skill artwork never fades by source replacement. Keep the exact artwork node/source stable; unlearned state is visual only. */
 html.tcw-ui-stability-ready .dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card{transition:filter .18s ease,opacity .18s ease,border-color .18s ease,background .18s ease!important}
 .dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card img{filter:none!important;opacity:1!important;transition:none!important}
 .dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card.unlearned,
