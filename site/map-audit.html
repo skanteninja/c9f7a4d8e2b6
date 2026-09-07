@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Map layout review · Top Classic World</title>
+<style>
+:root{color-scheme:dark;font:17px/1.55 system-ui,sans-serif;background:#0b0e16;color:#ecedf5}body{max-width:1180px;margin:auto;padding:32px 20px}a{color:#76dcf4}h1{font-size:32px;line-height:1.2}p{max-width:85ch;color:#bbc2d5}input,select,button{font:inherit;padding:10px 14px;border:1px solid #41495f;border-radius:8px;background:#161d2c;color:inherit}input{flex:1;min-width:200px}.filters{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}table{width:100%;border-collapse:collapse}th,td{text-align:left;vertical-align:top;padding:14px 10px;border-bottom:1px solid #30394c}th{color:#a5afc8}td small{display:block;color:#a5afc8}.removed{color:#ffb7b7}.kept,.replaced{color:#9fe6bd}#more{margin:24px 0}#error{color:#ffb7b7}[hidden]{display:none!important}@media(max-width:650px){th:nth-child(2),td:nth-child(2){display:none}td,th{padding:12px 5px;font-size:15px}}
+</style></head><body>
+<a href="/?page=maps&view=world">← Back to the map atlas</a>
+<h1>Map layout review</h1>
+<p>Every source record is listed here, including maps removed from the public atlas. Maps with matching verified Classic records link to that replacement. Removed entries remain in this review for accountability; they are not offered as working maps.</p>
+<p id="summary">Loading review…</p>
+<p id="method"></p>
+<a href="/map-audit.csv" download>Download the complete map list (CSV)</a>
+<div class="filters"><input id="search" type="search" aria-label="Search map review" placeholder="Search a map, region, or reason…"><select id="status" aria-label="Filter map status"><option value="all">All results</option><option value="kept">Kept</option><option value="replaced">Replaced / linked to Classic</option><option value="removed">Removed</option></select></div>
+<div id="count" role="status"></div><p id="error" hidden></p>
+<table><thead><tr><th>Map</th><th>Region / source</th><th>Result</th><th>Review link</th></tr></thead><tbody id="rows"></tbody></table>
+<button id="more" type="button" hidden>Show more</button>
+<script src="/map-audit.js"></script>
+</body></html>
