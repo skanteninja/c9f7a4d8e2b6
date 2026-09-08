@@ -53,7 +53,7 @@ jobs:
         run: |
           for f in maps-tab.js maps-tab.css etc-audit-data.js quest-audit-additions.js etc-audit-ui.js etc-audit-ui.css; do
             test -s "dist/$f"
-            grep -q "$f?v=0.8.2-static1" dist/index.html
+            grep -q "$f?v=0.8.7-class-emblems" dist/index.html
           done
           test "$(wc -c < dist/assets/map-atlas/sheets/maple-world.png)" -gt 100000
           test "$(wc -c < dist/assets/map-atlas/sheets/victoria-island.png)" -gt 5000
@@ -66,7 +66,7 @@ jobs:
           from pathlib import Path
           s=Path('dist/index.html').read_text()
           assert s.index('data-page="quests" class="nav-btn"') < s.index('data-page="maps" class="nav-btn') < s.index('data-page="equipment" class="nav-btn')
-          assert s.index('guide-data.js?v=0.8.2-static1') < s.index('etc-audit-data.js?v=0.8.2-static1') < s.index('quest-audit-additions.js?v=0.8.2-static1') < s.index('app.js?v=0.8.2-static1')
+          assert s.index('guide-data.js?v=0.8.7-class-emblems') < s.index('etc-audit-data.js?v=0.8.7-class-emblems') < s.index('quest-audit-additions.js?v=0.8.7-class-emblems') < s.index('app.js?v=0.8.7-class-emblems')
           PY
 
       - name: Browser gate for audited ETC and visual atlas navigation
@@ -137,4 +137,3 @@ jobs:
           "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=60000 --dump-dom http://127.0.0.1:4173/ci-maps-etc-test.html >/tmp/maps-etc-test.html
           grep -o 'maps-etc-regression-[^<]*' /tmp/maps-etc-test.html || true
           grep -q '>maps-etc-regression-ok<' /tmp/maps-etc-test.html
-
