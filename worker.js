@@ -15,6 +15,8 @@ function safeMediaPath(value) {
 
 function upstreamFor(url) {
   const p = url.pathname;
+  const emblem=p.match(/^\/game-media\/class-emblems\/(Beginner|Warrior|Magician|Bowman|Thief)\.png$/);
+  if(emblem)return 'https://media.maplestorywiki.net/yetidb/Class_'+emblem[1]+'.png';
   if (p.startsWith('/game-data/')) return CURRENT_DATA + p.slice('/game-data/'.length) + url.search;
   if (p.startsWith('/game-media/icons/')) return ICON_MEDIA + p.slice('/game-media/icons/'.length) + url.search;
   if (p.startsWith('/game-media/worldmap/')) {

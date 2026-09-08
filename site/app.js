@@ -675,16 +675,21 @@
     ['Cape','CAPE','slot-cape'],['Top','TOP','slot-top'],['Bottom','BOTTOM','slot-bottom'],['Gloves','GLOVES','slot-gloves'],
     ['Pet','PET','slot-pet'],['Mount','MOUNT','slot-mount'],['Shoes','SHOES','slot-shoes']
   ];
+  function classEmblem(cls){
+    const names={beginner:'Beginner',warrior:'Warrior',magician:'Magician',bowman:'Bowman',thief:'Thief'};
+    const name=names[cls?.id]||'Beginner';
+    return '<img class="class-emblem-icon" src="/game-media/class-emblems/'+name+'.png" alt="'+name+' emblem" width="32" height="32">';
+  }
   function renderEquipment(windowId,summaryId){
     const root=document.getElementById(windowId); if(!root)return;
     const overall=state.gear.Overall!=='None';
     let slots=slotDefs.map(([slot,label,cls])=>{
       const name=state.gear[slot]||'None';const item=getGear(name);const inactive=overall&&(slot==='Top'||slot==='Bottom');
       const highly=isHighlyRecommended(item);
-      return `<button class="gear-slot ${cls} ${name!=='None'?'selected':''} ${inactive?'inactive':''} ${highly?'highly-recommended':''}" data-slot="${esc(slot)}" data-item-name="${esc(name)}" title="${esc(slot)} · ${esc(name)}${highly?' · HIGHLY RECOMMENDED':''}">${item&&name!=='None'?imgTag(item):`<span class="slot-name">${label}</span>`}<em>${esc(label)}</em>${highly?'<span class="slot-rec-marker" aria-label="Highly recommended">★</span>':''}</button>`;
+      return `<button class="gear-slot ${cls} ${name!=='None'?'selected':''} ${inactive?'inactive':''} ${highly?'highly-recommended':''}" data-slot="${esc(slot)}" data-item-name="${esc(name)}" title="${esc(slot)} · ${esc(name)}${highly?' · HIGHLY RECOMMENDED':''}">${item&&name!=='None'?imgTag(item):''}<span class="slot-name">${esc(label)}</span>${highly?'<span class="slot-rec-marker" aria-label="Highly recommended">★</span>':''}</button>`;
     }).join('');
-    const core=skillImgTag('Cold Beam','core-skill-icon');
-    root.innerHTML=`<div class="slot-grid">${slots}<div class="core-orb skill-img-wrap">${core}<span>ICE / LIGHTNING</span></div></div>`;
+    const cls=classForBuild();const core=classEmblem(cls);
+    root.innerHTML=`<div class="slot-grid">${slots}<div class="core-orb skill-img-wrap">${core}<span>${esc(activeBuild()?.id==='magician-il-fresh'?'ICE / LIGHTNING':cls?.name||'Beginner')}</span></div></div>`;
     root.querySelectorAll('[data-slot]').forEach(b=>b.addEventListener('click',()=>openGearModal(b.dataset.slot)));
     hookImageFallback(root);renderBuildSummary(summaryId);
   }
@@ -787,7 +792,7 @@
     document.getElementById('active-build-count').textContent=String(builds.filter(b=>b.status==='active').length);
     root.innerHTML=classes.filter(c=>c.id!=='beginner').map(cls=>{
       const list=builds.filter(b=>b.classId===cls.id);
-      return `<section class="class-build-group ${cls.status==='active'?'active-class':''}"><div class="class-build-head"><div class="class-emblem">${esc(cls.icon||'◇')}</div><div><span class="eyebrow">${esc(cls.status==='active'?'ACTIVE CLASS':'READY FOR FUTURE BUILDS')}</span><h3>${esc(cls.name)}</h3><p>${esc((cls.branches||[]).join(' · '))}</p></div></div><div class="build-card-grid">${list.map(b=>{const active=b.id===state.activeBuildId&&b.status==='active';return `<article class="build-card ${active?'active-build':'planned-build'}"><div class="build-card-top"><span class="${active?'live-build-tag':'planned-tag'}">${active?'ACTIVE':'PLANNED'}</span>${b.levelMin?`<small>Lv ${b.levelMin}–${b.levelMax}</small>`:''}</div><h4>${esc(b.name)}</h4><p>${esc(b.description||b.subtitle||'Infrastructure reserved for a future researched build.')}</p><div class="build-tags">${(b.tags||[]).map(t=>`<span>${esc(t)}</span>`).join('')}</div>${active?`<button class="primary-btn" data-goto="dashboard">Open this build</button>`:`<button class="ghost-btn" disabled>Not researched yet</button>`}</article>`}).join('')}</div></section>`;
+      return `<section class="class-build-group ${cls.status==='active'?'active-class':''}"><div class="class-build-head"><div class="class-emblem">${classEmblem(cls)}</div><div><span class="eyebrow">${esc(cls.status==='active'?'ACTIVE CLASS':'READY FOR FUTURE BUILDS')}</span><h3>${esc(cls.name)}</h3><p>${esc((cls.branches||[]).join(' · '))}</p></div></div><div class="build-card-grid">${list.map(b=>{const active=b.id===state.activeBuildId&&b.status==='active';return `<article class="build-card ${active?'active-build':'planned-build'}"><div class="build-card-top"><span class="${active?'live-build-tag':'planned-tag'}">${active?'ACTIVE':'PLANNED'}</span>${b.levelMin?`<small>Lv ${b.levelMin}–${b.levelMax}</small>`:''}</div><h4>${esc(b.name)}</h4><p>${esc(b.description||b.subtitle||'Infrastructure reserved for a future researched build.')}</p><div class="build-tags">${(b.tags||[]).map(t=>`<span>${esc(t)}</span>`).join('')}</div>${active?`<button class="primary-btn" data-goto="dashboard">Open this build</button>`:`<button class="ghost-btn" disabled>Not researched yet</button>`}</article>`}).join('')}</div></section>`;
     }).join('');
   }
 

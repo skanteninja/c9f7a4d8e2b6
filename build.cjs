@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.8.6-beta-atlas';
+const assetVersion = '0.8.7-class-emblems';
 const BRAND = 'Top Classic World Maplestory';
 
 function readChunk(name) {
@@ -206,7 +206,7 @@ function patchApp(raw) {
   // Detail click handlers must read current allocation, rather than their creation level.
   app=app.replace("      const info=atlasSkillInfo[name], lv=alloc[info.abbr]||0;\n      detail.innerHTML=",
     "      const info=atlasSkillInfo[name], lv=parseSkillAllocation(latestSkillResult(kind,state.level)?.['Result After Level'])[info.abbr]||0;\n      detail.innerHTML=");
-  return app;
+  return require('./patches/equipment-branding.cjs')(app);
 }
 
 function removePageSection(html, page) {
@@ -302,6 +302,8 @@ html=html.replace('<script src="app.js', '<script src="job-search.js?v='+assetVe
 html=html.replace('</body>', '<script src="navigation-history.js?v='+assetVersion+'"></script></body>');
 for(const file of ['readability.css','job-search.js','navigation-history.js'])fs.copyFileSync(path.join(source,file),path.join(out,file));
 for(const file of ['map-layouts.json','map-audit.html','map-audit.js','map-audit.json','map-audit.csv'])fs.copyFileSync(path.join(source,file),path.join(out,file));
+html=html.replace('</head>', '<link rel="stylesheet" href="equipment-branding.css?v='+assetVersion+'"></head>');
+fs.copyFileSync(path.join(source,'equipment-branding.css'),path.join(out,'equipment-branding.css'));
 fs.writeFileSync(path.join(out, 'index.html'), html);
 const atlasAssets = path.join(source, 'assets', 'map-atlas');
 if (fs.existsSync(atlasAssets)) fs.cpSync(atlasAssets, path.join(out, 'assets', 'map-atlas'), { recursive: true });
