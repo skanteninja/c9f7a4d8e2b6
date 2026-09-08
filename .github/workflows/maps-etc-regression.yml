@@ -53,7 +53,7 @@ jobs:
         run: |
           for f in maps-tab.js maps-tab.css etc-audit-data.js quest-audit-additions.js etc-audit-ui.js etc-audit-ui.css; do
             test -s "dist/$f"
-            grep -q "$f?v=0.8.7-class-emblems" dist/index.html
+            grep -q "$f?v=0.8.8-build-crosscheck" dist/index.html
           done
           test "$(wc -c < dist/assets/map-atlas/sheets/maple-world.png)" -gt 100000
           test "$(wc -c < dist/assets/map-atlas/sheets/victoria-island.png)" -gt 5000
@@ -66,7 +66,7 @@ jobs:
           from pathlib import Path
           s=Path('dist/index.html').read_text()
           assert s.index('data-page="quests" class="nav-btn"') < s.index('data-page="maps" class="nav-btn') < s.index('data-page="equipment" class="nav-btn')
-          assert s.index('guide-data.js?v=0.8.7-class-emblems') < s.index('etc-audit-data.js?v=0.8.7-class-emblems') < s.index('quest-audit-additions.js?v=0.8.7-class-emblems') < s.index('app.js?v=0.8.7-class-emblems')
+          assert s.index('guide-data.js?v=0.8.8-build-crosscheck') < s.index('etc-audit-data.js?v=0.8.8-build-crosscheck') < s.index('quest-audit-additions.js?v=0.8.8-build-crosscheck') < s.index('app.js?v=0.8.8-build-crosscheck')
           PY
 
       - name: Browser gate for audited ETC and visual atlas navigation
