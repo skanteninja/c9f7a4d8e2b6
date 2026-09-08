@@ -1,0 +1,7 @@
+/* One consistent top label in every equipment window, including empty slots. */
+.slot-grid .gear-slot{position:relative}
+.slot-grid .gear-slot .slot-name{position:absolute;top:5px;left:2px;right:2px;bottom:auto;display:block;font-style:normal;font-size:8px;line-height:1.15;text-align:center;pointer-events:none}
+.slot-grid .gear-slot>img{margin-top:8px}
+.slot-grid .core-orb .class-emblem-icon,.class-emblem .class-emblem-icon{width:32px;height:32px;max-width:none;max-height:none;object-fit:contain;image-rendering:pixelated}
+.slot-grid .core-orb{gap:3px}
+.class-emblem{display:grid;place-items:center}

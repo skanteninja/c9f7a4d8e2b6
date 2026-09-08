@@ -10,6 +10,68 @@ const out = path.join(root, 'dist');
 const assetVersion = '0.8.7-class-emblems';
 const BRAND = 'Top Classic World Maplestory';
 
+function fighterVariant(base) {
+  const skillsAudit = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-skills.json'), 'utf8'));
+  const itemAudit = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-items.json'), 'utf8'));
+  const questAudit = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-quests.json'), 'utf8'));
+  const monsterAudit = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-monsters.json'), 'utf8'));
+  const craftingAudit = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-crafting.json'), 'utf8'));
+  const skillGroups = [...(skillsAudit.warrior || []), ...(skillsAudit.beginner || [])];
+  const allSkills = skillGroups.flatMap(group => group.skills || []);
+  const skillIcons = Object.fromEntries(allSkills.map(skill => [skill.name, {
+    id: skill.id, max: skill.max_level, role: skill.passive ? 'Passive' : (skill.mechanics?.label || 'Combat skill'),
+    desc: String(skill.description || '').replace(/\s+/g, ' ').trim()
+  }]));
+  const steps = [
+    [10, 'Power Strike +1', 'PS 1 | SB 0 | Precise 0 | IHP 0 | MHP 0'],
+    [11, 'Power Strike +2, Slash Blast +1', 'PS 3 | SB 1 | Precise 0 | IHP 0 | MHP 0'],
+    [12, 'Power Strike +1, Slash Blast +2', 'PS 4 | SB 3 | Precise 0 | IHP 0 | MHP 0'],
+    [13, 'Slash Blast +1, Precise Strikes +2', 'PS 4 | SB 4 | Precise 2 | IHP 0 | MHP 0'],
+    [14, 'Precise Strikes +3', 'PS 4 | SB 4 | Precise 5 | IHP 0 | MHP 0'],
+    [15, 'Precise Strikes +3', 'PS 4 | SB 4 | Precise 8 | IHP 0 | MHP 0'],
+    [16, 'Precise Strikes +3', 'PS 4 | SB 4 | Precise 11 | IHP 0 | MHP 0'],
+    [17, 'Precise Strikes +3', 'PS 4 | SB 4 | Precise 14 | IHP 0 | MHP 0'],
+    [18, 'Precise Strikes +1, Power Strike +2', 'PS 6 | SB 4 | Precise 15 | IHP 0 | MHP 0'],
+    [19, 'Power Strike +3', 'PS 9 | SB 4 | Precise 15 | IHP 0 | MHP 0'],
+    [20, 'Power Strike +3', 'PS 12 | SB 4 | Precise 15 | IHP 0 | MHP 0'],
+    [21, 'Power Strike +3', 'PS 15 | SB 4 | Precise 15 | IHP 0 | MHP 0'],
+    [22, 'Power Strike +3', 'PS 18 | SB 4 | Precise 15 | IHP 0 | MHP 0'],
+    [23, 'Power Strike +2, Slash Blast +1', 'PS 20 | SB 5 | Precise 15 | IHP 0 | MHP 0'],
+    [24, 'Slash Blast +3', 'PS 20 | SB 8 | Precise 15 | IHP 0 | MHP 0'],
+    [25, 'Slash Blast +3', 'PS 20 | SB 11 | Precise 15 | IHP 0 | MHP 0'],
+    [26, 'Slash Blast +3', 'PS 20 | SB 14 | Precise 15 | IHP 0 | MHP 0'],
+    [27, 'Slash Blast +3', 'PS 20 | SB 17 | Precise 15 | IHP 0 | MHP 0'],
+    [28, 'Slash Blast +3', 'PS 20 | SB 20 | Precise 15 | IHP 0 | MHP 0'],
+    [29, 'Improved HP Recovery +1, Max HP Increase +2', 'PS 20 | SB 20 | Precise 15 | IHP 1 | MHP 2'],
+    [30, 'Improved HP Recovery +2, Max HP Increase +1', 'PS 20 | SB 20 | Precise 15 | IHP 3 | MHP 3']
+  ];
+  const second = [
+    [31, 'Sword Mastery +1'], [32, 'Sword Mastery +2'], [33, 'Sword Mastery +3'], [34, 'Sword Mastery +3'], [35, 'Sword Mastery +3'], [36, 'Sword Mastery +3'], [37, 'Sword Mastery +3'], [38, 'Sword Mastery +2, Sword Booster +1'], [39, 'Sword Mastery +1, Final Attack: Sword +2'], [40, 'Final Attack: Sword +3'], [41, 'Final Attack: Sword +3'], [42, 'Final Attack: Sword +3'], [43, 'Final Attack: Sword +3'], [44, 'Final Attack: Sword +3'], [45, 'Final Attack: Sword +3'], [46, 'Final Attack: Sword +3'], [47, 'Final Attack: Sword +3'], [48, 'Final Attack: Sword +3'], [49, 'Final Attack: Sword +3'], [50, 'Final Attack: Sword +3'], [51, 'Final Attack: Sword +3'], [52, 'Final Attack: Sword +3'], [53, 'Final Attack: Sword +3'], [54, 'Final Attack: Sword +3'], [55, 'Sword Booster +3'], [56, 'Sword Booster +3'], [57, 'Sword Booster +3'], [58, 'Sword Booster +3'], [59, 'Sword Booster +3'], [60, 'Sword Booster +3'], [61, 'Sword Booster +3'], [62, 'Sword Booster +3'], [63, 'Rage +3'], [64, 'Rage +3'], [65, 'Rage +3'], [66, 'Rage +3'], [67, 'Rage +3'], [68, 'Rage +3'], [69, 'Rage +3'], [70, 'Rage +3']
+  ];
+  const skills = [...steps, ...second].map(([level, spend, result], i) => ({
+    Level: level, SP: level === 10 ? 1 : 3, Spend: spend,
+    'Why This Is The Action': level < 30 ? 'Classic Warrior first-job route: reach the accuracy and damage breakpoints before investing in defense.' : 'Sword-focused Fighter route: establish mastery and Final Attack, then add Booster and Rage for sustained melee damage.',
+    'Meso / MP Logic': 'Use the skill when its target is met; preserve potions and avoid spending on a skill that does not improve the current route.',
+    Status: 'Classic beta / verify at launch', 'Result After Level': result || 'Fighter progression checkpoint', 'Evidence Class': 'CURRENT / VERIFY'
+  }));
+  const warriorItems = (itemAudit.items || []).filter(item => {
+    const stats = item.stats || {};
+    return item.category === 'Equipment' && (item.req_job_label === 'Warrior' || (Number(stats.reqJob || 0) & 1) || ['1H Sword','2H Sword','1H Axe','2H Axe','1H Blunt Weapon','2H Blunt Weapon','Spear','Polearm'].includes(item.weapon_type));
+  });
+  const slotFor = item => ({Cap:'Hat',Coat:'Overall',Longcoat:'Overall',Pants:'Bottom',Shoes:'Shoes',Glove:'Gloves',Shield:'Shield',Cape:'Cape',Ring:'Ring',Accessory:'Earrings',Weapon:'Weapon'})[item.sub_category] || (item.sub_category === 'Weapon' ? 'Weapon' : 'Any');
+  const gear = [{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,'M.ATK':0,'WDEF':0,'MDEF':0,'Crit%':0,'Crit DMG':0,Speed:0,Jump:0,'Req Lv':0,'Req STR':0,'Req DEX':0,'Req LUK':0,Status:'CURRENT / VERIFY','Class Fit':'Any',Plan:'EMPTY',Priority:'—',Notes:'Empty slot','Highly Recommended':false,'Recommendation Reason':'','Evidence Class':'CURRENT / VERIFY'}, ...warriorItems.map(item => {
+    const s = item.stats || {};
+    return {Item:item.name, Slot:item.sub_category === 'Weapon' ? 'Weapon' : slotFor(item), 'Item ID':item.id, 'Icon URL':`/game-media/items/primary/${item.id}`, STR:s.incSTR||0, DEX:s.incDEX||0, INT:s.incINT||0, LUK:s.incLUK||0, 'W.ATK':s.incPAD||0, 'M.ATK':s.incMAD||0, 'WDEF':s.incPDD||0, 'MDEF':s.incMDD||0, 'Crit%':s.incCritRate||0, 'Crit DMG':s.incCritDamage||0, Speed:s.incSpeed||0, Jump:s.incJump||0, 'Req Lv':s.reqLevel||0, 'Req STR':s.reqSTR||0, 'Req DEX':s.reqDEX||0, 'Req LUK':s.reqLUK||0, 'Status':'CURRENT / VERIFY', 'Class Fit':'Warrior', Plan:'OPTIONAL', Priority:'Use at the relevant level or when it creates a real damage/accuracy breakpoint', Notes:item.weapon_type ? `${item.weapon_type} · ${item.attack_speed_label || ''}` : 'Classic Warrior equipment option', 'Highly Recommended':false, 'Recommendation Reason':'', 'Evidence Class':'CURRENT / VERIFY'};
+  })];
+  const weaponRows = gear.filter(x=>x.Slot==='Weapon').map(x=>({Lv:x['Req Lv']||1, Weapon:x.Item, Type:x['Item ID'], 'Weapon Type':'Warrior weapon', 'Why':x.Notes}));
+  const routeBlocks = [[1,9,'Maple Island quest chain','Snail / Blue Snail / Red Snail','Beginner attacks; leave for Victoria at level 10.'],[10,12,'Henesys Hunting Ground / Mushroom Garden','Slime / Orange Mushroom / Pig','Power Strike single-target; finish the Warrior advancement and begin citizenship preparation.'],[13,15,'Southern Forest / Lith Harbor fields','Green Mushroom / Slime / Blue Snail','Power Strike while building accuracy; use Slash Blast once multiple targets are grouped.'],[16,20,'Ellinia tree maps','Green Mushroom / Horny Mushroom','Power Strike for single targets and Slash Blast for 3–4 mobs; keep hit rate checked.'],[21,30,'Kerning PQ / Ant Tunnel / Perion outskirts','KPQ mobs / Zombie Mushroom / Fire Boar','Finish first-job targets and choose Fighter at level 30.'],[31,40,'Land of Wild Boar / Florina Island','Wild Boar / Iron Hog / Lorang','Sword Mastery and Final Attack come online; use a sword route.'],[41,50,'Ludibrium terraces / Perion routes','Teddy / Platoon Chronos / Stone Golem','Rush and Final Attack improve map control; keep accuracy ahead of risky level gaps.'],[51,60,'Orbis / El Nath approach','Jr. Yeti / White Fang / Hector','Rage and Booster support sustained melee training; prioritize safe maps over raw EXP.'],[61,70,'El Nath / Leafre-accessible Classic routes','Hector / Dark Yeti / Tauromacis','Complete the level-70 Fighter plan and verify any launch-scope map availability.']];
+  const leveling = Array.from({length:70},(_,i)=>{const lv=i+1,b=routeBlocks.find(x=>lv>=x[0]&&lv<=x[1]);return {Lv:lv,Job:lv<10?'Beginner':lv<30?'Warrior':'Fighter','Primary Route':b[2],'Main Monsters':b[3],'Fighter Method':b[4],'Alternative':'Use the nearest safer route with a confirmed layout','Quest / PQ Tie-In':lv<30?'Maple Island and Victoria quest chains':'Fighter advancement and class-appropriate quest chains','Gear Hunt Tie-In':lv<10?'Use Maple Island rewards':`Use the ${lv < 40 ? 'sword and shield' : 'current weapon'} checkpoint`,'SAVE ETC / ITEM NOW':'Bank active quest materials only','Target Qty':'As required by the active quest','Priority / Used For':'Route and quest progression','When You Can Stop Saving':'After the active quest chain is complete','Confidence':'CURRENT / VERIFY','Evidence Class':'CURRENT / VERIFY'};});
+  const apPlan=[['1–10','ALL STR',5,'Maple Island weapon',0,'Put every gained AP into STR after the starting spread.'],['11–20','DEX to accuracy breakpoint, then STR',20,'Level-appropriate sword',0,'Add only enough DEX to maintain reliable hit rate; STR remains the damage stat.'],['21–30','DEX to 30 target, then STR',30,'Lv30 Warrior weapon',0,'Use accuracy requirements for the next training target rather than a rigid old-school formula.'],['31–40','STR first; DEX only for a real breakpoint',40,'Sword + shield',0,'Do not add DEX simply because a legacy guide says to.'],['41–50','STR first; maintain accuracy',50,'Current sword checkpoint',0,'Use equipment accuracy and potions before permanent AP when practical.'],['51–60','ALL STR after accuracy is stable',50,'Fighter sword route',0,'Keep base DEX at the verified breakpoint and push STR.'],['61–70','ALL STR',50,'End-of-range sword route',0,'Final Fighter levels prioritize damage and safe hit-rate thresholds.']].map(x=>({'Level Range':x[0],'AP Action':x[1],'Base DEX Target':x[2],'Weapon Target':x[3],'Weapon DEX Req':x[4],'Effective DEX Plan':x[5],'Scroll Plan':'Prefer safe 100%/60% upgrades; do not gamble early progression gear','Why':x[5],'Status':'Classic beta / verify at launch','Evidence Class':'CURRENT / VERIFY'}));
+  const classes = base.catalog.classes.map(c=>c.id==='warrior'?{...c,status:'active'}:c);
+  const builds = base.catalog.builds.map(b=>b.id==='magician-il-fresh'?{...b,name:'I/L Wizard Build'}:b.id==='warrior-future'?{...b,id:'warrior-fighter',name:'Fighter Build',shortName:'Fighter',subtitle:'Sword-focused Warrior progression',levelMin:1,levelMax:70,status:'active',tags:['Warrior','Fighter','Level 1–70','Quest-aware','Sword route'],primaryStat:'STR',secondaryPolicy:'DEX only for verified accuracy or equipment breakpoints',description:'A complete Classic Fighter path covering AP, SP, equipment, training, quests, monsters and crafting.',dataRef:'fighter'}:b);
+  return {catalog:{...base.catalog,classes,builds,activeBuildId:base.catalog.activeBuildId},skills,skillIcons,gear,weapons:weaponRows,armor:gear,recipes:base.recipes,upgrades:base.upgrades,routes:routeBlocks.map(x=>({Levels:`${x[0]}–${x[1]}`,'Primary Route':x[2],'Main Monsters':x[3],'Main Skill / Method':x[4],'Why This Block':'Classic Fighter route checkpoint.','Major ETCs to Bank':'Only active quest materials','Weapon Decision Point':'Review current sword breakpoint','Quest / PQ Focus':'Complete class-appropriate chain','Status':'CURRENT / VERIFY','Evidence Class':'CURRENT / VERIFY'})),leveling,quests:questAudit.quests,etc:base.etc,apPlan,scrolls:base.scrolls,decisions:base.decisions,gearPresets:{efficient:{name:'Fighter Sword Progression',description:'Level checkpoints for a practical sword-and-shield Fighter.',levels:[]}},fighterDatabase:{monsters:monsterAudit.monsters,crafting:craftingAudit}};
+}
+
 function readChunk(name) {
   const directRepair = path.join(repairs, name);
   if (fs.existsSync(directRepair)) return fs.readFileSync(directRepair, 'utf8');
@@ -85,6 +147,11 @@ function sanitizePublicGuide(value, key = '') {
 
 function publicGuide(raw) {
   const data = JSON.parse(raw);
+  data.buildVariants = { fighter: fighterVariant(data) };
+  if (data.catalog?.builds) {
+    data.catalog.builds = data.catalog.builds.map(b => b.id === 'magician-il-fresh' ? {...b, name:'I/L Wizard Build'} : b.id === 'warrior-future' ? {...b, id:'warrior-fighter', name:'Fighter Build', shortName:'Fighter', subtitle:'Sword-focused Warrior progression', levelMin:1, levelMax:70, status:'active', tags:['Warrior','Fighter','Level 1–70','Quest-aware','Sword route'], primaryStat:'STR', secondaryPolicy:'DEX only for verified accuracy or equipment breakpoints', description:'A complete Classic Fighter path covering AP, SP, equipment, training, quests, monsters and crafting.', dataRef:'fighter'} : b);
+    data.catalog.classes = data.catalog.classes.map(c => c.id === 'warrior' ? {...c, status:'active'} : c);
+  }
   if (data.meta) {
     data.meta = {
       title: BRAND,
@@ -100,7 +167,15 @@ function publicGuide(raw) {
 
 function patchApp(raw) {
   let app = ownedUrls(raw).replaceAll('MapleStory Classic Builder', BRAND);
+  app = app.replace('  const D = window.GUIDE_DATA;', `  let D = window.GUIDE_DATA;
+  try {
+    const requestedBuild = JSON.parse(localStorage.getItem('ultimateILGuideState.v1') || '{}').activeBuildId;
+    if(requestedBuild === 'warrior-fighter' && D.buildVariants?.fighter) D = D.buildVariants.fighter;
+  } catch(e) {}`);
   app = require('./patches/usability.cjs')(app);
+  app = app.replace("    const profile=activeBuild();", "    const profile=activeBuild();\n    const buildTitle=document.getElementById('hero-build-title'); if(buildTitle) buildTitle.textContent=profile?.name||'I/L Wizard Build';\n    const buildSub=document.getElementById('hero-build-subtitle'); if(buildSub) buildSub.textContent=profile?.subtitle||'Current route';\n    const heroClass=document.querySelector('.v5-kicker-row .class-pill'); if(heroClass) heroClass.textContent=classForBuild(profile)?.name?.toUpperCase()||'MAGICIAN';\n    const heroJob=document.querySelector('.v5-kicker-row .job-pill'); if(heroJob) heroJob.textContent=profile?.shortName||'I/L WIZARD';");
+  app = app.replace("  function recommendedWeaponName(level=state.level){", "  function recommendedWeaponName(level=state.level){\n    if(activeBuild()?.id==='warrior-fighter'){ const row=(D.weapons||[]).filter(x=>Number(x.Lv||0)<=level).at(-1); return row?.Weapon||'None'; }");
+  app = app.replace("  function renderAtlasSkills(){", "  function renderAtlasSkills(){\n    if(activeBuild()?.id==='warrior-fighter'){\n      const tabs=document.getElementById('atlas-skill-tabs'),grid=document.getElementById('atlas-skill-grid'),detail=document.getElementById('atlas-skill-detail');\n      if(!tabs||!grid||!detail)return;\n      tabs.innerHTML='<span class=\"eyebrow\">FIGHTER SKILL PLAN</span>';\n      const row=D.skills.filter(x=>Number(x.Level)===state.level).at(-1)||D.skills[0];\n      const names=[...new Set((D.skills||[]).flatMap(x=>String(x.Spend||'').split(/[+,]/).map(y=>y.trim().replace(/\\s+\\+\\d+.*$/,'')).filter(y=>D.skillIcons?.[y])))];\n      grid.innerHTML=names.map(name=>`<button class=\"atlas-skill-card\" data-skill-name=\"${esc(name)}\"><span class=\"skill-img-wrap\">${skillImgTag(name,'skill-icon')}</span><b>${esc(name)}</b><small>Fighter skill</small></button>`).join('');\n      detail.innerHTML=`<span class=\"detail-kicker\">CURRENT SP ACTION</span><b>Lv ${esc(state.level)} · ${esc(row?.Spend||'Follow the plan')}</b><p>${esc(row?.['Why This Is The Action']||'Follow the Fighter skill plan.')}</p>`;\n      return;\n    }");
 
   const oldSetLevel = `function setLevel(level){\n    state.level=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));\n    save();\n    renderAll();\n  }`;
   const newSetLevel = `function preserveLoadedImages(root,render){\n    const pool=new Map();\n    if(root) root.querySelectorAll('img[src]').forEach(img=>{\n      const key=[img.getAttribute('src')||'',img.alt||'',img.className||''].join('¦');\n      if(!pool.has(key))pool.set(key,[]);\n      pool.get(key).push(img);\n    });\n    render();\n    if(!root)return;\n    root.querySelectorAll('img[src]').forEach(img=>{\n      const key=[img.getAttribute('src')||'',img.alt||'',img.className||''].join('¦');\n      const old=pool.get(key)?.shift();\n      if(old&&old!==img&&old.complete&&old.naturalWidth>0)img.replaceWith(old);\n    });\n  }\n  function renderLevelPage(){\n    const p=state.page;\n    const root=document.querySelector('.page[data-page="'+p+'"]');\n    preserveLoadedImages(root,()=>{\n      if(p==='dashboard')renderDashboard();\n      else if(p==='builds')renderBuildLibrary();\n      else if(p==='leveling')renderRoutes();\n      else if(p==='quests')renderQuests();\n      else if(p==='equipment'){renderWeapons();renderEquipment('equipment-window-page','build-summary-page');}\n      else if(p==='skills')renderSkills();\n      else if(p==='etc')renderEtc();\n      else if(p==='formulas')renderFormulas();\n    });\n  }\n  function setLevel(level){\n    const next=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));\n    if(next===state.level)return;\n    state.level=next;\n    save();\n    const a=document.getElementById('level-select'),b=document.getElementById('hero-level-select'),r=document.getElementById('level-range');\n    if(a)a.value=String(next);if(b)b.value=String(next);if(r)r.value=String(next);\n    document.documentElement.dataset.levelUpdate='1';\n    renderLevelPage();\n    requestAnimationFrame(()=>document.documentElement.removeAttribute('data-level-update'));\n  }`;
@@ -115,6 +190,8 @@ function patchApp(raw) {
     `function evidenceLabel(item){\n    const e=String(item?.['Evidence Class']||'UNVERIFIED');\n    if(e.includes('HISTORICAL')) return 'HISTORICAL ONLY';\n    if(e.includes('PRE-LAUNCH')) return 'COT2 · VERIFY LAUNCH';\n    if(e.includes('CURRENT')) return 'COT2 VERIFIED';\n    return 'UNVERIFIED';\n  }`,
     `function evidenceLabel(){ return ''; }`
   );
+  app = app.replace('<button class="ghost-btn" disabled>Not researched yet</button>', '<button class="ghost-btn" data-build-select="${b.id}">${b.id===\'warrior-fighter\'?\'Open Fighter Build\':\'Not researched yet\'}</button>');
+  app = app.replace("  document.getElementById('page-back')?.addEventListener('click',()=>setPage('dashboard'));", "  document.getElementById('page-back')?.addEventListener('click',()=>setPage('dashboard'));\n  document.body.addEventListener('click',e=>{const b=e.target.closest('[data-build-select]');if(!b)return;state.activeBuildId=b.dataset.buildSelect;save();location.reload();});");
 
   app = app.replaceAll('COT2 client export via OSMS', 'Top Classic World database');
   app = app.replaceAll('Current COT2 metadata', 'Current game data');
@@ -239,6 +316,8 @@ function patchHtml(raw) {
   html = html.replace(/\s*<button data-page="formulas"[^>]*>[\s\S]*?<\/button>\s*/, '\n');
   html = html.replace('<div><b>Headless data source attached</b><small>Website is the main interface</small></div>', '<div><b>Top Classic World</b><small>Database online</small></div>');
   html = html.replace('<span id="atlas-beta-pill" class="beta-tag">COT2-AWARE</span>', '');
+  html = html.replace('<h2>Top Classic World Maplestory</h2><p>Ice / Lightning Wizard · Level 1–70 · equipment, skills, quests, targets and progression in one build.</p>', '<h2 id="hero-build-title">I/L Wizard Build</h2><p id="hero-build-subtitle">Ice / Lightning Wizard · Level 1–70 · equipment, skills, quests, targets and progression in one build.</p>');
+  html = html.replace('Ice / Lightning is the active personalized build today; future class cards stay infrastructure-only until researched and verified.', 'Choose a researched build and follow its level-by-level progression.');
 
   html = html.replace(
     '<section data-page="classicdb" class="page"><div class="db-hero"><div><span class="eyebrow">OSMS · CURRENT COT2 CLIENT EXPORT</span><h2>Classic Database</h2><p>Search the broad COT2 metadata layer without mixing it into curated I/L recommendations.</p></div><div class="db-provider-badge"><b>Provider</b><span>OSMS Data Explorer</span></div></div>',
