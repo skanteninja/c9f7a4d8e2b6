@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.8.4-static1';
+const assetVersion = '0.8.6-beta-atlas';
 const BRAND = 'Top Classic World Maplestory';
 
 function readChunk(name) {
@@ -301,6 +301,7 @@ html=html.replace('</head>', '<link rel="stylesheet" href="readability.css?v='+a
 html=html.replace('<script src="app.js', '<script src="job-search.js?v='+assetVersion+'"></script>\n<script src="app.js');
 html=html.replace('</body>', '<script src="navigation-history.js?v='+assetVersion+'"></script></body>');
 for(const file of ['readability.css','job-search.js','navigation-history.js'])fs.copyFileSync(path.join(source,file),path.join(out,file));
+for(const file of ['map-layouts.json','map-audit.html','map-audit.js','map-audit.json','map-audit.csv'])fs.copyFileSync(path.join(source,file),path.join(out,file));
 fs.writeFileSync(path.join(out, 'index.html'), html);
 const atlasAssets = path.join(source, 'assets', 'map-atlas');
 if (fs.existsSync(atlasAssets)) fs.cpSync(atlasAssets, path.join(out, 'assets', 'map-atlas'), { recursive: true });

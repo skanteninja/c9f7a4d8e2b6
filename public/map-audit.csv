@@ -1,0 +1,427 @@
+ref,id,name,street,region,source,status,reason,link
+c:900000000,900000000,White Map,Hidden Street,Dev,current,removed,No usable OSMS full-layout asset,
+c:900000001,900000001,White Map with Mob,Hidden Street,Dev,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A900000001
+c:900000002,900000002,Black Map with Mob,Hidden Street,Dev,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A900000002
+c:90000000,90000000,Maple Hill,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90000000
+c:90040000,90040000,Physical Fitness Test <Waiting Room>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040000
+c:90040001,90040001,Physical Fitness Test <Level 1>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040001
+c:90040002,90040002,Physical Fitness Test <Level 2>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040002
+c:90040003,90040003,Physical Fitness Test <Level 3>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040003
+c:90040004,90040004,Physical Fitness Test <Level 4>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040004
+c:90040010,90040010,Physical Fitness Test <Easy Waiting Room>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040010
+c:90040011,90040011,Physical Fitness Test <Easy Level 1>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040011
+c:90040012,90040012,Physical Fitness Test <Easy Level 2>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040012
+c:90040013,90040013,Physical Fitness Test <Easy Level 3>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040013
+c:90040020,90040020,Physical Fitness Test <Normal Waiting Room>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040020
+c:90040021,90040021,Physical Fitness Test <Normal Level 1>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040021
+c:90040022,90040022,Physical Fitness Test <Normal Level 2>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040022
+c:90040023,90040023,Physical Fitness Test <Normal Level 3>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040023
+c:90040101,90040101,Up and Up <Level 1>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040101
+c:90040102,90040102,Up and Up <Level 2>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040102
+c:90040103,90040103,Up and Up <Level 3>,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040103
+c:90040200,90040200,Coconut Harvest,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040200
+c:90040201,90040201,Coconut Harvest,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040201
+c:90040202,90040202,Coconut Harvest,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040202
+c:90040203,90040203,G* Coconut Season,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90040203
+c:90050000,90050000,Leaving the Event,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90050000
+c:90050001,90050001,Receiving the Reward For the Event,Hidden Street,Event,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A90050001
+c:1,1,Mushroom Town - West Entrance,Maple Road,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1
+c:10,10,Mushroom Town,Maple Road,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A10
+c:20,20,Mushroom Town,Maple Road,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20
+c:21,21,Mushroom Town Townstreet,Maple Road,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A21
+c:30,30,East Entrance to Mushroom Town,Maple Road,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A30
+c:40,40,Snail Hunting Ground I,Maple Road,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A40
+c:41,41,Snail Hunting Ground II,Maple Road,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A41
+c:42,42,Snail Hunting Ground III,Maple Road,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A42
+c:50,50,A Split Road,Maple Road,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A50
+c:60,60,Southperry,Maple Road,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A60
+c:61,61,Southperry Armor Store,Maple Road,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A61
+c:1000,1000,The Field West of Amherst,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1000
+c:1001,1001,In a Small Forest,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1001
+c:1002,1002,Dangerous Forest,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1002
+c:1003,1003,Mushroom Garden,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1003
+c:1004,1004,Snail Garden,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1004
+c:1005,1005,Hunting Ground Middle of the Forest I,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1005
+c:1006,1006,Hunting Ground Middle of the Forest II,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1006
+c:1010,1010,Amherst,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1010
+c:1011,1011,Amherst Weapon Store,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1011
+c:1012,1012,Amherst Townstreet,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1012
+c:1013,1013,Amherst Department Store,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1013
+c:1014,1014,Snail Field of Flowers,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1014
+c:1020,1020,The Field East of Amherst,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1020
+c:1021,1021,Tomato Field,Rainbow Street,Maple Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A1021
+c:20000000,20000000,Orbis,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000000
+c:20000001,20000001,Orbis Weapon Store,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000001
+c:20000002,20000002,Orbis Department Store,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000002
+c:20000010,20000010,Orbis Ticketing Booth,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000010
+c:20000011,20000011,Station Tunnel <To Ellinia>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000011
+c:20000012,20000012,Station<To Ellinia>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000012
+c:20000013,20000013,Before Takeoff <To Ellinia>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000013
+c:20000020,20000020,To Ellinia,During the Ride,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000020
+c:20000021,20000021,Cabin <To Ellinia>,During the Ride,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000021
+c:20000022,20000022,To Orbis,During the Ride,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000022
+c:20000023,20000023,Cabin <To Orbis>,During the Ride,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000023
+c:20000030,20000030,Orbis Park,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000030
+c:20000031,20000031,Orbis Plastic Surgery,Orbis Park,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000031
+c:20000032,20000032,Orbis Hair Salon,Orbis Park,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000032
+c:20000033,20000033,Orbis Skin-Care,Orbis Park,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000033
+c:20000040,20000040,Top of the Hill,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000040
+c:20000041,20000041,Guild Head Quarters<Hall of Fame>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000041
+c:20000050,20000050,Cloud Park I,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000050
+c:20000051,20000051,The Road to Garden of 3 Colors,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000051
+c:20000052,20000052,Garden of Red I,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000052
+c:20000053,20000053,Garden of Red II,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000053
+c:20000054,20000054,Stairway to the Sky I,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000054
+c:20000055,20000055,Stairway to the Sky II,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000055
+c:20000056,20000056,Garden of Darkness I,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000056
+c:20000057,20000057,Garden of Darkness II,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000057
+c:20000060,20000060,Garden of Yellow I,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000060
+c:20000061,20000061,Garden of Yellow II,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000061
+c:20000070,20000070,Garden of Green I,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000070
+c:20000071,20000071,Garden of Green II,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000071
+c:20000080,20000080,Cloud Park II,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000080
+c:20000081,20000081,Strolling Path,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000081
+c:20000082,20000082,Cloud Park III,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000082
+c:20000083,20000083,Disposed Flower Garden,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000083
+c:20000084,20000084,Cloud Park IV,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000084
+c:20000085,20000085,Old Man's House,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000085
+c:20000086,20000086,Strolling Path II,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000086
+c:20000087,20000087,Cloud Park V,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000087
+c:20000088,20000088,Cloud Park VI,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000088
+c:20000090,20000090,Entrance to Orbis Tower,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000090
+c:20000091,20000091,Orbis Tower <15th Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000091
+c:20000092,20000092,Orbis Tower <14th Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000092
+c:20000093,20000093,Orbis Tower <13th Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000093
+c:20000094,20000094,Orbis Tower <12th Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000094
+c:20000095,20000095,Orbis Tower <11th Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000095
+c:20000096,20000096,Orbis Tower <10th Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000096
+c:20000097,20000097,Orbis Tower <9th Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000097
+c:20000098,20000098,Orbis Tower <8th Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000098
+c:20000099,20000099,Orbis Tower <Hidden Room>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000099
+c:20000100,20000100,Orbis Tower <7th Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000100
+c:20000101,20000101,Orbis Tower <6th Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000101
+c:20000102,20000102,Orbis Tower <5th Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000102
+c:20000103,20000103,Orbis Tower <4th Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000103
+c:20000104,20000104,Orbis Tower <3rd Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000104
+c:20000105,20000105,Orbis Tower <2nd Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000105
+c:20000106,20000106,Orbis Tower <1st Floor>,Orbis,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20000106
+c:20001000,20001000,El Nath,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001000
+c:20001001,20001001,Chief's Residence,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001001
+c:20001010,20001010,El Nath Market,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001010
+c:20001011,20001011,El Nath Weapon Store,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001011
+c:20001012,20001012,El Nath Department Store,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001012
+c:20001020,20001020,Snowy Hill,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001020
+c:20001030,20001030,Watch Out for Icy Path I,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001030
+c:20001031,20001031,Watch Out for Icy Path II,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001031
+c:20001032,20001032,Cold Field I,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001032
+c:20001033,20001033,Cold Field II,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001033
+c:20001034,20001034,The Crown-Flyer,Hidden Street,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001034
+c:20001035,20001035,Icy Cold Field,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001035
+c:20001040,20001040,Ice Valley I,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001040
+c:20001041,20001041,Ice Valley II,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001041
+c:20001042,20001042,Sharp Cliff I,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001042
+c:20001043,20001043,Sharp Cliff II,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001043
+c:20001044,20001044,Holy Ground at the Snowfield,Hidden Street,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001044
+c:20001050,20001050,Wolf Territory I,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001050
+c:20001051,20001051,Wolf Territory II,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001051
+c:20001052,20001052,Dangerous Cliff,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001052
+c:20001053,20001053,Wolf Territory III,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001053
+c:20001054,20001054,Wolf Territory IV,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001054
+c:20001055,20001055,Wolf Territory V,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001055
+c:20001060,20001060,Forest of Dead Trees I,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001060
+c:20001061,20001061,Forest of Dead Trees II,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001061
+c:20001062,20001062,Forest of Dead Trees III,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001062
+c:20001063,20001063,Forest of Dead Trees IV,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001063
+c:20001064,20001064,Dead Mine I,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001064
+c:20001065,20001065,Dead Mine II,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001065
+c:20001066,20001066,Dead Mine III,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001066
+c:20001067,20001067,Dead Mine IV,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001067
+c:20001070,20001070,The Passage,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001070
+c:20001071,20001071,The Cave of Trial I,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001071
+c:20001072,20001072,The Cave of Trial II,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001072
+c:20001073,20001073,Cave Within the Cave,Hidden Street,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001073
+c:20001074,20001074,The Cave of Trial III,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001074
+c:20001075,20001075,The Door to Zakum,El Nath,Ossyria,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A20001075
+c:80000000,80000000,1st Accompaniment <1st Stage>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80000000
+c:80000100,80000100,1st Accompaniment <2nd Stage>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80000100
+c:80000200,80000200,1st Accompaniment <3rd Stage>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80000200
+c:80000300,80000300,1st Accompaniment <4th stage>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80000300
+c:80000400,80000400,1st Accompaniment <Last Stage>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80000400
+c:80000500,80000500,1st Accompaniment <Bonus>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80000500
+c:80000600,80000600,1st Accompaniment <Exit>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80000600
+c:80001000,80001000,Ant Tunnel For Bowman,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80001000
+c:80001100,80001100,Magician's Tree Dungeon,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80001100
+c:80001200,80001200,Thief's Construction Site,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80001200
+c:80001300,80001300,Warrior's Rocky Mountain,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80001300
+c:80002000,80002000,Free Market Entrance,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80002000
+c:80002001,80002001,Free Market <1>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80002001
+c:80002002,80002002,Free Market <2>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80002002
+c:80002003,80002003,Free Market <3>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80002003
+c:80002004,80002004,Free Market <4>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80002004
+c:80002005,80002005,Free Market <5>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80002005
+c:80002006,80002006,Free Market <6>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80002006
+c:80002007,80002007,Free Market <7>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80002007
+c:80002008,80002008,Free Market <8>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80002008
+c:80002009,80002009,Free Market <9>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80002009
+c:80002010,80002010,Free Market <10>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80002010
+c:80002011,80002011,Free Market <11>,Hidden Street,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80002011
+c:88000000,88000000,Victoria Road,Yellow Mushroom House,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A88000000
+c:89000000,89000000,Truth Booth,Truth Booth,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A89000000
+c:80003000,80003000,,,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80003000
+c:80003100,80003100,,,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80003100
+c:80003200,80003200,,,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80003200
+c:80003300,80003300,,,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80003300
+c:80003400,80003400,,,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80003400
+c:80003500,80003500,,,Other,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=other&map=c%3A80003500
+c:10000000,10000000,Lith Harbor,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10000000
+c:10000001,10000001,Lith Harbor Armor Shop,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10000001
+c:10000002,10000002,Lith Harbor Department Store,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10000002
+c:10000003,10000003,Lith Harbor Weapon Shop,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10000003
+c:10000010,10000010,Right Around Lith Harbor,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10000010
+c:10000011,10000011,Thicket Around the Beach I,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10000011
+c:10000012,10000012,Thicket Around the Beach II,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10000012
+c:10000013,10000013,Thicket Around the Beach III,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10000013
+c:10000020,10000020,3-Way Road-Split,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10000020
+c:10000021,10000021,The Pig Beach,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10000021
+c:10000022,10000022,Beach Hunting Ground,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10000022
+c:10001000,10001000,Henesys,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001000
+c:10001001,10001001,Henesys Townstreet,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001001
+c:10001002,10001002,An Empty House,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001002
+c:10001003,10001003,Pig Park,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001003
+c:10001004,10001004,Pig Park II,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001004
+c:10001005,10001005,Someone Else's House,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001005
+c:10001006,10001006,"The Resting Spot, Pig Park",Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001006
+c:10001007,10001007,Henesys Town Hall,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001007
+c:10001010,10001010,Henesys Hunting Ground I,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001010
+c:10001011,10001011,Henesys Hunting Ground II,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001011
+c:10001012,10001012,Henesys Hunting Ground III,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001012
+c:10001020,10001020,A Hill West of Henesys ,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001020
+c:10001021,10001021,Mushroom Garden,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001021
+c:10001030,10001030,Forest West of Henesys,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001030
+c:10001040,10001040,Henesys Market,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001040
+c:10001041,10001041,Henesys Weapon Store,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001041
+c:10001042,10001042,Henesys Department Store,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001042
+c:10001043,10001043,Henesys Plastic Surgery,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001043
+c:10001044,10001044,Henesys Hair Salon,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001044
+c:10001045,10001045,Henesys Skin-Care,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001045
+c:10001050,10001050,Henesys Park,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001050
+c:10001051,10001051,Bowman Instructional School,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001051
+c:10001052,10001052,Pet-Walking Road,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001052
+c:10001060,10001060,The Hill East of Henesys,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001060
+c:10001070,10001070,The Rain-Forest East of Henesys,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001070
+c:10001080,10001080,The Forest East of Henesys,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001080
+c:10001081,10001081,The Blue Mushroom Forest,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001081
+c:10001082,10001082,Utah's Pig Farm,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001082
+c:10001090,10001090,The Road to the Dungeon,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001090
+c:10001100,10001100,Henesys Dungeon Entrance,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001100
+c:10001101,10001101,The Breathing Rock,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001101
+c:10001102,10001102,The Entrance of Golem's Temple,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001102
+c:10001103,10001103,Golem's Temple I,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001103
+c:10001104,10001104,Golem's Temple II,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001104
+c:10001105,10001105,Golem's Temple III,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001105
+c:10001106,10001106,Golem's Temple IV,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10001106
+c:10002000,10002000,Ellinia,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002000
+c:10002001,10002001,Ellinia Weapon Store,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002001
+c:10002002,10002002,Ellinia Department Store,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002002
+c:10002003,10002003,Magic Library,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002003
+c:10002004,10002004,Marr's Forest,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002004
+c:10002010,10002010,The Field South of Ellinia,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002010
+c:10002020,10002020,The Forest of Wisdom,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002020
+c:10002021,10002021,Monkey Forest I,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002021
+c:10002022,10002022,"Tree Dungeon, Monkey Forest I",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002022
+c:10002023,10002023,Monkey Forest II,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002023
+c:10002024,10002024,"Tree Dungeon, Monkey Forest II",Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002024
+c:10002025,10002025,The Forest of Evil I,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002025
+c:10002026,10002026,The Forest of Evil II,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002026
+c:10002027,10002027,Downstairs at the Forest,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002027
+c:10002030,10002030,The Forest South of Ellinia,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002030
+c:10002031,10002031,"Dungeon, Southern Forest I",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002031
+c:10002032,10002032,"Dungeon, Southern Forest II",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002032
+c:10002033,10002033,"Dungeon, Southern Forest III",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002033
+c:10002034,10002034,"Dungeon, Southern Forest IV",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002034
+c:10002040,10002040,The Forest of Patience <Step 1>,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002040
+c:10002041,10002041,The Forest of Patience <Step 2>,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002041
+c:10002042,10002042,The Forest of Patience <Step 3>,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002042
+c:10002043,10002043,The Forest of Patience <Step 4>,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002043
+c:10002044,10002044,The Forest of Patience <Step 5>,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002044
+c:10002050,10002050,The Field Up North of Ellinia,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002050
+c:10002060,10002060,The Tree That Grew I,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002060
+c:10002061,10002061,The Tree That Grew II,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002061
+c:10002062,10002062,The Tree That Grew III,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002062
+c:10002070,10002070,The Forest North of Ellinia,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002070
+c:10002071,10002071,The Tree Tunnel At the Forest Up North,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002071
+c:10002072,10002072,"Tree Dungeon, Forest Up North I",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002072
+c:10002073,10002073,"Tree Dungeon, Forest Up North II",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002073
+c:10002074,10002074,"Tree Dungeon, Forest Up North III",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002074
+c:10002075,10002075,"Tree Dungeon, Forest Up North IV",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002075
+c:10002076,10002076,"Tree Dungeon, Forest Up North V",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002076
+c:10002080,10002080,"Tree Dungeon, Forest Up North VI",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002080
+c:10002081,10002081,"Tree Dungeon, Forest Up North VII",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002081
+c:10002082,10002082,"Tree Dungeon, Forest Up North VIII",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002082
+c:10002083,10002083,"Tree Dungeon, Forest Up North IX",Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002083
+c:10002090,10002090,Ellinia Station,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002090
+c:10002091,10002091,Before Takeoff <To Orbis>,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10002091
+c:10003000,10003000,Kerning City,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003000
+c:10003001,10003001,Kerning City Self-Defence Item Store,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003001
+c:10003002,10003002,Kerning City Pharmacy,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003002
+c:10003003,10003003,Thieves' Hideout,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003003
+c:10003004,10003004,Niora Hospital,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003004
+c:10003005,10003005,Kerning City Hair Salon,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003005
+c:10003006,10003006,Kerning City Repair Shop,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003006
+c:10003007,10003007,Kerning City Civic Center,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003007
+c:10003010,10003010,Kerning City Construction Site,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003010
+c:10003011,10003011,Caution Falling Down,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003011
+c:10003020,10003020,L Forest I,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003020
+c:10003030,10003030,L Forest II,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003030
+c:10003040,10003040,L Forest III,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003040
+c:10003050,10003050,Kerning City Middle Forest I,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003050
+c:10003051,10003051,Kerning City Middle Forest II,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003051
+c:10003052,10003052,Kerning City Middle Forest III,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003052
+c:10003060,10003060,Subway Ticketing Booth,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003060
+c:10003061,10003061,Line 1 <Area 1>,Kerning City Subway,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003061
+c:10003062,10003062,Transfer Area,Kerning City Subway,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003062
+c:10003063,10003063,Line 1 <Area 2>,Kerning City Subway,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003063
+c:10003064,10003064,Line 1 <Area 3>,Kerning City Subway,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003064
+c:10003065,10003065,Line 1 <Area 4>,Kerning City Subway,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003065
+c:10003066,10003066,Line 2 <Area 1>,Kerning City Subway,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003066
+c:10003067,10003067,Line 2 <Area 2>,Kerning City Subway,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003067
+c:10003068,10003068,Line 2 <Area 3>,Kerning City Subway,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003068
+c:10003070,10003070,Sunset Sky,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003070
+c:10003080,10003080,Construction Site North of Kerning City,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003080
+c:10003081,10003081,Northern Top of Construction Site,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003081
+c:10003090,10003090,The Swamp of Despair I,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003090
+c:10003091,10003091,The Swamp of Despair II,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003091
+c:10003092,10003092,The Swamp of Despair III,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003092
+c:10003093,10003093,Dangerous Croko I,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003093
+c:10003094,10003094,Dangerous Croko II,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003094
+c:10003095,10003095,Monkey Swamp I,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003095
+c:10003096,10003096,Monkey Swamp II,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003096
+c:10003097,10003097,Monkey Swamp III,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003097
+c:10003100,10003100,B1 <Area 1>,Line 3 Construction Site,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003100
+c:10003101,10003101,B1 <Area 2>,Line 3 Construction Site,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003101
+c:10003102,10003102,B1 <Subway Depot>,Line 3 Construction Site,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003102
+c:10003103,10003103,B2 <Area 1>,Line 3 Construction Site,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003103
+c:10003104,10003104,B2 <Area 2>,Line 3 Construction Site,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003104
+c:10003105,10003105,B2 <Subway Depot>,Line 3 Construction Site,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003105
+c:10003106,10003106,B3 <Area 1>,Line 3 Construction Site,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003106
+c:10003107,10003107,B3 <Area 2>,Line 3 Construction Site,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003107
+c:10003108,10003108,B3 <Area 3>,Line 3 Construction Site,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003108
+c:10003109,10003109,B3 <Subway Depot>,Line 3 Construction Site,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10003109
+c:10004000,10004000,Perion,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004000
+c:10004001,10004001,Perion Weapon Store,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004001
+c:10004002,10004002,Perion Department Store,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004002
+c:10004003,10004003,Warriors' Sanctuary,Victoria Road,Victoria Island,current,removed,No usable OSMS full-layout asset,
+c:10004010,10004010,West Street Corner of Perion,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004010
+c:10004020,10004020,West Rocky Mountain I,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004020
+c:10004021,10004021,West Rocky Mountain II,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004021
+c:10004022,10004022,West Rocky Mountain III,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004022
+c:10004023,10004023,West Rocky Mountain IV,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004023
+c:10004030,10004030,West Domain of Perion,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004030
+c:10004040,10004040,Perion Street Corner,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004040
+c:10004041,10004041,Land of Wild Boar,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004041
+c:10004042,10004042,Over the Wall,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004042
+c:10004050,10004050,East Rocky Mountain I,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004050
+c:10004051,10004051,East Rocky Mountain II,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004051
+c:10004052,10004052,East Rocky Mountain III,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004052
+c:10004053,10004053,East Rocky Mountain IV,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004053
+c:10004054,10004054,East Rocky Mountain V,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004054
+c:10004055,10004055,East Rocky Mountain VI,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004055
+c:10004056,10004056,East Rocky Mountain VII,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004056
+c:10004060,10004060,Rocky Road I,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004060
+c:10004070,10004070,Rocky Road II,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004070
+c:10004080,10004080,Rocky Road III,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004080
+c:10004090,10004090,East Domain of Perion,Victoria Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004090
+c:10004091,10004091,The Land of Wild Boar II,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004091
+c:10004100,10004100,Deep Valley I,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004100
+c:10004101,10004101,Dangerous Valley,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004101
+c:10004102,10004102,Dangerous Valley II,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004102
+c:10004110,10004110,Deep Valley II,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004110
+c:10004111,10004111,The Burnt Land I,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004111
+c:10004112,10004112,The Burnt Land II,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004112
+c:10004113,10004113,The Burnt Land III,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004113
+c:10004114,10004114,The Burnt Land IV,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004114
+c:10004115,10004115,The Burnt Land V,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004115
+c:10004120,10004120,Deep Valley III,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004120
+c:10004121,10004121,Perion Dungeon Entrance,Warning Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10004121
+c:10005000,10005000,Sleepywood,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005000
+c:10005001,10005001,Sleepywood Hotel,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005001
+c:10005002,10005002,Regular Sauna,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005002
+c:10005003,10005003,VIP Sauna,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005003
+c:10005010,10005010,Swampy Land in a Deep Forest,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005010
+c:10005011,10005011,Hunting Ground in the Deep Forest I,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005011
+c:10005012,10005012,Hunting Ground in the Deep Forest II,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005012
+c:10005020,10005020,Deep Forest,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005020
+c:10005030,10005030,Damp Tree-Forest,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005030
+c:10005031,10005031,Damp Forest,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005031
+c:10005040,10005040,The Deep Forest of Patience <Step 1>,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005040
+c:10005041,10005041,The Deep Forest of Patience <Step 2>,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005041
+c:10005042,10005042,The Deep Forest of Patience <Step 3>,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005042
+c:10005043,10005043,The Deep Forest of Patience <Step 4>,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005043
+c:10005044,10005044,The Deep Forest of Patience <Step 5>,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005044
+c:10005045,10005045,The Deep Forest of Patience <Step 6>,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005045
+c:10005046,10005046,The Deep Forest of Patience <Step 7>,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005046
+c:10005050,10005050,Sleepy Dungeon I,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005050
+c:10005051,10005051,Sleepy Dungeon II,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005051
+c:10005052,10005052,Sleepy Dungeon III,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005052
+c:10005053,10005053,Sleepy Dungeon IV,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005053
+c:10005054,10005054,Sleepy Dungeon V,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005054
+c:10005060,10005060,Ant Tunnel I,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005060
+c:10005061,10005061,Ant Tunnel II,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005061
+c:10005062,10005062,Ant Tunnel III,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005062
+c:10005063,10005063,Ant Tunnel IV,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005063
+c:10005064,10005064,Dark Cave,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005064
+c:10005065,10005065,Dangerous Steam,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005065
+c:10005066,10005066,Deep Ant Tunnel I,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005066
+c:10005067,10005067,Deep Ant Tunnel II,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005067
+c:10005070,10005070,Ant Tunnel Park,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005070
+c:10005071,10005071,The Cave of Evil Eye I,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005071
+c:10005072,10005072,The Cave of Evil Eye II,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005072
+c:10005073,10005073,The Cave of Evil Eye III,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005073
+c:10005074,10005074,The Cave of Evil Eye IV,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005074
+c:10005075,10005075,Drake Hunting Ground,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005075
+c:10005076,10005076,The Tunnel That Lost Light I,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005076
+c:10005077,10005077,The Tunnel That Lost Light II,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005077
+c:10005078,10005078,The Grave of Mushmom,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005078
+c:10005080,10005080,Another Entrance,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005080
+c:10005090,10005090,Drake's Meal Table,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005090
+c:10005091,10005091,Wild Kargo's Area,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005091
+c:10005100,10005100,Another Path,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005100
+c:10005101,10005101,Sanctuary Entrance I,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005101
+c:10005102,10005102,Sanctuary Entrance II,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005102
+c:10005103,10005103,Sanctuary Entrance III,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005103
+c:10005104,10005104,Sanctuary Entrance IV,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005104
+c:10005105,10005105,The Cursed Sanctuary,Dungeon,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10005105
+c:10006000,10006000,Forgotten Hollow,Shallow Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006000
+c:10006001,10006001,Cave Fairy Sanctuary,Shallow Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006001
+c:10006002,10006002,Cave Fairy Department Store,Shallow Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006002
+c:10006010,10006010,Primeval Forest I,Shallow Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006010
+c:10006020,10006020,Primeval Forest II,Shallow Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006020
+c:10006022,10006022,Collision of Ice and Fire,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006022
+c:10006030,10006030,Primeval Forest III,Shallow Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006030
+c:10006031,10006031,The Valley of Death,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006031
+c:10006040,10006040,Forgotten Entrance I,Shallow Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006040
+c:10006050,10006050,Forgotten Entrance II,Shallow Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006050
+c:10006060,10006060,Forgotten Entrance III,Shallow Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006060
+c:10006070,10006070,The End of Fleeting Light,Shallow Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006070
+c:10006071,10006071,Forgotten Dungeon Tunnel,Shallow Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006071
+c:10006072,10006072,The Faded Canopy,Shallow Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006072
+c:10006080,10006080,Forbidden Entrance,Shallow Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006080
+c:10006090,10006090,Perilous Descent I,Deep Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006090
+c:10006100,10006100,Perilous Descent II,Deep Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006100
+c:10006110,10006110,Perilous Descent III,Deep Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006110
+c:10006120,10006120,Decayed Tunnel I,Deep Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006120
+c:10006121,10006121,Someone Else's Grave,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006121
+c:10006130,10006130,Decayed Tunnel II,Deep Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006130
+c:10006140,10006140,Decayed Tunnel III,Deep Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006140
+c:10006150,10006150,Lingering Regret,Deep Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006150
+c:10006152,10006152,Bygone Days,Deep Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006152
+c:10006160,10006160,Precipice of Darkness,Deep Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006160
+c:10006161,10006161,Dilapidated Tomb,Deep Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006161
+c:10006162,10006162,Another Sanctuary,Deep Passage,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10006162
+c:10007000,10007000,Florina Beach,Florina Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10007000
+c:10007010,10007010,A Look-Out Shed Around the Beach,Florina Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10007010
+c:10007020,10007020,Lorang Lorang,Florina Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10007020
+c:10007021,10007021,Lorang Lorang Lorang,Hidden Street,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10007021
+c:10007030,10007030,Lorang and Clang,Florina Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10007030
+c:10007031,10007031,Clang and Lorang,Florina Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10007031
+c:10007040,10007040,Hot Sand,Florina Road,Victoria Island,current,kept,Verified OSMS/Classic layout,/?page=maps&view=detail&continent=victoria&map=c%3A10007040

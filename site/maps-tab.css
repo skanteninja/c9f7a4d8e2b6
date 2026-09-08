@@ -35,3 +35,8 @@ section[data-page="maps"]{--map-cyan:#56d9ff;--map-blue:#5f8dff;--map-green:#60e
 .map-canvas>#map-detail-image{display:block;width:100%;max-width:100%;min-width:0;height:auto;object-fit:contain}
 .maps-detail-side{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:900px){.maps-detail-side{grid-template-columns:1fr}}
+
+/* Keep the beta artwork and its marker layer in the same responsive bounds. */
+.maps-sheet-stage.victoria-sheet{width:636px;max-width:100%;min-width:0}
+.maps-sheet-stage.victoria-sheet>img{width:100%;max-width:100%;height:auto}
+.maps-sheet-stage.victoria-sheet>#maps-sheet-markers{inset:0;max-width:none}
