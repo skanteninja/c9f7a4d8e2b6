@@ -1,5 +1,10 @@
 (() => {
   const D=window.GUIDE_DATA;if(!D)return;
+  // Do not let I/L allocation state overwrite the selected build's cards.
+  if((window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh')!=='magician-il-fresh'){
+    document.documentElement.classList.add('progression-skill-state-ready','progression-skill-state-build-aware');
+    return;
+  }
   const maps={magician:{EB:'Energy Bolt',MC:'Magic Claw',MG:'Magic Guard',MPR:'Improved MP Recovery',MaxMP:'Max MP Increase',Armor:'Magic Armor'},il:{TP:'Teleport',CB:'Cold Beam',TB:'Thunder Bolt','MP Eater':'MP Eater',Med:'Meditation',Slow:'Slow'}};
   const beginner={1:[0,0,0],2:[1,0,0],3:[2,0,0],4:[3,0,0],5:[3,1,0],6:[3,2,0],7:[3,3,0],8:[3,3,1],9:[3,3,2],10:[3,3,3]};
   const bnames=['Nimble Feet','Three Snails','Recovery'];

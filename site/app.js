@@ -1,7 +1,23 @@
 
 (() => {
-  const D = window.GUIDE_DATA;
-  const KEY = 'ultimateILGuideState.v1';
+  let D = window.GUIDE_DATA;
+  let requestedBuild = '';
+  try {
+    const saved = JSON.parse(localStorage.getItem('ultimateILGuideState.v1') || '{}');
+    requestedBuild = new URLSearchParams(location.search).get('build') || saved.activeBuildId || '';
+    const researched = new Set((D.catalog?.builds||[]).filter(build=>build.status==='active').map(build=>build.id));
+    if(!researched.has(requestedBuild)) requestedBuild = D.catalog?.activeBuildId || 'magician-il-fresh';
+    const variant = { 'warrior-fighter':'fighter', 'archer-hunter':'hunter' }[requestedBuild];
+    if(variant && D.buildVariants?.[variant]) D = D.buildVariants[variant];
+  } catch(e) {}
+  // All enhancement modules receive the selected guide, never the I/L root
+  // object. This is the boundary that keeps every page build-aware.
+  window.GUIDE_DATA = D;
+  window.TCW_ACTIVE_BUILD_ID = requestedBuild || D.catalog?.activeBuildId || 'magician-il-fresh';
+  const LEGACY_KEY = 'ultimateILGuideState.v1';
+  // Preserve the established I/L save unchanged; other researched builds own
+  // their level, gear, checklist, and planner state.
+  const KEY = window.TCW_ACTIVE_BUILD_ID==='magician-il-fresh' ? LEGACY_KEY : `${LEGACY_KEY}.${window.TCW_ACTIVE_BUILD_ID}`;
   const defaultGear = {
     Hat:'None',Face:'None',Eye:'None',Earrings:'None',Pendant:'None',Medal:'None',
     Top:'None',Overall:'None',Bottom:'None',Cape:'None',Shield:'None',Gloves:'None',
@@ -62,7 +78,7 @@
     return {
       level,
       page:['research','data','formulas'].includes(raw.page)?'dashboard':(raw.page||'dashboard'),
-      activeBuildId:raw.activeBuildId||D.catalog?.activeBuildId||'magician-il-fresh',
+      activeBuildId:((id)=>D.catalog?.builds?.some(b=>b.id===id&&b.status==='active')?id:(D.catalog?.activeBuildId||'magician-il-fresh'))(new URLSearchParams(location.search).get('build')||window.TCW_ACTIVE_BUILD_ID||raw.activeBuildId),
       quests:raw.quests||{},
       skills:raw.skills||{},
       etcHeld:raw.etcHeld||{},
@@ -213,6 +229,7 @@
   function baseLukTarget(){ const a=currentAP(); return Number(a?.['Base LUK Target'] ?? (state.level>50?30:5)); }
   function currentRoute(){ return D.routes.find(r=>rangeContains(r.Levels,state.level)); }
   function recommendedWeaponName(level=state.level){
+    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){ const row=(D.weapons||[]).filter(x=>Number(x.Lv||0)<=level).at(-1); return row?.Weapon||'None'; }
     if(level<10) return 'Beginner weapon / Maple Island';
     if(level<15) return "Beginner's Wooden Wand / job wand";
     if(level<30) return 'Hardwood Wand';
@@ -356,6 +373,7 @@
     const b=e.target.closest('[data-goto]');if(b)setPage(b.dataset.goto);
   });
   document.getElementById('page-back')?.addEventListener('click',()=>setPage('dashboard'));
+  document.body.addEventListener('click',e=>{const b=e.target.closest('[data-build-select]');if(!b)return;e.preventDefault();const id=b.dataset.buildSelect;if(!D.catalog?.builds?.some(x=>x.id===id&&x.status==='active'))return;window.TCW_ACTIVE_BUILD_ID=id;const u=new URL(location.href);u.searchParams.set('build',id);u.searchParams.set('page','dashboard');location.assign(u.pathname+u.search+u.hash);});
   document.addEventListener('keydown',e=>{
     if(e.key!=='Escape') return;
     const modal=document.getElementById('gear-modal');
@@ -473,6 +491,16 @@
     hookImageFallback(root);
   }
   function renderAtlasSkills(){
+    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){
+      const tabs=document.getElementById('atlas-skill-tabs'),grid=document.getElementById('atlas-skill-grid'),detail=document.getElementById('atlas-skill-detail');
+      if(!tabs||!grid||!detail)return;
+      const label=activeBuild()?.shortName||'Class'; tabs.innerHTML=`<span class="eyebrow">${label.toUpperCase()} SKILL PLAN</span>`;
+      const row=D.skills.filter(x=>Number(x.Level)===state.level).at(-1)||D.skills[0];
+      const names=[...new Set((D.skills||[]).flatMap(x=>String(x.Spend||'').split(/[+,]/).map(y=>y.trim().replace(/\s+\+\d+.*$/,'')).filter(y=>D.skillIcons?.[y])))];
+      grid.innerHTML=names.map(name=>`<button class="atlas-skill-card" data-skill-name="${esc(name)}"><span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><b>${esc(name)}</b><small>${esc(label)} skill</small></button>`).join('');
+      detail.innerHTML=`<span class="detail-kicker">CURRENT SP ACTION</span><b>Lv ${esc(state.level)} · ${esc(row?.Spend||'Follow the plan')}</b><p>${esc(row?.['Why This Is The Action']||'Follow the class plan.')}</p>`;
+      return;
+    }
     const tabs=document.getElementById('atlas-skill-tabs'), grid=document.getElementById('atlas-skill-grid'), detail=document.getElementById('atlas-skill-detail');
     if(!tabs||!grid||!detail)return;
     const tab=activeAtlasSkillTab();
@@ -607,6 +635,10 @@
     const l=currentLevelRow()||{}, srow=currentSkillRow()||{}, a=currentAP()||{};
     const build=computeBuild();
     const profile=activeBuild();
+    const buildTitle=document.getElementById('hero-build-title'); if(buildTitle) buildTitle.textContent=profile?.name||'I/L Wizard Build';
+    const buildSub=document.getElementById('hero-build-subtitle'); if(buildSub) buildSub.textContent=profile?.subtitle||'Current route';
+    const heroClass=document.querySelector('.v5-kicker-row .class-pill'); if(heroClass) heroClass.textContent=classForBuild(profile)?.name?.toUpperCase()||'MAGICIAN';
+    const heroJob=document.querySelector('.v5-kicker-row .job-pill'); if(heroJob) heroJob.textContent=profile?.shortName||'I/L WIZARD';
     document.getElementById('hero-level').textContent=state.level;
     document.getElementById('atlas-job-line').textContent=`Lv${state.level} ${l.Job||'Beginner'}`;
     document.getElementById('atlas-route-sub').textContent=l['Primary Route']||'Current route';
@@ -789,10 +821,13 @@
     const root=document.getElementById('build-library'); if(!root)return;
     const builds=D.catalog?.builds||[];
     const classes=D.catalog?.classes||[];
-    document.getElementById('active-build-count').textContent=String(builds.filter(b=>b.status==='active').length);
+    const available=builds.filter(b=>b.status==='active');
+    document.getElementById('active-build-count').textContent=String(available.length);
     root.innerHTML=classes.filter(c=>c.id!=='beginner').map(cls=>{
       const list=builds.filter(b=>b.classId===cls.id);
-      return `<section class="class-build-group ${cls.status==='active'?'active-class':''}"><div class="class-build-head"><div class="class-emblem">${classEmblem(cls)}</div><div><span class="eyebrow">${esc(cls.status==='active'?'ACTIVE CLASS':'READY FOR FUTURE BUILDS')}</span><h3>${esc(cls.name)}</h3><p>${esc((cls.branches||[]).join(' · '))}</p></div></div><div class="build-card-grid">${list.map(b=>{const active=b.id===state.activeBuildId&&b.status==='active';return `<article class="build-card ${active?'active-build':'planned-build'}"><div class="build-card-top"><span class="${active?'live-build-tag':'planned-tag'}">${active?'ACTIVE':'PLANNED'}</span>${b.levelMin?`<small>Lv ${b.levelMin}–${b.levelMax}</small>`:''}</div><h4>${esc(b.name)}</h4><p>${esc(b.description||b.subtitle||'Infrastructure reserved for a future researched build.')}</p><div class="build-tags">${(b.tags||[]).map(t=>`<span>${esc(t)}</span>`).join('')}</div>${active?`<button class="primary-btn" data-goto="dashboard">Open this build</button>`:`<button class="ghost-btn" disabled>Not researched yet</button>`}</article>`}).join('')}</div></section>`;
+      if(!list.length)return '';
+      const classLive=list.some(b=>b.status==='active');
+      return `<section class="class-build-group ${classLive?'active-class':''}"><div class="class-build-head"><div class="class-emblem">${classEmblem(cls)}</div><div><span class="eyebrow">${classLive?'RESEARCHED BUILDS':'READY FOR FUTURE BUILDS'}</span><h3>${esc(cls.name)}</h3><p>${esc((cls.branches||[]).join(' · '))}</p></div></div><div class="build-card-grid">${list.map(b=>{const selected=b.id===state.activeBuildId;const researched=b.status==='active';const label=selected?'VIEWING':researched?'AVAILABLE':'PLANNED';return `<article class="build-card ${selected?'active-build':researched?'available-build':'planned-build'}"><div class="build-card-top"><span class="${selected?'live-build-tag':researched?'available-build-tag':'planned-tag'}">${label}</span>${b.levelMin?`<small>Lv ${b.levelMin}–${b.levelMax}</small>`:''}</div><h4>${esc(b.name)}</h4><p>${esc(b.description||b.subtitle||'Infrastructure reserved for a future researched build.')}</p><div class="build-tags">${(b.tags||[]).map(t=>`<span>${esc(t)}</span>`).join('')}</div>${researched?`<a class="${selected?'primary-btn':'ghost-btn'}" data-build-select="${esc(b.id)}" href="?build=${encodeURIComponent(b.id)}&page=dashboard">${selected?'Viewing build':'Open build'}</a>`:`<button class="ghost-btn" disabled>Not researched yet</button>`}</article>`;}).join('')}</div></section>`;
     }).join('');
   }
 
@@ -875,6 +910,15 @@
   }
 
   function renderSkills(){
+    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){
+      const names=[...new Set((D.skills||[]).flatMap(row=>String(row.Spend||'').split(/[+,]/).map(x=>x.trim().replace(/\s+\+\d+.*$/,'')).filter(Boolean)))].filter(name=>D.skillIcons?.[name]);
+      const current=D.skills.filter(row=>Number(row.Level)===state.level).at(-1);
+      const buildName=activeBuild()?.shortName||'Class';
+      const cards=names.map(name=>`<article class="skill-beginner-card fighter-skill-card"><span class="skill-beginner-icon">${skillImgTag(name,'skill-icon')}</span><div><div class="skill-beginner-title"><b>${esc(name)}</b><span>Classic</span></div><p>${esc(D.skillIcons[name].desc||`${buildName} skill`)}</p><small class="skill-beginner-meta">${esc(D.skillIcons[name].role||'Combat skill')}</small></div></article>`).join('');
+      const rows=D.skills.map(row=>`<div class="skill-row ${Number(row.Level)===state.level?'current':''}" data-informational="1"><b style="color:#8bdfff">Lv${esc(row.Level)}</b><b>${esc(row.SP)}</b><div class="skill-icon-host">${skillImgTag(String(row.Spend).split(/[+,]/)[0].trim())}</div><div class="skill-spend">${esc(row.Spend)}</div><div class="skill-why">${esc(row['Why This Is The Action']||'Follow the selected progression.')}</div><div><span class="beta-tag">verify</span></div><div class="skill-result" style="grid-column:4/-1">${esc(row['Result After Level']||'')}</div></div>`).join('');
+      document.getElementById('skill-list').innerHTML=`<section class="skill-beginner-reference"><div class="skill-beginner-head"><div><span class="eyebrow">${esc(buildName.toUpperCase())} · LV1–70</span><h3>${esc(buildName)} Skills</h3></div><p>Classic route. Current checkpoint: ${esc(current?.Spend||'Follow the level plan.')}</p></div><div class="skill-beginner-grid">${cards}</div></section>${rows}`;
+      return;
+    }
     const currentSkillIds={
       'Nimble Feet':'0001002','Three Snails':'0001000','Recovery':'0001001',
       'Improved MP Recovery':'2000000','Max MP Increase':'2000001','Magic Guard':'2001000','Magic Armor':'2001001','Energy Bolt':'2001002','Magic Claw':'2001003',

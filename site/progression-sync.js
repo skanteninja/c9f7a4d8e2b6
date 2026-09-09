@@ -1,6 +1,13 @@
 (() => {
   const D = window.GUIDE_DATA;
   if (!D) return;
+  // This richer board is the I/L route's synchronization layer. Fighter and
+  // Hunter use the selected guide's native skill renderer instead of inheriting
+  // Magician milestones and allocation labels.
+  if ((window.TCW_ACTIVE_BUILD_ID || 'magician-il-fresh') !== 'magician-il-fresh') {
+    document.documentElement.classList.add('progression-sync-build-aware');
+    return;
+  }
 
   const RAW = '/game-data/data/current/';
   const BEGINNER_PLAN = {

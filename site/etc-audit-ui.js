@@ -1,6 +1,6 @@
 (() => {
   const A=window.TCW_ETC_AUDIT;
-  if(!A)return;
+  if(!A){document.documentElement.classList.add('etc-build-aware-ready');return;}
   let timer=null;
   const norm=v=>String(v??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
