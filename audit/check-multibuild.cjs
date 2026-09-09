@@ -1,7 +1,8 @@
 const fs = require('fs');
 const vm = require('vm');
 
-const guideSource = fs.readFileSync('dist/guide-data.js', 'utf8');
+const outputDir = fs.existsSync('dist/guide-data.js') ? 'dist' : 'site';
+const guideSource = fs.readFileSync(`${outputDir}/guide-data.js`, 'utf8');
 const context = {window: {}};
 vm.createContext(context);
 vm.runInContext(guideSource, context, {filename: 'dist/guide-data.js'});
@@ -53,7 +54,7 @@ for (const [id, classId, name] of expected) {
 const bowman = root.catalog.classes.find(row => row.id === 'bowman');
 if (bowman?.status !== 'active') throw new Error('Hunter did not activate the Bowman class');
 
-const app = fs.readFileSync('dist/app.js', 'utf8');
+const app = fs.readFileSync(`${outputDir}/app.js`, 'utf8');
 for (const token of [
   'window.GUIDE_DATA = D;',
   "new URLSearchParams(location.search).get('build')",
@@ -67,7 +68,7 @@ for (const token of [
 ]) {
   if (!app.includes(token)) throw new Error(`Missing build-navigation contract: ${token}`);
 }
-if (!fs.readFileSync('dist/progression-gear-visual.js', 'utf8').includes('progression-avatar-level-controls')) {
+if (!fs.readFileSync(`${outputDir}/progression-gear-visual.js`, 'utf8').includes('progression-avatar-level-controls')) {
   throw new Error('Level-control merge module is missing its avatar footer contract');
 }
 
