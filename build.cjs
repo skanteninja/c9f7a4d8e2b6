@@ -300,6 +300,14 @@ function applyGearPlan(gear, stages, buildName) {
     for (const [slot, itemName] of Object.entries(stage.gear || {})) {
       if (!available.has(itemName)) continue;
       clean[slot] = itemName;
+      // Keep generated checkpoints valid: Overall and Top/Bottom are
+      // mutually exclusive in the equipment inventory.
+      if (slot === 'Overall' && itemName !== 'None') {
+        clean.Top = 'None';
+        clean.Bottom = 'None';
+      } else if ((slot === 'Top' || slot === 'Bottom') && itemName !== 'None') {
+        clean.Overall = 'None';
+      }
       selected.set(itemName, {min: Number(stage.min) || 1, reason: stage.reason || `${buildName} checkpoint at Lv${stage.min}.`});
     }
     return {min: Number(stage.min) || 1, gear: clean};
@@ -856,6 +864,34 @@ function patchApp(raw) {
   app = app.replace(
     "  function renderGearOptions(){",
     "  function classGearItemAllowed(item){\n    if(!item||item.Item==='None')return true;\n    const id=activeBuild()?.id;\n    if(id!=='warrior-fighter'&&id!=='archer-hunter')return true;\n    const text=String(item['Class Fit']||'')+' '+String(item['Req Job']||'');\n    const forbidden=/(mage|magician|wizard|cleric|thief|crossbow|spear|polearm|blunt)/i;\n    if(forbidden.test(text))return false;\n    if(id==='warrior-fighter')return /(warrior|any|fighter)/i.test(text);\n    return /(bowman|hunter|any)/i.test(text);\n  }\n  function classFilteredGearItems(slot){return gearItemsForSlot(slot).filter(classGearItemAllowed);}\n  function gearOptionStats(item,none){\n    if(none)return '';\n    const id=activeBuild()?.id;\n    if(id==='warrior-fighter') return `Lv ${item['Req Lv']||0}<br>W.ATK ${item['W.ATK']||0} · DEX ${item.DEX||0}<br>WDEF ${item.WDEF||0} · Speed ${item.Speed||0}`;\n    if(id==='archer-hunter') return `Lv ${item['Req Lv']||0}<br>W.ATK ${item['W.ATK']||0} · STR ${item.STR||0}<br>WDEF ${item.WDEF||0} · Speed ${item.Speed||0}`;\n    return `Lv ${item['Req Lv']||0}<br>INT ${item.INT||0} · LUK ${item.LUK||0}<br>M.ATK ${item['M.ATK']||0}<br>Crit ${item['Crit%']||0}% · CDMG ${item['Crit DMG']||0}%`;\n  }\n  function gearOptionMeta(item,none){\n    if(none)return '';\n    const id=activeBuild()?.id;\n    const job=String(item['Req Job']||item['Class Fit']||'Any');\n    const stat=id==='warrior-fighter'?`STR ${item['Req STR']||0} · DEX ${item['Req DEX']||0}`:id==='archer-hunter'?`STR ${item['Req STR']||0} · DEX ${item['Req DEX']||0}`:'';\n    return [`Lv ${item['Req Lv']||0}`,job,stat].filter(Boolean).join(' · ');\n  }\n  function updateGearFilterUi(){\n    const id=activeBuild()?.id, profile=activeBuild()||{}, branch=id==='warrior-fighter'?'Warrior / Fighter':id==='archer-hunter'?'Bowman / Hunter':(profile.shortName||'class');\n    const row=document.querySelector('[data-class-equipment-filters]'); if(row)row.hidden=false;\n    const future=document.getElementById('modal-future-label'), optional=document.getElementById('modal-optional-label');\n    if(future)future.textContent='Show future-level '+branch+' items';\n    if(optional)optional.textContent='Show all curated '+branch+' options';\n  }\n  function renderGearOptions(){"
+  );
+  app = app.replace(
+    "  function gearOptionStats(item,none){",
+    "  function sanitizeGearState(){\n    const id=activeBuild()?.id;\n    state.gear={...defaultGear,...(state.gear||{})};\n    Object.keys(state.gear).forEach(slot=>{\n      const name=state.gear[slot];\n      if(!name||name==='None'){state.gear[slot]='None';return;}\n      const item=getGear(name);\n      if(!item || ((id==='warrior-fighter'||id==='archer-hunter')&&!classGearItemAllowed(item))) state.gear[slot]='None';\n    });\n    // Saved data from older builds can contain impossible combinations.\n    // Preserve an existing Overall and remove the mutually exclusive pieces.\n    if(state.gear.Overall!=='None'){\n      state.gear.Top='None';\n      state.gear.Bottom='None';\n    }else if(state.gear.Top!=='None'||state.gear.Bottom!=='None'){\n      state.gear.Overall='None';\n    }\n    return state.gear;\n  }\n  function gearOptionStats(item,none){"
+  );
+  app = app.replace(
+    /  function presetAtLevel\(type\)\{[\s\S]*?  function applyPreset\(type\)\{/,
+    `  function presetAtLevel(type){
+    const p=D.gearPresets?.[type]; if(!p)return {};
+    let out={};
+    (p.levels||[]).filter(x=>Number(x.min)<=state.level).sort((a,b)=>Number(a.min)-Number(b.min)).forEach(x=>{
+      Object.entries(x.gear||{}).forEach(([slot,item])=>{
+        out[slot]=item;
+        if(item!=='None'&&slot==='Overall'){out.Top='None';out.Bottom='None';}
+        if(item!=='None'&&(slot==='Top'||slot==='Bottom'))out.Overall='None';
+      });
+    });
+    return out;
+  }
+  function applyPreset(type){`
+  );
+  app = app.replace(
+    "    state.gear={...defaultGear,...presetAtLevel(type),...keep};\n    save();renderDashboard();renderEquipment('equipment-window-page','build-summary-page');",
+    "    state.gear={...defaultGear,...presetAtLevel(type),...keep};\n    sanitizeGearState();\n    save();renderDashboard();renderEquipment('equipment-window-page','build-summary-page');"
+  );
+  app = app.replace(
+    "  function renderAll(){\n    const a=document.getElementById('level-select'), b=document.getElementById('hero-level-select'), r=document.getElementById('level-range');",
+    "  function renderAll(){\n    sanitizeGearState();\n    const a=document.getElementById('level-select'), b=document.getElementById('hero-level-select'), r=document.getElementById('level-range');"
   );
   app = app.replace(
     "    document.getElementById('modal-title').textContent=`Choose ${slot}`;\n    document.getElementById('gear-modal').classList.add('open');",
