@@ -873,6 +873,19 @@ function patchApp(raw) {
     "    if(items.length===1 && items[0].Item==='None'){\n      root.innerHTML=`<div class=\"empty-option\">No meaningful ${esc(activeSlot)} target is in the curated class equipment pool yet. That is deliberate: an empty slot is better than chasing filler gear.</div>`;",
     "    const summary=document.getElementById('modal-filter-summary');\n    if(summary){\n      const profile=activeBuild()||{}, branch=profile.shortName||'Class';\n      summary.textContent=`${branch} equipment · Level ${state.level} · ${futureCount} future-level item${futureCount===1?'':'s'} ${showFuture?'shown':'hidden'} · ${Math.max(0,beforeLevelFilter-1)} class-matched option${beforeLevelFilter-1===1?'':'s'}`;\n    }\n    if(items.length===1 && items[0].Item==='None'){\n      root.innerHTML=`<div class=\"empty-option\">No ${esc(activeSlot)} item matches the ${esc((activeBuild()?.shortName||'selected class')+' job filter')}. Future-level and optional controls stay available above.</div>`;"
   );
+  const gearSummaryNeedle = "    if(items.length===1 && items[0].Item==='None'){";
+  if (!app.includes("const summary=document.getElementById('modal-filter-summary');")) {
+    if (!app.includes(gearSummaryNeedle)) throw new Error('gear summary guard target missing');
+    const gearSummaryPatch = [
+      "    const summary=document.getElementById('modal-filter-summary');",
+      "    if(summary){",
+      "      const profile=activeBuild()||{}, branch=profile.shortName||'Class';",
+      "      summary.textContent=`${branch} equipment · Level ${state.level} · ${futureCount} future-level item${futureCount===1?'':'s'} ${showFuture?'shown':'hidden'} · ${Math.max(0,beforeLevelFilter-1)} class-matched option${beforeLevelFilter-1===1?'':'s'}`;",
+      "    }",
+      gearSummaryNeedle
+    ].join("\n");
+    app = app.replace(gearSummaryNeedle, gearSummaryPatch);
+  }
   app = app.replace(
     "<div><h4>${esc(item.Item)}</h4><div class=\"gear-badges\">${none?'':`<span class=\"plan-tag ${slug(item.Plan)}\">${esc(item.Plan)}</span><span class=\"class-tag\">${esc(item['Class Fit']||'Mage')}</span>`}</div><p>${esc(highly?(item['Recommendation Reason']||item.Notes||''):item.Notes||'Empty slot')}</p>${none?'':`<span class=\"evidence-tag ${String(item['Evidence Class']||'').includes('HISTORICAL')?'historical':String(item['Evidence Class']||'').includes('PRE-LAUNCH')?'verify':''}\" title=\"${esc(item['Parity Check']||'Current Classic/CURRENT cross-check status')}\">${esc(evidenceLabel(item))}</span>`}</div>",
     "<div><h4>${esc(item.Item)}</h4><div class=\"gear-badges\">${none?'':`<span class=\"plan-tag ${slug(item.Plan)}\">${esc(item.Plan)}</span><span class=\"class-tag\">${esc(item['Class Fit']||item['Req Job']||'Any')}</span>`}</div><p>${esc(highly?(item['Recommendation Reason']||item.Notes||''):item.Notes||'Empty slot')}</p>${none?'':`<span class=\"evidence-tag ${String(item['Evidence Class']||'').includes('HISTORICAL')?'historical':String(item['Evidence Class']||'').includes('PRE-LAUNCH')?'verify':''}\" title=\"${esc(item['Parity Check']||'Current Classic/CURRENT cross-check status')}\">${esc(evidenceLabel(item))}</span>`}</div>"
