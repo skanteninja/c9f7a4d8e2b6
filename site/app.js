@@ -226,7 +226,7 @@
   function currentLevelRow(){ return D.leveling.find(x=>Number(x.Lv)===state.level); }
   function currentSkillRow(){ const rows=D.skills.filter(x=>Number(x.Level)===state.level); return state.level>=30?(rows.at(-1)||rows[0]):rows[0]; }
   function currentAP(){ return D.apPlan.find(x=>rangeContains(x['Level Range'],state.level)); }
-  function baseLukTarget(){ const a=currentAP(); if(activeBuild()?.id==='warrior-fighter') return Number(a?.['Base DEX Target'] ?? 5); if(activeBuild()?.id==='archer-hunter') return Number(a?.['Base STR Target'] ?? 5); return Number(a?.['Base LUK Target'] ?? (state.level>50?30:5)); }
+  function baseLukTarget(){ const a=currentAP(); const numeric=v=>{const n=Number(v);if(Number.isFinite(n))return n;const m=String(v??'').match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):5;}; if(activeBuild()?.id==='warrior-fighter') return numeric(a?.['Base DEX Target'] ?? 5); if(activeBuild()?.id==='archer-hunter') return numeric(a?.['Base STR Target'] ?? 5); return numeric(a?.['Base LUK Target'] ?? (state.level>50?30:5)); }
   function currentRoute(){ return D.routes.find(r=>rangeContains(r.Levels,state.level)); }
   function recommendedWeaponName(level=state.level){
     if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){ const row=(D.weapons||[]).filter(x=>Number(x.Lv||0)<=level).at(-1); return row?.Weapon||'None'; }
@@ -354,6 +354,7 @@
     document.getElementById('page-title').textContent=pageMeta[p][0];
     document.getElementById('page-subtitle').textContent=pageMeta[p][1];
     const back=document.getElementById('page-back'); if(back) back.hidden=p==='dashboard';
+    updateBuildCopy();
     if(p==='dashboard') renderDashboard();
     if(p==='leveling') renderRoutes();
     if(p==='quests') renderQuests();
@@ -651,7 +652,40 @@
     root.innerHTML=items.map(([name,lv,status,tag])=>`<div class="buff-chip"><span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><div><b>${esc(name)} <span>Lv${lv}</span></b><small>${esc(tag)} · ${esc(status)}</small></div></div>`).join('')+`<div class="economy-note"><b>Builder rule</b><span>Do not buy a gear tier unless it changes a breakpoint, solves a requirement, or is a meaningful long hold.</span></div>`;
     hookImageFallback(root);
   }
+  function updateBuildCopy(){
+    const profile=activeBuild();
+    const id=profile?.id||'magician-il-fresh';
+    const className=classForBuild(profile)?.name||'Magician';
+    const short=profile?.shortName||'I/L Wizard';
+    const max=Number(profile?.levelMax||D.meta?.maxLevel||70);
+    const levelRange='Level '+String(profile?.levelMin||1)+'–'+String(max);
+    const title=document.getElementById('hero-build-title'); if(title)title.textContent=profile?.name||'I/L Wizard Build';
+    const subtitle=document.getElementById('hero-build-subtitle'); if(subtitle)subtitle.textContent=(profile?.subtitle||'Ice / Lightning Wizard')+' · '+levelRange;
+    const milestones=document.querySelector('.v5-milestones');
+    if(milestones){
+      const at=lv=>(D.dashboardMilestones||[]).find(m=>Number(m.level)===lv)||{};
+      milestones.innerHTML='<span>1</span><b>10<br><small>'+esc(at(10).label||className)+'</small></b><b>30<br><small>'+esc(at(30).label||short)+'</small></b><span>'+max+'</span>';
+    }
+    const etcSmall=document.querySelector('.v72-etc-panel .atlas-panel-head small');
+    if(etcSmall)etcSmall.textContent=id==='magician-il-fresh'?'Lifetime quest + I/L craft reserve · 15% buffer':'Lifetime quest reserve · 15% safety buffer';
+    const buffSmall=document.querySelector('.v6-buffs-panel .atlas-panel-head small');
+    if(buffSmall)buffSmall.textContent=id==='magician-il-fresh'?'I/L utility and spending rules':short+' skill checkpoints and spending rules';
+    const equipmentEyebrow=document.querySelector('[data-page="equipment"] .section-head .eyebrow');
+    if(equipmentEyebrow)equipmentEyebrow.textContent=id==='magician-il-fresh'?'CURATED I/L GEAR':'CURATED '+short.toUpperCase()+' GEAR';
+    const skillsEyebrow=document.querySelector('[data-page="skills"] .section-head .eyebrow');
+    if(skillsEyebrow)skillsEyebrow.textContent=id==='magician-il-fresh'?'CURATED I/L SKILLS':'CURATED '+short.toUpperCase()+' SKILLS';
+    const callout=document.querySelector('[data-page="skills"] .decision-callout');
+    if(callout&&id!=='magician-il-fresh'){
+      const b=callout.querySelector('b'),span=callout.querySelector('span');
+      if(b)b.textContent='Definitive '+short+' route checkpoint.';
+      if(span)span.textContent=' Follow the researched level-by-level SP plan; the dashboard and full tree use this selected build.';
+    }
+    const optional=document.getElementById('modal-show-optional');
+    const textNode=optional?.parentElement&&[...optional.parentElement.childNodes].find(node=>node.nodeType===3);
+    if(textNode)textNode.textContent=' Show all curated '+className+' options';
+  }
   function renderDashboard(){
+    updateBuildCopy();
     const l=currentLevelRow()||{}, srow=currentSkillRow()||{}, a=currentAP()||{};
     const build=computeBuild();
     const profile=activeBuild();
