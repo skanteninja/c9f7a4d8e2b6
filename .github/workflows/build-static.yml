@@ -216,27 +216,34 @@ jobs:
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-static-${viewport//,/-}.html"
             "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=14000 --dump-dom http://127.0.0.1:4173/ >"$file"
-            for marker in visual-layer-ready visual-db-layer-ready visual-npc-layer-ready visual-skill-layer-ready visual-portal-layer-ready dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified skill-progression-board-ready beginner-skill-tree-ready dashboard-action-layout-ok dashboard-page-layout-ok etc-planner-fixed-ready top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready tcw-skill-images-connected-ready; do
-              grep -q "$marker" "$file"
+            required_patterns=(
+              visual-layer-ready visual-db-layer-ready visual-npc-layer-ready visual-skill-layer-ready visual-portal-layer-ready
+              dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready
+              progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified skill-progression-board-ready
+              beginner-skill-tree-ready dashboard-action-layout-ok dashboard-page-layout-ok etc-planner-fixed-ready top-classic-world-ready
+              public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready
+              tcw-skill-images-connected-ready 'class="atlas-action-row' 'class="gear-slot' 'class="atlas-timeline-level'
+              'class="progression-avatar-level-controls' 'id="level-range"' 'id="hero-level-select"'
+              'data-progress-skill="Nimble Feet"' 'data-progress-skill="Three Snails"' 'data-progress-skill="Recovery"'
+              'class="etc-recommended"' 'class="etc-check-wrap'
+            )
+            for required in "${required_patterns[@]}"; do
+              if ! grep -q "$required" "$file"; then
+                echo "missing static browser assertion: $required (viewport $viewport)"
+                head -c 1200 "$file" || true
+                exit 1
+              fi
             done
-            grep -q 'class="atlas-action-row' "$file"
-            grep -q 'class="gear-slot' "$file"
-            grep -q 'class="atlas-timeline-level' "$file"
-            grep -q 'class="progression-avatar-level-controls' "$file"
-            grep -q 'id="level-range"' "$file"
-            grep -q 'id="hero-level-select"' "$file"
-            ! grep -q 'id="dashboard-level-state-host"' "$file"
-            ! grep -q 'class="v5-level-hero' "$file"
-            grep -q 'data-progress-skill="Nimble Feet"' "$file"
-            grep -q 'data-progress-skill="Three Snails"' "$file"
-            grep -q 'data-progress-skill="Recovery"' "$file"
-            ! grep -q 'class="progression-loadout-strip' "$file"
-            ! grep -q 'class="avatar-equipped-icons' "$file"
-            ! grep -q 'dashboard-overflow-detected' "$file"
-            ! grep -q 'dashboard-page-overflow-detected' "$file"
-            grep -Eq 'visual-media-strip|visualized-item-row|visual-quest-items' "$file"
-            grep -q 'class="etc-recommended"' "$file"
-            grep -q 'class="etc-check-wrap' "$file"
+            for forbidden in 'id="dashboard-level-state-host"' 'class="v5-level-hero' 'class="progression-loadout-strip' 'class="avatar-equipped-icons' dashboard-overflow-detected dashboard-page-overflow-detected; do
+              if grep -q "$forbidden" "$file"; then
+                echo "forbidden static browser assertion: $forbidden (viewport $viewport)"
+                exit 1
+              fi
+            done
+            if ! grep -Eq 'visual-media-strip|visualized-item-row|visual-quest-items' "$file"; then
+              echo "missing static visual media assertion (viewport $viewport)"
+              exit 1
+            fi
             python3 - "$file" <<'PY'
           import re, sys
           s=open(sys.argv[1], encoding='utf-8', errors='replace').read()
