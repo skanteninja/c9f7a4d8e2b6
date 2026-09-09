@@ -1188,20 +1188,20 @@
   function renderData(){
     document.getElementById('data-status').innerHTML=`<div class="data-stat"><small>Headless maintenance source</small><b>Connected · backend swappable</b></div><div class="data-stat"><small>Website snapshot</small><b>v${esc(D.meta.version)} · ${new Date(D.meta.builtAt).toLocaleString()}</b></div><div class="data-stat"><small>Quest coverage</small><b>${esc(D.meta.questCoverage?.status||'Curated')} · ${D.quests.length}/${esc(D.meta.questCoverage?.currentCurrentDirectoryCount||'—')}</b></div><div class="data-stat"><small>Progress persistence</small><b>${launcherStateReady?'Browser + PC mirror':'Browser localStorage'}</b></div><div class="data-stat"><small>Local state</small><b>${Object.values(state.quests).filter(Boolean).length} quests · Lv${state.level} · ${computeBuild().chosen.length} equipped items</b></div>`;
   }
-  document.getElementById('export-progress').addEventListener('click',()=>{
+  document.getElementById('export-progress')?.addEventListener('click',()=>{
     const blob=new Blob([JSON.stringify({project:D.meta.title,version:1,exportedAt:new Date().toISOString(),state},null,2)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ultimate-il-guide-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   });
-  document.getElementById('import-progress').addEventListener('change',async e=>{
+  document.getElementById('import-progress')?.addEventListener('change',async e=>{
     const file=e.target.files[0];if(!file)return;
     try{const j=JSON.parse(await file.text());state=normalizeState({...state,...j.state,gear:{...defaultGear,...(j.state?.gear||{})}});save();renderAll();toast('Progress imported');}
     catch(err){toast('Could not import that JSON file');}
     e.target.value='';
   });
-  document.getElementById('reset-progress').addEventListener('click',()=>{
+  document.getElementById('reset-progress')?.addEventListener('click',()=>{
     if(confirm('Reset level, quests, ETC counts and equipped build on this browser?')){localStorage.removeItem(KEY);localStorage.removeItem(STATE_UPDATED_KEY);state=loadState();save();renderAll();toast('Local progress reset');}
   });
-  document.getElementById('cache-assets').addEventListener('click',async()=>{
+  document.getElementById('cache-assets')?.addEventListener('click',async()=>{
     const urls=[...new Set([
       ...D.gear.filter(g=>Number(g['Item ID'])>0&&!['HISTORICAL ONLY','UNVERIFIED'].includes(String(g['Evidence Class']||''))).flatMap(g=>visualCandidates(g)),
       ...Object.values(D.skillIcons).flatMap(skillVisualCandidates)
