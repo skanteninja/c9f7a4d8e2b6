@@ -22,6 +22,19 @@ const catalogShape = guide => JSON.stringify({
 });
 
 const sharedCatalog = catalogShape(root);
+function effectivePreset(guide, level) {
+  const out = {Overall: 'None', Top: 'None', Bottom: 'None'};
+  const stages = guide.gearPresets?.efficient?.levels || [];
+  stages.filter(row => Number(row.min) <= level).sort((a, b) => Number(a.min) - Number(b.min)).forEach(row => {
+    Object.entries(row.gear || {}).forEach(([slot, item]) => {
+      out[slot] = item;
+      if (item !== 'None' && slot === 'Overall') { out.Top = 'None'; out.Bottom = 'None'; }
+      if (item !== 'None' && (slot === 'Top' || slot === 'Bottom')) out.Overall = 'None';
+    });
+  });
+  return out;
+}
+
 for (const [name, guide] of Object.entries(root.buildVariants)) {
   if (catalogShape(guide) !== sharedCatalog) throw new Error(`${name} has a divergent build catalog`);
   const skillLevels = guide.skills.map(row => Number(row.Level));
@@ -43,6 +56,12 @@ for (const [name, guide] of Object.entries(root.buildVariants)) {
   for (const checkpoint of guide.gearPresets.efficient.levels) {
     for (const [slot, item] of Object.entries(checkpoint.gear || {})) {
       if (!gearNames.has(item)) throw new Error(`${name} checkpoint ${checkpoint.min} references missing ${slot}: ${item}`);
+    }
+  }
+  for (const level of [1, 10, 15, 30, 50, 60, 70]) {
+    const loadout = effectivePreset(guide, level);
+    if (loadout.Overall !== 'None' && (loadout.Top !== 'None' || loadout.Bottom !== 'None')) {
+      throw new Error(`${name} effective Lv${level} preset contains Overall plus Top/Bottom`);
     }
   }
   if (guide.quests.some(row => !row.Quest || !row.Region || !row.Priority || !row['Why Do It'] || row.Lv === undefined || row.Lv === null)) {
@@ -133,6 +152,8 @@ for (const token of [
   "Arrow Bomb: Bow",
   'classGearItemAllowed',
   'classFilteredGearItems',
+  'sanitizeGearState',
+  'presetAtLevel',
   'Show future-level',
   "navigator.serviceWorker.register('./sw.js?v=0.9.0-class-specific-builds')",
   'const next=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));',
