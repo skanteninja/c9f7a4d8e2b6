@@ -104,8 +104,10 @@ jobs:
           assert 'data-page="research" class="nav-btn' not in s
           assert 'data-page="data" class="nav-btn' not in s
           assert s.index('data-page="quests" class="nav-btn') < s.index('data-page="maps" class="nav-btn') < s.index('data-page="equipment" class="nav-btn')
-          assert len(re.findall(r'class="maps-continent-card',s)) >= 8
-          assert len(re.findall(r'class="maps-atlas-world-point',s)) >= 10
+          # Current/Classic-only public data currently exposes Maple Island, Victoria Island,
+          # Ossyria, and the retained event/other set; do not require removed legacy rows.
+          assert len(re.findall(r'class="maps-continent-card',s)) >= 4
+          assert len(re.findall(r'class="maps-atlas-world-point',s)) >= 4
           PY
           done
 
