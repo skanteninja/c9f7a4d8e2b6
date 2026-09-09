@@ -1,11 +1,20 @@
   function renderSkills(){
     if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){
-      const names=[...new Set((D.skills||[]).flatMap(row=>String(row.Spend||'').split(/[+,]/).map(x=>x.trim().replace(/\s+\+\d+.*$/,'')).filter(Boolean)))].filter(name=>D.skillIcons?.[name]);
-      const current=D.skills.filter(row=>Number(row.Level)===state.level).at(-1);
       const buildName=activeBuild()?.shortName||'Class';
-      const cards=names.map(name=>`<article class="skill-beginner-card fighter-skill-card"><span class="skill-beginner-icon">${skillImgTag(name,'skill-icon')}</span><div><div class="skill-beginner-title"><b>${esc(name)}</b><span>Classic</span></div><p>${esc(D.skillIcons[name].desc||`${buildName} skill`)}</p><small class="skill-beginner-meta">${esc(D.skillIcons[name].role||'Combat skill')}</small></div></article>`).join('');
+      const tiers=D.skillTiers||[];
+      const allocation={};
+      (D.skills||[]).filter(row=>Number(row.Level)<=state.level).forEach(row=>String(row.Spend||'').split(',').forEach(part=>{const m=part.trim().match(/^(.+?)\s+\+(\d+)/);if(m)allocation[m[1]]=(allocation[m[1]]||0)+Number(m[2]);}));
+      const tierMarkup=tiers.map(tier=>{
+        const locked=state.level<tier.opens;
+        const cards=(tier.names||[]).filter(name=>D.skillIcons?.[name]).map(name=>{
+          const info=D.skillIcons[name],max=Number(info.max||20),lv=locked?0:Math.min(max,Number(allocation[name]||0));
+          return `<article class="skill-beginner-card fighter-skill-card ${locked?'tier-locked':''}"><span class="skill-beginner-icon">${skillImgTag(name,'skill-icon')}</span><div><div class="skill-beginner-title"><b>${esc(name)}</b><span>${locked?'LOCKED':`Lv ${lv}/${max}`}</span></div><p>${esc(info.desc||`${buildName} skill`)}</p><small class="skill-beginner-meta">${esc(info.role||'Combat skill')} · ${locked?`opens Lv${tier.opens}`:'current class tier'}</small></div></article>`;
+        }).join('');
+        return `<section class="skill-beginner-reference class-skill-tier ${locked?'tier-locked':''}"><div class="skill-beginner-head"><div><span class="eyebrow">${esc(tier.label.toUpperCase())} · OPENS LV${tier.opens}</span><h3>${esc(tier.label)}</h3></div><p>${locked?'Locked until the job transition.':`Current allocation through Lv${state.level}.`}</p></div><div class="skill-beginner-grid">${cards}</div></section>`;
+      }).join('');
       const rows=D.skills.map(row=>`<div class="skill-row ${Number(row.Level)===state.level?'current':''}" data-informational="1"><b style="color:#8bdfff">Lv${esc(row.Level)}</b><b>${esc(row.SP)}</b><div class="skill-icon-host">${skillImgTag(String(row.Spend).split(/[+,]/)[0].trim())}</div><div class="skill-spend">${esc(row.Spend)}</div><div class="skill-why">${esc(row['Why This Is The Action']||'Follow the selected progression.')}</div><div><span class="beta-tag">verify</span></div><div class="skill-result" style="grid-column:4/-1">${esc(row['Result After Level']||'')}</div></div>`).join('');
-      document.getElementById('skill-list').innerHTML=`<section class="skill-beginner-reference"><div class="skill-beginner-head"><div><span class="eyebrow">${esc(buildName.toUpperCase())} · LV1–70</span><h3>${esc(buildName)} Skills</h3></div><p>Classic route. Current checkpoint: ${esc(current?.Spend||'Follow the level plan.')}</p></div><div class="skill-beginner-grid">${cards}</div></section>${rows}`;
+      const current=D.skills.filter(row=>Number(row.Level)===state.level).at(-1);
+      document.getElementById('skill-list').innerHTML=`<section class="skill-beginner-reference"><div class="skill-beginner-head"><div><span class="eyebrow">${esc(buildName.toUpperCase())} · LV1–70</span><h3>${esc(buildName)} Skills</h3></div><p>Current checkpoint: ${esc(current?.Spend||'Follow the level plan.')}</p></div><p class="class-build-rule"><b>Path:</b> ${esc(activeBuild()?.skillPath||'Class-specific skill path')}</p></section>${tierMarkup}<section class="skill-level-plan"><div class="skill-beginner-head"><div><span class="eyebrow">LEVEL PLAN</span><h3>Exact SP actions</h3></div><p>Rows are informational; level changes never create completion checkboxes.</p></div>${rows}</section>`;
       return;
     }
     const currentSkillIds={

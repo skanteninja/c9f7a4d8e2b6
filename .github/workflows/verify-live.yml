@@ -24,7 +24,7 @@ jobs:
           for i in {1..60}; do
             build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0; visuals_ok=0; integrity_ok=0; stability_ok=0
             build_info="$(curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" || true)"
-            [[ "$build_info" == *"Top Classic World Maplestory 0.8.9-multibuild-foundation"* ]] && build_ok=1 || true
+            [[ "$build_info" == *"Top Classic World Maplestory 0.9.0-class-specific-builds"* ]] && build_ok=1 || true
 
             maps_js="$(curl -fsSL --max-time 15 "$BASE_URL/maps-tab.js?ci=$GITHUB_RUN_ID" || true)"
             if [[ "$maps_js" == *"maps-world-ready"* ]] && [[ "$maps_js" == *"maps-explorer-ready"* ]] && [[ "$maps_js" == *"maps-atlas-visual-ready"* ]] && [[ "$maps_js" == *"maps-current-only-ready"* ]] && [[ "$maps_js" == *"ATLAS_CURRENT_NAME_ALIASES"* ]] && [[ "$maps_js" == *"100000000':'henesys"* ]] && [[ "$maps_js" == *"LEGACY_INDEX"* ]] && [[ "$maps_js" == *"legacyFetch=Promise.resolve([])"* ]]; then maps_ok=1; fi
