@@ -89,6 +89,17 @@
   hook('level-range','input',true);
   hook('level-prev','click',false);
   hook('level-next','click',false);
+  // New class builds should show their first curated loadout immediately. Keep
+  // an existing manual selection untouched; only an empty dashboard receives
+  // the automatic Lv1 checkpoint.
+  queueMicrotask(() => {
+    const custom = ['warrior-fighter','archer-hunter'].includes(window.TCW_ACTIVE_BUILD_ID);
+    const empty = !document.querySelector('.dashboard-v72 .gear-slot.selected');
+    if (custom && empty && D?.gearPresets?.efficient?.levels?.length) {
+      document.documentElement.dataset.autoGearAppliedBreakpoint = '';
+      apply(level());
+    }
+  });
   mark(level());
   document.documentElement.classList.add('progression-level-hook-ready');
 })();
@@ -217,4 +228,3 @@
 
   document.documentElement.classList.add('tcw-ui-stability-ready','tcw-level-dom-stable-ready','tcw-skill-images-connected-ready');
 })();
-

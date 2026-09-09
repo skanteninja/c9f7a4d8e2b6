@@ -1,7 +1,7 @@
 (() => {
   const D = window.GUIDE_DATA;
   const preset = D?.gearPresets?.efficient;
-  if (!D || !preset?.levels?.length) return;
+  if (!D) return;
 
   let timer = null;
   let decisionsVerified = null;
@@ -45,6 +45,10 @@
 
   function verifyDecisionData() {
     if (decisionsVerified !== null) return decisionsVerified;
+    if (window.TCW_ACTIVE_BUILD_ID && window.TCW_ACTIVE_BUILD_ID !== 'magician-il-fresh') {
+      decisionsVerified = true;
+      return decisionsVerified;
+    }
     const checks = [
       {lv:20,action:'SKIP',candidate:'Metal Wand',weapon:'Hardwood Wand'},
       {lv:25,action:'SKIP',candidate:'Ice Wand',weapon:'Hardwood Wand'},

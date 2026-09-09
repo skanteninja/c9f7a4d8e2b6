@@ -226,7 +226,7 @@
   function currentLevelRow(){ return D.leveling.find(x=>Number(x.Lv)===state.level); }
   function currentSkillRow(){ const rows=D.skills.filter(x=>Number(x.Level)===state.level); return state.level>=30?(rows.at(-1)||rows[0]):rows[0]; }
   function currentAP(){ return D.apPlan.find(x=>rangeContains(x['Level Range'],state.level)); }
-  function baseLukTarget(){ const a=currentAP(); return Number(a?.['Base LUK Target'] ?? (state.level>50?30:5)); }
+  function baseLukTarget(){ const a=currentAP(); if(activeBuild()?.id==='warrior-fighter') return Number(a?.['Base DEX Target'] ?? 5); if(activeBuild()?.id==='archer-hunter') return Number(a?.['Base STR Target'] ?? 5); return Number(a?.['Base LUK Target'] ?? (state.level>50?30:5)); }
   function currentRoute(){ return D.routes.find(r=>rangeContains(r.Levels,state.level)); }
   function recommendedWeaponName(level=state.level){
     if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){ const row=(D.weapons||[]).filter(x=>Number(x.Lv||0)<=level).at(-1); return row?.Weapon||'None'; }
@@ -257,15 +257,17 @@
     }
     const sum=k=>chosen.reduce((a,x)=>a+Number(x[k]||0),0);
     const weapon=getGear(state.gear.Weapon);
-    const totalLuk=sum('LUK');
-    const base=baseLukTarget();
-    const effective=base+totalLuk;
-    const req=Number(weapon?.['Req LUK']||0);
-    return {
-      chosen,int:sum('INT'),luk:totalLuk,matk:sum('M.ATK'),
-      crit:sum('Crit%'),critDmg:sum('Crit DMG'),speed:sum('Speed'),
-      baseLuk:base,effectiveLuk:effective,reqLuk:req,ready:effective>=req,weapon
-    };
+    const id=activeBuild()?.id;
+    if(id==='warrior-fighter'){
+      const base=baseLukTarget(), gearDex=sum('DEX'), req=Number(weapon?.['Req DEX']||0), effective=base+gearDex;
+      return {chosen,str:sum('STR'),dex:gearDex,wAtk:sum('W.ATK'),wdef:sum('WDEF'),speed:sum('Speed'),baseDex:base,effectiveDex:effective,reqDex:req,ready:effective>=req,weapon,int:sum('INT'),luk:sum('LUK'),matk:sum('M.ATK'),crit:sum('Crit%'),critDmg:sum('Crit DMG')};
+    }
+    if(id==='archer-hunter'){
+      const base=baseLukTarget(), gearStr=sum('STR'), req=Number(weapon?.['Req STR']||0), effective=base+gearStr;
+      return {chosen,str:gearStr,dex:sum('DEX'),wAtk:sum('W.ATK'),wdef:sum('WDEF'),speed:sum('Speed'),baseStr:base,effectiveStr:effective,reqStr:req,ready:effective>=req,weapon,int:sum('INT'),luk:sum('LUK'),matk:sum('M.ATK'),crit:sum('Crit%'),critDmg:sum('Crit DMG')};
+    }
+    const totalLuk=sum('LUK'),base=baseLukTarget(),effective=base+totalLuk,req=Number(weapon?.['Req LUK']||0);
+    return {chosen,int:sum('INT'),luk:totalLuk,matk:sum('M.ATK'),crit:sum('Crit%'),critDmg:sum('Crit DMG'),speed:sum('Speed'),baseLuk:base,effectiveLuk:effective,reqLuk:req,ready:effective>=req,weapon};
   }
 
   function preserveLoadedImages(root,render){
@@ -329,12 +331,12 @@
   }
 
   const pageMeta={
-    dashboard:['Top Classic World Maplestory','Your personalized Ice / Lightning build workspace.'],
-    builds:['Build Library','Multi-class infrastructure with your I/L build active and personalized right now.'],
+    dashboard:['Top Classic World Maplestory','Your selected multi-build workspace.'],
+    builds:['Build Library','Multi-class build library with Fighter, Hunter, and I/L routes active.'],
     leveling:['Leveling Route','One clean route, with exact per-level instructions when you need them.'],
-    quests:['Quest Tracker','Prioritized for an Ice / Lightning Mage and saved forever in your browser.'],
+    quests:['Quest Tracker','Prioritized for the selected class build and saved in your browser.'],
     equipment:['Equipment & Crafting','Breakpoint-driven upgrades and a real slot-based build builder.'],
-    skills:['Skill Tree','One definitive SP path built around efficient I/L progression.'],
+    skills:['Skill Tree','One definitive SP path for the selected class build.'],
     etc:['ETC Master Planner','Know the full future requirement before you vendor the first drop.'],
     classicdb:['Classic Database','Broad current CURRENT client-export metadata, kept separate from curated guide decisions.'],
     cashshop:['Cash Shop','CURRENT client catalog with beta pricing and availability warnings.'],
@@ -398,7 +400,7 @@
       .sort((a,b)=>Number(a['Req Lv'])-Number(b['Req Lv']) || (a.Slot==='Weapon'?-1:1))[0] || null;
   }
   function currentCoreWeapon(level=state.level){
-    const names=["Beginner's Wooden Wand / job wand",'Hardwood Wand','Mithril Wand','Cromi','Angel Wings'];
+    const names=['warrior-fighter','archer-hunter'].includes(activeBuild()?.id) ? (D.weapons||[]).filter(x=>Number(x.Lv||0)<=level).map(x=>x.Weapon) : ["Beginner's Wooden Wand / job wand",'Hardwood Wand','Mithril Wand','Cromi','Angel Wings'];
     return names.map(getGear).filter(Boolean).filter(x=>Number(x['Req Lv'])<=level).sort((a,b)=>Number(b['Req Lv'])-Number(a['Req Lv']))[0]||null;
   }
   function levelCheckId(kind){return `lv${state.level}-${kind}`;}
@@ -477,7 +479,7 @@
   function renderAtlasAvatar(){
     const root=document.getElementById('atlas-avatar'); if(!root)return;
     const equipped=['Hat','Overall','Weapon','Shield','Cape','Gloves','Shoes'].map(s=>getGear(state.gear[s])).filter(Boolean).filter(x=>x.Item!=='None').slice(0,5);
-    root.innerHTML=`<div class="avatar-aura"></div><img class="avatar-character" src="${esc(characterRenderUrl())}" alt="Equipped I/L character"><div class="classic-avatar-placeholder avatar-render-fallback" hidden><span class="pixel-head">✦</span><b>LOADOUT PREVIEW</b><small>Renderer unavailable — gear icons shown below</small></div><div class="avatar-equipped-icons">${equipped.map(x=>`<span title="${esc(x.Item)}">${imgTag(x)}</span>`).join('')}</div><div class="avatar-job-badge">I/L</div>`;
+    root.innerHTML=`<div class="avatar-aura"></div><img class="avatar-character" src="${esc(characterRenderUrl())}" alt="${esc(activeBuild()?.name||"Equipped character")}"><div class="classic-avatar-placeholder avatar-render-fallback" hidden><span class="pixel-head">✦</span><b>LOADOUT PREVIEW</b><small>Renderer unavailable — gear icons shown below</small></div><div class="avatar-equipped-icons">${equipped.map(x=>`<span title="${esc(x.Item)}">${imgTag(x)}</span>`).join('')}</div><div class="avatar-job-badge">${esc(activeBuild()?.shortName||"I/L")}</div>`;
     const img=root.querySelector('.avatar-character'), fallback=root.querySelector('.avatar-render-fallback');
     if(img){
       img.dataset.assetHooked='1';
@@ -495,10 +497,17 @@
       const tabs=document.getElementById('atlas-skill-tabs'),grid=document.getElementById('atlas-skill-grid'),detail=document.getElementById('atlas-skill-detail');
       if(!tabs||!grid||!detail)return;
       const label=activeBuild()?.shortName||'Class'; tabs.innerHTML=`<span class="eyebrow">${label.toUpperCase()} SKILL PLAN</span>`;
+      const beginner=['Three Snails','Recovery','Nimble Feet'];
+      const allocations={};
+      (D.skills||[]).filter(x=>Number(x.Level)<=state.level).forEach(x=>String(x.Spend||'').split(',').forEach(part=>{const m=part.trim().match(/^(.+?)\s+\+(\d+)/);if(m&&D.skillIcons?.[m[1]])allocations[m[1]]=(allocations[m[1]]||0)+Number(m[2]);}));
+      if(state.level>=10) beginner.forEach(name=>allocations[name]=3);
       const row=D.skills.filter(x=>Number(x.Level)===state.level).at(-1)||D.skills[0];
-      const names=[...new Set((D.skills||[]).flatMap(x=>String(x.Spend||'').split(/[+,]/).map(y=>y.trim().replace(/\s+\+\d+.*$/,'')).filter(y=>D.skillIcons?.[y])))];
-      grid.innerHTML=names.map(name=>`<button class="atlas-skill-card" data-skill-name="${esc(name)}"><span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><b>${esc(name)}</b><small>${esc(label)} skill</small></button>`).join('');
-      detail.innerHTML=`<span class="detail-kicker">CURRENT SP ACTION</span><b>Lv ${esc(state.level)} · ${esc(row?.Spend||'Follow the plan')}</b><p>${esc(row?.['Why This Is The Action']||'Follow the class plan.')}</p>`;
+      const names=(D.skillOrder||[]).filter(name=>D.skillIcons?.[name]);
+      grid.innerHTML=names.map(name=>{const max=Number(D.skillIcons[name]?.max||20),lv=Math.min(max,Number(allocations[name]||0));return `<button class="atlas-skill-card ${lv>0?'learned':'unlearned'}" data-skill-name="${esc(name)}"><span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><b>${esc(name)}</b><small>Lv. ${lv}/${max}</small></button>`;}).join('');
+      const show=name=>{const max=Number(D.skillIcons[name]?.max||20),lv=Math.min(max,Number(allocations[name]||0));detail.innerHTML=`<span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><div><span class="detail-kicker">${esc(label.toUpperCase())} · CLASSIC SKILL</span><b>${esc(name)} · Lv ${lv}/${max}</b><p>${esc(D.skillIcons[name]?.desc||'Follow the selected class progression.')}</p><small>Current SP action: <strong>${esc(row?.Spend||'Follow the plan')}</strong></small></div>`;hookImageFallback(detail);};
+      grid.querySelectorAll('[data-skill-name]').forEach(btn=>btn.addEventListener('click',()=>{grid.querySelectorAll('.atlas-skill-card').forEach(x=>x.classList.remove('selected'));btn.classList.add('selected');show(btn.dataset.skillName);}));
+      show(names.find(name=>Number(allocations[name]||0)>0)||names[0]);
+      hookImageFallback(grid);
       return;
     }
     const tabs=document.getElementById('atlas-skill-tabs'), grid=document.getElementById('atlas-skill-grid'), detail=document.getElementById('atlas-skill-detail');
@@ -526,7 +535,7 @@
     tabs.querySelectorAll('[data-skill-tab]').forEach(b=>b.addEventListener('click',()=>{state.skillTab=b.dataset.skillTab;save();renderAtlasSkills()}));
     if(tab==='beginner'){
       grid.innerHTML=`<div class="beginner-milestone-grid"><div><span>AP</span><b>INT first</b><small>No STR/DEX investment. Preserve LUK only for the verified equipment route.</small></div><div><span>GEAR</span><b>Do not shop yet</b><small>Maple Island gear is not a meaningful spending checkpoint for this build.</small></div><div><span>QUESTS</span><b>Clear the island</b><small>Finish nearby quests while moving; protect useful ETCs surfaced in the queue.</small></div><div><span>LV10</span><b>Magician + free wand</b><small>Your first real build milestone. The job wand is a deliberate meso hold.</small></div></div>`;
-      detail.innerHTML=`<span class="detail-kicker">NEXT MILESTONE</span><b>Lv10 · Path of the Magician</b><p>Advance, equip the free job wand, then put the prerequisite point into Energy Bolt before building Magic Claw. No filler purchase is required before that.</p><small class="evidence-inline">Plan status: current route · recheck at launch</small>`;
+      detail.innerHTML=`<span class="detail-kicker">NEXT MILESTONE</span><b>Lv10 · Path of the Magician</b><p>Advance, equip the free job wand, then put the prerequisite point into Energy Bolt before building Magic Claw. No filler purchase is required before that.</p><small class="evidence-inline">Plan status: current pre-launch route · recheck at launch</small>`;
       return;
     }
     const kind=tab==='magician'?'magician':'il';
@@ -560,6 +569,13 @@
     const select=document.getElementById('atlas-mob-select'), card=document.getElementById('atlas-mob-card'), dmg=document.getElementById('atlas-damage');
     if(!select||!card||!dmg)return;
     const route=currentLevelRow()||{};
+    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){
+      select.innerHTML='<option value="auto">Auto · current class route</option>'; select.value='auto'; select.disabled=true;
+      const targetText=String(route['Main Monsters']||'Current route target').split('/')[0].trim();
+      const key=mobKeyFromText(targetText)||mobKeyFromText(route['Main Monsters']); const mob=key?atlasMobMap[key]:null;
+      card.innerHTML=`<div class="mob-art">${mob?`<img src="${esc(mobAsset(mob.id))}" data-asset-fallbacks="${esc(mapleIoMobAsset(mob.id))}" alt="${esc(mob.name)}">`:'<div class="mob-placeholder"><span>◈</span><small>Visual unavailable</small></div>'}</div><div class="mob-copy"><span class="detail-kicker">CURRENT CLASS ROUTE</span><h4>${esc(mob?.name||targetText)}</h4><p>${esc(route['Primary Route']||'Current training route')}</p><div class="mob-stat-grid"><div><small>Job method</small><b>${esc(route['Main Skill / Method']||'Follow the build plan')}</b></div><div><small>Class</small><b>${esc(activeBuild()?.name||'Selected build')}</b></div></div></div>`;
+      dmg.innerHTML=`<div class="damage-empty"><b>Class-specific route active.</b><p>Use the selected build's AP, SP, weapon, and hit-rate checkpoints before changing maps.</p></div>`; hookImageFallback(card); return;
+    }
     const options=['<option value="auto">Auto · current breakpoint</option>'].concat(D.upgrades.map(x=>`<option value="${x.Lv}">Lv${x.Lv} · ${esc(x['Representative Next Mob'])}</option>`));
     select.innerHTML=options.join(''); select.value=state.targetUpgrade||'auto';
     select.onchange=()=>{state.targetUpgrade=select.value;save();renderAtlasTarget()};
@@ -586,7 +602,7 @@
         return pending
           ? `<div class="atlas-queue-row pending-undo"><span class="queue-check done">✓</span><span><b>${esc(q.Quest)}</b><small>Completed · undo available</small></span><button class="undo-btn" data-undo-quest="${esc(q._id)}">Undo</button></div>`
           : `<label class="atlas-queue-row"><input type="checkbox" data-atlas-quest="${esc(q._id)}"><span><b>${esc(q.Quest)}</b><small>${esc(q.Priority)} · ${esc(q.Region)}</small></span></label>`;
-      }).join(''):'<div class="queue-empty">No available I/L-relevant quests.</div>';
+      }).join(''):'<div class="queue-empty">No available quests for this build.</div>';
       qr.querySelectorAll('[data-atlas-quest]').forEach(c=>c.addEventListener('change',()=>{
         if(!c.checked) return;
         state.quests[c.dataset.atlasQuest]=true;save();
@@ -621,6 +637,10 @@
   }
   function renderAtlasBuffs(){
     const root=document.getElementById('atlas-buffs');if(!root)return;
+    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){
+      const current=D.skills.filter(x=>Number(x.Level)<=state.level).at(-1);
+      const names=(D.skillOrder||[]).filter(name=>D.skillIcons?.[name]).slice(3,7);
+      root.innerHTML=names.map(name=>`<div class="buff-chip"><span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><div><b>${esc(name)}</b><small>${esc(activeBuild()?.shortName||'Class')} plan · ${state.level>=10?'available by level':'Beginner foundation'}</small></div></div>`).join('')+`<div class="economy-note"><b>Class route</b><span>${esc(current?.Spend||'Follow the Beginner foundation before first job.')}</span></div>`; hookImageFallback(root); return; }
     const m=parseSkillAllocation(latestSkillResult('magician',state.level)?.['Result After Level']);
     const il=parseSkillAllocation(latestSkillResult('il',state.level)?.['Result After Level']);
     const items=[
@@ -639,6 +659,7 @@
     const buildSub=document.getElementById('hero-build-subtitle'); if(buildSub) buildSub.textContent=profile?.subtitle||'Current route';
     const heroClass=document.querySelector('.v5-kicker-row .class-pill'); if(heroClass) heroClass.textContent=classForBuild(profile)?.name?.toUpperCase()||'MAGICIAN';
     const heroJob=document.querySelector('.v5-kicker-row .job-pill'); if(heroJob) heroJob.textContent=profile?.shortName||'I/L WIZARD';
+    const bridge=document.getElementById('preset-luk'); if(bridge) bridge.textContent=profile?.id==='warrior-fighter'?'Accuracy Bridge':profile?.id==='archer-hunter'?'STR Bow Bridge':'LUK Bridge';
     document.getElementById('hero-level').textContent=state.level;
     document.getElementById('atlas-job-line').textContent=`Lv${state.level} ${l.Job||'Beginner'}`;
     document.getElementById('atlas-route-sub').textContent=l['Primary Route']||'Current route';
@@ -665,7 +686,7 @@
     const actions=[
       ['TRAIN',l['Primary Route']||'—',l['Main Monsters']||'Open route','leveling'],
       ['SP',srow.Spend||'No SP action',srow['Why This Is The Action']||'Follow the skill plan','skills'],
-      ['AP',a['AP Action']||(state.level>50?'VERIFY BEFORE MORE LUK':'ONLY INT'),`Base LUK target ${baseLukTarget()}`,'equipment'],
+      ['AP',a['AP Action']||(state.level>50?'VERIFY BEFORE MORE LUK':'ONLY INT'),`${activeBuild()?.id==='warrior-fighter'?'Base DEX target':activeBuild()?.id==='archer-hunter'?'Base STR target':'Base LUK target'} ${baseLukTarget()}`,'equipment'],
       ['BANK',l['SAVE ETC / ITEM NOW']||'Nothing special',l['Target Qty']||'No target','etc']
     ];
     const ar=document.getElementById('dashboard-actions');
@@ -729,6 +750,13 @@
   function renderBuildSummary(id){
     const root=document.getElementById(id);if(!root)return;
     const b=computeBuild(), l=currentLevelRow()||{};
+    const buildId=activeBuild()?.id;
+    if(buildId==='warrior-fighter'||buildId==='archer-hunter'){
+      const rows=buildId==='warrior-fighter'?[['Job',l.Job||'Beginner'],['Gear STR',`+${b.str}`],['Base DEX target',b.baseDex],['Gear DEX',`+${b.dex}`],['Effective DEX',b.effectiveDex],['Weapon Attack',b.wAtk],['Weapon Req. DEX',b.reqDex],['Speed bonus',`+${b.speed}`]]:[['Job',l.Job||'Beginner'],['Gear DEX',`+${b.dex}`],['Base STR target',b.baseStr],['Gear STR',`+${b.str}`],['Effective STR',b.effectiveStr],['Weapon Attack',b.wAtk],['Weapon Req. STR',b.reqStr],['Speed bonus',`+${b.speed}`]];
+      const short=buildId==='warrior-fighter'?`${Math.max(0,b.reqDex-b.effectiveDex)} DEX SHORT`:`${Math.max(0,b.reqStr-b.effectiveStr)} STR SHORT`;
+      root.innerHTML=rows.map(([k,v])=>`<div class="atlas-stat-row"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')+`<div class="atlas-equip-check ${b.ready?'ready':'blocked'}"><span>Weapon requirement</span><b>${b.ready?'READY':short}</b></div>`;
+      return;
+    }
     const rows=[
       ['Job',l.Job||'Beginner'],['Gear INT',`+${b.int}`],['Base LUK target',b.baseLuk],['Gear LUK',`+${b.luk}`],['Effective LUK',b.effectiveLuk],['Magic Attack',b.matk],['Critical Rate',`${b.crit}%`],['Critical Damage',`${b.critDmg}%`],['Speed bonus',`+${b.speed}`],['Weapon Req. LUK',b.reqLuk]
     ];
@@ -757,7 +785,7 @@
     if(!showFuture) items=items.filter(x=>x.Item==='None'||Number(x['Req Lv']||0)<=state.level);
     if(!showOptional) items=items.filter(x=>x.Item==='None'||['CORE','FREE / HOLD'].includes(String(x.Plan||'')));
     if(items.length===1 && items[0].Item==='None'){
-      root.innerHTML=`<div class="empty-option">No meaningful ${esc(activeSlot)} target is in the curated Mage/I/L pool yet. That is deliberate: an empty slot is better than chasing filler gear.</div>`;
+      root.innerHTML=`<div class="empty-option">No meaningful ${esc(activeSlot)} target is in the curated class equipment pool yet. That is deliberate: an empty slot is better than chasing filler gear.</div>`;
       return;
     }
     root.innerHTML=items.map(item=>{
