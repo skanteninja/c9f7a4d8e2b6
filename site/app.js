@@ -690,7 +690,7 @@
     const build=computeBuild();
     const profile=activeBuild();
     const buildTitle=document.getElementById('hero-build-title'); if(buildTitle) buildTitle.textContent=profile?.name||'I/L Wizard Build';
-    const buildSub=document.getElementById('hero-build-subtitle'); if(buildSub) buildSub.textContent=profile?.subtitle||'Current route';
+    const buildSub=document.getElementById('hero-build-subtitle'); if(buildSub) buildSub.textContent=(profile?.subtitle||'Current route')+' · Level '+String(profile?.levelMin||1)+'–'+String(profile?.levelMax||D.meta?.maxLevel||70);
     const heroClass=document.querySelector('.v5-kicker-row .class-pill'); if(heroClass) heroClass.textContent=classForBuild(profile)?.name?.toUpperCase()||'MAGICIAN';
     const heroJob=document.querySelector('.v5-kicker-row .job-pill'); if(heroJob) heroJob.textContent=profile?.shortName||'I/L WIZARD';
     const bridge=document.getElementById('preset-luk'); if(bridge) bridge.textContent=profile?.id==='warrior-fighter'?'Accuracy Bridge':profile?.id==='archer-hunter'?'STR Bow Bridge':'LUK Bridge';
