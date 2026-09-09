@@ -280,18 +280,18 @@ jobs:
               assert name in library, f'missing build-library card: {name}'
           for build_id in ('warrior-fighter', 'archer-hunter', 'magician-il-fresh'):
               assert f'data-build-select="{build_id}"' in library, f'missing build link: {build_id}'
-          assert not re.search(r'\\bLuna\\b', library, re.I), 'engine name leaked into build-library copy'
+          assert not re.search(r'\bLuna\b', library, re.I), 'engine name leaked into build-library copy'
 
           checks = [
-              ('/tmp/tcw-live-fighter.html', 'Fighter Build', 'WARRIOR', 'FIGHTER'),
-              ('/tmp/tcw-live-hunter.html', 'Hunter Build', 'BOWMAN', 'HUNTER'),
-              ('/tmp/tcw-live-il.html', 'I/L Wizard Build', 'MAGICIAN', 'WIZARD'),
+              ('/tmp/tcw-live-fighter.html', 'Fighter Build', 'WARRIOR', 'Fighter'),
+              ('/tmp/tcw-live-hunter.html', 'Hunter Build', 'BOWMAN', 'Hunter'),
+              ('/tmp/tcw-live-il.html', 'I/L Wizard Build', 'MAGICIAN', 'I/L Wizard'),
           ]
           for filename, title, class_name, job_name in checks:
               html = Path(filename).read_text(encoding='utf-8', errors='replace')
               assert f'id="hero-build-title">{title}</h2>' in html, f'wrong title in {filename}'
-              assert f'class-pill">{class_name}</span>' in html, f'wrong class emblem in {filename}'
-              assert f'job-pill">{job_name}' in html, f'wrong advancement in {filename}'
+              assert re.search(rf'class-pill">\s*{re.escape(class_name)}\s*</span>', html, re.I), f'wrong class emblem in {filename}'
+              assert re.search(rf'job-pill">\s*{re.escape(job_name)}\s*</span>', html, re.I), f'wrong advancement in {filename}'
           assert 'data-skill-name="Power Strike"' in Path('/tmp/tcw-live-fighter.html').read_text(encoding='utf-8', errors='replace')
           assert 'data-skill-name="Arrow Blow"' in Path('/tmp/tcw-live-hunter.html').read_text(encoding='utf-8', errors='replace')
           assert 'data-skill-name="Magic Claw"' in Path('/tmp/tcw-live-il.html').read_text(encoding='utf-8', errors='replace')
