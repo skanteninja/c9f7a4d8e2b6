@@ -1,5 +1,11 @@
 (() => {
   const D=window.GUIDE_DATA;if(!D||!Array.isArray(D.etc))return;
+  // The detailed lifetime reserve below was audited for I/L crafting. Other
+  // builds keep their own quest baseline until their recipe reserve is audited.
+  if((window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh')!=='magician-il-fresh'){
+    document.documentElement.classList.add('etc-lifetime-data-ready','etc-build-aware-ready');
+    return;
+  }
   const KEY='ultimateILGuideState.v1';
   const norm=v=>String(v??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const slug=v=>String(v??'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');

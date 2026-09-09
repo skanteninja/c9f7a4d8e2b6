@@ -17,13 +17,18 @@ process = subprocess.Popen([chrome, '--headless', '--no-sandbox', '--disable-gpu
     '--user-data-dir=' + profile.name, base + '/?skill-regression=real-input'],
     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 try:
-    for _ in range(100):
+    target = None
+    for _ in range(300):
+        if process.poll() is not None:
+            raise RuntimeError(f'Chrome exited before opening a debugger target ({process.returncode})')
         try:
             tabs = json.load(urllib.request.urlopen('http://127.0.0.1:9333/json'))
             target = next(t for t in tabs if t['type'] == 'page')
             break
         except Exception:
             time.sleep(.1)
+    if target is None:
+        raise AssertionError('Chrome debugger target was not ready after 30 seconds')
     ws = websocket.create_connection(target['webSocketDebuggerUrl'], timeout=60)
     seq = 0
 

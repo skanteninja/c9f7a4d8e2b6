@@ -11,6 +11,15 @@ on:
       - 'wrangler.jsonc'
       - '.github/ci_static_proxy.py'
       - '.github/workflows/visual-regression.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/**'
+      - 'build.cjs'
+      - 'worker.js'
+      - 'wrangler.jsonc'
+      - '.github/ci_static_proxy.py'
+      - '.github/workflows/visual-regression.yml'
 
 jobs:
   visual-regression:

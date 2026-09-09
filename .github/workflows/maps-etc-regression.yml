@@ -18,6 +18,21 @@ on:
       - 'worker.js'
       - '.github/ci_static_proxy.py'
       - '.github/workflows/maps-etc-regression.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/index.html'
+      - 'public/maps-tab.js'
+      - 'public/maps-tab.css'
+      - 'public/assets/map-atlas/**'
+      - 'public/etc-audit-data.js'
+      - 'public/etc-audit-ui.js'
+      - 'public/etc-audit-ui.css'
+      - 'public/quest-audit-additions.js'
+      - 'build.cjs'
+      - 'worker.js'
+      - '.github/ci_static_proxy.py'
+      - '.github/workflows/maps-etc-regression.yml'
 
 permissions:
   contents: read
@@ -37,10 +52,11 @@ jobs:
           for f in maps-tab etc-audit-data etc-audit-ui quest-audit-additions; do node --check "public/$f.js"; test -s "public/$f.js"; done
           node --check worker.js
           python3 -m py_compile .github/ci_static_proxy.py
-          grep -q "const LEGACY_INDEX='/game-data/legacy/maps.json'" public/maps-tab.js
+          grep -q 'const legacyFetch=Promise.resolve(\[\])' public/maps-tab.js
           grep -q 'maps-explorer-ready' public/maps-tab.js
           grep -q 'maps-atlas-visual-ready' public/maps-tab.js
           grep -q "name:'Orbis / El Nath Mts.'" public/maps-tab.js
+          grep -q '.maps-atlas-world-point.sprite-fallback:before' public/maps-tab.css
           test "$(wc -c < public/assets/map-atlas/sheets/maple-world.png)" -gt 100000
           test "$(wc -c < public/assets/map-atlas/sheets/victoria-island.png)" -gt 5000
           test "$(wc -c < public/assets/map-atlas/sheets/orbis-el-nath.png)" -gt 5000
@@ -53,7 +69,7 @@ jobs:
         run: |
           for f in maps-tab.js maps-tab.css etc-audit-data.js quest-audit-additions.js etc-audit-ui.js etc-audit-ui.css; do
             test -s "dist/$f"
-            grep -q "$f?v=0.8.8-build-crosscheck" dist/index.html
+            grep -q "$f?v=0.8.9-multibuild-foundation" dist/index.html
           done
           test "$(wc -c < dist/assets/map-atlas/sheets/maple-world.png)" -gt 100000
           test "$(wc -c < dist/assets/map-atlas/sheets/victoria-island.png)" -gt 5000
@@ -66,7 +82,7 @@ jobs:
           from pathlib import Path
           s=Path('dist/index.html').read_text()
           assert s.index('data-page="quests" class="nav-btn"') < s.index('data-page="maps" class="nav-btn') < s.index('data-page="equipment" class="nav-btn')
-          assert s.index('guide-data.js?v=0.8.8-build-crosscheck') < s.index('etc-audit-data.js?v=0.8.8-build-crosscheck') < s.index('quest-audit-additions.js?v=0.8.8-build-crosscheck') < s.index('app.js?v=0.8.8-build-crosscheck')
+          assert s.index('guide-data.js?v=0.8.9-multibuild-foundation') < s.index('etc-audit-data.js?v=0.8.9-multibuild-foundation') < s.index('quest-audit-additions.js?v=0.8.9-multibuild-foundation') < s.index('app.js?v=0.8.9-multibuild-foundation')
           PY
 
       - name: Browser gate for audited ETC and visual atlas navigation
@@ -81,7 +97,6 @@ jobs:
             await wait(()=>d.documentElement.classList.contains('quest-catalog-audit-ready'),'quest audit');
             await wait(()=>d.documentElement.classList.contains('maps-tab-ready'),'maps tab');
             await wait(()=>d.documentElement.classList.contains('maps-world-ready'),'world');
-            await wait(()=>d.documentElement.classList.contains('maps-legacy-data-ready'),'legacy maps');
             const D=w.GUIDE_DATA;if(!D)throw Error('GUIDE_DATA missing');
             const item=name=>D.etc.find(x=>x.Item===name);
             const expected={"Pig's Ribbon":58,'Orange Mushroom Cap':48,'Green Mushroom Cap':98,'Leaf':121,'Octopus Leg':92,'Cursed Doll':690,'Stone Golem Rubble':173,'Tablecloth':115};
@@ -95,16 +110,21 @@ jobs:
             await wait(()=>d.documentElement.classList.contains('maps-atlas-visual-ready'),'visual atlas');
             const world=d.getElementById('maps-full-world-image');
             await wait(()=>world?.complete&&world.naturalWidth>200,'Maple World artwork');
-            if(d.querySelectorAll('.maps-atlas-world-point').length<10)throw Error('world WZ points');
-            if(d.querySelectorAll('.maps-continent-art-image').length<8)throw Error('continent artwork');
-            await wait(()=>[...d.querySelectorAll('.maps-atlas-world-point img')].some(x=>x.complete&&x.naturalWidth>0),'marker sprite');
-            const state=w.TCW_MAPS?.state;if(!state||state.current.length<200||state.legacy.length<10||state.maps.length<=state.current.length)throw Error('map merge incomplete');
+            await wait(()=>{const cards=d.querySelectorAll('.maps-continent-card').length,points=d.querySelectorAll('.maps-atlas-world-point').length;return cards>0&&points>=cards;},'world WZ points');
+            const artwork=[...d.querySelectorAll('.maps-continent-art-image')];if(!artwork.length)throw Error('continent artwork missing');
+            await wait(()=>artwork.every(img=>img.complete&&img.naturalWidth>0),'continent artwork');
+            if(d.querySelector('.maps-continent-art-missing'))throw Error('continent artwork failed to load');
+            const worldPoints=[...d.querySelectorAll('.maps-atlas-world-point')];
+            if(!worldPoints.every(point=>point.dataset.continent&&/^Open /.test(point.getAttribute('aria-label')||'')))throw Error('world point labels');
+            if(!worldPoints.some(point=>point.classList.contains('sprite-fallback')))throw Error('world point fallback marker');
+            const state=w.TCW_MAPS?.state;if(!state||state.current.length<200||state.legacy.length!==0||state.maps.length!==state.current.length)throw Error('Classic-only map catalog');
 
             d.querySelector('.maps-continent-card[data-continent="victoria"]')?.click();
             await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Victoria');
             await wait(()=>d.getElementById('maps-sheet-image')?.complete&&d.getElementById('maps-sheet-image').naturalWidth>200,'Victoria artwork');
-            await wait(()=>d.querySelectorAll('.world-map-marker,.atlas-map-point').length>=50,'Victoria points');
-            const h=[...d.querySelectorAll('.atlas-map-point')].find(x=>/Henesys/i.test(x.title||''));if(!h||h.classList.contains('unresolved')||!h.dataset.mapId)throw Error('resolved Henesys atlas point');h.click();
+            await wait(()=>d.querySelectorAll('.world-map-marker').length>=50,'Victoria points');
+            if(d.querySelectorAll('.atlas-map-point').length)throw Error('duplicate Victoria WZ points');
+            const h=[...d.querySelectorAll('.world-map-marker')].find(x=>/Henesys/i.test(x.title||'')&&x.dataset.mapId);if(!h)throw Error('resolved Henesys Victoria point');h.click();
             await wait(()=>d.getElementById('maps-detail')?.classList.contains('active')&&/Henesys/i.test(d.getElementById('map-detail-name')?.textContent||''),'Henesys detail');
             d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Esc to Victoria');
             d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-world')?.classList.contains('active'),'Esc to world');

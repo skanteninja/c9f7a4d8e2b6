@@ -3,6 +3,9 @@ on:
   push:
     branches: [main, fix/skill-renderer-stability]
     paths: ['public/**', 'build.cjs', '.github/skill_stability.py', '.github/workflows/skill-stability.yml']
+  pull_request:
+    branches: [main]
+    paths: ['public/**', 'build.cjs', '.github/skill_stability.py', '.github/workflows/skill-stability.yml']
   workflow_dispatch:
 jobs:
   regression:
