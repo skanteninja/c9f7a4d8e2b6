@@ -420,6 +420,8 @@ function patchApp(raw) {
   try {
     const saved = JSON.parse(localStorage.getItem('ultimateILGuideState.v1') || '{}');
     requestedBuild = new URLSearchParams(location.search).get('build') || saved.activeBuildId || '';
+    const researched = new Set((D.catalog?.builds||[]).filter(build=>build.status==='active').map(build=>build.id));
+    if(!researched.has(requestedBuild)) requestedBuild = D.catalog?.activeBuildId || 'magician-il-fresh';
     const variant = { 'warrior-fighter':'fighter', 'archer-hunter':'hunter' }[requestedBuild];
     if(variant && D.buildVariants?.[variant]) D = D.buildVariants[variant];
   } catch(e) {}
@@ -491,7 +493,7 @@ function patchApp(raw) {
   app = app.replace(`page:raw.page||'dashboard',`, `page:['research','data','formulas'].includes(raw.page)?'dashboard':(raw.page||'dashboard'),`);
   app = app.replace(
     `activeBuildId:raw.activeBuildId||D.catalog?.activeBuildId||'magician-il-fresh',`,
-    `activeBuildId:((id)=>D.catalog?.builds?.some(b=>b.id===id&&b.status==='active')?id:(raw.activeBuildId||D.catalog?.activeBuildId||'magician-il-fresh'))(new URLSearchParams(location.search).get('build')||window.TCW_ACTIVE_BUILD_ID),`
+    `activeBuildId:((id)=>D.catalog?.builds?.some(b=>b.id===id&&b.status==='active')?id:(D.catalog?.activeBuildId||'magician-il-fresh'))(new URLSearchParams(location.search).get('build')||window.TCW_ACTIVE_BUILD_ID||raw.activeBuildId),`
   );
 
   // Dashboard queues use the physical space available in the equal-height action row.

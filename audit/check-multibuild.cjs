@@ -73,7 +73,8 @@ function selectedGuide(build) {
 const boots = {
   il: selectedGuide('magician-il-fresh'),
   fighter: selectedGuide('warrior-fighter'),
-  hunter: selectedGuide('archer-hunter')
+  hunter: selectedGuide('archer-hunter'),
+  planned: selectedGuide('magician-fp-future')
 };
 if (boots.il.key !== 'ultimateILGuideState.v1' || boots.il.skills !== root.skills.length) {
   throw new Error('I/L bootstrap no longer preserves its established progress key');
@@ -83,6 +84,9 @@ for (const [name, id] of [['fighter', 'warrior-fighter'], ['hunter', 'archer-hun
   if (boot.id !== id || boot.key !== `ultimateILGuideState.v1.${id}` || boot.skills !== root.buildVariants[name].skills.length) {
     throw new Error(`${name} bootstrap did not select isolated build data/state`);
   }
+}
+if (boots.planned.id !== 'magician-il-fresh' || boots.planned.key !== 'ultimateILGuideState.v1') {
+  throw new Error('A planned build can still become an active guide');
 }
 
 console.log('multi-build-regression-ok');
