@@ -117,8 +117,9 @@ jobs:
           assert s.index('data-page="quests" class="nav-btn') < s.index('data-page="maps" class="nav-btn') < s.index('data-page="equipment" class="nav-btn')
           cards=len(re.findall(r'class="maps-continent-card',s))
           points=len(re.findall(r'class="maps-atlas-world-point',s))
-          assert cards > 0
-          assert points >= cards
+          print(f"live-map-dom cards={cards} points={points} images={len(imgs)}")
+          assert cards > 0, f"no rendered continent cards (cards={cards}, points={points})"
+          assert points >= cards, f"world atlas points do not cover cards (cards={cards}, points={points})"
           PY
           done
 
