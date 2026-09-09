@@ -217,6 +217,30 @@ for (const token of ['modal-filter-summary', 'modal-show-future', 'data-class-eq
   if (!indexHtml.includes(token)) throw new Error(`Missing equipment filter contract: ${token}`);
 }
 
+const progressionSyncCss = fs.readFileSync(`${outputDir}/progression-sync.css`, 'utf8');
+const progressionGearCss = fs.readFileSync(`${outputDir}/progression-gear-visual.css`, 'utf8');
+const ownershipCss = fs.readFileSync(`${outputDir}/ownership-ui.css`, 'utf8');
+const visualsSkillsJs = fs.readFileSync(`${outputDir}/visuals-skills.js`, 'utf8');
+const readabilityCss = fs.readFileSync(`${outputDir}/readability.css`, 'utf8');
+const levelHookJs = fs.readFileSync(`${outputDir}/progression-level-hook.js`, 'utf8');
+if (!progressionSyncCss.includes('.tcw-hero-skill-tree .atlas-skill-grid') || !progressionSyncCss.includes('grid-template-columns:repeat(6,minmax(0,1fr))')) {
+  throw new Error('Dashboard skill-tree horizontal layout contract is missing');
+}
+for (const [name, source] of [['progression-gear-visual.css', progressionGearCss], ['ownership-ui.css', ownershipCss]]) {
+  if (source.includes('.dashboard-v72 .v6-skills-panel .atlas-skill-grid{grid-template-columns:repeat(3')) {
+    throw new Error(`${name} still overrides the moved dashboard skill tree with the legacy vertical grid`);
+  }
+}
+if (visualsSkillsJs.includes('.dashboard-v72 .v6-skills-panel .atlas-skill-grid{grid-template-columns:repeat(3')) {
+  throw new Error('Runtime skill styling still overrides the dashboard horizontal grid');
+}
+if (!readabilityCss.includes('.page[data-page="skills"] .skill-grid{display:flex') || !readabilityCss.includes('.page[data-page="skills"] .skill-tree-grid{display:grid')) {
+  throw new Error('Full Skill Tree and dashboard skill-grid layouts are not separated');
+}
+if (levelHookJs.includes("n < 10 ? 'beginner' : n < 30 ? 'magician' : 'il'")) {
+  throw new Error('Level stability hook still hardcodes the I/L stage names for other builds');
+}
+
 const bootStart = app.indexOf('  let D = window.GUIDE_DATA;');
 const bootEnd = app.indexOf('  const defaultGear = {', bootStart);
 if (bootStart < 0 || bootEnd < 0) throw new Error('Could not locate selected-guide bootstrap');

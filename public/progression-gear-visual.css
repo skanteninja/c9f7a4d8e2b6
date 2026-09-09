@@ -68,7 +68,7 @@
 .dashboard-v72 .v6-skills-panel{padding:14px}
 .dashboard-v72 .v6-skills-panel .atlas-panel-head{margin-bottom:10px}
 .dashboard-v72 .v6-skills-panel .atlas-skill-tabs{margin-bottom:10px;padding-bottom:8px}
-.dashboard-v72 .v6-skills-panel .atlas-skill-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px}
+.dashboard-v72 .v6-skills-panel:not(.tcw-hero-skill-tree) .atlas-skill-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px}
 .dashboard-v72 .v6-skills-panel .atlas-skill-card{min-height:76px!important;padding:8px 6px!important}
 .dashboard-v72 .v6-skills-panel .skill-img-wrap{width:39px;height:39px}
 .dashboard-v72 .v6-skills-panel .atlas-skill-card img{max-width:33px;max-height:33px}
@@ -105,5 +105,5 @@
   .dashboard-v72 .progression-avatar-level-head{grid-template-columns:1fr auto;align-items:center;justify-items:stretch}
   .dashboard-v72 .progression-avatar-level-head b{justify-self:end}
   .dashboard-v72 .progression-avatar-level-controls .v5-level-stepper{max-width:260px;width:100%;justify-self:center}
-  .dashboard-v72 .v6-skills-panel .atlas-skill-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .dashboard-v72 .v6-skills-panel:not(.tcw-hero-skill-tree) .atlas-skill-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 }

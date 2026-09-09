@@ -16,7 +16,8 @@
       .dashboard-v72 .v6-skills-panel .atlas-panel-head{margin-bottom:6px!important;padding-bottom:6px!important}
       .dashboard-v72 .v6-skills-panel .atlas-skill-tabs{margin-bottom:6px!important;padding-bottom:5px!important}
       .dashboard-v72 .v6-skills-panel .atlas-skill-tab{font-size:8px!important;padding:5px 8px!important}
-      .dashboard-v72 .v6-skills-panel .atlas-skill-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+      .dashboard-v72 .v6-skills-panel .atlas-skill-grid{gap:6px!important}
+      .dashboard-v72 .v6-skills-panel:not(.tcw-hero-skill-tree) .atlas-skill-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
       .dashboard-v72 .v6-skills-panel .atlas-skill-card{min-height:52px!important;height:52px!important;padding:4px 6px!important;gap:1px!important;border-radius:8px!important}
       .dashboard-v72 .v6-skills-panel .skill-img-wrap{width:25px!important;height:25px!important;border-radius:5px!important}
       .dashboard-v72 .v6-skills-panel .atlas-skill-card img{max-width:22px!important;max-height:22px!important}
