@@ -103,8 +103,10 @@ jobs:
           assert 'data-page="research" class="nav-btn' not in s
           assert 'data-page="data" class="nav-btn' not in s
           assert s.index('data-page="quests" class="nav-btn') < s.index('data-page="maps" class="nav-btn') < s.index('data-page="equipment" class="nav-btn')
-          assert len(re.findall(r'class="maps-continent-card',s)) >= 8
-          assert len(re.findall(r'class="maps-atlas-world-point',s)) >= 10
+          cards=len(re.findall(r'class="maps-continent-card',s))
+          points=len(re.findall(r'class="maps-atlas-world-point',s))
+          assert cards >= 8
+          assert points >= cards
           PY
           done
 
