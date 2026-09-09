@@ -13,6 +13,17 @@ on:
       - 'public/bootstrap.js'
       - 'build.cjs'
       - '.github/workflows/monster-integrity-regression.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/monster-integrity.js'
+      - 'public/monster-integrity.css'
+      - 'public/monster-drop-evidence.js'
+      - 'public/visuals-db.js'
+      - 'public/ownership-ui.js'
+      - 'public/bootstrap.js'
+      - 'build.cjs'
+      - '.github/workflows/monster-integrity-regression.yml'
 
 jobs:
   monster-integrity:
