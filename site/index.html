@@ -7,19 +7,19 @@
   <meta name="theme-color" content="#090b13">
   <title>Top Classic World Maplestory</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=0.8.9-multibuild-foundation">
-  <link rel="stylesheet" href="visuals.css?v=0.8.9-multibuild-foundation">
-  <link rel="stylesheet" href="visuals-db.css?v=0.8.9-multibuild-foundation">
-  <link rel="stylesheet" href="visuals-npc.css?v=0.8.9-multibuild-foundation">
-  <link rel="stylesheet" href="visuals-skills.css?v=0.8.9-multibuild-foundation">
-  <link rel="stylesheet" href="visuals-portals.css?v=0.8.9-multibuild-foundation">
-  <link rel="stylesheet" href="dashboard-polish.css?v=0.8.9-multibuild-foundation">
-  <link rel="stylesheet" href="progression-sync.css?v=0.8.9-multibuild-foundation">
-  <link rel="stylesheet" href="progression-gear-visual.css?v=0.8.9-multibuild-foundation">
-  <link rel="stylesheet" href="ownership-ui.css?v=0.8.9-multibuild-foundation">
-  <link rel="stylesheet" href="maps-tab.css?v=0.8.9-multibuild-foundation">
-  <link rel="stylesheet" href="etc-audit-ui.css?v=0.8.9-multibuild-foundation">
-<link rel="stylesheet" href="readability.css?v=0.8.9-multibuild-foundation"><link rel="stylesheet" href="equipment-branding.css?v=0.8.9-multibuild-foundation"></head>
+  <link rel="stylesheet" href="styles.css?v=0.9.0-class-specific-builds">
+  <link rel="stylesheet" href="visuals.css?v=0.9.0-class-specific-builds">
+  <link rel="stylesheet" href="visuals-db.css?v=0.9.0-class-specific-builds">
+  <link rel="stylesheet" href="visuals-npc.css?v=0.9.0-class-specific-builds">
+  <link rel="stylesheet" href="visuals-skills.css?v=0.9.0-class-specific-builds">
+  <link rel="stylesheet" href="visuals-portals.css?v=0.9.0-class-specific-builds">
+  <link rel="stylesheet" href="dashboard-polish.css?v=0.9.0-class-specific-builds">
+  <link rel="stylesheet" href="progression-sync.css?v=0.9.0-class-specific-builds">
+  <link rel="stylesheet" href="progression-gear-visual.css?v=0.9.0-class-specific-builds">
+  <link rel="stylesheet" href="ownership-ui.css?v=0.9.0-class-specific-builds">
+  <link rel="stylesheet" href="maps-tab.css?v=0.9.0-class-specific-builds">
+  <link rel="stylesheet" href="etc-audit-ui.css?v=0.9.0-class-specific-builds">
+<link rel="stylesheet" href="readability.css?v=0.9.0-class-specific-builds"><link rel="stylesheet" href="equipment-branding.css?v=0.9.0-class-specific-builds"></head>
 <body>
   <div id="app">
     <aside class="sidebar">
@@ -100,34 +100,34 @@
 
       <section data-page="beauty" class="page"><div class="db-hero"><div><span class="eyebrow">TOP CLASSIC WORLD</span><h2>Beauty</h2><p>Hair and face styles with exact IDs and artwork.</p></div></div><div class="db-toolbar"><select id="beauty-type"><option value="hair">Hair</option><option value="face">Face</option></select><select id="beauty-gender"><option value="all">All genders</option><option value="male">Male</option><option value="female">Female</option></select><input id="beauty-search" type="search" placeholder="Search styles or IDs..."></div><div id="beauty-status" class="db-status"></div><div id="beauty-results" class="beauty-grid"></div></section>
 
-      
 
-      
 
-      
+
+
+
     </main>
   </div>
 
   <div id="gear-modal" class="modal" aria-hidden="true"><div class="modal-backdrop" data-close-modal></div><div class="modal-card"><div class="modal-head"><div><span class="eyebrow">EQUIPMENT SLOT</span><h2 id="modal-title">Choose item</h2></div><button class="close-btn" data-close-modal>×</button></div><div class="modal-filter-row"><label class="toggle"><input id="modal-show-future" type="checkbox"> Show future-level items</label><label class="toggle"><input id="modal-show-optional" type="checkbox" checked> Show all curated Mage options</label></div><div id="gear-options" class="gear-options"></div></div></div>
   <div id="toast" class="toast"></div>
-  <script src="guide-data.js?v=0.8.9-multibuild-foundation"></script>
+  <script src="guide-data.js?v=0.9.0-class-specific-builds"></script>
   <script>(()=>{const root=window.GUIDE_DATA;if(!root)return;try{const saved=JSON.parse(localStorage.getItem('ultimateILGuideState.v1')||'{}');let id=new URLSearchParams(location.search).get('build')||saved.activeBuildId||root.catalog?.activeBuildId||'magician-il-fresh';const active=new Set((root.catalog?.builds||[]).filter(x=>x.status==='active').map(x=>x.id));if(!active.has(id))id=root.catalog?.activeBuildId||'magician-il-fresh';const map={'warrior-fighter':'fighter','archer-hunter':'hunter'};if(map[id]&&root.buildVariants?.[map[id]])window.GUIDE_DATA=root.buildVariants[map[id]];window.TCW_ACTIVE_BUILD_ID=id;}catch(e){window.TCW_ACTIVE_BUILD_ID='magician-il-fresh';}})();</script>
-  <script src="etc-audit-data.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="quest-audit-additions.js?v=0.8.9-multibuild-foundation"></script>
-<script src="job-search.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="app.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="visuals.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="visuals-db.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="visuals-npc.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="visuals-skills.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="visuals-portals.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="dashboard-polish.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="progression-sync.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="progression-level-hook.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="progression-skill-state.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="progression-gear-visual.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="ownership-ui.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="maps-tab.js?v=0.8.9-multibuild-foundation"></script>
-  <script src="etc-audit-ui.js?v=0.8.9-multibuild-foundation"></script>
-<script src="navigation-history.js?v=0.8.9-multibuild-foundation"></script></body>
+  <script src="etc-audit-data.js?v=0.9.0-class-specific-builds"></script>
+  <script src="quest-audit-additions.js?v=0.9.0-class-specific-builds"></script>
+<script src="job-search.js?v=0.9.0-class-specific-builds"></script>
+  <script src="app.js?v=0.9.0-class-specific-builds"></script>
+  <script src="visuals.js?v=0.9.0-class-specific-builds"></script>
+  <script src="visuals-db.js?v=0.9.0-class-specific-builds"></script>
+  <script src="visuals-npc.js?v=0.9.0-class-specific-builds"></script>
+  <script src="visuals-skills.js?v=0.9.0-class-specific-builds"></script>
+  <script src="visuals-portals.js?v=0.9.0-class-specific-builds"></script>
+  <script src="dashboard-polish.js?v=0.9.0-class-specific-builds"></script>
+  <script src="progression-sync.js?v=0.9.0-class-specific-builds"></script>
+  <script src="progression-level-hook.js?v=0.9.0-class-specific-builds"></script>
+  <script src="progression-skill-state.js?v=0.9.0-class-specific-builds"></script>
+  <script src="progression-gear-visual.js?v=0.9.0-class-specific-builds"></script>
+  <script src="ownership-ui.js?v=0.9.0-class-specific-builds"></script>
+  <script src="maps-tab.js?v=0.9.0-class-specific-builds"></script>
+  <script src="etc-audit-ui.js?v=0.9.0-class-specific-builds"></script>
+<script src="navigation-history.js?v=0.9.0-class-specific-builds"></script></body>
 </html>

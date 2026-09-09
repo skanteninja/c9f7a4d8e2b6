@@ -228,8 +228,13 @@
   function currentAP(){ return D.apPlan.find(x=>rangeContains(x['Level Range'],state.level)); }
   function baseLukTarget(){ const a=currentAP(); const numeric=v=>{const n=Number(v);if(Number.isFinite(n))return n;const m=String(v??'').match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):5;}; if(activeBuild()?.id==='warrior-fighter') return numeric(a?.['Base DEX Target'] ?? 5); if(activeBuild()?.id==='archer-hunter') return numeric(a?.['Base STR Target'] ?? 5); return numeric(a?.['Base LUK Target'] ?? (state.level>50?30:5)); }
   function currentRoute(){ return D.routes.find(r=>rangeContains(r.Levels,state.level)); }
+  function classCoreWeaponName(level=state.level){
+    const stages=D.gearPresets?.efficient?.levels||[];
+    const stage=[...stages].filter(x=>Number(x.min||0)<=level).sort((a,b)=>Number(a.min||0)-Number(b.min||0)).at(-1);
+    return stage?.gear?.Weapon||'None';
+  }
   function recommendedWeaponName(level=state.level){
-    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){ const row=(D.weapons||[]).filter(x=>Number(x.Lv||0)<=level).at(-1); return row?.Weapon||'None'; }
+    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)) return classCoreWeaponName(level);
     if(level<10) return 'Beginner weapon / Maple Island';
     if(level<15) return "Beginner's Wooden Wand / job wand";
     if(level<30) return 'Hardwood Wand';
@@ -401,7 +406,7 @@
       .sort((a,b)=>Number(a['Req Lv'])-Number(b['Req Lv']) || (a.Slot==='Weapon'?-1:1))[0] || null;
   }
   function currentCoreWeapon(level=state.level){
-    const names=['warrior-fighter','archer-hunter'].includes(activeBuild()?.id) ? (D.weapons||[]).filter(x=>Number(x.Lv||0)<=level).map(x=>x.Weapon) : ["Beginner's Wooden Wand / job wand",'Hardwood Wand','Mithril Wand','Cromi','Angel Wings'];
+    const names=['warrior-fighter','archer-hunter'].includes(activeBuild()?.id) ? [classCoreWeaponName(level)] : ["Beginner's Wooden Wand / job wand",'Hardwood Wand','Mithril Wand','Cromi','Angel Wings'];
     return names.map(getGear).filter(Boolean).filter(x=>Number(x['Req Lv'])<=level).sort((a,b)=>Number(b['Req Lv'])-Number(a['Req Lv']))[0]||null;
   }
   function levelCheckId(kind){return `lv${state.level}-${kind}`;}
@@ -493,24 +498,33 @@
     }
     hookImageFallback(root);
   }
+  function renderClassAtlasSkills(){
+    const tabs=document.getElementById('atlas-skill-tabs'),grid=document.getElementById('atlas-skill-grid'),detail=document.getElementById('atlas-skill-detail');
+    if(!tabs||!grid||!detail)return;
+    const profile=activeBuild()||{};
+    const tiers=D.skillTiers||[];
+    const level=Math.max(1,Math.min(Number(D.meta?.maxLevel)||70,Number(state.level)||1));
+    const defaultTier=level<10?'beginner':level<30?(tiers[1]?.id||'first'):(tiers[2]?.id||'second');
+    const chosen=tiers.some(t=>t.id===state.skillTab)?state.skillTab:defaultTier;
+    const tier=tiers.find(t=>t.id===chosen)||tiers[0];
+    const allocations={};
+    (D.skills||[]).filter(row=>Number(row.Level)<=level).forEach(row=>String(row.Spend||'').split(',').forEach(part=>{const m=part.trim().match(/^(.+?)\s+\+(\d+)/);if(m)allocations[m[1]]=(allocations[m[1]]||0)+Number(m[2]);}));
+    tabs.innerHTML=`<span class="eyebrow">${esc((profile.shortName||'CLASS').toUpperCase())} SKILL PLAN</span>`+tiers.map(t=>`<button class="atlas-skill-tab ${t.id===tier.id?'active':''} ${level<t.opens?'locked':''}" data-skill-tab="${esc(t.id)}">${esc(t.label)}${level<t.opens?`<small>Lv${t.opens}</small>`:''}</button>`).join('');
+    tabs.querySelectorAll('[data-skill-tab]').forEach(button=>button.addEventListener('click',()=>{state.skillTab=button.dataset.skillTab;save();renderClassAtlasSkills();}));
+    const names=(tier.names||[]).filter(name=>D.skillIcons?.[name]);
+    const locked=level<tier.opens;
+    const currentRow=D.skills.filter(row=>Number(row.Level)===level).at(-1)||D.skills.filter(row=>Number(row.Level)<=level).at(-1)||D.skills[0];
+    const detailName=grid.querySelector('.atlas-skill-card.selected')?.dataset.skillName||names.find(name=>Number(allocations[name]||0)>0)||names[0];
+    const updateCard=(card,name)=>{const info=D.skillIcons[name]||{},max=Number(info.max||20),lv=locked?0:Math.min(max,Number(allocations[name]||0));card.classList.toggle('learned',lv>0);card.classList.toggle('unlearned',lv===0);card.classList.toggle('tier-locked',locked);const small=card.querySelector('small');if(small)small.textContent=`Lv. ${lv}/${max}`;};
+    if(grid.dataset.classSkillTier===tier.id&&grid.querySelectorAll('.atlas-skill-card').length===names.length){grid.querySelectorAll('.atlas-skill-card').forEach(card=>updateCard(card,card.dataset.skillName));}else{grid.dataset.classSkillTier=tier.id;grid.innerHTML=names.map(name=>{const info=D.skillIcons[name]||{},max=Number(info.max||20),lv=locked?0:Math.min(max,Number(allocations[name]||0));return `<button class="atlas-skill-card ${lv>0?'learned':'unlearned'} ${locked?'tier-locked':''}" data-skill-name="${esc(name)}"><span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><b>${esc(name)}</b><small>Lv. ${lv}/${max}</small></button>`;}).join('');}
+    const show=name=>{if(!name)return;const info=D.skillIcons[name]||{},max=Number(info.max||20),lv=locked?0:Math.min(max,Number(allocations[name]||0));detail.innerHTML=`<span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><div><span class="detail-kicker">${esc(tier.label.toUpperCase())} · CLASSIC SKILL</span><b>${esc(name)} · Lv ${lv}/${max}</b><p>${esc(info.desc||'Follow the selected class progression.')}</p><small>${locked?'Unlocks at':'Current'} Lv${tier.opens}${currentRow?` · SP action: <strong>${esc(currentRow.Spend||'Follow the plan')}</strong>`:''}</small></div>`;hookImageFallback(detail);};
+    grid.querySelectorAll('[data-skill-name]').forEach(button=>button.onclick=()=>{grid.querySelectorAll('.atlas-skill-card').forEach(card=>card.classList.remove('selected'));button.classList.add('selected');show(button.dataset.skillName);});
+    if(detailName&&names.includes(detailName))show(detailName);else show(names[0]);
+    hookImageFallback(grid);
+    window.TCW_REFRESH_SKILL_STATE?.();
+  }
   function renderAtlasSkills(){
-    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){
-      const tabs=document.getElementById('atlas-skill-tabs'),grid=document.getElementById('atlas-skill-grid'),detail=document.getElementById('atlas-skill-detail');
-      if(!tabs||!grid||!detail)return;
-      const label=activeBuild()?.shortName||'Class'; tabs.innerHTML=`<span class="eyebrow">${label.toUpperCase()} SKILL PLAN</span>`;
-      const beginner=['Three Snails','Recovery','Nimble Feet'];
-      const allocations={};
-      (D.skills||[]).filter(x=>Number(x.Level)<=state.level).forEach(x=>String(x.Spend||'').split(',').forEach(part=>{const m=part.trim().match(/^(.+?)\s+\+(\d+)/);if(m&&D.skillIcons?.[m[1]])allocations[m[1]]=(allocations[m[1]]||0)+Number(m[2]);}));
-      if(state.level>=10) beginner.forEach(name=>allocations[name]=3);
-      const row=D.skills.filter(x=>Number(x.Level)===state.level).at(-1)||D.skills[0];
-      const names=(D.skillOrder||[]).filter(name=>D.skillIcons?.[name]);
-      grid.innerHTML=names.map(name=>{const max=Number(D.skillIcons[name]?.max||20),lv=Math.min(max,Number(allocations[name]||0));return `<button class="atlas-skill-card ${lv>0?'learned':'unlearned'}" data-skill-name="${esc(name)}"><span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><b>${esc(name)}</b><small>Lv. ${lv}/${max}</small></button>`;}).join('');
-      const show=name=>{const max=Number(D.skillIcons[name]?.max||20),lv=Math.min(max,Number(allocations[name]||0));detail.innerHTML=`<span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><div><span class="detail-kicker">${esc(label.toUpperCase())} · CLASSIC SKILL</span><b>${esc(name)} · Lv ${lv}/${max}</b><p>${esc(D.skillIcons[name]?.desc||'Follow the selected class progression.')}</p><small>Current SP action: <strong>${esc(row?.Spend||'Follow the plan')}</strong></small></div>`;hookImageFallback(detail);};
-      grid.querySelectorAll('[data-skill-name]').forEach(btn=>btn.addEventListener('click',()=>{grid.querySelectorAll('.atlas-skill-card').forEach(x=>x.classList.remove('selected'));btn.classList.add('selected');show(btn.dataset.skillName);}));
-      show(names.find(name=>Number(allocations[name]||0)>0)||names[0]);
-      hookImageFallback(grid);
-      return;
-    }
+    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id))return renderClassAtlasSkills();
     const tabs=document.getElementById('atlas-skill-tabs'), grid=document.getElementById('atlas-skill-grid'), detail=document.getElementById('atlas-skill-detail');
     if(!tabs||!grid||!detail)return;
     const tab=activeAtlasSkillTab();
@@ -639,9 +653,13 @@
   function renderAtlasBuffs(){
     const root=document.getElementById('atlas-buffs');if(!root)return;
     if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){
-      const current=D.skills.filter(x=>Number(x.Level)<=state.level).at(-1);
-      const names=(D.skillOrder||[]).filter(name=>D.skillIcons?.[name]).slice(3,7);
-      root.innerHTML=names.map(name=>`<div class="buff-chip"><span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><div><b>${esc(name)}</b><small>${esc(activeBuild()?.shortName||'Class')} plan · ${state.level>=10?'available by level':'Beginner foundation'}</small></div></div>`).join('')+`<div class="economy-note"><b>Class route</b><span>${esc(current?.Spend||'Follow the Beginner foundation before first job.')}</span></div>`; hookImageFallback(root); return; }
+      const id=activeBuild()?.id, fighter=id==='warrior-fighter';
+      const names=fighter?['Axe Mastery','Axe Booster','Rage','Final Attack: Axe','Rush']:['Bow Mastery',"Amazon's Judgement",'Bow Booster','Soul Arrow: Bow','Final Attack: Bow','Arrow Bomb: Bow'];
+      const allocation={};
+      (D.skills||[]).filter(row=>Number(row.Level)<=state.level).forEach(row=>String(row.Spend||'').split(',').forEach(part=>{const m=part.trim().match(/^(.+?)\s+\+(\d+)/);if(m)allocation[m[1]]=(allocation[m[1]]||0)+Number(m[2]);}));
+      const maxes=Object.fromEntries(names.map(name=>[name,Number(D.skillIcons?.[name]?.max||20)]));
+      const roles=fighter?{'Axe Mastery':'Bleed + minimum damage','Axe Booster':'Axe attack speed','Rage':'Party Attack Power','Final Attack: Axe':'Toggle · proc damage','Rush':'Grouping / knockback protection'}:{'Bow Mastery':'Bow minimum damage + Evasion',"Amazon's Judgement":'Critical-hit slow','Bow Booster':'Bow attack speed','Soul Arrow: Bow':'Arrow conservation','Final Attack: Bow':'Toggle · proc damage','Arrow Bomb: Bow':'Four-target stun AoE'};
+      root.innerHTML=names.map(name=>{const lv=Math.min(maxes[name],Number(allocation[name]||0));const status=lv?`Lv${lv}/${maxes[name]}`:(state.level<30?'Unlocks at Lv30':'Next SP checkpoint');return `<div class="buff-chip"><span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><div><b>${esc(name)} <span>${status}</span></b><small>${esc(roles[name])}</small></div></div>`;}).join('')+`<div class="economy-note"><b>${fighter?'Axe path':'Bow path'}</b><span>${esc(fighter?(D.weaponPaths?.primary?.summary||'Two-handed axe default; compare one-handed Guard when needed.'):(D.weaponPath||'Bow + arrows; keep firing room and arrow reserves.'))}</span></div>`; hookImageFallback(root); return; }
     const m=parseSkillAllocation(latestSkillResult('magician',state.level)?.['Result After Level']);
     const il=parseSkillAllocation(latestSkillResult('il',state.level)?.['Result After Level']);
     const items=[
@@ -746,11 +764,24 @@
     root.querySelectorAll('[data-set-level]').forEach(b=>b.addEventListener('click',()=>setLevel(b.dataset.setLevel)));
   }
 
+  function snapshotSummary(b){
+    const id=activeBuild()?.id;
+    if(id==='warrior-fighter') return `${b.wAtk} W.ATK · ${b.effectiveDex} effective DEX`;
+    if(id==='archer-hunter') return `${b.wAtk} W.ATK · ${b.effectiveStr} effective STR`;
+    return `${b.int} INT · ${b.luk} gear LUK · ${b.matk} M.ATK`;
+  }
+  function snapshotRequirement(b){
+    const id=activeBuild()?.id;
+    if(b.ready) return 'Weapon ready';
+    if(id==='warrior-fighter') return `${Math.max(0,b.reqDex-b.effectiveDex)} DEX short`;
+    if(id==='archer-hunter') return `${Math.max(0,b.reqStr-b.effectiveStr)} STR short`;
+    return `${Math.max(0,b.reqLuk-b.effectiveLuk)} LUK short`;
+  }
   function renderLoadoutSnapshot(){
     const root=document.getElementById('loadout-snapshot'); if(!root)return;
     const b=computeBuild();
     const showSlots=['Hat','Overall','Cape','Gloves','Weapon','Shield','Shoes','Earrings','Pet','Mount'];
-    root.innerHTML=`<div class="snapshot-items">${showSlots.map(slot=>{const name=state.gear[slot]||'None';const item=getGear(name);return `<button data-snapshot-slot="${slot}" class="snapshot-slot ${name==='None'?'empty':''} ${isHighlyRecommended(item)?'highly-recommended':''}" title="${esc(slot)}: ${esc(name)}${isHighlyRecommended(item)?' · HIGHLY RECOMMENDED':''}"><span>${item&&name!=='None'?imgTag(item):'+'}</span><small>${slot}</small>${isHighlyRecommended(item)?'<i class="snapshot-rec-dot">★</i>':''}</button>`}).join('')}</div><div class="snapshot-footer"><b>${b.int} INT · ${b.luk} gear LUK · ${b.matk} M.ATK</b><span class="${b.ready?'equip-ready':'equip-blocked'}">${b.ready?'Weapon ready':`${Math.max(0,b.reqLuk-b.effectiveLuk)} effective LUK short`}</span></div>`;
+    root.innerHTML=`<div class="snapshot-items">${showSlots.map(slot=>{const name=state.gear[slot]||'None';const item=getGear(name);return `<button data-snapshot-slot="${slot}" class="snapshot-slot ${name==='None'?'empty':''} ${isHighlyRecommended(item)?'highly-recommended':''}" title="${esc(slot)}: ${esc(name)}${isHighlyRecommended(item)?' · HIGHLY RECOMMENDED':''}"><span>${item&&name!=='None'?imgTag(item):'+'}</span><small>${slot}</small>${isHighlyRecommended(item)?'<i class="snapshot-rec-dot">★</i>':''}</button>`}).join('')}</div><div class="snapshot-footer"><b>${snapshotSummary(b)}</b><span class="${b.ready?'equip-ready':'equip-blocked'}">${snapshotRequirement(b)}</span></div>`;
     root.querySelectorAll('[data-snapshot-slot]').forEach(b=>b.addEventListener('click',()=>openGearModal(b.dataset.snapshotSlot)));
     hookImageFallback(root);
   }
@@ -809,6 +840,13 @@
   document.querySelectorAll('[data-close-modal]').forEach(x=>x.addEventListener('click',closeModal));
   document.getElementById('modal-show-future').addEventListener('change',renderGearOptions);
   document.getElementById('modal-show-optional').addEventListener('change',renderGearOptions);
+  function gearOptionStats(item,none){
+    if(none)return '';
+    const id=activeBuild()?.id;
+    if(id==='warrior-fighter') return `Lv ${item['Req Lv']||0}<br>W.ATK ${item['W.ATK']||0} · DEX ${item.DEX||0}<br>WDEF ${item.WDEF||0} · Speed ${item.Speed||0}`;
+    if(id==='archer-hunter') return `Lv ${item['Req Lv']||0}<br>W.ATK ${item['W.ATK']||0} · STR ${item.STR||0}<br>WDEF ${item.WDEF||0} · Speed ${item.Speed||0}`;
+    return `Lv ${item['Req Lv']||0}<br>INT ${item.INT||0} · LUK ${item.LUK||0}<br>M.ATK ${item['M.ATK']||0}<br>Crit ${item['Crit%']||0}% · CDMG ${item['Crit DMG']||0}%`;
+  }
   function renderGearOptions(){
     const root=document.getElementById('gear-options');
     const showFuture=document.getElementById('modal-show-future').checked;
@@ -828,7 +866,7 @@
       return `<button class="gear-option ${highly?'highly-recommended':''}" data-item="${esc(item.Item)}">
         <div>${none?'—':imgTag(item)}</div>
         <div><h4>${esc(item.Item)}</h4><div class="gear-badges">${none?'':`<span class="plan-tag ${slug(item.Plan)}">${esc(item.Plan)}</span><span class="class-tag">${esc(item['Class Fit']||'Mage')}</span>`}</div><p>${esc(highly?(item['Recommendation Reason']||item.Notes||''):item.Notes||'Empty slot')}</p>${none?'':`<span class="evidence-tag ${String(item['Evidence Class']||'').includes('HISTORICAL')?'historical':String(item['Evidence Class']||'').includes('PRE-LAUNCH')?'verify':''}" title="${esc(item['Parity Check']||'Current Classic/CURRENT cross-check status')}">${esc(evidenceLabel(item))}</span>`}</div>
-        <div class="stats">${none?'':`Lv ${item['Req Lv']||0}<br>INT ${item.INT||0} · LUK ${item.LUK||0}<br>M.ATK ${item['M.ATK']||0}<br>Crit ${item['Crit%']||0}% · CDMG ${item['Crit DMG']||0}%`}</div>
+        <div class="stats">${gearOptionStats(item,none)}</div>
         ${recommendationBadge(item,'bottom-left')}
       </button>`;
     }).join('');
@@ -858,7 +896,7 @@
   document.getElementById('preset-efficient')?.addEventListener('click',()=>applyPreset('efficient'));
   document.getElementById('preset-luk')?.addEventListener('click',()=>applyPreset('luk'));
   document.getElementById('clear-gear')?.addEventListener('click',()=>{
-    state.gear={...defaultGear,Weapon:state.level>=10?"Beginner's Wooden Wand / job wand":'None'};save();renderDashboard();renderEquipment('equipment-window-page','build-summary-page');toast('Build cleared');
+    state.gear={...defaultGear,Weapon:state.level>=10&&activeBuild()?.id==='magician-il-fresh'?"Beginner's Wooden Wand / job wand":'None'};save();renderDashboard();renderEquipment('equipment-window-page','build-summary-page');toast('Build cleared');
   });
 
   function renderDashboardEtc(){
@@ -889,7 +927,7 @@
       const list=builds.filter(b=>b.classId===cls.id);
       if(!list.length)return '';
       const classLive=list.some(b=>b.status==='active');
-      return `<section class="class-build-group ${classLive?'active-class':''}"><div class="class-build-head"><div class="class-emblem">${classEmblem(cls)}</div><div><span class="eyebrow">${classLive?'RESEARCHED BUILDS':'READY FOR FUTURE BUILDS'}</span><h3>${esc(cls.name)}</h3><p>${esc((cls.branches||[]).join(' · '))}</p></div></div><div class="build-card-grid">${list.map(b=>{const selected=b.id===state.activeBuildId;const researched=b.status==='active';const label=selected?'VIEWING':researched?'AVAILABLE':'PLANNED';return `<article class="build-card ${selected?'active-build':researched?'available-build':'planned-build'}"><div class="build-card-top"><span class="${selected?'live-build-tag':researched?'available-build-tag':'planned-tag'}">${label}</span>${b.levelMin?`<small>Lv ${b.levelMin}–${b.levelMax}</small>`:''}</div><h4>${esc(b.name)}</h4><p>${esc(b.description||b.subtitle||'Infrastructure reserved for a future researched build.')}</p><div class="build-tags">${(b.tags||[]).map(t=>`<span>${esc(t)}</span>`).join('')}</div>${researched?`<a class="${selected?'primary-btn':'ghost-btn'}" data-build-select="${esc(b.id)}" href="?build=${encodeURIComponent(b.id)}&page=dashboard">${selected?'Viewing build':'Open build'}</a>`:`<button class="ghost-btn" disabled>Not researched yet</button>`}</article>`;}).join('')}</div></section>`;
+      return `<section class="class-build-group ${classLive?'active-class':''}"><div class="class-build-head"><div class="class-emblem">${classEmblem(cls)}</div><div><span class="eyebrow">${classLive?'RESEARCHED BUILDS':'READY FOR FUTURE BUILDS'}</span><h3>${esc(cls.name)}</h3><p>${esc((cls.branches||[]).join(' · '))}</p></div></div><div class="build-card-grid">${list.map(b=>{const selected=b.id===state.activeBuildId;const researched=b.status==='active';const label=selected?'VIEWING':researched?'AVAILABLE':'PLANNED';return `<article class="build-card ${selected?'active-build':researched?'available-build':'planned-build'}"><div class="build-card-top"><span class="${selected?'live-build-tag':researched?'available-build-tag':'planned-tag'}">${label}</span>${b.levelMin?`<small>Lv ${b.levelMin}–${b.levelMax}</small>`:''}</div><h4>${esc(b.name)}</h4><p>${esc(b.description||b.subtitle||'Infrastructure reserved for a future researched build.')}</p>${researched?`<div class="build-paths"><small><b>Weapon:</b> ${esc(b.weaponPath||'Class route')}</small><small><b>Skills:</b> ${esc(b.skillPath||'Class route')}</small></div>`:''}<div class="build-tags">${(b.tags||[]).map(t=>`<span>${esc(t)}</span>`).join('')}</div>${researched?`<a class="${selected?'primary-btn':'ghost-btn'}" data-build-select="${esc(b.id)}" href="?build=${encodeURIComponent(b.id)}&page=dashboard">${selected?'Viewing build':'Open build'}</a>`:`<button class="ghost-btn" disabled>Not researched yet</button>`}</article>`;}).join('')}</div></section>`;
     }).join('');
   }
 
@@ -961,7 +999,7 @@
         <b style="color:#89ddff">Lv${esc(w.Lv)}</b>
         <div>${g?imgTag(g):''}</div>
         <b>${esc(w.Weapon)}</b>
-        <span>${w['M.ATK']?`${w['M.ATK']} MA`:'—'}</span>
+        <span>${w['W.ATK']?`${w['W.ATK']} W.ATK`:(w['M.ATK']?`${w['M.ATK']} MA`:'—')}</span>
         <span class="weapon-action ${actionClass(w['Upgrade Priority'])}">${esc(w['Upgrade Priority'])}</span>
         <div><b style="font-size:10px">${esc(w.Why)}</b>${isBeta(w.Status)?`<div style="margin-top:5px"><span class="beta-tag">${esc(w.Status)}</span></div>`:''}</div>
         ${recommendationBadge(g,'bottom-left')}
@@ -973,12 +1011,21 @@
 
   function renderSkills(){
     if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){
-      const names=[...new Set((D.skills||[]).flatMap(row=>String(row.Spend||'').split(/[+,]/).map(x=>x.trim().replace(/\s+\+\d+.*$/,'')).filter(Boolean)))].filter(name=>D.skillIcons?.[name]);
-      const current=D.skills.filter(row=>Number(row.Level)===state.level).at(-1);
       const buildName=activeBuild()?.shortName||'Class';
-      const cards=names.map(name=>`<article class="skill-beginner-card fighter-skill-card"><span class="skill-beginner-icon">${skillImgTag(name,'skill-icon')}</span><div><div class="skill-beginner-title"><b>${esc(name)}</b><span>Classic</span></div><p>${esc(D.skillIcons[name].desc||`${buildName} skill`)}</p><small class="skill-beginner-meta">${esc(D.skillIcons[name].role||'Combat skill')}</small></div></article>`).join('');
+      const tiers=D.skillTiers||[];
+      const allocation={};
+      (D.skills||[]).filter(row=>Number(row.Level)<=state.level).forEach(row=>String(row.Spend||'').split(',').forEach(part=>{const m=part.trim().match(/^(.+?)\s+\+(\d+)/);if(m)allocation[m[1]]=(allocation[m[1]]||0)+Number(m[2]);}));
+      const tierMarkup=tiers.map(tier=>{
+        const locked=state.level<tier.opens;
+        const cards=(tier.names||[]).filter(name=>D.skillIcons?.[name]).map(name=>{
+          const info=D.skillIcons[name],max=Number(info.max||20),lv=locked?0:Math.min(max,Number(allocation[name]||0));
+          return `<article class="skill-beginner-card fighter-skill-card ${locked?'tier-locked':''}"><span class="skill-beginner-icon">${skillImgTag(name,'skill-icon')}</span><div><div class="skill-beginner-title"><b>${esc(name)}</b><span>${locked?'LOCKED':`Lv ${lv}/${max}`}</span></div><p>${esc(info.desc||`${buildName} skill`)}</p><small class="skill-beginner-meta">${esc(info.role||'Combat skill')} · ${locked?`opens Lv${tier.opens}`:'current class tier'}</small></div></article>`;
+        }).join('');
+        return `<section class="skill-beginner-reference class-skill-tier ${locked?'tier-locked':''}"><div class="skill-beginner-head"><div><span class="eyebrow">${esc(tier.label.toUpperCase())} · OPENS LV${tier.opens}</span><h3>${esc(tier.label)}</h3></div><p>${locked?'Locked until the job transition.':`Current allocation through Lv${state.level}.`}</p></div><div class="skill-beginner-grid">${cards}</div></section>`;
+      }).join('');
       const rows=D.skills.map(row=>`<div class="skill-row ${Number(row.Level)===state.level?'current':''}" data-informational="1"><b style="color:#8bdfff">Lv${esc(row.Level)}</b><b>${esc(row.SP)}</b><div class="skill-icon-host">${skillImgTag(String(row.Spend).split(/[+,]/)[0].trim())}</div><div class="skill-spend">${esc(row.Spend)}</div><div class="skill-why">${esc(row['Why This Is The Action']||'Follow the selected progression.')}</div><div><span class="beta-tag">verify</span></div><div class="skill-result" style="grid-column:4/-1">${esc(row['Result After Level']||'')}</div></div>`).join('');
-      document.getElementById('skill-list').innerHTML=`<section class="skill-beginner-reference"><div class="skill-beginner-head"><div><span class="eyebrow">${esc(buildName.toUpperCase())} · LV1–70</span><h3>${esc(buildName)} Skills</h3></div><p>Classic route. Current checkpoint: ${esc(current?.Spend||'Follow the level plan.')}</p></div><div class="skill-beginner-grid">${cards}</div></section>${rows}`;
+      const current=D.skills.filter(row=>Number(row.Level)===state.level).at(-1);
+      document.getElementById('skill-list').innerHTML=`<section class="skill-beginner-reference"><div class="skill-beginner-head"><div><span class="eyebrow">${esc(buildName.toUpperCase())} · LV1–70</span><h3>${esc(buildName)} Skills</h3></div><p>Current checkpoint: ${esc(current?.Spend||'Follow the level plan.')}</p></div><p class="class-build-rule"><b>Path:</b> ${esc(activeBuild()?.skillPath||'Class-specific skill path')}</p></section>${tierMarkup}<section class="skill-level-plan"><div class="skill-beginner-head"><div><span class="eyebrow">LEVEL PLAN</span><h3>Exact SP actions</h3></div><p>Rows are informational; level changes never create completion checkboxes.</p></div>${rows}</section>`;
       return;
     }
     const currentSkillIds={
@@ -1292,6 +1339,6 @@
   hydrateLauncherState();
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.8.0').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.9.0-class-specific-builds').catch(()=>{});
   }
 })();
