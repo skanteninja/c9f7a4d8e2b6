@@ -489,7 +489,7 @@
     const img=root.querySelector('.avatar-character'), fallback=root.querySelector('.avatar-render-fallback');
     if(img){
       img.dataset.assetHooked='1';
-      const fallbacks=[mapleIoCharacterRenderUrl(),baseCharacterRenderUrl(),baseMapleIoCharacterRenderUrl()];
+      const fallbacks=[baseCharacterRenderUrl()];
       img.onerror=()=>{
         const next=fallbacks.shift();
         if(next){ img.src=next; return; }
