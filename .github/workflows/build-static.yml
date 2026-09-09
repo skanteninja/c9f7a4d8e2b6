@@ -41,12 +41,12 @@ jobs:
       - name: Reconstruct verified static files
         run: |
           node build.cjs
+          node audit/check-multibuild.cjs
           rm -rf site
           mv dist site
 
       - name: Verify static output
         run: |
-          node audit/check-multibuild.cjs
           for f in app guide-data visuals visuals-db visuals-npc visuals-skills visuals-portals dashboard-polish progression-sync progression-level-hook progression-skill-state progression-gear-visual ownership-ui; do
             node --check "site/$f.js"
             test -s "site/$f.js"
