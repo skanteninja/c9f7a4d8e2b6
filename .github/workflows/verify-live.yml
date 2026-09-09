@@ -80,21 +80,34 @@ jobs:
                 exit 1
               fi
             done
-            grep -q '<title>Top Classic World Maplestory</title>' "$file"
-            grep -q 'data-page="maps" class="nav-btn' "$file"
-            grep -q 'id="maps-world"' "$file"
-            grep -q 'id="maps-open-explorer"' "$file"
-            grep -q 'data-continent="victoria"' "$file"
-            grep -q 'data-continent="ossyria"' "$file"
-            grep -q 'data-continent="ludus"' "$file"
-            grep -q 'id="maps-full-world-image"' "$file"
-            grep -q 'maps-atlas-world-point' "$file"
-            grep -q 'maps-continent-art-image' "$file"
-            grep -q 'id="level-range"' "$file"
-            grep -q 'id="atlas-quest-queue"' "$file"
-            grep -q 'id="atlas-etc-queue"' "$file"
-            ! grep -q 'dashboard-overflow-detected' "$file"
-            ! grep -q 'dashboard-page-overflow-detected' "$file"
+            required_patterns=(
+              '<title>Top Classic World Maplestory</title>'
+              'data-page="maps" class="nav-btn'
+              'id="maps-world"'
+              'id="maps-open-explorer"'
+              'data-continent="victoria"'
+              'data-continent="ossyria"'
+              'data-continent="ludus"'
+              'id="maps-full-world-image"'
+              'maps-atlas-world-point'
+              'maps-continent-art-image'
+              'id="level-range"'
+              'id="atlas-quest-queue"'
+              'id="atlas-etc-queue"'
+            )
+            for required in "${required_patterns[@]}"; do
+              if ! grep -q "$required" "$file"; then
+                echo "missing live browser assertion: $required (viewport $viewport)"
+                grep -o 'id="[^"]*"' "$file" | head -80 || true
+                exit 1
+              fi
+            done
+            for forbidden in dashboard-overflow-detected dashboard-page-overflow-detected; do
+              if grep -q "$forbidden" "$file"; then
+                echo "forbidden dashboard overflow marker: $forbidden (viewport $viewport)"
+                exit 1
+              fi
+            done
             if grep -Eqi '>\s*(PLAY|DATABASE|META)\s*<' "$file"; then
               echo "forbidden navigation label exposed"
               grep -Eio '>\s*(PLAY|DATABASE|META)\s*<' "$file" | head -20 || true
