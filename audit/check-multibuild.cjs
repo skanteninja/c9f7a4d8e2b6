@@ -154,6 +154,7 @@ for (const token of [
   'classFilteredGearItems',
   'sanitizeGearState',
   'presetAtLevel',
+  'const fallbacks=[baseCharacterRenderUrl()];',
   'Show future-level',
   "navigator.serviceWorker.register('./sw.js?v=0.9.0-class-specific-builds')",
   'const next=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));',
