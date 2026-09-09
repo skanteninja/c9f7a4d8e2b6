@@ -95,8 +95,16 @@ jobs:
             grep -q 'id="atlas-etc-queue"' "$file"
             ! grep -q 'dashboard-overflow-detected' "$file"
             ! grep -q 'dashboard-page-overflow-detected' "$file"
-            ! grep -Eqi '>\s*(PLAY|DATABASE|META)\s*<' "$file"
-            ! grep -Eqi 'COT2|OSMS|pre[- ]launch|launch[- ]scope|Evidence &amp; sources|Evidence & sources' "$file"
+            if grep -Eqi '>\s*(PLAY|DATABASE|META)\s*<' "$file"; then
+              echo "forbidden navigation label exposed"
+              grep -Eio '>\s*(PLAY|DATABASE|META)\s*<' "$file" | head -20 || true
+              exit 1
+            fi
+            if grep -Eqi 'COT2|OSMS|pre[- ]launch|launch[- ]scope|Evidence &amp; sources|Evidence & sources' "$file"; then
+              echo "forbidden internal wording exposed"
+              grep -Ein -C 1 'COT2|OSMS|pre[- ]launch|launch[- ]scope|Evidence &amp; sources|Evidence & sources' "$file" | head -60 || true
+              exit 1
+            fi
             python3 - "$file" <<'PY'
           import re,sys
           s=open(sys.argv[1],encoding='utf-8',errors='replace').read()
