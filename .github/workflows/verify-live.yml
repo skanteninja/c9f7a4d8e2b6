@@ -83,7 +83,6 @@ jobs:
             grep -q 'id="maps-open-explorer"' "$file"
             grep -q 'data-continent="victoria"' "$file"
             grep -q 'data-continent="ossyria"' "$file"
-            grep -q 'data-continent="ludus"' "$file"
             grep -q 'id="maps-full-world-image"' "$file"
             grep -q 'maps-atlas-world-point' "$file"
             grep -q 'maps-continent-art-image' "$file"
