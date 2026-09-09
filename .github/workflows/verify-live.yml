@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Live gate v21: product, visual atlas, same-origin Classic media, monster integrity, and zero-reload dashboard skill icons.
+# Live gate v22: product, current-only visual atlas, same-origin Classic media, monster integrity, and zero-reload dashboard skill icons.
 on:
   workflow_run:
     workflows: ["Build static site"]
@@ -27,11 +27,11 @@ jobs:
             [[ "$build_info" == *"Top Classic World Maplestory 0.8.9-multibuild-foundation"* ]] && build_ok=1 || true
 
             maps_js="$(curl -fsSL --max-time 15 "$BASE_URL/maps-tab.js?ci=$GITHUB_RUN_ID" || true)"
-            if [[ "$maps_js" == *"maps-world-ready"* ]] && [[ "$maps_js" == *"maps-explorer-ready"* ]] && [[ "$maps_js" == *"maps-atlas-visual-ready"* ]] && [[ "$maps_js" == *"ATLAS_CURRENT_NAME_ALIASES"* ]] && [[ "$maps_js" == *"100000000':'henesys"* ]] && [[ "$maps_js" == *"LEGACY_INDEX"* ]]; then maps_ok=1; fi
+            if [[ "$maps_js" == *"maps-world-ready"* ]] && [[ "$maps_js" == *"maps-explorer-ready"* ]] && [[ "$maps_js" == *"maps-atlas-visual-ready"* ]] && [[ "$maps_js" == *"maps-current-only-ready"* ]] && [[ "$maps_js" == *"ATLAS_CURRENT_NAME_ALIASES"* ]] && [[ "$maps_js" == *"100000000':'henesys"* ]] && [[ "$maps_js" == *"LEGACY_INDEX"* ]] && [[ "$maps_js" == *"legacyFetch=Promise.resolve([])"* ]]; then maps_ok=1; fi
 
             legacy="$(curl -fsSL --max-time 35 "$BASE_URL/game-data/legacy/maps.json?ci=$GITHUB_RUN_ID" || true)"
-            legacy_lc="${legacy,,}"
-            if [ "${#legacy}" -gt 10000 ] && [[ "$legacy_lc" == *'"name":"orbis"'* ]] && [[ "$legacy_lc" == *'"name":"el nath"'* ]]; then legacy_ok=1; fi
+            # The public map contract is current/Classic-only. The old legacy index must not be required or reintroduced.
+            if [ "${#legacy}" -eq 0 ]; then legacy_ok=1; fi
 
             world_bytes="$(curl -fsSL --max-time 30 "$BASE_URL/assets/map-atlas/sheets/maple-world.png?ci=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
             atlas_data="$(curl -fsSL --max-time 20 "$BASE_URL/assets/map-atlas/data/markers.json?ci=$GITHUB_RUN_ID" || true)"
@@ -74,7 +74,7 @@ jobs:
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-live-${viewport//,/-}.html"
             "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=36000 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID&viewport=$viewport" >"$file"
-            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready maps-nav-ready maps-data-ready maps-tab-ready maps-world-ready maps-legacy-data-ready maps-atlas-visual-ready etc-lifetime-data-ready quest-catalog-audit-ready etc-lifetime-audit-ready monster-drop-evidence-ready tcw-skill-images-connected-ready; do
+            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready maps-nav-ready maps-data-ready maps-tab-ready maps-world-ready maps-current-only-ready maps-atlas-visual-ready etc-lifetime-data-ready quest-catalog-audit-ready etc-lifetime-audit-ready monster-drop-evidence-ready tcw-skill-images-connected-ready; do
               grep -q "$marker" "$file"
             done
             grep -q '<title>Top Classic World Maplestory</title>' "$file"
