@@ -282,16 +282,26 @@ jobs:
               assert f'data-build-select="{build_id}"' in library, f'missing build link: {build_id}'
           assert not re.search(r'\bLuna\b', library, re.I), 'engine name leaked into build-library copy'
 
-          checks = [
+          def assert_pill(html, pill, text, filename):
+              assert re.search(rf'{pill}">\s*{re.escape(text)}\s*</span>', html, re.I), f'wrong {pill} in {filename}'
+          
+          for filename, title, class_name, job_name in [
               ('/tmp/tcw-live-fighter.html', 'Fighter Build', 'WARRIOR', 'Fighter'),
               ('/tmp/tcw-live-hunter.html', 'Hunter Build', 'BOWMAN', 'Hunter'),
-              ('/tmp/tcw-live-il.html', 'I/L Wizard Build', 'MAGICIAN', 'I/L Wizard'),
-          ]
-          for filename, title, class_name, job_name in checks:
+          ]:
               html = Path(filename).read_text(encoding='utf-8', errors='replace')
               assert f'id="hero-build-title">{title}</h2>' in html, f'wrong title in {filename}'
-              assert re.search(rf'class-pill">\s*{re.escape(class_name)}\s*</span>', html, re.I), f'wrong class emblem in {filename}'
-              assert re.search(rf'job-pill">\s*{re.escape(job_name)}\s*</span>', html, re.I), f'wrong advancement in {filename}'
+              assert_pill(html, 'class-pill', class_name, filename)
+              assert_pill(html, 'job-pill', job_name, filename)
+
+          il_file = '/tmp/tcw-live-il.html'
+          il_html = Path(il_file).read_text(encoding='utf-8', errors='replace')
+          assert 'id="hero-build-title">I/L Wizard Build</h2>' in il_html, f'wrong title in {il_file}'
+          il_level = int(re.search(r'id="hero-level">(\d+)<', il_html).group(1))
+          il_stage = ('BEGINNER', 'PRE-JOB') if il_level < 10 else ('MAGICIAN', '1ST JOB') if il_level < 30 else ('MAGICIAN', 'WIZARD (I/L)')
+          assert_pill(il_html, 'class-pill', il_stage[0], il_file)
+          assert_pill(il_html, 'job-pill', il_stage[1], il_file)
+          print(f'live-il-advancement-state level={il_level} class={il_stage[0]} job={il_stage[1]}')
           assert 'data-skill-name="Power Strike"' in Path('/tmp/tcw-live-fighter.html').read_text(encoding='utf-8', errors='replace')
           assert 'data-skill-name="Arrow Blow"' in Path('/tmp/tcw-live-hunter.html').read_text(encoding='utf-8', errors='replace')
           assert 'data-skill-name="Magic Claw"' in Path('/tmp/tcw-live-il.html').read_text(encoding='utf-8', errors='replace')
