@@ -110,7 +110,9 @@ jobs:
             const world=d.getElementById('maps-full-world-image');
             await wait(()=>world?.complete&&world.naturalWidth>200,'Maple World artwork');
             await wait(()=>{const cards=d.querySelectorAll('.maps-continent-card').length,points=d.querySelectorAll('.maps-atlas-world-point').length;return cards>0&&points>=cards;},'world WZ points');
-            if(d.querySelectorAll('.maps-continent-art-image').length<8)throw Error('continent artwork');
+            const artwork=[...d.querySelectorAll('.maps-continent-art-image')];if(!artwork.length)throw Error('continent artwork missing');
+            await wait(()=>artwork.every(img=>img.complete&&img.naturalWidth>0),'continent artwork');
+            if(d.querySelector('.maps-continent-art-missing'))throw Error('continent artwork failed to load');
             await wait(()=>[...d.querySelectorAll('.maps-atlas-world-point img')].some(x=>x.complete&&x.naturalWidth>0),'marker sprite');
             const state=w.TCW_MAPS?.state;if(!state||state.current.length<200||state.legacy.length!==0||state.maps.length!==state.current.length)throw Error('Classic-only map catalog');
 
