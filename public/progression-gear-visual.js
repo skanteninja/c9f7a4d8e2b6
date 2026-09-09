@@ -16,7 +16,16 @@
   function loadoutAt(lv) {
     const out = {};
     [...preset.levels].sort((a,b) => Number(a.min)-Number(b.min)).forEach(stage => {
-      if (Number(stage.min) <= lv) Object.assign(out, stage.gear || {});
+      if (Number(stage.min) > lv) return;
+      Object.entries(stage.gear || {}).forEach(([slot, item]) => {
+        out[slot] = item;
+        if (item !== 'None' && slot === 'Overall') {
+          out.Top = 'None';
+          out.Bottom = 'None';
+        } else if (item !== 'None' && (slot === 'Top' || slot === 'Bottom')) {
+          out.Overall = 'None';
+        }
+      });
     });
     return out;
   }
