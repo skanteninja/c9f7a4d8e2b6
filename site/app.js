@@ -701,6 +701,11 @@
     const optional=document.getElementById('modal-show-optional');
     const textNode=optional?.parentElement&&[...optional.parentElement.childNodes].find(node=>node.nodeType===3);
     if(textNode)textNode.textContent=' Show all curated '+className+' options';
+    const futureLabel=document.getElementById('modal-future-label');
+    const optionalLabel=document.getElementById('modal-optional-label');
+    const branchLabel=id==='warrior-fighter'?'Warrior / Fighter':id==='archer-hunter'?'Bowman / Hunter':className;
+    if(futureLabel)futureLabel.textContent='Show future-level '+branchLabel+' items';
+    if(optionalLabel)optionalLabel.textContent='Show all curated '+branchLabel+' options';
   }
   function renderDashboard(){
     updateBuildCopy();
@@ -832,6 +837,7 @@
   function openGearModal(slot){
     activeSlot=slot;
     document.getElementById('modal-title').textContent=`Choose ${slot}`;
+    updateGearFilterUi();
     document.getElementById('gear-modal').classList.add('open');
     document.getElementById('gear-modal').setAttribute('aria-hidden','false');
     renderGearOptions();
@@ -840,6 +846,17 @@
   document.querySelectorAll('[data-close-modal]').forEach(x=>x.addEventListener('click',closeModal));
   document.getElementById('modal-show-future').addEventListener('change',renderGearOptions);
   document.getElementById('modal-show-optional').addEventListener('change',renderGearOptions);
+  function classGearItemAllowed(item){
+    if(!item||item.Item==='None')return true;
+    const id=activeBuild()?.id;
+    if(id!=='warrior-fighter'&&id!=='archer-hunter')return true;
+    const text=String(item['Class Fit']||'')+' '+String(item['Req Job']||'');
+    const forbidden=/\b(?:mage|magician|wizard|cleric)\b/i;
+    if(forbidden.test(text))return false;
+    if(id==='warrior-fighter')return /(warrior|any|fighter)/i.test(text);
+    return /(bowman|hunter|any)/i.test(text);
+  }
+  function classFilteredGearItems(slot){return gearItemsForSlot(slot).filter(classGearItemAllowed);}
   function gearOptionStats(item,none){
     if(none)return '';
     const id=activeBuild()?.id;
@@ -847,11 +864,28 @@
     if(id==='archer-hunter') return `Lv ${item['Req Lv']||0}<br>W.ATK ${item['W.ATK']||0} · STR ${item.STR||0}<br>WDEF ${item.WDEF||0} · Speed ${item.Speed||0}`;
     return `Lv ${item['Req Lv']||0}<br>INT ${item.INT||0} · LUK ${item.LUK||0}<br>M.ATK ${item['M.ATK']||0}<br>Crit ${item['Crit%']||0}% · CDMG ${item['Crit DMG']||0}%`;
   }
+  function gearOptionMeta(item,none){
+    if(none)return '';
+    const id=activeBuild()?.id;
+    const job=String(item['Req Job']||item['Class Fit']||'Any');
+    const stat=id==='warrior-fighter'?`STR ${item['Req STR']||0} · DEX ${item['Req DEX']||0}`:id==='archer-hunter'?`STR ${item['Req STR']||0} · DEX ${item['Req DEX']||0}`:'';
+    return [`Lv ${item['Req Lv']||0}`,job,stat].filter(Boolean).join(' · ');
+  }
+  function updateGearFilterUi(){
+    const id=activeBuild()?.id, profile=activeBuild()||{}, branch=id==='warrior-fighter'?'Warrior / Fighter':id==='archer-hunter'?'Bowman / Hunter':(profile.shortName||'class');
+    const row=document.querySelector('[data-class-equipment-filters]'); if(row)row.hidden=false;
+    const future=document.getElementById('modal-future-label'), optional=document.getElementById('modal-optional-label');
+    if(future)future.textContent='Show future-level '+branch+' items';
+    if(optional)optional.textContent='Show all curated '+branch+' options';
+  }
   function renderGearOptions(){
     const root=document.getElementById('gear-options');
     const showFuture=document.getElementById('modal-show-future').checked;
     const showOptional=document.getElementById('modal-show-optional').checked;
-    let items=gearItemsForSlot(activeSlot);
+    updateGearFilterUi();
+    let items=classFilteredGearItems(activeSlot);
+    const beforeLevelFilter=items.length;
+    const futureCount=items.filter(x=>x.Item!=='None'&&Number(x['Req Lv']||0)>state.level).length;
     const planRank={'CORE':0,'FREE / HOLD':1,'LUK BRIDGE':2,'OPTIONAL':3,'EMPTY':9};
     items.sort((a,b)=>(isHighlyRecommended(b)?1:0)-(isHighlyRecommended(a)?1:0) || (a.Item==='None'?99:(planRank[a.Plan]??8))-(b.Item==='None'?99:(planRank[b.Plan]??8)) || Number(a['Req Lv']||0)-Number(b['Req Lv']||0));
     if(!showFuture) items=items.filter(x=>x.Item==='None'||Number(x['Req Lv']||0)<=state.level);
@@ -865,8 +899,8 @@
       const highly=isHighlyRecommended(item);
       return `<button class="gear-option ${highly?'highly-recommended':''}" data-item="${esc(item.Item)}">
         <div>${none?'—':imgTag(item)}</div>
-        <div><h4>${esc(item.Item)}</h4><div class="gear-badges">${none?'':`<span class="plan-tag ${slug(item.Plan)}">${esc(item.Plan)}</span><span class="class-tag">${esc(item['Class Fit']||'Mage')}</span>`}</div><p>${esc(highly?(item['Recommendation Reason']||item.Notes||''):item.Notes||'Empty slot')}</p>${none?'':`<span class="evidence-tag ${String(item['Evidence Class']||'').includes('HISTORICAL')?'historical':String(item['Evidence Class']||'').includes('PRE-LAUNCH')?'verify':''}" title="${esc(item['Parity Check']||'Current Classic/CURRENT cross-check status')}">${esc(evidenceLabel(item))}</span>`}</div>
-        <div class="stats">${gearOptionStats(item,none)}</div>
+        <div><h4>${esc(item.Item)}</h4><div class="gear-badges">${none?'':`<span class="plan-tag ${slug(item.Plan)}">${esc(item.Plan)}</span><span class="class-tag">${esc(item['Class Fit']||item['Req Job']||'Any')}</span>`}</div><p>${esc(highly?(item['Recommendation Reason']||item.Notes||''):item.Notes||'Empty slot')}</p>${none?'':`<span class="evidence-tag ${String(item['Evidence Class']||'').includes('HISTORICAL')?'historical':String(item['Evidence Class']||'').includes('PRE-LAUNCH')?'verify':''}" title="${esc(item['Parity Check']||'Current Classic/CURRENT cross-check status')}">${esc(evidenceLabel(item))}</span>`}</div>
+        <div class="stats">${gearOptionStats(item,none)}${none?'':`<span class="gear-requirements"><span>Requires</span> ${esc(gearOptionMeta(item,none))}</span>`}</div>
         ${recommendationBadge(item,'bottom-left')}
       </button>`;
     }).join('');
