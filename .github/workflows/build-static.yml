@@ -14,6 +14,16 @@ on:
       - 'wrangler.jsonc'
       - '.github/ci_static_proxy.py'
       - '.github/workflows/build-static.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/**'
+      - 'audit/check-multibuild.cjs'
+      - 'build.cjs'
+      - 'worker.js'
+      - 'wrangler.jsonc'
+      - '.github/ci_static_proxy.py'
+      - '.github/workflows/build-static.yml'
 
 permissions:
   contents: write
@@ -246,6 +256,7 @@ jobs:
           rm -f site/ci-progression-test.html
 
       - name: Commit generated site
+        if: github.ref == 'refs/heads/main'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
