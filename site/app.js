@@ -151,7 +151,9 @@
   function classicItemIcon(id){ return id ? `/game-media/icons/${Math.trunc(Number(id))}` : ''; }
   function visualCandidates(item){
     if(!item || !item['Item ID'] || Number(item['Item ID'])===0) return [];
-    return [classicItemIcon(item['Item ID'])];
+    const canonical=classicItemIcon(item['Item ID']);
+    if(String(item['Icon URL']||'')!==canonical) return [];
+    return [canonical];
   }
   function imgTag(item, cls=''){
     const urls=visualCandidates(item);
