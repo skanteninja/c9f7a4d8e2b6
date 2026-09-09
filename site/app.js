@@ -890,6 +890,11 @@
     items.sort((a,b)=>(isHighlyRecommended(b)?1:0)-(isHighlyRecommended(a)?1:0) || (a.Item==='None'?99:(planRank[a.Plan]??8))-(b.Item==='None'?99:(planRank[b.Plan]??8)) || Number(a['Req Lv']||0)-Number(b['Req Lv']||0));
     if(!showFuture) items=items.filter(x=>x.Item==='None'||Number(x['Req Lv']||0)<=state.level);
     if(!showOptional) items=items.filter(x=>x.Item==='None'||['CORE','FREE / HOLD'].includes(String(x.Plan||'')));
+    const summary=document.getElementById('modal-filter-summary');
+    if(summary){
+      const profile=activeBuild()||{}, branch=profile.shortName||'Class';
+      summary.textContent=`${branch} equipment · Level ${state.level} · ${futureCount} future-level item${futureCount===1?'':'s'} ${showFuture?'shown':'hidden'} · ${Math.max(0,beforeLevelFilter-1)} class-matched option${beforeLevelFilter-1===1?'':'s'}`;
+    }
     if(items.length===1 && items[0].Item==='None'){
       root.innerHTML=`<div class="empty-option">No meaningful ${esc(activeSlot)} target is in the curated class equipment pool yet. That is deliberate: an empty slot is better than chasing filler gear.</div>`;
       return;
