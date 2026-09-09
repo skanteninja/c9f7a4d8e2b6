@@ -36,6 +36,9 @@ for (const [name, guide] of Object.entries(root.buildVariants)) {
   if (!guide.gearPresets?.efficient?.levels?.length || !guide.gear.some(row => row['Highly Recommended'] === true)) {
     throw new Error(`${name} is missing curated equipment checkpoints`);
   }
+  if (guide.gear.some(row => row['Req Lv'] === undefined || row['Class Fit'] === undefined || row['Job Family'] === undefined || row['Job Branch'] === undefined || row['Req Job'] === undefined || row['Item Type'] === undefined)) {
+    throw new Error(`${name} contains an item without job, branch, type, or level metadata`);
+  }
   const gearNames = new Set(guide.gear.map(row => row.Item));
   for (const checkpoint of guide.gearPresets.efficient.levels) {
     for (const [slot, item] of Object.entries(checkpoint.gear || {})) {
@@ -68,6 +71,12 @@ for (const [name, guide] of Object.entries(root.buildVariants)) {
     if (guide.gear.some(row => row.Slot === 'Weapon' && /Crossbow|Spear|Polearm|Blunt/i.test(String(row.Notes || '')))) {
       throw new Error('Fighter gear leaked a non-sword/axe weapon branch');
     }
+    if (guide.gear.some(row => row.Item !== 'None' && /\b(?:Mage|Magician|Wizard|Cleric)\b/i.test(`${row['Req Job']} ${row['Class Fit']} ${row.Notes}`))) {
+      throw new Error('Fighter gear leaked a magician label');
+    }
+    if (guide.upgrades.some(row => /Wand|Magic Claw|M\.ATK|\b(?:INT|LUK|Mage|Magician)\b/i.test(JSON.stringify(row)))) {
+      throw new Error('Fighter upgrades inherited the I/L table');
+    }
     if (guide.quests.some(row => ['Bowman','Magician','Thief'].includes(row.Region))) throw new Error('Fighter quest list leaked another advancement branch');
     const core = guide.gearPresets.efficient.levels.map(row => row.gear?.Weapon).filter(Boolean);
     if (core.at(-1) !== 'Chrono' || !core.includes('Blue Axe') || !guide.weaponPaths?.defensive?.label?.includes('1H')) {
@@ -80,6 +89,12 @@ for (const [name, guide] of Object.entries(root.buildVariants)) {
     }
     if (guide.gear.some(row => row.Slot === 'Weapon' && /Crossbow/i.test(String(row.Notes || '')))) {
       throw new Error('Hunter gear leaked the crossbow weapon branch');
+    }
+    if (guide.gear.some(row => row.Item !== 'None' && /\b(?:Mage|Magician|Wizard|Cleric|Warrior)\b/i.test(`${row['Req Job']} ${row['Class Fit']} ${row.Notes}`))) {
+      throw new Error('Hunter gear leaked a magician/warrior label');
+    }
+    if (guide.upgrades.some(row => /Wand|Magic Claw|M\.ATK|\b(?:INT|LUK|Warrior|Mage|Magician)\b/i.test(JSON.stringify(row)))) {
+      throw new Error('Hunter upgrades inherited the I/L table');
     }
     if (guide.quests.some(row => ['Warrior','Magician','Thief'].includes(row.Region))) throw new Error('Hunter quest list leaked another advancement branch');
     if (guide.weapons.some(row => row['Weapon Type'] !== 'Bow')) throw new Error('Hunter roadmap contains a non-bow weapon');
@@ -116,6 +131,9 @@ for (const token of [
   'gearOptionStats(item,none)',
   "Final Attack: Axe",
   "Arrow Bomb: Bow",
+  'classGearItemAllowed',
+  'classFilteredGearItems',
+  'Show future-level',
   "navigator.serviceWorker.register('./sw.js?v=0.9.0-class-specific-builds')",
   'const next=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));',
   'renderLevelPage();',
@@ -129,6 +147,10 @@ if (app.includes('state.level=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Nu
 }
 if (!fs.readFileSync(`${outputDir}/progression-gear-visual.js`, 'utf8').includes('progression-avatar-level-controls')) {
   throw new Error('Level-control merge module is missing its avatar footer contract');
+}
+const indexHtml = fs.readFileSync(`${outputDir}/index.html`, 'utf8');
+for (const token of ['modal-filter-summary', 'modal-show-future', 'data-class-equipment-filters']) {
+  if (!indexHtml.includes(token)) throw new Error(`Missing equipment filter contract: ${token}`);
 }
 
 const bootStart = app.indexOf('  let D = window.GUIDE_DATA;');

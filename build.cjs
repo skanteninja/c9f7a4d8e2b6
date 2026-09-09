@@ -341,6 +341,81 @@ function buildRecipeRows(gear, levels, buildName) {
   });
 }
 
+function classEquipmentLabel(item) {
+  return String(item?.req_job_label || 'All').trim() || 'All';
+}
+
+function classEquipmentFit(item, family, branch) {
+  const label = classEquipmentLabel(item);
+  if (label === 'All') return `Any · ${branch}`;
+  return family;
+}
+
+function equipmentSlot(item) {
+  return ({
+    Weapon: 'Weapon', Hat: 'Hat', Cap: 'Hat',
+    Top: 'Top', Coat: 'Top', Longcoat: 'Overall',
+    Overall: 'Overall', Bottom: 'Bottom', Pants: 'Bottom',
+    Shoes: 'Shoes', Glove: 'Gloves', Gloves: 'Gloves',
+    Shield: 'Shield', Cape: 'Cape', Ring: 'Ring',
+    Earring: 'Earrings', Earrings: 'Earrings', Accessory: 'Earrings'
+  })[item?.sub_category] || 'Any';
+}
+
+function equipmentFields(item, family, branch) {
+  const stats = item.stats || {};
+  const label = classEquipmentLabel(item);
+  return {
+    'Job Family': family,
+    'Job Branch': branch,
+    'Req Job': label === 'All' ? 'Any' : label,
+    'Req Job ID': Number(stats.reqJob || 0),
+    'Item Type': item.sub_category === 'Weapon' ? (item.weapon_type || 'Weapon') : (item.sub_category || 'Equipment')
+  };
+}
+
+function buildWeaponUpgradeRows(gear, levels, buildName, branch, skillFamily) {
+  const byName = new Map(gear.map(row => [row.Item, row]));
+  const rows = [];
+  let previous = null;
+  for (const stage of levels || []) {
+    const name = stage.gear?.Weapon;
+    const item = name && byName.get(name);
+    if (!item) continue;
+    if (previous && previous.Item !== item.Item) {
+      const gain = Number(item['W.ATK'] || 0) - Number(previous['W.ATK'] || 0);
+      rows.push({
+        Lv: Number(stage.min || item['Req Lv'] || 1),
+        'Current Weapon': previous.Item,
+        Candidate: item.Item,
+        'W.ATK Gain': gain >= 0 ? gain : 0,
+        'Representative Next Mob': `${buildName} route checkpoint`,
+        HP: 'Route target',
+        'M.DEF': '—',
+        'Skill / Ref Build': `${buildName} · ${skillFamily} route`,
+        'Current Final Dmg / Cast': 'Build-specific',
+        'Candidate Final Dmg / Cast': 'Build-specific',
+        'Worst Casts Current': '—',
+        'Worst Casts Candidate': '—',
+        'Default Action': 'BUY / HOLD TO BREAKPOINT',
+        Why: `${branch} weapon breakpoint. Compare W.ATK, required stats, price, and the current route before replacing a working weapon.`,
+        'Req Job': item['Req Job'] || familyLabelForUpgrade(branch),
+        'Req Lv': Number(item['Req Lv'] || stage.min || 1),
+        'Req STR': Number(item['Req STR'] || 0),
+        'Req DEX': Number(item['Req DEX'] || 0),
+        'Weapon Type': item['Item Type'] || skillFamily,
+        'Class Fit': item['Class Fit'] || branch
+      });
+    }
+    previous = item;
+  }
+  return rows;
+}
+
+function familyLabelForUpgrade(branch) {
+  return branch === 'Fighter' ? 'Warrior' : branch === 'Hunter' ? 'Bowman' : 'Any';
+}
+
 function fighterVariant(base) {
   const skillsAudit = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-skills.json'), 'utf8'));
   const itemAudit = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-items.json'), 'utf8'));
@@ -416,13 +491,19 @@ function fighterVariant(base) {
     if (item.category !== 'Equipment') return false;
     // A Fighter can compare swords and axes, but the payload must not expose
     // Page/Spearman blunt, spear, or polearm branches as actionable gear.
-    if (item.sub_category === 'Weapon') return ['1H Sword','2H Sword','1H Axe','2H Axe'].includes(item.weapon_type);
-    return item.req_job_label === 'Warrior' || (Number(stats.reqJob || 0) & 1);
+    if (item.sub_category === 'Weapon') {
+      return ['1H Sword','2H Sword','1H Axe','2H Axe'].includes(item.weapon_type)
+        && (classEquipmentLabel(item) === 'All' || /\bWarrior\b/.test(classEquipmentLabel(item)))
+        && !/\bMage\b/i.test(classEquipmentLabel(item));
+    }
+    // Do not treat a mixed Warrior/Mage record as Fighter equipment. The
+    // source export uses bit flags, so checking only reqJob let magician
+    // crossover items leak into this build.
+    return /\bWarrior\b/.test(classEquipmentLabel(item)) && !/\bMage\b/i.test(classEquipmentLabel(item));
   });
-  const slotFor = item => ({Cap:'Hat',Coat:'Overall',Longcoat:'Overall',Pants:'Bottom',Shoes:'Shoes',Glove:'Gloves',Shield:'Shield',Cape:'Cape',Ring:'Ring',Accessory:'Earrings',Weapon:'Weapon'})[item.sub_category] || (item.sub_category === 'Weapon' ? 'Weapon' : 'Any');
-  let gear = [{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,'M.ATK':0,'WDEF':0,'MDEF':0,'Crit%':0,'Crit DMG':0,Speed:0,Jump:0,'Req Lv':0,'Req STR':0,'Req DEX':0,'Req LUK':0,Status:'CURRENT / VERIFY','Class Fit':'Any',Plan:'EMPTY',Priority:'—',Notes:'Empty slot','Highly Recommended':false,'Recommendation Reason':'','Evidence Class':'CURRENT / VERIFY'}, ...warriorItems.map(item => {
+  let gear = [{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,'M.ATK':0,'WDEF':0,'MDEF':0,'Crit%':0,'Crit DMG':0,Speed:0,Jump:0,'Req Lv':0,'Req STR':0,'Req DEX':0,'Req LUK':0,Status:'CURRENT / VERIFY','Class Fit':'Any · Fighter','Job Family':'Any','Job Branch':'None','Req Job':'Any','Req Job ID':0,'Item Type':'Empty',Plan:'EMPTY',Priority:'—',Notes:'Empty slot','Highly Recommended':false,'Recommendation Reason':'','Evidence Class':'CURRENT / VERIFY'}, ...warriorItems.map(item => {
     const s = item.stats || {};
-    return {Item:item.name, Slot:item.sub_category === 'Weapon' ? 'Weapon' : slotFor(item), 'Item ID':item.id, 'Icon URL':`/game-media/items/primary/${item.id}`, STR:s.incSTR||0, DEX:s.incDEX||0, INT:s.incINT||0, LUK:s.incLUK||0, 'W.ATK':s.incPAD||0, 'M.ATK':s.incMAD||0, 'WDEF':s.incPDD||0, 'MDEF':s.incMDD||0, 'Crit%':s.incCritRate||0, 'Crit DMG':s.incCritDamage||0, Speed:s.incSpeed||0, Jump:s.incJump||0, 'Req Lv':s.reqLevel||0, 'Req STR':s.reqSTR||0, 'Req DEX':s.reqDEX||0, 'Req LUK':s.reqLUK||0, 'Status':'CURRENT / VERIFY', 'Class Fit':'Warrior', Plan:'OPTIONAL', Priority:'Use at the relevant level or when it creates a real damage/accuracy breakpoint', Notes:item.weapon_type ? `${item.weapon_type} · ${item.attack_speed_label || ''}` : 'Classic Warrior equipment option', 'Highly Recommended':false, 'Recommendation Reason':'', 'Evidence Class':'CURRENT / VERIFY'};
+    return {Item:item.name, Slot:equipmentSlot(item), 'Item ID':item.id, 'Icon URL':`/game-media/items/primary/${item.id}`, STR:s.incSTR||0, DEX:s.incDEX||0, INT:s.incINT||0, LUK:s.incLUK||0, 'W.ATK':s.incPAD||0, 'M.ATK':s.incMAD||0, 'WDEF':s.incPDD||0, 'MDEF':s.incMDD||0, 'Crit%':s.incCritRate||0, 'Crit DMG':s.incCritDamage||0, Speed:s.incSpeed||0, Jump:s.incJump||0, 'Req Lv':s.reqLevel||0, 'Req STR':s.reqSTR||0, 'Req DEX':s.reqDEX||0, 'Req LUK':s.reqLUK||0, Status:'CURRENT / VERIFY', 'Class Fit':classEquipmentFit(item,'Warrior','Fighter'), ...equipmentFields(item,'Warrior','Fighter'), Plan:'OPTIONAL', Priority:'Use at the relevant level or when it creates a real damage/accuracy breakpoint', Notes:item.weapon_type ? `${item.weapon_type} · ${item.attack_speed_label || ''}` : `${classEquipmentLabel(item)} Fighter equipment option`, 'Highly Recommended':false, 'Recommendation Reason':'', 'Evidence Class':'CURRENT / VERIFY'};
   })];
   const gearPlan = applyGearPlan(gear, [
     {min:1, gear:{Weapon:'Hand Axe'}, reason:'Maple Island starter; the axe family is selected before weapon-specific Fighter SP.'},
@@ -486,7 +567,7 @@ function fighterVariant(base) {
       defensive:{id:'axe-1h-shield',label:'Axe · 1H + shield alternative',summary:'Same Axe Mastery/Booster/Final Attack skills with Guard and shield WDEF, traded against two-handed W.ATK.',skillFamily:'Axe',shield:'Red Cross Shield → Gold Ancient Shield',checkpoints:['Fireman\'s Axe','Dankke','Blue Counter','Buck','Hawkhead','Mikhail']},
       alternate:{id:'sword',label:'Sword alternative',summary:'Use only if consistency and extra Sword Mastery WDEF outweigh the axe family\'s average damage and bleed.',skillFamily:'Sword',shield:'Optional',checkpoints:['Scimitar','Zard','Lion\'s Fang','Sparta','Doombringer']}
     },
-    recipes:buildRecipeRows(gear,gearPlan.levels,'Fighter Build'), upgrades:base.upgrades,
+    recipes:buildRecipeRows(gear,gearPlan.levels,'Fighter Build'), upgrades:buildWeaponUpgradeRows(gear,gearPlan.levels,'Fighter Build','Fighter','Axe'),
     routes:routeBlocks.map(x=>({Levels:`${x[0]}–${x[1]}`,'Primary Route':x[2],'Main Monsters':x[3],'Main Skill / Method':x[4],'Why This Block':'Class-specific Axe Fighter route checkpoint; verify weakest-hit kills and hit rate before moving.','Major ETCs to Bank':'Active quest materials plus confirmed axe-crafting inputs','Weapon Decision Point':'Keep Axe Mastery, Axe Booster, and Final Attack: Axe on the same family; compare 2H W.ATK against 1H Guard','Quest / PQ Focus':'Warrior/Fighter advancement, Henesys citizenship, and the active class quest chain','Status':'CURRENT / VERIFY','Evidence Class':'CURRENT / VERIFY'})),
     leveling, quests, etc, apPlan, scrolls:base.scrolls, decisions:base.decisions,
     gearPresets:{efficient:{name:'Fighter Axe · 2H Progression',description:'Default researched axe-family path using two-handed damage breakpoints; compare 1H + shield only when Guard changes survivability.',levels:gearPlan.levels},luk:{name:'Fighter DEX / Accuracy Bridge',description:'Use the current axe checkpoint and add only the DEX or direct Accuracy needed for the next verified hit/equipment breakpoint.',levels:gearPlan.levels}},
@@ -557,8 +638,11 @@ function hunterVariant(base) {
   const skills=[...beginner,...[...first,...second].map(([Level,Spend,result,spOverride])=>({Level,SP:spOverride ?? (Level===10?1:3),Spend,'Why This Is The Action':Level<30?'Current Classic Bowman first-job route: raise Arrow Blow, take Eye early for range, then finish Critical Shot, Eye, Focus, and one Power Knockback.':'Current Classic Hunter route: unlock Arrow Bomb immediately, raise Bow Mastery and speed prerequisites, then max Arrow Bomb, Final Attack, Amazon\'s Judgement, Booster, and Soul Arrow in the researched order.','Meso / MP Logic':'Use Arrow Blow on single mobs, Arrow Bomb on packs, keep Soul Arrow active when arrow savings matter, and preserve potions for real hit/damage breakpoints.','Result After Level':result||'Hunter checkpoint','Status':'Classic beta / verify at launch','Evidence Class':'CURRENT / VERIFY'}))];
   // Bowman is the job label shared by both bows and crossbows in the export;
   // this build must expose the Hunter bow branch only.
-  const bows=(items.items||[]).filter(i=>i.category==='Equipment' && (i.weapon_type==='Bow' || (i.sub_category!=='Weapon' && i.req_job_label==='Bowman')));
-  let gear=[{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,WDEF:0,MDEF:0,Speed:0,Jump:0,'Req Lv':0,Status:'CURRENT / VERIFY','Class Fit':'Any',Plan:'EMPTY','Priority':'—','Highly Recommended':false,'Recommendation Reason':'',Notes:'Empty slot'},...bows.map(i=>{const s=i.stats||{};return {Item:i.name,Slot:i.sub_category==='Weapon'?'Weapon':({Cap:'Hat',Coat:'Overall',Longcoat:'Overall',Pants:'Bottom',Shoes:'Shoes',Glove:'Gloves',Cape:'Cape',Accessory:'Earrings'}[i.sub_category]||'Any'),'Item ID':i.id,'Icon URL':`/game-media/items/primary/${i.id}`,STR:s.incSTR||0,DEX:s.incDEX||0,INT:s.incINT||0,LUK:s.incLUK||0,'W.ATK':s.incPAD||0,WDEF:s.incPDD||0,MDEF:s.incMDD||0,Speed:s.incSpeed||0,Jump:s.incJump||0,'Req Lv':s.reqLevel||0,'Req STR':s.reqSTR||0,'Req DEX':s.reqDEX||0,Status:'CURRENT / VERIFY','Class Fit':'Bowman / Hunter',Plan:'OPTIONAL',Priority:'Use at the relevant bow breakpoint', 'Highly Recommended':false,'Recommendation Reason':'',Notes:i.weapon_type||'Classic Bowman equipment'};})];
+  const bows=(items.items||[]).filter(i=>i.category==='Equipment' && (
+    (i.sub_category==='Weapon' && i.weapon_type==='Bow' && /\bBowman\b/.test(classEquipmentLabel(i)))
+    || (i.sub_category!=='Weapon' && /\bBowman\b/.test(classEquipmentLabel(i)) && !/\bMage\b/i.test(classEquipmentLabel(i)))
+  ));
+  let gear=[{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,WDEF:0,MDEF:0,Speed:0,Jump:0,'Req Lv':0,Status:'CURRENT / VERIFY','Class Fit':'Any · Hunter','Job Family':'Any','Job Branch':'None','Req Job':'Any','Req Job ID':0,'Item Type':'Empty',Plan:'EMPTY','Priority':'—','Highly Recommended':false,'Recommendation Reason':'',Notes:'Empty slot'},...bows.map(i=>{const s=i.stats||{};return {Item:i.name,Slot:equipmentSlot(i),'Item ID':i.id,'Icon URL':`/game-media/items/primary/${i.id}`,STR:s.incSTR||0,DEX:s.incDEX||0,INT:s.incINT||0,LUK:s.incLUK||0,'W.ATK':s.incPAD||0,WDEF:s.incPDD||0,MDEF:s.incMDD||0,Speed:s.incSpeed||0,Jump:s.incJump||0,'Req Lv':s.reqLevel||0,'Req STR':s.reqSTR||0,'Req DEX':s.reqDEX||0,Status:'CURRENT / VERIFY','Class Fit':classEquipmentFit(i,'Bowman','Hunter'),...equipmentFields(i,'Bowman','Hunter'),Plan:'OPTIONAL',Priority:'Use at the relevant bow breakpoint', 'Highly Recommended':false,'Recommendation Reason':'',Notes:i.weapon_type?`${i.weapon_type} · ${i.attack_speed_label || ''}`:`${classEquipmentLabel(i)} Hunter equipment`};})];
   const gearPlan = applyGearPlan(gear, [
     {min:10, gear:{Weapon:'War Bow',Hat:'Brown Winter Hat',Top:'Brown Archer Top',Bottom:'Archer Pants',Shoes:'Brown Hard Leather Boots'}, reason:'First Bowman bow and starter armor checkpoint.'},
     {min:15, gear:{Weapon:'Composite Bow',Hat:'Green Feather Hat',Top:'Green Able Armor',Bottom:'Green Able Armor Skirt',Shoes:'Green Woodsman Boots',Gloves:'Basic Archer Gloves'}, reason:'Level-15 bow and first complete Bowman gear checkpoint.'},
@@ -602,7 +686,7 @@ function hunterVariant(base) {
     skills, skillOrder, skillTiers, skillIcons, gear,
     weapons:gear.filter(x=>x.Slot==='Weapon').map(x=>({Lv:x['Req Lv']||1,Weapon:x.Item,Type:x['Item ID'],'Weapon Type':'Bow','W.ATK':x['W.ATK']||0,Speed:x.Speed||0,'Req STR':x['Req STR']||0,'Upgrade Priority':['War Bow','Composite Bow',"Hunter's Bow",'Battle Bow','Ryden','Red Viper','Vaulter 2000','Olympus','Asianic Bow','Golden Hinkel'].includes(x.Item)?'CORE · BUY AT BREAKPOINT':'OPTIONAL','Why':x.Notes||'Bow breakpoint'})).sort((a,b)=>Number(a.Lv)-Number(b.Lv)||String(a.Weapon).localeCompare(String(b.Weapon))),
     armor:gear, weaponPath:'Bow + arrows · two-handed ranged path; no shield',
-    recipes:buildRecipeRows(gear,gearPlan.levels,'Hunter Build'), upgrades:base.upgrades,
+    recipes:buildRecipeRows(gear,gearPlan.levels,'Hunter Build'), upgrades:buildWeaponUpgradeRows(gear,gearPlan.levels,'Hunter Build','Hunter','Bow'),
     routes:routes.map(x=>({Levels:`${x[0]}–${x[1]}`,'Primary Route':x[2],'Main Monsters':x[3],'Main Skill / Method':x[4],'Why This Block':'Class-specific Hunter route checkpoint; maintain firing room and verify hit rate before moving.','Major ETCs to Bank':'Active quest materials plus confirmed arrow/bow inputs','Weapon Decision Point':'Use the next bow breakpoint and arrow tier; W.ATK beats speculative crit gear for this route','Quest / PQ Focus':'Bowman/Hunter advancement, Henesys citizenship, ammo, and class-appropriate chain','Status':'CURRENT / VERIFY','Evidence Class':'CURRENT / VERIFY'})),
     leveling, quests:questRows, etc, apPlan, scrolls:base.scrolls, decisions:base.decisions,
     gearPresets:{efficient:{name:'Hunter Bow Progression',description:'DEX-first bow progression with Arrow Blow → Arrow Bomb, current bow breakpoints, and minimum-STR guidance after level 30.',levels:gearPlan.levels},luk:{name:'Hunter STR / Bow Requirement Bridge',description:'Use the current bow checkpoint and add only the STR needed for the next bow; keep the rest of each level in DEX.',levels:gearPlan.levels}},
@@ -771,7 +855,31 @@ function patchApp(raw) {
   );
   app = app.replace(
     "  function renderGearOptions(){",
-    "  function gearOptionStats(item,none){\n    if(none)return '';\n    const id=activeBuild()?.id;\n    if(id==='warrior-fighter') return `Lv ${item['Req Lv']||0}<br>W.ATK ${item['W.ATK']||0} · DEX ${item.DEX||0}<br>WDEF ${item.WDEF||0} · Speed ${item.Speed||0}`;\n    if(id==='archer-hunter') return `Lv ${item['Req Lv']||0}<br>W.ATK ${item['W.ATK']||0} · STR ${item.STR||0}<br>WDEF ${item.WDEF||0} · Speed ${item.Speed||0}`;\n    return `Lv ${item['Req Lv']||0}<br>INT ${item.INT||0} · LUK ${item.LUK||0}<br>M.ATK ${item['M.ATK']||0}<br>Crit ${item['Crit%']||0}% · CDMG ${item['Crit DMG']||0}%`;\n  }\n  function renderGearOptions(){"
+    "  function classGearItemAllowed(item){\n    if(!item||item.Item==='None')return true;\n    const id=activeBuild()?.id;\n    if(id!=='warrior-fighter'&&id!=='archer-hunter')return true;\n    const text=String(item['Class Fit']||'')+' '+String(item['Req Job']||'');\n    const forbidden=/(mage|magician|wizard|cleric|thief|crossbow|spear|polearm|blunt)/i;\n    if(forbidden.test(text))return false;\n    if(id==='warrior-fighter')return /(warrior|any|fighter)/i.test(text);\n    return /(bowman|hunter|any)/i.test(text);\n  }\n  function classFilteredGearItems(slot){return gearItemsForSlot(slot).filter(classGearItemAllowed);}\n  function gearOptionStats(item,none){\n    if(none)return '';\n    const id=activeBuild()?.id;\n    if(id==='warrior-fighter') return `Lv ${item['Req Lv']||0}<br>W.ATK ${item['W.ATK']||0} · DEX ${item.DEX||0}<br>WDEF ${item.WDEF||0} · Speed ${item.Speed||0}`;\n    if(id==='archer-hunter') return `Lv ${item['Req Lv']||0}<br>W.ATK ${item['W.ATK']||0} · STR ${item.STR||0}<br>WDEF ${item.WDEF||0} · Speed ${item.Speed||0}`;\n    return `Lv ${item['Req Lv']||0}<br>INT ${item.INT||0} · LUK ${item.LUK||0}<br>M.ATK ${item['M.ATK']||0}<br>Crit ${item['Crit%']||0}% · CDMG ${item['Crit DMG']||0}%`;\n  }\n  function gearOptionMeta(item,none){\n    if(none)return '';\n    const id=activeBuild()?.id;\n    const job=String(item['Req Job']||item['Class Fit']||'Any');\n    const stat=id==='warrior-fighter'?`STR ${item['Req STR']||0} · DEX ${item['Req DEX']||0}`:id==='archer-hunter'?`STR ${item['Req STR']||0} · DEX ${item['Req DEX']||0}`:'';\n    return [`Lv ${item['Req Lv']||0}`,job,stat].filter(Boolean).join(' · ');\n  }\n  function updateGearFilterUi(){\n    const id=activeBuild()?.id, profile=activeBuild()||{}, branch=id==='warrior-fighter'?'Warrior / Fighter':id==='archer-hunter'?'Bowman / Hunter':(profile.shortName||'class');\n    const row=document.querySelector('[data-class-equipment-filters]'); if(row)row.hidden=false;\n    const future=document.getElementById('modal-future-label'), optional=document.getElementById('modal-optional-label');\n    if(future)future.textContent='Show future-level '+branch+' items';\n    if(optional)optional.textContent='Show all curated '+branch+' options';\n  }\n  function renderGearOptions(){"
+  );
+  app = app.replace(
+    "    document.getElementById('modal-title').textContent=`Choose ${slot}`;\n    document.getElementById('gear-modal').classList.add('open');",
+    "    document.getElementById('modal-title').textContent=`Choose ${slot}`;\n    updateGearFilterUi();\n    document.getElementById('gear-modal').classList.add('open');"
+  );
+  app = app.replace(
+    "    let items=gearItemsForSlot(activeSlot);",
+    "    updateGearFilterUi();\n    let items=classFilteredGearItems(activeSlot);\n    const beforeLevelFilter=items.length;\n    const futureCount=items.filter(x=>x.Item!=='None'&&Number(x['Req Lv']||0)>state.level).length;"
+  );
+  app = app.replace(
+    "const forbidden=/(mage|magician|wizard|cleric|thief|crossbow|spear|polearm|blunt)/i;",
+    "const forbidden=/\\b(?:mage|magician|wizard|cleric)\\b/i;"
+  );
+  app = app.replace(
+    "    if(items.length===1 && items[0].Item==='None'){\n      root.innerHTML=`<div class=\"empty-option\">No meaningful ${esc(activeSlot)} target is in the curated class equipment pool yet. That is deliberate: an empty slot is better than chasing filler gear.</div>`;",
+    "    const summary=document.getElementById('modal-filter-summary');\n    if(summary){\n      const profile=activeBuild()||{}, branch=profile.shortName||'Class';\n      summary.textContent=`${branch} equipment · Level ${state.level} · ${futureCount} future-level item${futureCount===1?'':'s'} ${showFuture?'shown':'hidden'} · ${Math.max(0,beforeLevelFilter-1)} class-matched option${beforeLevelFilter-1===1?'':'s'}`;\n    }\n    if(items.length===1 && items[0].Item==='None'){\n      root.innerHTML=`<div class=\"empty-option\">No ${esc(activeSlot)} item matches the ${esc((activeBuild()?.shortName||'selected class')+' job filter')}. Future-level and optional controls stay available above.</div>`;"
+  );
+  app = app.replace(
+    "<div><h4>${esc(item.Item)}</h4><div class=\"gear-badges\">${none?'':`<span class=\"plan-tag ${slug(item.Plan)}\">${esc(item.Plan)}</span><span class=\"class-tag\">${esc(item['Class Fit']||'Mage')}</span>`}</div><p>${esc(highly?(item['Recommendation Reason']||item.Notes||''):item.Notes||'Empty slot')}</p>${none?'':`<span class=\"evidence-tag ${String(item['Evidence Class']||'').includes('HISTORICAL')?'historical':String(item['Evidence Class']||'').includes('PRE-LAUNCH')?'verify':''}\" title=\"${esc(item['Parity Check']||'Current Classic/CURRENT cross-check status')}\">${esc(evidenceLabel(item))}</span>`}</div>",
+    "<div><h4>${esc(item.Item)}</h4><div class=\"gear-badges\">${none?'':`<span class=\"plan-tag ${slug(item.Plan)}\">${esc(item.Plan)}</span><span class=\"class-tag\">${esc(item['Class Fit']||item['Req Job']||'Any')}</span>`}</div><p>${esc(highly?(item['Recommendation Reason']||item.Notes||''):item.Notes||'Empty slot')}</p>${none?'':`<span class=\"evidence-tag ${String(item['Evidence Class']||'').includes('HISTORICAL')?'historical':String(item['Evidence Class']||'').includes('PRE-LAUNCH')?'verify':''}\" title=\"${esc(item['Parity Check']||'Current Classic/CURRENT cross-check status')}\">${esc(evidenceLabel(item))}</span>`}</div>"
+  );
+  app = app.replace(
+    "        <div class=\"stats\">${gearOptionStats(item,none)}</div>",
+    "        <div class=\"stats\">${gearOptionStats(item,none)}${none?'':`<span class=\"gear-requirements\"><span>Requires</span> ${esc(gearOptionMeta(item,none))}</span>`}</div>"
   );
   app = app.replace(
     "        <div class=\"stats\">${none?'':`Lv ${item['Req Lv']||0}<br>INT ${item.INT||0} · LUK ${item.LUK||0}<br>M.ATK ${item['M.ATK']||0}<br>Crit ${item['Crit%']||0}% · CDMG ${item['Crit DMG']||0}%`}</div>",
@@ -1028,6 +1136,11 @@ function patchApp(raw) {
     const optional=document.getElementById('modal-show-optional');
     const textNode=optional?.parentElement&&[...optional.parentElement.childNodes].find(node=>node.nodeType===3);
     if(textNode)textNode.textContent=' Show all curated '+className+' options';
+    const futureLabel=document.getElementById('modal-future-label');
+    const optionalLabel=document.getElementById('modal-optional-label');
+    const branchLabel=id==='warrior-fighter'?'Warrior / Fighter':id==='archer-hunter'?'Bowman / Hunter':className;
+    if(futureLabel)futureLabel.textContent='Show future-level '+branchLabel+' items';
+    if(optionalLabel)optionalLabel.textContent='Show all curated '+branchLabel+' options';
   }
   function renderDashboard(){`;
   if(!app.includes(buildCopyNeedle)) throw new Error('build-aware copy patch target missing');
@@ -1035,6 +1148,11 @@ function patchApp(raw) {
   app=app.replace("    if(p==='dashboard') renderDashboard();","    updateBuildCopy();\n    if(p==='dashboard') renderDashboard();");
   app=app.replace("  function renderDashboard(){\n    const l=currentLevelRow()||{}, srow=currentSkillRow()||{}, a=currentAP()||{};","  function renderDashboard(){\n    updateBuildCopy();\n    const l=currentLevelRow()||{}, srow=currentSkillRow()||{}, a=currentAP()||{};");
   app = app.replaceAll("buildSub.textContent=profile?.subtitle||'Current route'", "buildSub.textContent=(profile?.subtitle||'Current route')+' · Level '+String(profile?.levelMin||1)+'–'+String(profile?.levelMax||D.meta?.maxLevel||70)");
+  app = app.replaceAll("item['Class Fit']||'Mage'", "item['Class Fit']||item['Req Job']||'Any'");
+  app = app.replace(
+    "        <div class=\"stats\">${gearOptionStats(item,none)}</div>",
+    "        <div class=\"stats\">${gearOptionStats(item,none)}${none?'':`<span class=\"gear-requirements\"><span>Requires</span> ${esc(gearOptionMeta(item,none))}</span>`}</div>"
+  );
   return require('./patches/equipment-branding.cjs')(app);
 }
 
