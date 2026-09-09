@@ -917,6 +917,7 @@ function patchApp(raw) {
   app=app.replace(buildCopyNeedle,buildCopyFunction);
   app=app.replace("    if(p==='dashboard') renderDashboard();","    updateBuildCopy();\n    if(p==='dashboard') renderDashboard();");
   app=app.replace("  function renderDashboard(){\n    const l=currentLevelRow()||{}, srow=currentSkillRow()||{}, a=currentAP()||{};","  function renderDashboard(){\n    updateBuildCopy();\n    const l=currentLevelRow()||{}, srow=currentSkillRow()||{}, a=currentAP()||{};");
+  app = app.replaceAll("buildSub.textContent=profile?.subtitle||'Current route'", "buildSub.textContent=(profile?.subtitle||'Current route')+' · Level '+String(profile?.levelMin||1)+'–'+String(profile?.levelMax||D.meta?.maxLevel||70)");
   return require('./patches/equipment-branding.cjs')(app);
 }
 
