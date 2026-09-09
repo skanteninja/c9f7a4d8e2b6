@@ -857,6 +857,25 @@
     return /(bowman|hunter|any)/i.test(text);
   }
   function classFilteredGearItems(slot){return gearItemsForSlot(slot).filter(classGearItemAllowed);}
+  function sanitizeGearState(){
+    const id=activeBuild()?.id;
+    state.gear={...defaultGear,...(state.gear||{})};
+    Object.keys(state.gear).forEach(slot=>{
+      const name=state.gear[slot];
+      if(!name||name==='None'){state.gear[slot]='None';return;}
+      const item=getGear(name);
+      if(!item || ((id==='warrior-fighter'||id==='archer-hunter')&&!classGearItemAllowed(item))) state.gear[slot]='None';
+    });
+    // Saved data from older builds can contain impossible combinations.
+    // Preserve an existing Overall and remove the mutually exclusive pieces.
+    if(state.gear.Overall!=='None'){
+      state.gear.Top='None';
+      state.gear.Bottom='None';
+    }else if(state.gear.Top!=='None'||state.gear.Bottom!=='None'){
+      state.gear.Overall='None';
+    }
+    return state.gear;
+  }
   function gearOptionStats(item,none){
     if(none)return '';
     const id=activeBuild()?.id;
@@ -922,13 +941,20 @@
   function presetAtLevel(type){
     const p=D.gearPresets?.[type]; if(!p)return {};
     let out={};
-    (p.levels||[]).filter(x=>Number(x.min)<=state.level).sort((a,b)=>Number(a.min)-Number(b.min)).forEach(x=>Object.assign(out,x.gear||{}));
+    (p.levels||[]).filter(x=>Number(x.min)<=state.level).sort((a,b)=>Number(a.min)-Number(b.min)).forEach(x=>{
+      Object.entries(x.gear||{}).forEach(([slot,item])=>{
+        out[slot]=item;
+        if(item!=='None'&&slot==='Overall'){out.Top='None';out.Bottom='None';}
+        if(item!=='None'&&(slot==='Top'||slot==='Bottom'))out.Overall='None';
+      });
+    });
     return out;
   }
   function applyPreset(type){
     const p=D.gearPresets?.[type]; if(!p)return;
     const keep={Pet:state.gear.Pet,Mount:state.gear.Mount};
     state.gear={...defaultGear,...presetAtLevel(type),...keep};
+    sanitizeGearState();
     save();renderDashboard();renderEquipment('equipment-window-page','build-summary-page');
     toast(`${p.name} applied for Lv${state.level}`);
   }
@@ -1365,6 +1391,7 @@
   function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2600)}
 
   function renderAll(){
+    sanitizeGearState();
     const a=document.getElementById('level-select'), b=document.getElementById('hero-level-select'), r=document.getElementById('level-range');
     if(a)a.value=String(state.level); if(b)b.value=String(state.level); if(r)r.value=String(state.level);
     renderDashboard();renderBuildLibrary();renderRoutes();renderQuests();renderWeapons();renderSkills();renderEtc();
