@@ -56,6 +56,7 @@ jobs:
           grep -q 'maps-explorer-ready' public/maps-tab.js
           grep -q 'maps-atlas-visual-ready' public/maps-tab.js
           grep -q "name:'Orbis / El Nath Mts.'" public/maps-tab.js
+          grep -q '.maps-atlas-world-point.sprite-fallback:before' public/maps-tab.css
           test "$(wc -c < public/assets/map-atlas/sheets/maple-world.png)" -gt 100000
           test "$(wc -c < public/assets/map-atlas/sheets/victoria-island.png)" -gt 5000
           test "$(wc -c < public/assets/map-atlas/sheets/orbis-el-nath.png)" -gt 5000
@@ -113,7 +114,9 @@ jobs:
             const artwork=[...d.querySelectorAll('.maps-continent-art-image')];if(!artwork.length)throw Error('continent artwork missing');
             await wait(()=>artwork.every(img=>img.complete&&img.naturalWidth>0),'continent artwork');
             if(d.querySelector('.maps-continent-art-missing'))throw Error('continent artwork failed to load');
-            await wait(()=>[...d.querySelectorAll('.maps-atlas-world-point img')].some(x=>x.complete&&x.naturalWidth>0),'marker sprite');
+            const worldPoints=[...d.querySelectorAll('.maps-atlas-world-point')];
+            if(!worldPoints.every(point=>point.dataset.continent&&/^Open /.test(point.getAttribute('aria-label')||'')))throw Error('world point labels');
+            if(!worldPoints.some(point=>point.classList.contains('sprite-fallback')))throw Error('world point fallback marker');
             const state=w.TCW_MAPS?.state;if(!state||state.current.length<200||state.legacy.length!==0||state.maps.length!==state.current.length)throw Error('Classic-only map catalog');
 
             d.querySelector('.maps-continent-card[data-continent="victoria"]')?.click();
