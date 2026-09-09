@@ -22,7 +22,9 @@ body{font-size:15px;line-height:1.5}
 .page[data-page="skills"] :is(h2){font-size:28px}.page[data-page="skills"] :is(h3){font-size:21px}
 .page[data-page="skills"] :is(.skill-row,.skill-plan-row){padding:14px;gap:12px}
 .page[data-page="skills"] :is(.skill-card,.atlas-skill-card){padding:12px;min-width:0}
-.page[data-page="skills"] :is(.atlas-skill-grid,.skill-grid){grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.page[data-page="skills"] .atlas-skill-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.page[data-page="skills"] .skill-grid{display:flex;flex-wrap:wrap;gap:12px}
+.page[data-page="skills"] .skill-tree-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
 .page[data-page="skills"] :is(b,small){white-space:normal;overflow-wrap:anywhere}
 .page[data-page="skills"] img{object-fit:contain}
 .page :is(.atlas-action-row b,.atlas-queue-row b,.buff-chip b){font-size:13px;white-space:normal}

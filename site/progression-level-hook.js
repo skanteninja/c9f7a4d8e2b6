@@ -154,7 +154,11 @@
   let activeMask = null;
 
   const clamp = n => Math.max(1, Math.min(70, Number(n) || 1));
-  const stage = n => n < 10 ? 'beginner' : n < 30 ? 'magician' : 'il';
+  const stage = n => {
+    const tiers = Array.isArray(D?.skillTiers) ? D.skillTiers : [];
+    const tier = n < 10 ? tiers[0] : n < 30 ? tiers[1] : tiers[2];
+    return tier?.id || (n < 10 ? 'beginner' : n < 30 ? 'first-job' : 'second-job');
+  };
   const renderedLevel = () => clamp(Number(document.getElementById('hero-level')?.textContent || document.getElementById('level-select')?.value || 1));
 
   function gearBreakpoint(n) {

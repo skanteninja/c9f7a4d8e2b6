@@ -13,7 +13,9 @@ html.auto-gear-synced .equipment-window{box-shadow:inset 0 0 0 1px rgba(98,212,1
 .dashboard-v72 .v5-character-hero .v5-quick-metrics button{min-height:44px!important;padding:5px 10px!important}
 .dashboard-v72 .v5-character-hero .v5-quick-metrics small{margin-bottom:2px!important}
 .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree{position:absolute!important;top:14px!important;right:14px!important;width:clamp(300px,39%,360px)!important;max-width:360px!important;margin:0!important;z-index:3!important;box-sizing:border-box!important}
-/* Magician/I-L have more than three skills. Keep them on one row: the module grows sideways, never down into Next SP. */
+.dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-flow:row!important;gap:6px!important}
+.dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .skill-grid{display:flex!important;flex-flow:row wrap!important;gap:12px!important}
+/* Any class with a second-job skill set gets a horizontal dashboard tree. */
 .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)){width:clamp(410px,55%,440px)!important;max-width:440px!important}
 .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)) .atlas-skill-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important;grid-auto-flow:row!important}
 .dashboard-v72 .v5-character-hero:has(>.tcw-hero-skill-tree .atlas-skill-grid>.atlas-skill-card:nth-child(4)) .v5-character-copy{padding-right:clamp(390px,52%,430px)!important}
