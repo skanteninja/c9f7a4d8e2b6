@@ -58,6 +58,100 @@ function secondJobPlan(startLevel, endLevel, phases) {
   return rows;
 }
 
+/*
+ * The build library is shared product metadata, not part of any one build's
+ * gameplay payload.  Every selected guide must therefore receive the exact
+ * same catalog.  Keeping catalog changes inside individual variants caused a
+ * Fighter session and a Hunter session to disagree about which builds existed.
+ */
+function multiBuildCatalog(baseCatalog = {}) {
+  const classes = (baseCatalog.classes || []).map(cls => {
+    if (cls.id === 'warrior' || cls.id === 'bowman') return {...cls, status: 'active'};
+    return {...cls};
+  });
+
+  const fighter = {
+    id: 'warrior-fighter',
+    classId: 'warrior',
+    branchId: 'fighter',
+    name: 'Fighter Build',
+    shortName: 'Fighter',
+    subtitle: 'Sword-focused Warrior progression',
+    levelMin: 1,
+    levelMax: 70,
+    status: 'active',
+    tags: ['Warrior', 'Fighter', 'Level 1–70', 'Quest-aware', 'Sword route'],
+    primaryStat: 'STR',
+    secondaryPolicy: 'DEX only for verified accuracy or equipment breakpoints',
+    description: 'A complete Classic Fighter path covering AP, SP, equipment, training, quests, monsters and crafting.',
+    dataRef: 'fighter'
+  };
+  const hunter = {
+    id: 'archer-hunter',
+    classId: 'bowman',
+    branchId: 'hunter',
+    name: 'Hunter Build',
+    shortName: 'Hunter',
+    subtitle: 'DEX-first bow progression',
+    levelMin: 1,
+    levelMax: 70,
+    status: 'active',
+    tags: ['Bowman', 'Hunter', 'Level 1–70', 'Bow route'],
+    primaryStat: 'DEX',
+    secondaryPolicy: 'Minimum STR for bow requirements',
+    description: 'A complete Classic Bowman-to-Hunter path covering AP, SP, bows, training, quests, monsters and crafting.',
+    dataRef: 'hunter'
+  };
+
+  let hasHunter = false;
+  const builds = (baseCatalog.builds || []).map(build => {
+    if (build.id === 'magician-il-fresh') {
+      return {
+        ...build,
+        name: 'I/L Wizard Build',
+        shortName: 'I/L Wizard',
+        subtitle: 'Ice / Lightning Wizard progression',
+        description: 'A complete Classic I/L Wizard path covering AP, SP, equipment, training, quests, monsters and crafting.',
+        dataRef: 'root'
+      };
+    }
+    if (build.id === 'warrior-future' || build.id === 'warrior-fighter') return fighter;
+    if (build.id === 'archer-hunter') {
+      hasHunter = true;
+      return hunter;
+    }
+    return {...build};
+  });
+
+  if (!hasHunter) {
+    const afterBowman = builds.findIndex(build => build.id === 'bowman-future');
+    builds.splice(afterBowman >= 0 ? afterBowman + 1 : builds.length, 0, hunter);
+  }
+
+  return {...baseCatalog, classes, builds};
+}
+
+function questOnlyEtc(rows, buildName) {
+  return (rows || []).flatMap(row => {
+    const quest = Number(row['Core Quest Need'] || 0);
+    const craft = Number(row['Crafting Need'] || 0);
+    if (!craft) return [{...row}];
+    if (!quest) return [];
+    const donation = Number(row['Optional / Donation'] || 0);
+    return [{
+      ...row,
+      'Crafting Need': 0,
+      'Core + Craft Minimum': quest,
+      'All-In Total': quest + donation,
+      'Used For': `${row.Item} quest reserve. Add ${buildName} crafting materials only when a verified recipe is selected.`,
+      'Stop Saving When': donation
+        ? `After the quest reserve. Donation extras are only needed when active.`
+        : 'After the listed quest reserve is complete.',
+      'Confidence': 'Quest baseline'
+    }];
+  });
+}
+
 function fighterVariant(base) {
   const skillsAudit = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-skills.json'), 'utf8'));
   const itemAudit = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-items.json'), 'utf8'));
@@ -148,9 +242,7 @@ function fighterVariant(base) {
     ['30','+5 STR',135,27,'Gladius / Blue Axe / level-30 sword route',30,'Current level-30 sample is 135 STR / 27 base DEX, with gear supplying the remaining DEX.' ],
     ['31–70','STR first; DEX only for verified accuracy or equipment breakpoints','135+','27+','One-handed sword + shield', '30+','Keep the safer sword route’s hit rate current; use gear, scrolls, and potions before permanent AP when practical.']
   ].map(x=>({'Level Range':x[0],'AP Action':x[1],'Base STR Target':x[2],'Base DEX Target':x[3],'Weapon Target':x[4],'Weapon DEX Req':x[5],'Effective DEX Plan':x[6],'Scroll Plan':'Prefer safe 100%/60% upgrades; do not gamble early progression gear','Why':x[6],'Status':'Classic beta / verify at launch','Evidence Class':'CURRENT / VERIFY'}));
-  const classes = base.catalog.classes.map(c=>c.id==='warrior'?{...c,status:'active'}:c);
-  const builds = base.catalog.builds.map(b=>b.id==='magician-il-fresh'?{...b,name:'I/L Wizard Build'}:b.id==='warrior-future'?{...b,id:'warrior-fighter',name:'Fighter Build',shortName:'Fighter',subtitle:'Sword-focused Warrior progression',levelMin:1,levelMax:70,status:'active',tags:['Warrior','Fighter','Level 1–70','Quest-aware','Sword route'],primaryStat:'STR',secondaryPolicy:'DEX only for verified accuracy or equipment breakpoints',description:'A complete Classic Fighter path covering AP, SP, equipment, training, quests, monsters and crafting.',dataRef:'fighter'}:b);
-  return {catalog:{...base.catalog,classes,builds,activeBuildId:base.catalog.activeBuildId},skills,skillIcons,gear,weapons:weaponRows,armor:gear,recipes:base.recipes,upgrades:base.upgrades,routes:routeBlocks.map(x=>({Levels:`${x[0]}–${x[1]}`,'Primary Route':x[2],'Main Monsters':x[3],'Main Skill / Method':x[4],'Why This Block':'Classic Fighter route checkpoint.','Major ETCs to Bank':'Only active quest materials','Weapon Decision Point':'Review current sword breakpoint','Quest / PQ Focus':'Complete class-appropriate chain','Status':'CURRENT / VERIFY','Evidence Class':'CURRENT / VERIFY'})),leveling,quests:questAudit.quests,etc:base.etc,apPlan,scrolls:base.scrolls,decisions:base.decisions,gearPresets:{efficient:{name:'Fighter Sword Progression',description:'Level checkpoints for a practical sword-and-shield Fighter.',levels:[]}},fighterDatabase:{monsters:monsterAudit.monsters,crafting:craftingAudit}};
+  return {catalog:base.catalog,skills,skillIcons,gear,weapons:weaponRows,armor:gear,recipes:base.recipes,upgrades:base.upgrades,routes:routeBlocks.map(x=>({Levels:`${x[0]}–${x[1]}`,'Primary Route':x[2],'Main Monsters':x[3],'Main Skill / Method':x[4],'Why This Block':'Classic Fighter route checkpoint.','Major ETCs to Bank':'Only active quest materials','Weapon Decision Point':'Review current sword breakpoint','Quest / PQ Focus':'Complete class-appropriate chain','Status':'CURRENT / VERIFY','Evidence Class':'CURRENT / VERIFY'})),leveling,quests:questAudit.quests,etc:questOnlyEtc(base.etc,'Fighter'),apPlan,scrolls:base.scrolls,decisions:base.decisions,gearPresets:{efficient:{name:'Fighter Sword Progression',description:'Level checkpoints for a practical sword-and-shield Fighter.',levels:[]}},fighterDatabase:{monsters:monsterAudit.monsters,crafting:craftingAudit}};
 }
 
 function hunterVariant(base) {
@@ -221,7 +313,7 @@ function hunterVariant(base) {
     ['26–30','+5 STR / +20 DEX',30,132,'Ryden',65,'Reach the current level-30 bow sample, then let gear/scrolls handle later STR requirements where possible.'],
     ['31–70','Keep STR at the next bow requirement; DEX otherwise','30+','132+','Current bow / Hunter equipment','Next bow requirement','The private guide’s minimum-STR rule is useful after level 30; current Classic data remains the authority for exact equipment breakpoints.']
   ].map(x=>({'Level Range':x[0],'AP Action':x[1],'Base STR Target':x[2],'Base DEX Target':x[3],'Weapon Target':x[4],'Weapon DEX Req':x[5],'Effective DEX Plan':x[6],'Primary Stat':'DEX','Secondary Stat':'STR for bow requirements','Scroll Plan':'Bow Attack weapon scrolls; use safe progression upgrades first','Why':x[6],'Status':'Classic beta / verify at launch','Evidence Class':'CURRENT / VERIFY'}));
-  return {catalog:{...base.catalog,activeBuildId:base.catalog.activeBuildId,classes:base.catalog.classes.map(c=>c.id==='archer'?{...c,status:'active'}:c),builds:base.catalog.builds},skills,skillIcons,gear,weapons:gear.filter(x=>x.Slot==='Weapon').map(x=>({Lv:x['Req Lv']||1,Weapon:x.Item,Type:x['Item ID'],'Weapon Type':'Bow','Why':x.Notes||'Bow breakpoint'})),armor:gear,recipes:base.recipes,upgrades:base.upgrades,routes:routes.map(x=>({Levels:`${x[0]}–${x[1]}`,'Primary Route':x[2],'Main Monsters':x[3],'Main Skill / Method':x[4],Status:'CURRENT / VERIFY','Evidence Class':'CURRENT / VERIFY'})),leveling,quests:quests.quests,etc:base.etc,apPlan,scrolls:base.scrolls,decisions:base.decisions,gearPresets:{efficient:{name:'Hunter Bow Progression',description:'DEX-first bow progression with current Classic bow breakpoints and minimum-STR guidance after level 30.',levels:[]}},hunterDatabase:{monsters:monsters.monsters,crafting}};
+  return {catalog:base.catalog,skills,skillIcons,gear,weapons:gear.filter(x=>x.Slot==='Weapon').map(x=>({Lv:x['Req Lv']||1,Weapon:x.Item,Type:x['Item ID'],'Weapon Type':'Bow','Why':x.Notes||'Bow breakpoint'})),armor:gear,recipes:base.recipes,upgrades:base.upgrades,routes:routes.map(x=>({Levels:`${x[0]}–${x[1]}`,'Primary Route':x[2],'Main Monsters':x[3],'Main Skill / Method':x[4],Status:'CURRENT / VERIFY','Evidence Class':'CURRENT / VERIFY'})),leveling,quests:quests.quests,etc:questOnlyEtc(base.etc,'Hunter'),apPlan,scrolls:base.scrolls,decisions:base.decisions,gearPresets:{efficient:{name:'Hunter Bow Progression',description:'DEX-first bow progression with current Classic bow breakpoints and minimum-STR guidance after level 30.',levels:[]}},hunterDatabase:{monsters:monsters.monsters,crafting}};
 }
 
 function readChunk(name) {
@@ -299,12 +391,15 @@ function sanitizePublicGuide(value, key = '') {
 
 function publicGuide(raw) {
   const data = JSON.parse(raw);
-  data.buildVariants = { fighter: fighterVariant(data), hunter: hunterVariant(data) };
-  if (data.catalog?.builds) {
-    data.catalog.builds = data.catalog.builds.map(b => b.id === 'magician-il-fresh' ? {...b, name:'I/L Wizard Build'} : b.id === 'warrior-future' ? {...b, id:'warrior-fighter', name:'Fighter Build', shortName:'Fighter', subtitle:'Sword-focused Warrior progression', levelMin:1, levelMax:70, status:'active', tags:['Warrior','Fighter','Level 1–70','Quest-aware','Sword route'], primaryStat:'STR', secondaryPolicy:'DEX only for verified accuracy or equipment breakpoints', description:'A complete Classic Fighter path covering AP, SP, equipment, training, quests, monsters and crafting.', dataRef:'fighter'} : b);
-    data.catalog.builds.push({id:'archer-hunter',name:'Hunter Build',shortName:'Hunter',subtitle:'DEX-first bow progression',levelMin:1,levelMax:70,status:'active',classId:'archer',branchId:'hunter',tags:['Archer','Hunter','Level 1–70','Bow route'],primaryStat:'DEX',secondaryPolicy:'Minimum STR for bow requirements',description:'A Classic Bowman-to-Hunter path covering AP, SP, bows, training, quests, monsters and crafting.',dataRef:'hunter'});
-    data.catalog.classes = data.catalog.classes.map(c => c.id === 'warrior' ? {...c, status:'active'} : c);
-  }
+  const catalog = multiBuildCatalog(data.catalog);
+  const fighter = fighterVariant(data);
+  const hunter = hunterVariant(data);
+  // Every guide reads the same build library. Gameplay arrays differ by build;
+  // navigation metadata must not.
+  data.catalog = catalog;
+  fighter.catalog = catalog;
+  hunter.catalog = catalog;
+  data.buildVariants = {fighter, hunter};
   if (data.meta) {
     data.meta = {
       title: BRAND,
@@ -321,11 +416,21 @@ function publicGuide(raw) {
 function patchApp(raw) {
   let app = ownedUrls(raw).replaceAll('MapleStory Classic Builder', BRAND);
   app = app.replace('  const D = window.GUIDE_DATA;', `  let D = window.GUIDE_DATA;
+  let requestedBuild = '';
   try {
-    const requestedBuild = JSON.parse(localStorage.getItem('ultimateILGuideState.v1') || '{}').activeBuildId;
-    if(requestedBuild === 'warrior-fighter' && D.buildVariants?.fighter) D = D.buildVariants.fighter;
-    if(requestedBuild === 'archer-hunter' && D.buildVariants?.hunter) D = D.buildVariants.hunter;
-  } catch(e) {}`);
+    const saved = JSON.parse(localStorage.getItem('ultimateILGuideState.v1') || '{}');
+    requestedBuild = new URLSearchParams(location.search).get('build') || saved.activeBuildId || '';
+    const variant = { 'warrior-fighter':'fighter', 'archer-hunter':'hunter' }[requestedBuild];
+    if(variant && D.buildVariants?.[variant]) D = D.buildVariants[variant];
+  } catch(e) {}
+  // All enhancement modules receive the selected guide, never the I/L root
+  // object. This is the boundary that keeps every page build-aware.
+  window.GUIDE_DATA = D;
+  window.TCW_ACTIVE_BUILD_ID = requestedBuild || D.catalog?.activeBuildId || 'magician-il-fresh';`);
+  app = app.replace(
+    "  const KEY = 'ultimateILGuideState.v1';",
+    "  const LEGACY_KEY = 'ultimateILGuideState.v1';\n  // Preserve the established I/L save unchanged; other researched builds own\n  // their level, gear, checklist, and planner state.\n  const KEY = window.TCW_ACTIVE_BUILD_ID==='magician-il-fresh' ? LEGACY_KEY : `${LEGACY_KEY}.${window.TCW_ACTIVE_BUILD_ID}`;"
+  );
   app = require('./patches/usability.cjs')(app);
   app = app.replace("    const profile=activeBuild();", "    const profile=activeBuild();\n    const buildTitle=document.getElementById('hero-build-title'); if(buildTitle) buildTitle.textContent=profile?.name||'I/L Wizard Build';\n    const buildSub=document.getElementById('hero-build-subtitle'); if(buildSub) buildSub.textContent=profile?.subtitle||'Current route';\n    const heroClass=document.querySelector('.v5-kicker-row .class-pill'); if(heroClass) heroClass.textContent=classForBuild(profile)?.name?.toUpperCase()||'MAGICIAN';\n    const heroJob=document.querySelector('.v5-kicker-row .job-pill'); if(heroJob) heroJob.textContent=profile?.shortName||'I/L WIZARD';");
   app = app.replace("  function recommendedWeaponName(level=state.level){", "  function recommendedWeaponName(level=state.level){\n    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){ const row=(D.weapons||[]).filter(x=>Number(x.Lv||0)<=level).at(-1); return row?.Weapon||'None'; }");
@@ -344,8 +449,24 @@ function patchApp(raw) {
     `function evidenceLabel(item){\n    const e=String(item?.['Evidence Class']||'UNVERIFIED');\n    if(e.includes('HISTORICAL')) return 'HISTORICAL ONLY';\n    if(e.includes('PRE-LAUNCH')) return 'COT2 · VERIFY LAUNCH';\n    if(e.includes('CURRENT')) return 'COT2 VERIFIED';\n    return 'UNVERIFIED';\n  }`,
     `function evidenceLabel(){ return ''; }`
   );
-  app = app.replace('<button class="ghost-btn" disabled>Not researched yet</button>', '<button class="ghost-btn" data-build-select="${b.id}">${[\'warrior-fighter\',\'archer-hunter\'].includes(b.id)?`Open ${b.name}`:\'Not researched yet\'}</button>');
-  app = app.replace("  document.getElementById('page-back')?.addEventListener('click',()=>setPage('dashboard'));", "  document.getElementById('page-back')?.addEventListener('click',()=>setPage('dashboard'));\n  document.body.addEventListener('click',e=>{const b=e.target.closest('[data-build-select]');if(!b)return;state.activeBuildId=b.dataset.buildSelect;save();location.reload();});");
+  const buildLibraryStart = app.indexOf('  function renderBuildLibrary(){');
+  const buildLibraryEnd = app.indexOf('\n\n  function renderRoutes(){', buildLibraryStart);
+  if (buildLibraryStart < 0 || buildLibraryEnd < 0) throw new Error('build library renderer patch target missing');
+  const multiBuildLibraryRenderer = `  function renderBuildLibrary(){
+    const root=document.getElementById('build-library'); if(!root)return;
+    const builds=D.catalog?.builds||[];
+    const classes=D.catalog?.classes||[];
+    const available=builds.filter(b=>b.status==='active');
+    document.getElementById('active-build-count').textContent=String(available.length);
+    root.innerHTML=classes.filter(c=>c.id!=='beginner').map(cls=>{
+      const list=builds.filter(b=>b.classId===cls.id);
+      if(!list.length)return '';
+      const classLive=list.some(b=>b.status==='active');
+      return \`<section class="class-build-group \${classLive?'active-class':''}"><div class="class-build-head"><div class="class-emblem">\${classEmblem(cls)}</div><div><span class="eyebrow">\${classLive?'RESEARCHED BUILDS':'READY FOR FUTURE BUILDS'}</span><h3>\${esc(cls.name)}</h3><p>\${esc((cls.branches||[]).join(' · '))}</p></div></div><div class="build-card-grid">\${list.map(b=>{const selected=b.id===state.activeBuildId;const researched=b.status==='active';const label=selected?'VIEWING':researched?'AVAILABLE':'PLANNED';return \`<article class="build-card \${selected?'active-build':researched?'available-build':'planned-build'}"><div class="build-card-top"><span class="\${selected?'live-build-tag':researched?'available-build-tag':'planned-tag'}">\${label}</span>\${b.levelMin?\`<small>Lv \${b.levelMin}–\${b.levelMax}</small>\`:''}</div><h4>\${esc(b.name)}</h4><p>\${esc(b.description||b.subtitle||'Infrastructure reserved for a future researched build.')}</p><div class="build-tags">\${(b.tags||[]).map(t=>\`<span>\${esc(t)}</span>\`).join('')}</div>\${researched?\`<a class="\${selected?'primary-btn':'ghost-btn'}" data-build-select="\${esc(b.id)}" href="?build=\${encodeURIComponent(b.id)}&page=dashboard">\${selected?'Viewing build':'Open build'}</a>\`:\`<button class="ghost-btn" disabled>Not researched yet</button>\`}</article>\`;}).join('')}</div></section>\`;
+    }).join('');
+  }`;
+  app = app.slice(0, buildLibraryStart) + multiBuildLibraryRenderer + app.slice(buildLibraryEnd);
+  app = app.replace("  document.getElementById('page-back')?.addEventListener('click',()=>setPage('dashboard'));", "  document.getElementById('page-back')?.addEventListener('click',()=>setPage('dashboard'));\n  document.body.addEventListener('click',e=>{const b=e.target.closest('[data-build-select]');if(!b)return;e.preventDefault();const id=b.dataset.buildSelect;if(!D.catalog?.builds?.some(x=>x.id===id&&x.status==='active'))return;window.TCW_ACTIVE_BUILD_ID=id;const u=new URL(location.href);u.searchParams.set('build',id);u.searchParams.set('page','dashboard');location.assign(u.pathname+u.search+u.hash);});");
 
   app = app.replaceAll('COT2 client export via OSMS', 'Top Classic World database');
   app = app.replaceAll('Current COT2 metadata', 'Current game data');
@@ -368,6 +489,10 @@ function patchApp(raw) {
     `renderDashboard();renderBuildLibrary();renderRoutes();renderQuests();renderWeapons();renderSkills();renderEtc();`
   );
   app = app.replace(`page:raw.page||'dashboard',`, `page:['research','data','formulas'].includes(raw.page)?'dashboard':(raw.page||'dashboard'),`);
+  app = app.replace(
+    `activeBuildId:raw.activeBuildId||D.catalog?.activeBuildId||'magician-il-fresh',`,
+    `activeBuildId:((id)=>D.catalog?.builds?.some(b=>b.id===id&&b.status==='active')?id:(raw.activeBuildId||D.catalog?.activeBuildId||'magician-il-fresh'))(new URLSearchParams(location.search).get('build')||window.TCW_ACTIVE_BUILD_ID),`
+  );
 
   // Dashboard queues use the physical space available in the equal-height action row.
   app = app.replace(

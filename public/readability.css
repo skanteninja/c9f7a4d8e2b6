@@ -29,4 +29,7 @@ body{font-size:15px;line-height:1.5}
 .page :is(.atlas-action-row small,.atlas-queue-row small,.buff-chip small){font-size:12px;white-space:normal}
 .page .atlas-skill-card b{font-size:12px;white-space:normal}.page .atlas-skill-card small{font-size:12px}
 .page .atlas-skill-detail p{font-size:14px}.page .atlas-skill-detail b{font-size:16px}
+.build-card.available-build{border-color:rgba(100,210,150,.45);box-shadow:0 0 0 1px rgba(100,210,150,.08) inset}
+.available-build-tag{display:inline-flex;align-items:center;border:1px solid rgba(100,210,150,.55);border-radius:999px;padding:3px 8px;color:#9df1bd;background:rgba(47,144,87,.14);font-size:11px;font-weight:800;letter-spacing:.06em}
+.build-card a[data-build-select]{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 @media(max-width:700px){.page .db-toolbar{flex-wrap:wrap}.page .db-toolbar input{min-width:0;width:100%}.page[data-page="skills"] .skill-row{grid-template-columns:48px 38px 42px minmax(0,1fr)}.page[data-page="skills"] .skill-why,.page[data-page="skills"] .skill-result{grid-column:1/-1!important}}
