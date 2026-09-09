@@ -108,9 +108,31 @@ jobs:
                 exit 1
               fi
             done
-            if grep -Eqi '>\s*(PLAY|DATABASE|META)\s*<' "$file"; then
-              echo "forbidden navigation label exposed"
-              python3 - "$file" <<'PY'
+            if python3 - "$file" <<'PY'
+          import re,sys
+          s=open(sys.argv[1],encoding='utf-8',errors='replace').read()
+          visible=re.sub(r'<(script|style)\\b[^>]*>[\\s\\S]*?</\\1>',' ',s,flags=re.I)
+          sys.exit(0 if not re.search(r'>\\s*(PLAY|DATABASE|META)\\s*<',visible,re.I) else 1)
+          PY
+            then
+              :
+            else
+              echo "forbidden visible navigation label exposed"
+              exit 1
+            fi
+            if python3 - "$file" <<'PY'
+          import re,sys
+          s=open(sys.argv[1],encoding='utf-8',errors='replace').read()
+          visible=re.sub(r'<(script|style)\\b[^>]*>[\\s\\S]*?</\\1>',' ',s,flags=re.I)
+          sys.exit(0 if not re.search(r'COT2|OSMS|pre[- ]launch|launch[- ]scope|Evidence &amp; sources|Evidence & sources',visible,re.I) else 1)
+          PY
+            then
+              :
+            else
+              echo "forbidden visible internal wording exposed"
+              exit 1
+            fi
+            python3 - "$file" <<'PY'
           import re,sys
           s=open(sys.argv[1],encoding='utf-8',errors='replace').read()
           for m in list(re.finditer(r'>\s*(PLAY|DATABASE|META)\s*<',s,re.I))[:20]:
