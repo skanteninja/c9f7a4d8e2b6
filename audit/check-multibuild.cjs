@@ -209,7 +209,7 @@ const ciProxy = fs.readFileSync('.github/ci_static_proxy.py', 'utf8');
 if (!ciProxy.includes('primary_match') || ciProxy.includes('api.dreamms.gg/api/GMS/latest/item/')) {
   throw new Error('CI asset proxy still routes primary item artwork through the incompatible DreamMS/GMS table');
 }
-if (!app.includes('classic-canonical-item-id') || app.includes('/game-media/items/fallback/')) {
+if (!app.includes('classic-canonical-item-id') || !app.includes("String(item['Icon URL']||'')!==canonical") || app.includes('/game-media/items/fallback/')) {
   throw new Error('App still exposes legacy item visual fallbacks instead of canonical Classic IDs');
 }
 const indexHtml = fs.readFileSync(`${outputDir}/index.html`, 'utf8');
