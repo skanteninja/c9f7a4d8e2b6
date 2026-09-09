@@ -152,6 +152,164 @@ function questOnlyEtc(rows, buildName) {
   });
 }
 
+function beginnerSkillRows() {
+  const plan = [
+    [1, 'Save SP for Beginner skills', 'Three Snails 0 | Recovery 0 | Nimble Feet 0'],
+    [2, 'Three Snails +1', 'Three Snails 1 | Recovery 0 | Nimble Feet 0'],
+    [3, 'Three Snails +1', 'Three Snails 2 | Recovery 0 | Nimble Feet 0'],
+    [4, 'Three Snails +1', 'Three Snails 3 | Recovery 0 | Nimble Feet 0'],
+    [5, 'Recovery +1', 'Three Snails 3 | Recovery 1 | Nimble Feet 0'],
+    [6, 'Recovery +1', 'Three Snails 3 | Recovery 2 | Nimble Feet 0'],
+    [7, 'Recovery +1', 'Three Snails 3 | Recovery 3 | Nimble Feet 0'],
+    [8, 'Nimble Feet +1', 'Three Snails 3 | Recovery 3 | Nimble Feet 1'],
+    [9, 'Nimble Feet +1', 'Three Snails 3 | Recovery 3 | Nimble Feet 2']
+  ];
+  return plan.map(([Level, Spend, result]) => ({
+    Level, SP: Level === 1 ? 0 : 1, Spend,
+    'Why This Is The Action': Level === 1
+      ? 'Start with no spend at Lv1; the first Beginner SP arrives at Lv2.'
+      : 'Finish the shared Beginner foundation before the level-10 job advancement.',
+    'Meso / MP Logic': 'Keep Maple Island gear and potion spending light while the Beginner route is still active.',
+    'Result After Level': result,
+    Status: 'Classic beta / verify at launch',
+    'Evidence Class': 'CURRENT / VERIFY'
+  }));
+}
+
+function buildQuestRows(rows, buildName) {
+  return (rows || []).map((q, index) => {
+    const level = Number(q.level_min ?? q.chain_level_min ?? 1);
+    const requirements = Array.isArray(q.requirements_list) ? q.requirements_list : [];
+    const items = requirements.filter(x => x.type === 'item');
+    const text = `${q.name || ''} ${q.description || ''} ${q.region || ''} ${q.npc_name || ''}`;
+    const classQuest = /advance|job|warrior|fighter|bowman|archer|hunter|perion|henesys|olaf|athena/i.test(text);
+    const priority = level <= 10 || classQuest ? 'High' : level <= 30 || items.length ? 'Medium' : 'Low / Optional';
+    const description = String(q.description || '').split(/\n+/).map(x => x.trim()).find(Boolean) || `Continue the ${buildName} route.`;
+    const reward = [
+      q.rewards_items,
+      q.rewards_exp ? `EXP ${q.rewards_exp}` : '',
+      q.rewards_money ? `${q.rewards_money} mesos` : '',
+      q.next_quest_name ? `Next: ${q.next_quest_name}` : ''
+    ].filter(Boolean).join(' · ') || 'Quest completion';
+    return {
+      'Done?': false,
+      Priority: priority,
+      Lv: Number.isFinite(level) ? level : 1,
+      Quest: q.name || `Quest ${q.id || index + 1}`,
+      Region: q.region || 'Classic World',
+      Eligibility: `${buildName} route · level ${Number.isFinite(level) ? level : 1}+`,
+      Repeatable: 'No',
+      EXP: q.rewards_exp || 0,
+      Mesos: q.rewards_money || 0,
+      'Reward / Unlock': reward,
+      'Why Do It': description.slice(0, 260),
+      'ETC / Item To Save': items.map(x => x.name).join(' · '),
+      Qty: items.map(x => x.count).join(' · '),
+      'Save Guidance': items.length ? `Keep ${items.map(x => `${x.name} ×${x.count}`).join(', ')} until this chain is complete.` : 'No special ETC reserve; follow the route and take the reward.',
+      Status: 'CURRENT / VERIFY',
+      'Quest ID': q.id || String(index + 1),
+      NPC: q.npc_name || '—',
+      Chain: q.parent || '—',
+      'Next Quest': q.next_quest_name || '—',
+      'Class Fit': buildName,
+      Requirements: q.requirements || '—'
+    };
+  });
+}
+
+function buildEtcRows(baseRows, rawQuests, buildName) {
+  const rows = questOnlyEtc(baseRows, buildName).map(row => ({...row}));
+  const byName = new Map(rows.map(row => [String(row.Item).toLowerCase(), row]));
+  for (const quest of rawQuests || []) {
+    const itemReqs = (quest.requirements_list || []).filter(x => x.type === 'item' && x.name);
+    for (const req of itemReqs) {
+      const key = String(req.name).toLowerCase();
+      const count = Math.max(1, Number(req.count) || 1);
+      let row = byName.get(key);
+      if (!row) {
+        row = {
+          Item: req.name,
+          'Start Saving': `Lv${Number(quest.level_min || quest.chain_level_min || 1)}`,
+          'Core Quest Need': count,
+          'Crafting Need': 0,
+          'Optional / Donation': 0,
+          'Core + Craft Minimum': count,
+          'All-In Total': count,
+          'Used For': `${quest.name || 'Quest'} (${buildName} quest reserve)`,
+          'Stop Saving When': `After ${quest.name || 'the active quest'} is complete.`,
+          Confidence: 'Quest-linked',
+          'Start Lv': Number(quest.level_min || quest.chain_level_min || 1),
+          'Satisfied?': false,
+          'Your Held': null
+        };
+        rows.push(row);
+        byName.set(key, row);
+      } else {
+        row['Core Quest Need'] = Math.max(Number(row['Core Quest Need'] || 0), count);
+        row['Core + Craft Minimum'] = Math.max(Number(row['Core + Craft Minimum'] || 0), count);
+        row['All-In Total'] = Math.max(Number(row['All-In Total'] || 0), Number(row['Core + Craft Minimum'] || 0) + Number(row['Optional / Donation'] || 0));
+        const lv = Number(quest.level_min || quest.chain_level_min || 1);
+        row['Start Lv'] = Math.min(Number(row['Start Lv'] || lv), lv);
+        row['Start Saving'] = `Lv${row['Start Lv']}`;
+        const use = `${quest.name || 'Quest'} (${buildName})`;
+        if (!String(row['Used For'] || '').includes(quest.name || '')) row['Used For'] = `${row['Used For'] || ''}; ${use}`.replace(/^;\s*/, '');
+      }
+    }
+  }
+  return rows
+    .map(row => ({...row, 'Start Lv': Number(row['Start Lv'] || 1), 'Start Saving': `Lv${Number(row['Start Lv'] || 1)}`}))
+    .sort((a, b) => Number(a['Start Lv'] || 1) - Number(b['Start Lv'] || 1) || String(a.Item).localeCompare(String(b.Item)));
+}
+
+function applyGearPlan(gear, stages, buildName) {
+  const available = new Map(gear.map(row => [row.Item, row]));
+  const selected = new Map();
+  const levels = stages.map(stage => {
+    const clean = {};
+    for (const [slot, itemName] of Object.entries(stage.gear || {})) {
+      if (!available.has(itemName)) continue;
+      clean[slot] = itemName;
+      selected.set(itemName, {min: Number(stage.min) || 1, reason: stage.reason || `${buildName} checkpoint at Lv${stage.min}.`});
+    }
+    return {min: Number(stage.min) || 1, gear: clean};
+  });
+  const planned = gear.map(row => {
+    const rec = selected.get(row.Item);
+    if (!rec) return row;
+    return {
+      ...row,
+      Plan: 'CORE',
+      Priority: `Use at Lv${rec.min} or later when affordable`,
+      'Highly Recommended': true,
+      'Recommendation Reason': rec.reason,
+      Notes: `${row.Notes || ''} · ${rec.reason}`.replace(/^ · /, ''),
+      Status: 'CURRENT / VERIFY'
+    };
+  });
+  return {gear: planned, levels};
+}
+
+function buildRecipeRows(gear, levels, buildName) {
+  const byName = new Map(gear.map(row => [row.Item, row]));
+  const seen = new Set();
+  return (levels || []).flatMap(stage => {
+    const name = stage.gear?.Weapon;
+    if (!name || name === 'None' || seen.has(name) || !byName.has(name)) return [];
+    seen.add(name);
+    const item = byName.get(name);
+    return [{
+      Weapon: name,
+      Ingredient1: 'Classic item recipe', Qty1: 'See Database',
+      Ingredient2: 'Quest / ETC reserve', Qty2: 'As listed',
+      Ingredient3: 'Verify before crafting', Qty3: '—',
+      CraftLevel: `${buildName} · Lv${stage.min} checkpoint`,
+      MesoFee: 'Verify',
+      BuildOrder: `Use the ${item['Class Fit'] || buildName} equipment checkpoint first; confirm current recipe materials in the Database before farming.`,
+      Verify: 'CURRENT / VERIFY'
+    }];
+  });
+}
+
 function fighterVariant(base) {
   const skillsAudit = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-skills.json'), 'utf8'));
   const itemAudit = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-items.json'), 'utf8'));
@@ -160,6 +318,8 @@ function fighterVariant(base) {
   const craftingAudit = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-crafting.json'), 'utf8'));
   const skillGroups = [...(skillsAudit.warrior || []), ...(skillsAudit.beginner || [])];
   const allSkills = skillGroups.flatMap(group => group.skills || []);
+  const beginner = beginnerSkillRows();
+  const skillOrder = ['Three Snails','Recovery','Nimble Feet','Improved HP Recovery','Max HP Increase','Precise Strikes','Power Strike','Slash Blast','Iron Body','Sword Mastery','Sword Booster','Final Attack: Sword','Rage','Rush'];
   const skillIcons = Object.fromEntries(allSkills.map(skill => [skill.name, {
     id: skill.id, max: skill.max_level, role: skill.passive ? 'Passive' : (skill.mechanics?.label || 'Combat skill'),
     desc: String(skill.description || '').replace(/\s+/g, ' ').trim()
@@ -199,21 +359,35 @@ function fighterVariant(base) {
     {name:'Final Attack: Sword', label:'FA', points:29},
     {name:'Sword Booster', label:'SB', points:19}
   ]);
-  const skills = [...steps, ...second].map(([level, spend, result], i) => ({
+  const skills = [...beginner, ...[...steps, ...second].map(([level, spend, result], i) => ({
     Level: level, SP: level === 10 ? 1 : 3, Spend: spend,
     'Why This Is The Action': level < 30 ? 'Current Classic Warrior first-job route: build Power Strike and Slash Blast, finish Precise Strikes, then take the delayed HP breakpoints.' : 'Cross-checked one-handed sword Fighter route: satisfy Mastery prerequisites, add Booster, Final Attack, and Rush, then finish Mastery, Rush, Rage, Final Attack, and Booster.',
     'Meso / MP Logic': 'Use the skill when its target is met; preserve potions and avoid spending on a skill that does not improve the current route.',
     Status: 'Classic beta / verify at launch', 'Result After Level': result || 'Fighter progression checkpoint', 'Evidence Class': 'CURRENT / VERIFY'
-  }));
+  }))];
   const warriorItems = (itemAudit.items || []).filter(item => {
     const stats = item.stats || {};
     return item.category === 'Equipment' && (item.req_job_label === 'Warrior' || (Number(stats.reqJob || 0) & 1) || ['1H Sword','2H Sword','1H Axe','2H Axe','1H Blunt Weapon','2H Blunt Weapon','Spear','Polearm'].includes(item.weapon_type));
   });
   const slotFor = item => ({Cap:'Hat',Coat:'Overall',Longcoat:'Overall',Pants:'Bottom',Shoes:'Shoes',Glove:'Gloves',Shield:'Shield',Cape:'Cape',Ring:'Ring',Accessory:'Earrings',Weapon:'Weapon'})[item.sub_category] || (item.sub_category === 'Weapon' ? 'Weapon' : 'Any');
-  const gear = [{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,'M.ATK':0,'WDEF':0,'MDEF':0,'Crit%':0,'Crit DMG':0,Speed:0,Jump:0,'Req Lv':0,'Req STR':0,'Req DEX':0,'Req LUK':0,Status:'CURRENT / VERIFY','Class Fit':'Any',Plan:'EMPTY',Priority:'—',Notes:'Empty slot','Highly Recommended':false,'Recommendation Reason':'','Evidence Class':'CURRENT / VERIFY'}, ...warriorItems.map(item => {
+  let gear = [{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,'M.ATK':0,'WDEF':0,'MDEF':0,'Crit%':0,'Crit DMG':0,Speed:0,Jump:0,'Req Lv':0,'Req STR':0,'Req DEX':0,'Req LUK':0,Status:'CURRENT / VERIFY','Class Fit':'Any',Plan:'EMPTY',Priority:'—',Notes:'Empty slot','Highly Recommended':false,'Recommendation Reason':'','Evidence Class':'CURRENT / VERIFY'}, ...warriorItems.map(item => {
     const s = item.stats || {};
     return {Item:item.name, Slot:item.sub_category === 'Weapon' ? 'Weapon' : slotFor(item), 'Item ID':item.id, 'Icon URL':`/game-media/items/primary/${item.id}`, STR:s.incSTR||0, DEX:s.incDEX||0, INT:s.incINT||0, LUK:s.incLUK||0, 'W.ATK':s.incPAD||0, 'M.ATK':s.incMAD||0, 'WDEF':s.incPDD||0, 'MDEF':s.incMDD||0, 'Crit%':s.incCritRate||0, 'Crit DMG':s.incCritDamage||0, Speed:s.incSpeed||0, Jump:s.incJump||0, 'Req Lv':s.reqLevel||0, 'Req STR':s.reqSTR||0, 'Req DEX':s.reqDEX||0, 'Req LUK':s.reqLUK||0, 'Status':'CURRENT / VERIFY', 'Class Fit':'Warrior', Plan:'OPTIONAL', Priority:'Use at the relevant level or when it creates a real damage/accuracy breakpoint', Notes:item.weapon_type ? `${item.weapon_type} · ${item.attack_speed_label || ''}` : 'Classic Warrior equipment option', 'Highly Recommended':false, 'Recommendation Reason':'', 'Evidence Class':'CURRENT / VERIFY'};
   })];
+  const gearPlan = applyGearPlan(gear, [
+    {min:1, gear:{Weapon:'Sword'}, reason:'Starter one-handed sword; keep early mesos for potions and advancement.'},
+    {min:10, gear:{Weapon:'Long Sword',Hat:'Metal Koif',Top:'Brown Lolico Armor',Bottom:'Brown Lolico Pants',Shoes:'Bronze Grieves',Gloves:'Juno',Shield:'Wooden Buckler'}, reason:'First Warrior equipment checkpoint with a real sword, armor, and shield foundation.'},
+    {min:15, gear:{Weapon:'Sabre',Hat:'Steel Full Helm',Overall:'Steel Fitted Mail',Shoes:'Steel Grieves',Gloves:'Steel Fingerless Gloves',Shield:'Steel Shield'}, reason:'Affordable level-15 Warrior set; replace only when the item is available without starving potions.'},
+    {min:20, gear:{Weapon:'Viking Sword',Overall:'Blue Kendo Robe',Shield:'Mithril Buckler'}, reason:'Level-20 sword and overall checkpoint for the Fighter route.'},
+    {min:30, gear:{Weapon:'Gladius',Overall:'Red Engrit',Shield:'Red Cross Shield'}, reason:'Level-30 Fighter advancement and weapon breakpoint.'},
+    {min:35, gear:{Weapon:'Cutlus',Overall:'Blood Fitted Mail',Shield:'Battle Shield'}, reason:'Level-35 one-handed sword and durable overall checkpoint.'},
+    {min:40, gear:{Weapon:'Traus',Shield:'Adamantium Tower Shield'}, reason:'Level-40 attack and shield checkpoint; keep the prior overall if it is better funded.'},
+    {min:45, gear:{Weapon:"Hero's Gladius"}, reason:'Level-45 one-handed sword checkpoint.'},
+    {min:50, gear:{Weapon:'Jeweled Katar',Top:'Umber Shouldermail',Bottom:'Umber Shouldermail Pants',Shoes:'Mithril Hildon Boots'}, reason:'Level-50 Fighter armor breakpoint; use the weapon only after confirming its requirement in-game.'},
+    {min:60, gear:{Weapon:'Neocora',Top:'Blue Orientican',Bottom:'Blue Orientican Pants',Shoes:'Sapphire Camel Boots'}, reason:'Level-60 weapon and armor checkpoint.'},
+    {min:70, gear:{Weapon:'Red Katana',Top:'Bronze Platine',Bottom:'Bronze Platine Pants',Shoes:'Purple Carzen Boots'}, reason:'Level-70 Fighter capstone checkpoint.'}
+  ], 'Fighter');
+  gear = gearPlan.gear;
   const weaponRows = gear.filter(x=>x.Slot==='Weapon').map(x=>({Lv:x['Req Lv']||1, Weapon:x.Item, Type:x['Item ID'], 'Weapon Type':'Warrior weapon', 'Why':x.Notes}));
   const routeBlocks = [
     routeBlock(1, 9, [50, 1004, 1005], 'Snail / Blue Snail / Shroom', 'Beginner route through the retained Maple Island layouts; leave when the Warrior advancement is ready.'),
@@ -242,7 +416,9 @@ function fighterVariant(base) {
     ['30','+5 STR',135,27,'Gladius / Blue Axe / level-30 sword route',30,'Current level-30 sample is 135 STR / 27 base DEX, with gear supplying the remaining DEX.' ],
     ['31–70','STR first; DEX only for verified accuracy or equipment breakpoints','135+','27+','One-handed sword + shield', '30+','Keep the safer sword route’s hit rate current; use gear, scrolls, and potions before permanent AP when practical.']
   ].map(x=>({'Level Range':x[0],'AP Action':x[1],'Base STR Target':x[2],'Base DEX Target':x[3],'Weapon Target':x[4],'Weapon DEX Req':x[5],'Effective DEX Plan':x[6],'Scroll Plan':'Prefer safe 100%/60% upgrades; do not gamble early progression gear','Why':x[6],'Status':'Classic beta / verify at launch','Evidence Class':'CURRENT / VERIFY'}));
-  return {catalog:base.catalog,skills,skillIcons,gear,weapons:weaponRows,armor:gear,recipes:base.recipes,upgrades:base.upgrades,routes:routeBlocks.map(x=>({Levels:`${x[0]}–${x[1]}`,'Primary Route':x[2],'Main Monsters':x[3],'Main Skill / Method':x[4],'Why This Block':'Classic Fighter route checkpoint.','Major ETCs to Bank':'Only active quest materials','Weapon Decision Point':'Review current sword breakpoint','Quest / PQ Focus':'Complete class-appropriate chain','Status':'CURRENT / VERIFY','Evidence Class':'CURRENT / VERIFY'})),leveling,quests:questAudit.quests,etc:questOnlyEtc(base.etc,'Fighter'),apPlan,scrolls:base.scrolls,decisions:base.decisions,gearPresets:{efficient:{name:'Fighter Sword Progression',description:'Level checkpoints for a practical sword-and-shield Fighter.',levels:[]}},fighterDatabase:{monsters:monsterAudit.monsters,crafting:craftingAudit}};
+  const quests = buildQuestRows(questAudit.quests, 'Fighter Build');
+  const etc = buildEtcRows(base.etc, questAudit.quests, 'Fighter Build');
+  return {catalog:base.catalog,meta:{...base.meta},dashboardMilestones:base.dashboardMilestones,skills,skillOrder,skillIcons,gear,weapons:weaponRows,armor:gear,recipes:buildRecipeRows(gear,gearPlan.levels,'Fighter Build'),upgrades:base.upgrades,routes:routeBlocks.map(x=>({Levels:`${x[0]}–${x[1]}`,'Primary Route':x[2],'Main Monsters':x[3],'Main Skill / Method':x[4],'Why This Block':'Classic Fighter route checkpoint.','Major ETCs to Bank':'Only active quest materials','Weapon Decision Point':'Review current sword breakpoint','Quest / PQ Focus':'Complete class-appropriate chain','Status':'CURRENT / VERIFY','Evidence Class':'CURRENT / VERIFY'})),leveling,quests,etc,apPlan,scrolls:base.scrolls,decisions:base.decisions,gearPresets:{efficient:{name:'Fighter Sword Progression',description:'Level checkpoints for a practical sword-and-shield Fighter.',levels:gearPlan.levels},luk:{name:'Fighter Accuracy Bridge',description:'Reuse the active Fighter checkpoint when accuracy or requirements need a temporary bridge.',levels:gearPlan.levels}},fighterDatabase:{monsters:monsterAudit.monsters,crafting:craftingAudit}};
 }
 
 function hunterVariant(base) {
@@ -253,6 +429,8 @@ function hunterVariant(base) {
   const crafting = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-crafting.json'), 'utf8'));
   const groups = [...(audit.archer || []), ...(audit.beginner || [])];
   const all = groups.flatMap(g => g.skills || []).filter(s => !/Crossbow|Iron Arrow|Blizzard|Arrow Eruption|Golden Eagle|Evasion Step/.test(s.name));
+  const beginner = beginnerSkillRows();
+  const skillOrder = ['Three Snails','Recovery','Nimble Feet','Critical Shot','The Eye of Amazon','Focus','Power Knockback','Arrow Blow','Bow Mastery','Bow Booster','Soul Arrow: Bow','Final Attack: Bow','Arrow Bomb: Bow'];
   const skillIcons = Object.fromEntries(all.map(s => [s.name,{id:s.id,max:s.max_level,role:s.passive?'Passive':(s.mechanics?.label||'Combat skill'),desc:String(s.description||'').replace(/\s+/g,' ').trim()}]));
   const first = [
     [10,'Arrow Blow +1','AB 1'],
@@ -288,9 +466,22 @@ function hunterVariant(base) {
     {name:'Soul Arrow: Bow', label:'Soul', points:19},
     {name:'Bow Booster', label:'BB', points:19}
   ]);
-  const skills=[...first,...second].map(([Level,Spend,result])=>({Level,SP:Level===10?1:3,Spend,'Why This Is The Action':Level<30?'Current Classic Bowman first-job route: raise Arrow Blow, take Eye early for range, then finish Critical Shot, Eye, Focus, and one Power Knockback.':'Cross-checked Hunter route: satisfy Bow Mastery prerequisites, add Booster, Soul Arrow, and Final Attack, then finish Mastery, Arrow Bomb, Final Attack, Soul Arrow, and Booster.','Meso / MP Logic':'Use the active skill breakpoint and preserve potions and arrows for training.','Result After Level':result||'Hunter checkpoint','Status':'Classic beta / verify at launch','Evidence Class':'CURRENT / VERIFY'}));
+  const skills=[...beginner,...[...first,...second].map(([Level,Spend,result])=>({Level,SP:Level===10?1:3,Spend,'Why This Is The Action':Level<30?'Current Classic Bowman first-job route: raise Arrow Blow, take Eye early for range, then finish Critical Shot, Eye, Focus, and one Power Knockback.':'Cross-checked Hunter route: satisfy Bow Mastery prerequisites, add Booster, Soul Arrow, and Final Attack, then finish Mastery, Arrow Bomb, Final Attack, Soul Arrow, and Booster.','Meso / MP Logic':'Use the active skill breakpoint and preserve potions and arrows for training.','Result After Level':result||'Hunter checkpoint','Status':'Classic beta / verify at launch','Evidence Class':'CURRENT / VERIFY'}))];
   const bows=(items.items||[]).filter(i=>i.category==='Equipment'&&(i.weapon_type==='Bow'||i.req_job_label==='Bowman'));
-  const gear=[{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,'Req Lv':0,Status:'CURRENT / VERIFY','Class Fit':'Any','Highly Recommended':false},...bows.map(i=>{const s=i.stats||{};return {Item:i.name,Slot:i.sub_category==='Weapon'?'Weapon':({Cap:'Hat',Coat:'Overall',Longcoat:'Overall',Pants:'Bottom',Shoes:'Shoes',Glove:'Gloves',Cape:'Cape',Accessory:'Earrings'}[i.sub_category]||'Any'),'Item ID':i.id,'Icon URL':`/game-media/items/primary/${i.id}`,STR:s.incSTR||0,DEX:s.incDEX||0,INT:s.incINT||0,LUK:s.incLUK||0,'W.ATK':s.incPAD||0,'Req Lv':s.reqLevel||0,'Req STR':s.reqSTR||0,'Req DEX':s.reqDEX||0,Status:'CURRENT / VERIFY','Class Fit':'Bowman / Hunter','Highly Recommended':false,Notes:i.weapon_type||'Classic Bowman equipment'};})];
+  let gear=[{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,'Req Lv':0,Status:'CURRENT / VERIFY','Class Fit':'Any',Plan:'EMPTY','Priority':'—','Highly Recommended':false,'Recommendation Reason':'',Notes:'Empty slot'},...bows.map(i=>{const s=i.stats||{};return {Item:i.name,Slot:i.sub_category==='Weapon'?'Weapon':({Cap:'Hat',Coat:'Overall',Longcoat:'Overall',Pants:'Bottom',Shoes:'Shoes',Glove:'Gloves',Cape:'Cape',Accessory:'Earrings'}[i.sub_category]||'Any'),'Item ID':i.id,'Icon URL':`/game-media/items/primary/${i.id}`,STR:s.incSTR||0,DEX:s.incDEX||0,INT:s.incINT||0,LUK:s.incLUK||0,'W.ATK':s.incPAD||0,'Req Lv':s.reqLevel||0,'Req STR':s.reqSTR||0,'Req DEX':s.reqDEX||0,Status:'CURRENT / VERIFY','Class Fit':'Bowman / Hunter',Plan:'OPTIONAL',Priority:'Use at the relevant bow breakpoint', 'Highly Recommended':false,'Recommendation Reason':'',Notes:i.weapon_type||'Classic Bowman equipment'};})];
+  const gearPlan = applyGearPlan(gear, [
+    {min:10, gear:{Weapon:'War Bow',Hat:'Brown Winter Hat',Top:'Brown Archer Top',Bottom:'Archer Pants',Shoes:'Brown Hard Leather Boots'}, reason:'First Bowman bow and starter armor checkpoint.'},
+    {min:15, gear:{Weapon:'Composite Bow',Hat:'Green Feather Hat',Top:'Green Able Armor',Bottom:'Green Able Armor Skirt',Shoes:'Green Woodsman Boots',Gloves:'Basic Archer Gloves'}, reason:'Level-15 bow and first complete Bowman gear checkpoint.'},
+    {min:20, gear:{Weapon:"Hunter's Bow",Hat:'Green Robin Hat',Top:'Brown Hard Leather Top',Bottom:'Brown Hard Leather Pants',Shoes:'Deer Huntertop',Gloves:'Green Diros'}, reason:'Level-20 Hunter bow and armor breakpoint.'},
+    {min:25, gear:{Weapon:'Battle Bow',Hat:'Green Hunter',Top:'Green Bennis Chainmail',Bottom:'Bennis Chain Pants',Shoes:'Green Jack Boots',Gloves:'Green Savata'}, reason:'Level-25 bow and armor checkpoint before advancement.'},
+    {min:30, gear:{Weapon:'Ryden',Hat:'Green Hawkeye',Top:"Green Hunter's Armor",Bottom:"Green Hunter's Pants",Shoes:'Green Hunter Boots',Gloves:'Green Marker'}, reason:'Level-30 Hunter advancement and full class armor checkpoint.'},
+    {min:35, gear:{Weapon:'Red Viper',Hat:'Green Pole-Feather Hat',Top:'Green Legolier',Bottom:'Green Legolier Pants',Shoes:'Green Silky Boots',Gloves:'Mithril Scaler'}, reason:'Level-35 bow and armor checkpoint.'},
+    {min:40, gear:{Weapon:'Vaulter 2000',Hat:'Green Distinction',Top:'Brown Piette',Bottom:'Brown Piette Pants',Shoes:'Brown Pierre Shoes',Gloves:'Aqua Brace'}, reason:'Level-40 bow and DEX armor breakpoint.'},
+    {min:50, gear:{Weapon:'Olympus',Hat:'Green Maro',Overall:'Blue Lumati',Shoes:'Blue Steel-Tip Boots',Gloves:'Blue Willow'}, reason:'Level-50 bow and overall checkpoint.'},
+    {min:60, gear:{Weapon:'Asianic Bow',Hat:'Brown Polyfeather Hat',Overall:'Blue Choro',Shoes:'Blue Gore Boots',Gloves:'Oaker Garner'}, reason:'Level-60 bow and high-DEX overall checkpoint.'},
+    {min:70, gear:{Weapon:'Golden Hinkel',Hat:'Blue Patriot',Overall:'Blue Linnex',Shoes:'Blue Elf Shoes',Gloves:'Blue Eyes'}, reason:'Level-70 Hunter capstone equipment checkpoint.'}
+  ], 'Hunter');
+  gear = gearPlan.gear;
   const routes=[
     routeBlock(1, 9, [50, 1004, 1005], 'Snail / Blue Snail / Shroom', 'Beginner route through the retained Maple Island layouts; leave when the Bowman advancement is ready.'),
     routeBlock(10, 12, [10000010, 10000011, 10001010], 'Snail / Shroom / Pig', 'Complete the early Lith Harbor/Henesys quests, then use Arrow Blow from safe range.'),
@@ -313,7 +504,9 @@ function hunterVariant(base) {
     ['26–30','+5 STR / +20 DEX',30,132,'Ryden',65,'Reach the current level-30 bow sample, then let gear/scrolls handle later STR requirements where possible.'],
     ['31–70','Keep STR at the next bow requirement; DEX otherwise','30+','132+','Current bow / Hunter equipment','Next bow requirement','The private guide’s minimum-STR rule is useful after level 30; current Classic data remains the authority for exact equipment breakpoints.']
   ].map(x=>({'Level Range':x[0],'AP Action':x[1],'Base STR Target':x[2],'Base DEX Target':x[3],'Weapon Target':x[4],'Weapon DEX Req':x[5],'Effective DEX Plan':x[6],'Primary Stat':'DEX','Secondary Stat':'STR for bow requirements','Scroll Plan':'Bow Attack weapon scrolls; use safe progression upgrades first','Why':x[6],'Status':'Classic beta / verify at launch','Evidence Class':'CURRENT / VERIFY'}));
-  return {catalog:base.catalog,skills,skillIcons,gear,weapons:gear.filter(x=>x.Slot==='Weapon').map(x=>({Lv:x['Req Lv']||1,Weapon:x.Item,Type:x['Item ID'],'Weapon Type':'Bow','Why':x.Notes||'Bow breakpoint'})),armor:gear,recipes:base.recipes,upgrades:base.upgrades,routes:routes.map(x=>({Levels:`${x[0]}–${x[1]}`,'Primary Route':x[2],'Main Monsters':x[3],'Main Skill / Method':x[4],Status:'CURRENT / VERIFY','Evidence Class':'CURRENT / VERIFY'})),leveling,quests:quests.quests,etc:questOnlyEtc(base.etc,'Hunter'),apPlan,scrolls:base.scrolls,decisions:base.decisions,gearPresets:{efficient:{name:'Hunter Bow Progression',description:'DEX-first bow progression with current Classic bow breakpoints and minimum-STR guidance after level 30.',levels:[]}},hunterDatabase:{monsters:monsters.monsters,crafting}};
+  const questRows = buildQuestRows(quests.quests, 'Hunter Build');
+  const etc = buildEtcRows(base.etc, quests.quests, 'Hunter Build');
+  return {catalog:base.catalog,meta:{...base.meta},dashboardMilestones:base.dashboardMilestones,skills,skillOrder,skillIcons,gear,weapons:gear.filter(x=>x.Slot==='Weapon').map(x=>({Lv:x['Req Lv']||1,Weapon:x.Item,Type:x['Item ID'],'Weapon Type':'Bow','Why':x.Notes||'Bow breakpoint'})),armor:gear,recipes:buildRecipeRows(gear,gearPlan.levels,'Hunter Build'),upgrades:base.upgrades,routes:routes.map(x=>({Levels:`${x[0]}–${x[1]}`,'Primary Route':x[2],'Main Monsters':x[3],'Main Skill / Method':x[4],'Why This Block':'Classic Hunter route checkpoint.','Major ETCs to Bank':'Only active quest materials','Weapon Decision Point':'Review current bow breakpoint','Quest / PQ Focus':'Complete class-appropriate chain','Status':'CURRENT / VERIFY','Evidence Class':'CURRENT / VERIFY'})),leveling,quests:questRows,etc,apPlan,scrolls:base.scrolls,decisions:base.decisions,gearPresets:{efficient:{name:'Hunter Bow Progression',description:'DEX-first bow progression with current Classic bow breakpoints and minimum-STR guidance after level 30.',levels:gearPlan.levels},luk:{name:'Hunter STR Bridge',description:'Reuse the active Hunter checkpoint when a bow requirement needs a temporary STR bridge.',levels:gearPlan.levels}},hunterDatabase:{monsters:monsters.monsters,crafting}};
 }
 
 function readChunk(name) {
@@ -409,6 +602,12 @@ function publicGuide(raw) {
       recommendationPolicy: data.meta.recommendationPolicy
     };
   }
+  // Variants are rendered through the same dashboard/runtime as I/L. Keep the
+  // shared max-level metadata and milestone model on every selected guide.
+  fighter.meta = {...(data.meta || {}), title: BRAND};
+  hunter.meta = {...(data.meta || {}), title: BRAND};
+  fighter.dashboardMilestones = data.dashboardMilestones || fighter.dashboardMilestones || [];
+  hunter.dashboardMilestones = data.dashboardMilestones || hunter.dashboardMilestones || [];
   if (Array.isArray(data.sources)) data.sources = [];
   return JSON.stringify(sanitizePublicGuide(data));
 }
@@ -434,9 +633,13 @@ function patchApp(raw) {
     "  const LEGACY_KEY = 'ultimateILGuideState.v1';\n  // Preserve the established I/L save unchanged; other researched builds own\n  // their level, gear, checklist, and planner state.\n  const KEY = window.TCW_ACTIVE_BUILD_ID==='magician-il-fresh' ? LEGACY_KEY : `${LEGACY_KEY}.${window.TCW_ACTIVE_BUILD_ID}`;"
   );
   app = require('./patches/usability.cjs')(app);
+  app = app.replace(
+    "    const profile=activeBuild();",
+    "    const profile=activeBuild();\n    const bridge=document.getElementById('preset-luk'); if(bridge) bridge.textContent=profile?.id==='warrior-fighter'?'Accuracy Bridge':profile?.id==='archer-hunter'?'STR Bow Bridge':'LUK Bridge';"
+  );
   app = app.replace("    const profile=activeBuild();", "    const profile=activeBuild();\n    const buildTitle=document.getElementById('hero-build-title'); if(buildTitle) buildTitle.textContent=profile?.name||'I/L Wizard Build';\n    const buildSub=document.getElementById('hero-build-subtitle'); if(buildSub) buildSub.textContent=profile?.subtitle||'Current route';\n    const heroClass=document.querySelector('.v5-kicker-row .class-pill'); if(heroClass) heroClass.textContent=classForBuild(profile)?.name?.toUpperCase()||'MAGICIAN';\n    const heroJob=document.querySelector('.v5-kicker-row .job-pill'); if(heroJob) heroJob.textContent=profile?.shortName||'I/L WIZARD';");
   app = app.replace("  function recommendedWeaponName(level=state.level){", "  function recommendedWeaponName(level=state.level){\n    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){ const row=(D.weapons||[]).filter(x=>Number(x.Lv||0)<=level).at(-1); return row?.Weapon||'None'; }");
-  app = app.replace("  function renderAtlasSkills(){", "  function renderAtlasSkills(){\n    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){\n      const tabs=document.getElementById('atlas-skill-tabs'),grid=document.getElementById('atlas-skill-grid'),detail=document.getElementById('atlas-skill-detail');\n      if(!tabs||!grid||!detail)return;\n      const label=activeBuild()?.shortName||'Class'; tabs.innerHTML=`<span class=\"eyebrow\">${label.toUpperCase()} SKILL PLAN</span>`;\n      const row=D.skills.filter(x=>Number(x.Level)===state.level).at(-1)||D.skills[0];\n      const names=[...new Set((D.skills||[]).flatMap(x=>String(x.Spend||'').split(/[+,]/).map(y=>y.trim().replace(/\\s+\\+\\d+.*$/,'')).filter(y=>D.skillIcons?.[y])))];\n      grid.innerHTML=names.map(name=>`<button class=\"atlas-skill-card\" data-skill-name=\"${esc(name)}\"><span class=\"skill-img-wrap\">${skillImgTag(name,'skill-icon')}</span><b>${esc(name)}</b><small>${esc(label)} skill</small></button>`).join('');\n      detail.innerHTML=`<span class=\"detail-kicker\">CURRENT SP ACTION</span><b>Lv ${esc(state.level)} · ${esc(row?.Spend||'Follow the plan')}</b><p>${esc(row?.['Why This Is The Action']||'Follow the class plan.')}</p>`;\n      return;\n    }");
+  app = app.replace("  function renderAtlasSkills(){", "  function renderAtlasSkills(){\n    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){\n      const tabs=document.getElementById('atlas-skill-tabs'),grid=document.getElementById('atlas-skill-grid'),detail=document.getElementById('atlas-skill-detail');\n      if(!tabs||!grid||!detail)return;\n      const label=activeBuild()?.shortName||'Class'; tabs.innerHTML=`<span class=\"eyebrow\">${label.toUpperCase()} SKILL PLAN</span>`;\n      const beginner=['Three Snails','Recovery','Nimble Feet'];\n      const allocations={};\n      (D.skills||[]).filter(x=>Number(x.Level)<=state.level).forEach(x=>String(x.Spend||'').split(',').forEach(part=>{const m=part.trim().match(/^(.+?)\\s+\\+(\\d+)/);if(m&&D.skillIcons?.[m[1]])allocations[m[1]]=(allocations[m[1]]||0)+Number(m[2]);}));\n      if(state.level>=10) beginner.forEach(name=>allocations[name]=3);\n      const row=D.skills.filter(x=>Number(x.Level)===state.level).at(-1)||D.skills[0];\n      const names=(D.skillOrder||[]).filter(name=>D.skillIcons?.[name]);\n      grid.innerHTML=names.map(name=>{const max=Number(D.skillIcons[name]?.max||20),lv=Math.min(max,Number(allocations[name]||0));return `<button class=\"atlas-skill-card ${lv>0?'learned':'unlearned'}\" data-skill-name=\"${esc(name)}\"><span class=\"skill-img-wrap\">${skillImgTag(name,'skill-icon')}</span><b>${esc(name)}</b><small>Lv. ${lv}/${max}</small></button>`;}).join('');\n      const show=name=>{const max=Number(D.skillIcons[name]?.max||20),lv=Math.min(max,Number(allocations[name]||0));detail.innerHTML=`<span class=\"skill-img-wrap\">${skillImgTag(name,'skill-icon')}</span><div><span class=\"detail-kicker\">${esc(label.toUpperCase())} · CLASSIC SKILL</span><b>${esc(name)} · Lv ${lv}/${max}</b><p>${esc(D.skillIcons[name]?.desc||'Follow the selected class progression.')}</p><small>Current SP action: <strong>${esc(row?.Spend||'Follow the plan')}</strong></small></div>`;hookImageFallback(detail);};\n      grid.querySelectorAll('[data-skill-name]').forEach(btn=>btn.addEventListener('click',()=>{grid.querySelectorAll('.atlas-skill-card').forEach(x=>x.classList.remove('selected'));btn.classList.add('selected');show(btn.dataset.skillName);}));\n      show(names.find(name=>Number(allocations[name]||0)>0)||names[0]);\n      hookImageFallback(grid);\n      return;\n    }");
 
   const oldSetLevel = `function setLevel(level){\n    state.level=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));\n    save();\n    renderAll();\n  }`;
   const newSetLevel = `function preserveLoadedImages(root,render){\n    const pool=new Map();\n    if(root) root.querySelectorAll('img[src]').forEach(img=>{\n      const key=[img.getAttribute('src')||'',img.alt||'',img.className||''].join('¦');\n      if(!pool.has(key))pool.set(key,[]);\n      pool.get(key).push(img);\n    });\n    render();\n    if(!root)return;\n    root.querySelectorAll('img[src]').forEach(img=>{\n      const key=[img.getAttribute('src')||'',img.alt||'',img.className||''].join('¦');\n      const old=pool.get(key)?.shift();\n      if(old&&old!==img&&old.complete&&old.naturalWidth>0)img.replaceWith(old);\n    });\n  }\n  function renderLevelPage(){\n    const p=state.page;\n    const root=document.querySelector('.page[data-page="'+p+'"]');\n    preserveLoadedImages(root,()=>{\n      if(p==='dashboard')renderDashboard();\n      else if(p==='builds')renderBuildLibrary();\n      else if(p==='leveling')renderRoutes();\n      else if(p==='quests')renderQuests();\n      else if(p==='equipment'){renderWeapons();renderEquipment('equipment-window-page','build-summary-page');}\n      else if(p==='skills')renderSkills();\n      else if(p==='etc')renderEtc();\n      else if(p==='formulas')renderFormulas();\n    });\n  }\n  function setLevel(level){\n    const next=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));\n    if(next===state.level)return;\n    state.level=next;\n    save();\n    const a=document.getElementById('level-select'),b=document.getElementById('hero-level-select'),r=document.getElementById('level-range');\n    if(a)a.value=String(next);if(b)b.value=String(next);if(r)r.value=String(next);\n    document.documentElement.dataset.levelUpdate='1';\n    renderLevelPage();\n    requestAnimationFrame(()=>document.documentElement.removeAttribute('data-level-update'));\n  }`;
@@ -448,9 +651,93 @@ function patchApp(raw) {
   app = app.replace(pageHook, `if(p==='dashboard') renderDashboard();\n    if(p==='leveling') renderRoutes();\n    if(p==='quests') renderQuests();\n    if(p==='skills') renderSkills();\n    if(p==='etc') renderEtc();\n    if(p==='equipment'){renderWeapons();renderEquipment('equipment-window-page','build-summary-page');}`);
 
   app = app.replace(
+    "  function baseLukTarget(){ const a=currentAP(); return Number(a?.['Base LUK Target'] ?? (state.level>50?30:5)); }",
+    "  function baseLukTarget(){ const a=currentAP(); if(activeBuild()?.id==='warrior-fighter') return Number(a?.['Base DEX Target'] ?? 5); if(activeBuild()?.id==='archer-hunter') return Number(a?.['Base STR Target'] ?? 5); return Number(a?.['Base LUK Target'] ?? (state.level>50?30:5)); }"
+  );
+  app = app.replace(
+    "    const names=[...new Set((D.skills||[]).flatMap(row=>String(row.Spend||'').split(/[+,]/).map(x=>x.trim().replace(/\\s+\\+\\d+.*$/,'')).filter(Boolean)))].filter(name=>D.skillIcons?.[name]);",
+    "    const names=(D.skillOrder||[...new Set((D.skills||[]).flatMap(row=>String(row.Spend||'').split(/[+,]/).map(x=>x.trim().replace(/\\s+\\+\\d+.*$/,'')).filter(Boolean)))]).filter(name=>D.skillIcons?.[name]);"
+  );
+  app = app.replace(
+    "  function currentCoreWeapon(level=state.level){\n    const names=[\"Beginner's Wooden Wand / job wand\",'Hardwood Wand','Mithril Wand','Cromi','Angel Wings'];\n    return names.map(getGear).filter(Boolean).filter(x=>Number(x['Req Lv'])<=level).sort((a,b)=>Number(b['Req Lv'])-Number(a['Req Lv']))[0]||null;\n  }",
+    "  function currentCoreWeapon(level=state.level){\n    const names=['warrior-fighter','archer-hunter'].includes(activeBuild()?.id) ? (D.weapons||[]).filter(x=>Number(x.Lv||0)<=level).map(x=>x.Weapon) : [\"Beginner's Wooden Wand / job wand\",'Hardwood Wand','Mithril Wand','Cromi','Angel Wings'];\n    return names.map(getGear).filter(Boolean).filter(x=>Number(x['Req Lv'])<=level).sort((a,b)=>Number(b['Req Lv'])-Number(a['Req Lv']))[0]||null;\n  }"
+  );
+  app = app.replace(
+    "    if(!select||!card||!dmg)return;\n    const route=currentLevelRow()||{};",
+    "    if(!select||!card||!dmg)return;\n    const route=currentLevelRow()||{};\n    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){\n      select.innerHTML='<option value=\"auto\">Auto · current class route</option>'; select.value='auto'; select.disabled=true;\n      const targetText=String(route['Main Monsters']||'Current route target').split('/')[0].trim();\n      const key=mobKeyFromText(targetText)||mobKeyFromText(route['Main Monsters']); const mob=key?atlasMobMap[key]:null;\n      card.innerHTML=`<div class=\"mob-art\">${mob?`<img src=\"${esc(mobAsset(mob.id))}\" data-asset-fallbacks=\"${esc(mapleIoMobAsset(mob.id))}\" alt=\"${esc(mob.name)}\">`:'<div class=\"mob-placeholder\"><span>◈</span><small>Visual unavailable</small></div>'}</div><div class=\"mob-copy\"><span class=\"detail-kicker\">CURRENT CLASS ROUTE</span><h4>${esc(mob?.name||targetText)}</h4><p>${esc(route['Primary Route']||'Current training route')}</p><div class=\"mob-stat-grid\"><div><small>Job method</small><b>${esc(route['Main Skill / Method']||'Follow the build plan')}</b></div><div><small>Class</small><b>${esc(activeBuild()?.name||'Selected build')}</b></div></div></div>`;\n      dmg.innerHTML=`<div class=\"damage-empty\"><b>Class-specific route active.</b><p>Use the selected build's AP, SP, weapon, and hit-rate checkpoints before changing maps.</p></div>`; hookImageFallback(card); return;\n    }"
+  );
+  app = app.replace(
+    "  function renderAtlasBuffs(){\n    const root=document.getElementById('atlas-buffs');if(!root)return;",
+    "  function renderAtlasBuffs(){\n    const root=document.getElementById('atlas-buffs');if(!root)return;\n    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)){\n      const current=D.skills.filter(x=>Number(x.Level)<=state.level).at(-1);\n      const names=(D.skillOrder||[]).filter(name=>D.skillIcons?.[name]).slice(3,7);\n      root.innerHTML=names.map(name=>`<div class=\"buff-chip\"><span class=\"skill-img-wrap\">${skillImgTag(name,'skill-icon')}</span><div><b>${esc(name)}</b><small>${esc(activeBuild()?.shortName||'Class')} plan · ${state.level>=10?'available by level':'Beginner foundation'}</small></div></div>`).join('')+`<div class=\"economy-note\"><b>Class route</b><span>${esc(current?.Spend||'Follow the Beginner foundation before first job.')}</span></div>`; hookImageFallback(root); return; }"
+  );
+  app = app.replaceAll('No available I/L-relevant quests.', 'No available quests for this build.');
+  app = app.replace('alt="Equipped I/L character"', 'alt="${esc(activeBuild()?.name||"Equipped character")}"');
+  app = app.replace('<div class="avatar-job-badge">I/L</div>', '<div class="avatar-job-badge">${esc(activeBuild()?.shortName||"I/L")}</div>');
+  app = app.replace(
+    "    const b=computeBuild(), l=currentLevelRow()||{};",
+    "    const b=computeBuild(), l=currentLevelRow()||{};\n    const buildId=activeBuild()?.id;\n    if(buildId==='warrior-fighter'||buildId==='archer-hunter'){\n      const rows=buildId==='warrior-fighter'?[['Job',l.Job||'Beginner'],['Gear STR',`+${b.str}`],['Base DEX target',b.baseDex],['Gear DEX',`+${b.dex}`],['Effective DEX',b.effectiveDex],['Weapon Attack',b.wAtk],['Weapon Req. DEX',b.reqDex],['Speed bonus',`+${b.speed}`]]:[['Job',l.Job||'Beginner'],['Gear DEX',`+${b.dex}`],['Base STR target',b.baseStr],['Gear STR',`+${b.str}`],['Effective STR',b.effectiveStr],['Weapon Attack',b.wAtk],['Weapon Req. STR',b.reqStr],['Speed bonus',`+${b.speed}`]];\n      const short=buildId==='warrior-fighter'?`${Math.max(0,b.reqDex-b.effectiveDex)} DEX SHORT`:`${Math.max(0,b.reqStr-b.effectiveStr)} STR SHORT`;\n      root.innerHTML=rows.map(([k,v])=>`<div class=\"atlas-stat-row\"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')+`<div class=\"atlas-equip-check ${b.ready?'ready':'blocked'}\"><span>Weapon requirement</span><b>${b.ready?'READY':short}</b></div>`;\n      return;\n    }"
+  );
+  app = app.replaceAll('Multi-class infrastructure with your I/L build active and personalized right now.', 'Multi-class build library with Fighter, Hunter, and I/L routes active.');
+  app = app.replaceAll('One definitive SP path built around efficient I/L progression.', 'One definitive SP path for the selected class build.');
+  app = app.replace(
+    "      const names=[...new Set((D.skills||[]).flatMap(row=>String(row.Spend||'').split(/[+,]/).map(x=>x.trim().replace(/\\s+\\+\\d+.*$/,'')).filter(Boolean)))].filter(name=>D.skillIcons?.[name]);",
+    "      const names=(D.skillOrder||[...new Set((D.skills||[]).flatMap(row=>String(row.Spend||'').split(/[+,]/).map(x=>x.trim().replace(/\\s+\\+\\d+.*$/,'')).filter(Boolean)))]).filter(name=>D.skillIcons?.[name]);"
+  );
+  app = app.replace(
+    `  function computeBuild(){
+    let chosen=[];
+    for(const [slot,name] of Object.entries(state.gear)){
+      if(!name||name==='None') continue;
+      if(state.gear.Overall!=='None' && (slot==='Top'||slot==='Bottom')) continue;
+      const item=getGear(name); if(item) chosen.push(item);
+    }
+    const sum=k=>chosen.reduce((a,x)=>a+Number(x[k]||0),0);
+    const weapon=getGear(state.gear.Weapon);
+    const totalLuk=sum('LUK');
+    const base=baseLukTarget();
+    const effective=base+totalLuk;
+    const req=Number(weapon?.['Req LUK']||0);
+    return {
+      chosen,int:sum('INT'),luk:totalLuk,matk:sum('M.ATK'),
+      crit:sum('Crit%'),critDmg:sum('Crit DMG'),speed:sum('Speed'),
+      baseLuk:base,effectiveLuk:effective,reqLuk:req,ready:effective>=req,weapon
+    };
+  }`,
+    `  function computeBuild(){
+    let chosen=[];
+    for(const [slot,name] of Object.entries(state.gear)){
+      if(!name||name==='None') continue;
+      if(state.gear.Overall!=='None' && (slot==='Top'||slot==='Bottom')) continue;
+      const item=getGear(name); if(item) chosen.push(item);
+    }
+    const sum=k=>chosen.reduce((a,x)=>a+Number(x[k]||0),0);
+    const weapon=getGear(state.gear.Weapon);
+    const id=activeBuild()?.id;
+    if(id==='warrior-fighter'){
+      const base=baseLukTarget(), gearDex=sum('DEX'), req=Number(weapon?.['Req DEX']||0), effective=base+gearDex;
+      return {chosen,str:sum('STR'),dex:gearDex,wAtk:sum('W.ATK'),wdef:sum('WDEF'),speed:sum('Speed'),baseDex:base,effectiveDex:effective,reqDex:req,ready:effective>=req,weapon,int:sum('INT'),luk:sum('LUK'),matk:sum('M.ATK'),crit:sum('Crit%'),critDmg:sum('Crit DMG')};
+    }
+    if(id==='archer-hunter'){
+      const base=baseLukTarget(), gearStr=sum('STR'), req=Number(weapon?.['Req STR']||0), effective=base+gearStr;
+      return {chosen,str:gearStr,dex:sum('DEX'),wAtk:sum('W.ATK'),wdef:sum('WDEF'),speed:sum('Speed'),baseStr:base,effectiveStr:effective,reqStr:req,ready:effective>=req,weapon,int:sum('INT'),luk:sum('LUK'),matk:sum('M.ATK'),crit:sum('Crit%'),critDmg:sum('Crit DMG')};
+    }
+    const totalLuk=sum('LUK'),base=baseLukTarget(),effective=base+totalLuk,req=Number(weapon?.['Req LUK']||0);
+    return {chosen,int:sum('INT'),luk:totalLuk,matk:sum('M.ATK'),crit:sum('Crit%'),critDmg:sum('Crit DMG'),speed:sum('Speed'),baseLuk:base,effectiveLuk:effective,reqLuk:req,ready:effective>=req,weapon};
+  }`
+  );
+  app = app.replace(
+    "    const b=computeBuild();\n    const rows=[\n      ['Job',l.Job||'Beginner'],['Gear INT',`+${b.int}`],['Base LUK target',b.baseLuk],['Gear LUK',`+${b.luk}`],['Effective LUK',b.effectiveLuk],['Magic Attack',b.matk],['Critical Rate',`${b.crit}%`],['Critical Damage',`${b.critDmg}%`],['Speed bonus',`+${b.speed}`],['Weapon Req. LUK',b.reqLuk]\n    ];\n    root.innerHTML=rows.map(([k,v])=>`<div class=\"atlas-stat-row\"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')+`<div class=\"atlas-equip-check ${b.ready?'ready':'blocked'}\"><span>Weapon requirement</span><b>${b.ready?'READY':`${Math.max(0,b.reqLuk-b.effectiveLuk)} LUK SHORT`}</b></div>${state.level>50?'<p class=\"atlas-beta-note\">Lv51–70 LUK/equip behavior remains live-verification territory.</p>':''}`;",
+    "    const b=computeBuild();\n    const id=activeBuild()?.id;\n    const rows=id==='warrior-fighter'\n      ? [['Job',l.Job||'Beginner'],['Gear STR',`+${b.str}`],['Base DEX target',b.baseDex],['Gear DEX',`+${b.dex}`],['Effective DEX',b.effectiveDex],['Weapon Attack',b.wAtk],['Weapon Req. DEX',b.reqDex],['Speed bonus',`+${b.speed}`]]\n      : id==='archer-hunter'\n        ? [['Job',l.Job||'Beginner'],['Gear DEX',`+${b.dex}`],['Base STR target',b.baseStr],['Gear STR',`+${b.str}`],['Effective STR',b.effectiveStr],['Weapon Attack',b.wAtk],['Weapon Req. STR',b.reqStr],['Speed bonus',`+${b.speed}`]]\n        : [['Job',l.Job||'Beginner'],['Gear INT',`+${b.int}`],['Base LUK target',b.baseLuk],['Gear LUK',`+${b.luk}`],['Effective LUK',b.effectiveLuk],['Magic Attack',b.matk],['Critical Rate',`${b.crit}%`],['Critical Damage',`${b.critDmg}%`],['Speed bonus',`+${b.speed}`],['Weapon Req. LUK',b.reqLuk]];\n    const short=id==='warrior-fighter'?`${Math.max(0,b.reqDex-b.effectiveDex)} DEX SHORT`:id==='archer-hunter'?`${Math.max(0,b.reqStr-b.effectiveStr)} STR SHORT`:`${Math.max(0,b.reqLuk-b.effectiveLuk)} LUK SHORT`;\n    root.innerHTML=rows.map(([k,v])=>`<div class=\"atlas-stat-row\"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')+`<div class=\"atlas-equip-check ${b.ready?'ready':'blocked'}\"><span>Weapon requirement</span><b>${b.ready?'READY':short}</b></div>${state.level>50?'<p class=\"atlas-beta-note\">Lv51–70 equipment behavior remains live-verification territory.</p>':''}`;"
+  );
+
+  app = app.replace(
     `function evidenceLabel(item){\n    const e=String(item?.['Evidence Class']||'UNVERIFIED');\n    if(e.includes('HISTORICAL')) return 'HISTORICAL ONLY';\n    if(e.includes('PRE-LAUNCH')) return 'COT2 · VERIFY LAUNCH';\n    if(e.includes('CURRENT')) return 'COT2 VERIFIED';\n    return 'UNVERIFIED';\n  }`,
     `function evidenceLabel(){ return ''; }`
   );
+  app = app.replaceAll('curated Mage/I/L pool', 'curated class equipment pool');
+  app = app.replaceAll('Your personalized Ice / Lightning build workspace.', 'Your selected multi-build workspace.');
+  app = app.replaceAll('Prioritized for an Ice / Lightning Mage and saved forever in your browser.', 'Prioritized for the selected class build and saved in your browser.');
+  app = app.replace("`Base LUK target ${baseLukTarget()}`", "`${activeBuild()?.id==='warrior-fighter'?'Base DEX target':activeBuild()?.id==='archer-hunter'?'Base STR target':'Base LUK target'} ${baseLukTarget()}`");
   const buildLibraryStart = app.indexOf('  function renderBuildLibrary(){');
   const buildLibraryEnd = app.indexOf('\n\n  function renderRoutes(){', buildLibraryStart);
   if (buildLibraryStart < 0 || buildLibraryEnd < 0) throw new Error('build library renderer patch target missing');
@@ -627,7 +914,7 @@ fs.mkdirSync(out, { recursive: true });
 
 const css = readChunks('styles', 3);
 const guideJson = publicGuide(readChunks('guide', 6));
-const app = publicScript(patchApp(readChunks('app', 4))).replaceAll('Plan status: current pre-launch route · recheck at launch', 'Plan status: current route · recheck at launch');
+const app = publicScript(patchApp(readChunks('app', 4)));
 const visualCss = fs.readFileSync(path.join(source, 'visuals.css'), 'utf8');
 const visuals = publicScript(fs.readFileSync(path.join(source, 'visuals.js'), 'utf8'));
 const visualDbCss = fs.readFileSync(path.join(source, 'visuals-db.css'), 'utf8');

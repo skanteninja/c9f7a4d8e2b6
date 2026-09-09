@@ -23,8 +23,20 @@ const catalogShape = guide => JSON.stringify({
 const sharedCatalog = catalogShape(root);
 for (const [name, guide] of Object.entries(root.buildVariants)) {
   if (catalogShape(guide) !== sharedCatalog) throw new Error(`${name} has a divergent build catalog`);
-  if (guide.leveling.length !== 70 || guide.skills.length === 0 || guide.gear.length === 0 || guide.quests.length === 0) {
+  if (guide.meta?.maxLevel !== 70 || guide.leveling.length !== 70 || guide.skills.length !== 70 || guide.skills[0]?.Level !== 1 || guide.skills.at(-1)?.Level !== 70 || guide.gear.length === 0 || guide.quests.length !== 322) {
     throw new Error(`${name} is missing a complete progression payload`);
+  }
+  if (!Array.isArray(guide.skillOrder) || guide.skillOrder.length < 10 || !guide.skillIcons?.['Three Snails']) {
+    throw new Error(`${name} is missing its class skill order or Beginner skills`);
+  }
+  if (!guide.gearPresets?.efficient?.levels?.length || !guide.gear.some(row => row['Highly Recommended'] === true)) {
+    throw new Error(`${name} is missing curated equipment checkpoints`);
+  }
+  if (guide.quests.some(row => !row.Quest || !row.Region || !row.Priority || !row['Why Do It'] || row.Lv === undefined || row.Lv === null)) {
+    throw new Error(`${name} contains an unnormalized quest row`);
+  }
+  if (guide.etc.some(row => !row.Item || !row['Start Saving'] || row['Core + Craft Minimum'] === undefined)) {
+    throw new Error(`${name} contains an unnormalized ETC row`);
   }
   if (guide.etc.some(row => Number(row['Crafting Need'] || 0) > 0)) {
     throw new Error(`${name} inherited an unrelated I/L crafting reserve`);
@@ -49,9 +61,14 @@ for (const token of [
   "${LEGACY_KEY}.${window.TCW_ACTIVE_BUILD_ID}",
   'data-build-select',
   'Open build',
-  'AVAILABLE'
+  'AVAILABLE',
+  "activeBuild()?.id==='warrior-fighter'",
+  "activeBuild()?.id==='archer-hunter'"
 ]) {
   if (!app.includes(token)) throw new Error(`Missing build-navigation contract: ${token}`);
+}
+if (!fs.readFileSync('dist/progression-gear-visual.js', 'utf8').includes('progression-avatar-level-controls')) {
+  throw new Error('Level-control merge module is missing its avatar footer contract');
 }
 
 const bootStart = app.indexOf('  let D = window.GUIDE_DATA;');

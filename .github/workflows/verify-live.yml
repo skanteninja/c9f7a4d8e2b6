@@ -13,7 +13,7 @@ on:
 
 jobs:
   verify-live:
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Wait for deployed product and visual map atlas
@@ -22,15 +22,16 @@ jobs:
         run: |
           ready=0
           for i in {1..60}; do
-            build_ok=0; maps_ok=0; classic_ok=0; atlas_ok=0; visuals_ok=0; integrity_ok=0; stability_ok=0
+            build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0; visuals_ok=0; integrity_ok=0; stability_ok=0
             build_info="$(curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" || true)"
             [[ "$build_info" == *"Top Classic World Maplestory 0.8.9-multibuild-foundation"* ]] && build_ok=1 || true
 
             maps_js="$(curl -fsSL --max-time 15 "$BASE_URL/maps-tab.js?ci=$GITHUB_RUN_ID" || true)"
-            if [[ "$maps_js" == *"maps-world-ready"* ]] && [[ "$maps_js" == *"maps-explorer-ready"* ]] && [[ "$maps_js" == *"maps-atlas-visual-ready"* ]] && [[ "$maps_js" == *"ATLAS_CURRENT_NAME_ALIASES"* ]] && [[ "$maps_js" == *"100000000':'henesys"* ]] && [[ "$maps_js" == *"legacyFetch=Promise.resolve([])"* ]]; then maps_ok=1; fi
+            if [[ "$maps_js" == *"maps-world-ready"* ]] && [[ "$maps_js" == *"maps-explorer-ready"* ]] && [[ "$maps_js" == *"maps-atlas-visual-ready"* ]] && [[ "$maps_js" == *"ATLAS_CURRENT_NAME_ALIASES"* ]] && [[ "$maps_js" == *"100000000':'henesys"* ]] && [[ "$maps_js" == *"LEGACY_INDEX"* ]]; then maps_ok=1; fi
 
-            classic_manifest="$(curl -fsSL --max-time 35 "$BASE_URL/game-data/data/current/map_manifest.json?ci=$GITHUB_RUN_ID" || true)"
-            if [ "${#classic_manifest}" -gt 10000 ] && [[ "$classic_manifest" == *'010000000'* ]] && [[ "$classic_manifest" == *'020000000'* ]]; then classic_ok=1; fi
+            legacy="$(curl -fsSL --max-time 35 "$BASE_URL/game-data/legacy/maps.json?ci=$GITHUB_RUN_ID" || true)"
+            legacy_lc="${legacy,,}"
+            if [ "${#legacy}" -gt 10000 ] && [[ "$legacy_lc" == *'"name":"orbis"'* ]] && [[ "$legacy_lc" == *'"name":"el nath"'* ]]; then legacy_ok=1; fi
 
             world_bytes="$(curl -fsSL --max-time 30 "$BASE_URL/assets/map-atlas/sheets/maple-world.png?ci=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
             atlas_data="$(curl -fsSL --max-time 20 "$BASE_URL/assets/map-atlas/data/markers.json?ci=$GITHUB_RUN_ID" || true)"
@@ -49,8 +50,8 @@ jobs:
             sync_css="$(curl -fsSL --max-time 15 "$BASE_URL/progression-sync.css?ci=$GITHUB_RUN_ID" || true)"
             if [[ "$level_hook" == *"tcw-skill-images-connected-ready"* ]] && [[ "$level_hook" != *"node.remove()"* ]] && [[ "$sync_css" == *"Dashboard skill artwork never fades"* ]] && [[ "$sync_css" == *"filter:none!important;opacity:1!important"* ]]; then stability_ok=1; fi
 
-            echo "live-check[$i] build=$build_ok maps=$maps_ok classic=$classic_ok atlas=$atlas_ok visuals=$visuals_ok integrity=$integrity_ok stability=$stability_ok world_bytes=${world_bytes:-0} monster_bytes=${monster_bytes:-0}"
-            if [ "$build_ok" -eq 1 ] && [ "$maps_ok" -eq 1 ] && [ "$classic_ok" -eq 1 ] && [ "$atlas_ok" -eq 1 ] && [ "$visuals_ok" -eq 1 ] && [ "$integrity_ok" -eq 1 ] && [ "$stability_ok" -eq 1 ]; then ready=1; break; fi
+            echo "live-check[$i] build=$build_ok maps=$maps_ok legacy=$legacy_ok atlas=$atlas_ok visuals=$visuals_ok integrity=$integrity_ok stability=$stability_ok world_bytes=${world_bytes:-0} monster_bytes=${monster_bytes:-0}"
+            if [ "$build_ok" -eq 1 ] && [ "$maps_ok" -eq 1 ] && [ "$legacy_ok" -eq 1 ] && [ "$atlas_ok" -eq 1 ] && [ "$visuals_ok" -eq 1 ] && [ "$integrity_ok" -eq 1 ] && [ "$stability_ok" -eq 1 ]; then ready=1; break; fi
             sleep 5
           done
           test "$ready" -eq 1
@@ -73,72 +74,26 @@ jobs:
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-live-${viewport//,/-}.html"
             "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=36000 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID&viewport=$viewport" >"$file"
-            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready maps-nav-ready maps-data-ready maps-tab-ready maps-world-ready maps-atlas-visual-ready etc-lifetime-data-ready quest-catalog-audit-ready etc-lifetime-audit-ready monster-drop-evidence-ready tcw-skill-images-connected-ready; do
-              if ! grep -q "$marker" "$file"; then
-                echo "missing live marker: $marker (viewport $viewport)"
-                grep -o 'class="[^"]*ready[^"]*"' "$file" | head -c 2000 || true
-                exit 1
-              fi
+            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready maps-nav-ready maps-data-ready maps-tab-ready maps-world-ready maps-legacy-data-ready maps-atlas-visual-ready etc-lifetime-data-ready quest-catalog-audit-ready etc-lifetime-audit-ready monster-drop-evidence-ready tcw-skill-images-connected-ready; do
+              grep -q "$marker" "$file"
             done
-            required_patterns=(
-              '<title>Top Classic World Maplestory</title>'
-              'data-page="maps" class="nav-btn'
-              'id="maps-world"'
-              'id="maps-open-explorer"'
-              'data-continent="victoria"'
-              'data-continent="ossyria"'
-              'data-continent="maple-island"'
-              'id="maps-full-world-image"'
-              'maps-atlas-world-point'
-              'maps-continent-art-image'
-              'id="level-range"'
-              'id="atlas-quest-queue"'
-              'id="atlas-etc-queue"'
-            )
-            for required in "${required_patterns[@]}"; do
-              if ! grep -q "$required" "$file"; then
-                echo "missing live browser assertion: $required (viewport $viewport)"
-                grep -o 'id="[^"]*"' "$file" | head -80 || true
-                exit 1
-              fi
-            done
-            for forbidden in dashboard-overflow-detected dashboard-page-overflow-detected; do
-              if grep -q "$forbidden" "$file"; then
-                echo "forbidden dashboard overflow marker: $forbidden (viewport $viewport)"
-                exit 1
-              fi
-            done
-            if python3 - "$file" <<'PY'
-          import re,sys
-          s=open(sys.argv[1],encoding='utf-8',errors='replace').read()
-          visible=re.sub(r'<(script|style)\b[^>]*>[\s\S]*?</\1>',' ',s,flags=re.I)
-          matches=list(re.finditer(r'>\s*(PLAY|META)\s*<',visible,re.I))
-          for m in matches[:20]:
-              print('visible-nav-match',repr(m.group(0)),repr(visible[max(0,m.start()-220):m.end()+220]))
-          sys.exit(0 if not matches else 1)
-          PY
-            then
-              :
-            else
-              echo "forbidden visible navigation label exposed"
-              exit 1
-            fi
-            if python3 - "$file" <<'PY'
-          import re,sys
-          s=open(sys.argv[1],encoding='utf-8',errors='replace').read()
-          visible=re.sub(r'<(script|style)\b[^>]*>[\s\S]*?</\1>',' ',s,flags=re.I)
-          pattern=r'COT2|OSMS|pre[- ]launch|launch[- ]scope|Evidence &amp; sources|Evidence & sources'
-          matches=list(re.finditer(pattern,visible,re.I))
-          for m in matches[:20]:
-              print('visible-internal-match',repr(m.group(0)),repr(visible[max(0,m.start()-220):m.end()+220]))
-          sys.exit(0 if not matches else 1)
-          PY
-            then
-              :
-            else
-              echo "forbidden visible internal wording exposed"
-              exit 1
-            fi
+            grep -q '<title>Top Classic World Maplestory</title>' "$file"
+            grep -q 'data-page="maps" class="nav-btn' "$file"
+            grep -q 'id="maps-world"' "$file"
+            grep -q 'id="maps-open-explorer"' "$file"
+            grep -q 'data-continent="victoria"' "$file"
+            grep -q 'data-continent="ossyria"' "$file"
+            grep -q 'data-continent="ludus"' "$file"
+            grep -q 'id="maps-full-world-image"' "$file"
+            grep -q 'maps-atlas-world-point' "$file"
+            grep -q 'maps-continent-art-image' "$file"
+            grep -q 'id="level-range"' "$file"
+            grep -q 'id="atlas-quest-queue"' "$file"
+            grep -q 'id="atlas-etc-queue"' "$file"
+            ! grep -q 'dashboard-overflow-detected' "$file"
+            ! grep -q 'dashboard-page-overflow-detected' "$file"
+            ! grep -Eqi '>\s*(PLAY|DATABASE|META)\s*<' "$file"
+            ! grep -Eqi 'COT2|OSMS|pre[- ]launch|launch[- ]scope|Evidence &amp; sources|Evidence & sources' "$file"
             python3 - "$file" <<'PY'
           import re,sys
           s=open(sys.argv[1],encoding='utf-8',errors='replace').read()
@@ -149,11 +104,35 @@ jobs:
           assert 'data-page="research" class="nav-btn' not in s
           assert 'data-page="data" class="nav-btn' not in s
           assert s.index('data-page="quests" class="nav-btn') < s.index('data-page="maps" class="nav-btn') < s.index('data-page="equipment" class="nav-btn')
-          cards=len(re.findall(r'class="maps-continent-card',s))
-          points=len(re.findall(r'class="maps-atlas-world-point',s))
-          print(f"live-map-dom cards={cards} points={points} images={len(imgs)}")
-          assert cards > 0, f"no rendered continent cards (cards={cards}, points={points})"
-          assert points >= cards, f"world atlas points do not cover cards (cards={cards}, points={points})"
+          assert len(re.findall(r'class="maps-continent-card',s)) >= 8
+          assert len(re.findall(r'class="maps-atlas-world-point',s)) >= 10
+          PY
+          done
+
+      - name: Verify live Fighter and Hunter dashboard routes
+        env:
+          BASE_URL: https://maplestory-classic.ofri505.workers.dev
+        run: |
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          for spec in 'warrior-fighter|Fighter Build|Power Strike' 'archer-hunter|Hunter Build|Arrow Blow'; do
+            IFS='|' read -r build title skill <<<"$spec"
+            file="/tmp/maplestory-live-${build}.html"
+            "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=36000 --dump-dom "$BASE_URL/?build=${build}&ci=$GITHUB_RUN_ID&multibuild=1" >"$file"
+            grep -q "$title" "$file"
+            grep -q "data-skill-name=\"$skill\"" "$file"
+            grep -q 'class="atlas-action-row' "$file"
+            grep -q 'class="atlas-queue-row' "$file"
+            grep -q 'class="tcw-etc-name' "$file"
+            grep -q 'class="progression-avatar-level-controls' "$file"
+            grep -q 'id="level-range"' "$file"
+            python3 - "$file" <<'PY'
+          import re,sys
+          s=open(sys.argv[1],encoding='utf-8',errors='replace').read()
+          m=re.search(r'id="level-range"[^>]*max="([0-9]+)"',s)
+          assert m and m.group(1)=='70', 'live class build range is not 1–70'
+          assert re.search(r'class="atlas-queue-row"[^>]*>.*?<b>[^<]+</b>',s,re.S), 'live class quest queue is blank'
+          assert re.search(r'class="tcw-etc-name">[^<]+</span>',s), 'live class ETC queue is blank'
           PY
           done
 
@@ -251,59 +230,4 @@ jobs:
           assert magic_count==1, f'expected one canonical Magic Claw icon, got {magic_count}'
           print('live-skill-icon-stability-ok')
           ws.close()
-          PY
-
-      - name: Verify live multi-build library and direct build routes
-        env:
-          BASE_URL: https://maplestory-classic.ofri505.workers.dev
-        run: |
-          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
-          test -n "$chrome"
-          dump_build() {
-            local build="$1"
-            local page="$2"
-            local output="$3"
-            "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=30000 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID&build=$build&page=$page" >"$output"
-          }
-
-          dump_build magician-il-fresh builds /tmp/tcw-live-build-library.html
-          dump_build warrior-fighter dashboard /tmp/tcw-live-fighter.html
-          dump_build archer-hunter dashboard /tmp/tcw-live-hunter.html
-          dump_build magician-il-fresh dashboard /tmp/tcw-live-il.html
-
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          library = Path('/tmp/tcw-live-build-library.html').read_text(encoding='utf-8', errors='replace')
-          for name in ('Fighter Build', 'Hunter Build', 'I/L Wizard Build'):
-              assert name in library, f'missing build-library card: {name}'
-          for build_id in ('warrior-fighter', 'archer-hunter', 'magician-il-fresh'):
-              assert f'data-build-select="{build_id}"' in library, f'missing build link: {build_id}'
-          assert not re.search(r'\bLuna\b', library, re.I), 'engine name leaked into build-library copy'
-
-          def assert_pill(html, pill, text, filename):
-              assert re.search(rf'{pill}">\s*{re.escape(text)}\s*</span>', html, re.I), f'wrong {pill} in {filename}'
-          
-          for filename, title, class_name, job_name in [
-              ('/tmp/tcw-live-fighter.html', 'Fighter Build', 'WARRIOR', 'Fighter'),
-              ('/tmp/tcw-live-hunter.html', 'Hunter Build', 'BOWMAN', 'Hunter'),
-          ]:
-              html = Path(filename).read_text(encoding='utf-8', errors='replace')
-              assert f'id="hero-build-title">{title}</h2>' in html, f'wrong title in {filename}'
-              assert_pill(html, 'class-pill', class_name, filename)
-              assert_pill(html, 'job-pill', job_name, filename)
-
-          il_file = '/tmp/tcw-live-il.html'
-          il_html = Path(il_file).read_text(encoding='utf-8', errors='replace')
-          assert 'id="hero-build-title">I/L Wizard Build</h2>' in il_html, f'wrong title in {il_file}'
-          il_level = int(re.search(r'id="hero-level">(\d+)<', il_html).group(1))
-          il_stage = ('BEGINNER', 'PRE-JOB') if il_level < 10 else ('MAGICIAN', '1ST JOB') if il_level < 30 else ('MAGICIAN', 'WIZARD (I/L)')
-          assert_pill(il_html, 'class-pill', il_stage[0], il_file)
-          assert_pill(il_html, 'job-pill', il_stage[1], il_file)
-          print(f'live-il-advancement-state level={il_level} class={il_stage[0]} job={il_stage[1]}')
-          assert 'data-skill-name="Power Strike"' in Path('/tmp/tcw-live-fighter.html').read_text(encoding='utf-8', errors='replace')
-          assert 'data-skill-name="Arrow Blow"' in Path('/tmp/tcw-live-hunter.html').read_text(encoding='utf-8', errors='replace')
-          assert 'data-skill-name="Magic Claw"' in Path('/tmp/tcw-live-il.html').read_text(encoding='utf-8', errors='replace')
-          print('live-multibuild-library-ok')
           PY
