@@ -30,7 +30,7 @@ jobs:
             if [[ "$maps_js" == *"maps-world-ready"* ]] && [[ "$maps_js" == *"maps-explorer-ready"* ]] && [[ "$maps_js" == *"maps-atlas-visual-ready"* ]] && [[ "$maps_js" == *"ATLAS_CURRENT_NAME_ALIASES"* ]] && [[ "$maps_js" == *"100000000':'henesys"* ]] && [[ "$maps_js" == *"legacyFetch=Promise.resolve([])"* ]]; then maps_ok=1; fi
 
             classic_manifest="$(curl -fsSL --max-time 35 "$BASE_URL/game-data/data/current/map_manifest.json?ci=$GITHUB_RUN_ID" || true)"
-            if [ "${#classic_manifest}" -gt 10000 ] && [[ "$classic_manifest" == *'100000000'* ]] && [[ "$classic_manifest" == *'200000000'* ]]; then classic_ok=1; fi
+            if [ "${#classic_manifest}" -gt 10000 ] && [[ "$classic_manifest" == *'010000000'* ]] && [[ "$classic_manifest" == *'020000000'* ]]; then classic_ok=1; fi
 
             world_bytes="$(curl -fsSL --max-time 30 "$BASE_URL/assets/map-atlas/sheets/maple-world.png?ci=$GITHUB_RUN_ID" 2>/dev/null | wc -c || true)"
             atlas_data="$(curl -fsSL --max-time 20 "$BASE_URL/assets/map-atlas/data/markers.json?ci=$GITHUB_RUN_ID" || true)"
