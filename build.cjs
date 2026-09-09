@@ -490,6 +490,12 @@ function patchApp(raw) {
     `renderDashboard();renderBuildLibrary();renderRoutes();renderQuests();renderWeapons();renderSkills();renderEtc();renderResearch();renderData();`,
     `renderDashboard();renderBuildLibrary();renderRoutes();renderQuests();renderWeapons();renderSkills();renderEtc();`
   );
+  // The public shell removes internal Research/Data/Formula pages. Keep the
+  // legacy maintenance controls optional so their absent nodes cannot abort
+  // the dashboard boot sequence before multi-build enhancement modules run.
+  for (const id of ['export-progress','import-progress','reset-progress','cache-assets']) {
+    app = app.replaceAll(`document.getElementById('${id}').addEventListener`, `document.getElementById('${id}')?.addEventListener`);
+  }
   app = app.replace(`page:raw.page||'dashboard',`, `page:['research','data','formulas'].includes(raw.page)?'dashboard':(raw.page||'dashboard'),`);
   app = app.replace(
     `activeBuildId:raw.activeBuildId||D.catalog?.activeBuildId||'magician-il-fresh',`,
