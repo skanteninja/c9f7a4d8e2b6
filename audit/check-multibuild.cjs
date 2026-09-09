@@ -24,7 +24,9 @@ const catalogShape = guide => JSON.stringify({
 const sharedCatalog = catalogShape(root);
 for (const [name, guide] of Object.entries(root.buildVariants)) {
   if (catalogShape(guide) !== sharedCatalog) throw new Error(`${name} has a divergent build catalog`);
-  if (guide.meta?.maxLevel !== 70 || guide.leveling.length !== 70 || guide.skills.length !== 70 || guide.skills[0]?.Level !== 1 || guide.skills.at(-1)?.Level !== 70 || guide.gear.length === 0 || guide.quests.length !== 322) {
+  const skillLevels = guide.skills.map(row => Number(row.Level));
+  const level30Rows = skillLevels.filter(level => level === 30).length;
+  if (guide.meta?.maxLevel !== 70 || guide.leveling.length !== 70 || guide.skills.length !== 71 || skillLevels[0] !== 1 || skillLevels.at(-1) !== 70 || level30Rows !== 2 || guide.gear.length === 0 || guide.quests.length !== 322) {
     throw new Error(`${name} is missing a complete progression payload`);
   }
   if (!Array.isArray(guide.skillOrder) || guide.skillOrder.length < 10 || !guide.skillIcons?.['Three Snails']) {
