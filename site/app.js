@@ -74,7 +74,7 @@
       const name=gear[slot];
       if(name && name!=='None' && !D.gear.some(g=>g.Item===name)) gear[slot]='None';
     });
-    if(level<10 && gear.Weapon==="Beginner's Wooden Wand / job wand") gear.Weapon='None';
+    if(level<10 && gear.Weapon==="Wooden Wand") gear.Weapon='None';
     return {
       level,
       page:['research','data','formulas'].includes(raw.page)?'dashboard':(raw.page||'dashboard'),
@@ -148,22 +148,15 @@
   // Legacy GMS/v83 sprites are acceptable as artwork when the item/monster itself has
   // been confirmed against MapleStory Classic data. They are never used as proof of stats,
   // availability, quests, drops, recipes, or mechanics.
-  function meowIcon(id){ return id ? `/game-media/icons/${Math.trunc(Number(id))}` : ''; }
-  function dreamItemIcon(id, resize=2){ return id ? `/game-media/items/primary/${Math.trunc(Number(id))}/icon?format=png&resize=${resize}` : ''; }
-  function mapleIoItemIcon(id){ return id ? `/game-media/items/fallback/${Math.trunc(Number(id))}/icon` : ''; }
-  function dreamPetIcon(id, resize=2){ return id ? `/game-media/pets/${Math.trunc(Number(id))}/move/0?format=png&resize=${resize}` : ''; }
+  function classicItemIcon(id){ return id ? `/game-media/icons/${Math.trunc(Number(id))}` : ''; }
   function visualCandidates(item){
     if(!item || !item['Item ID'] || Number(item['Item ID'])===0) return [];
-    const id=item['Item ID'];
-    const dream=item.Slot==='Pet'?dreamPetIcon(id):dreamItemIcon(id);
-    const listed=String(item['Icon URL']||'').trim();
-    return [...new Set([dream,item.Slot==='Pet'?'':mapleIoItemIcon(id),listed,meowIcon(id)].filter(Boolean))];
+    return [classicItemIcon(item['Item ID'])];
   }
   function imgTag(item, cls=''){
     const urls=visualCandidates(item);
     if(!urls.length) return '';
-    const [primary,...fallbacks]=urls;
-    return `<img class="${cls}" src="${esc(primary)}" data-asset-fallbacks="${esc(fallbacks.join('|'))}" data-visual-source="legacy-sprite-classic-verified-entity" alt="${esc(item.Item)}">`;
+    return `<img class="${cls}" src="${esc(urls[0])}" data-visual-source="classic-canonical-item-id" alt="${esc(item.Item)}">`;
   }
   function hookImageFallback(root=document){
     root.querySelectorAll('img').forEach(img=>{
@@ -236,7 +229,7 @@
   function recommendedWeaponName(level=state.level){
     if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)) return classCoreWeaponName(level);
     if(level<10) return 'Beginner weapon / Maple Island';
-    if(level<15) return "Beginner's Wooden Wand / job wand";
+    if(level<15) return "Wooden Wand";
     if(level<30) return 'Hardwood Wand';
     if(level<50) return 'Mithril Wand';
     if(level<70) return 'Cromi';
@@ -406,7 +399,7 @@
       .sort((a,b)=>Number(a['Req Lv'])-Number(b['Req Lv']) || (a.Slot==='Weapon'?-1:1))[0] || null;
   }
   function currentCoreWeapon(level=state.level){
-    const names=['warrior-fighter','archer-hunter'].includes(activeBuild()?.id) ? [classCoreWeaponName(level)] : ["Beginner's Wooden Wand / job wand",'Hardwood Wand','Mithril Wand','Cromi','Angel Wings'];
+    const names=["Wooden Wand",'Hardwood Wand','Mithril Wand','Cromi','Angel Wings'];
     return names.map(getGear).filter(Boolean).filter(x=>Number(x['Req Lv'])<=level).sort((a,b)=>Number(b['Req Lv'])-Number(a['Req Lv']))[0]||null;
   }
   function levelCheckId(kind){return `lv${state.level}-${kind}`;}
@@ -847,6 +840,8 @@
   document.getElementById('modal-show-future').addEventListener('change',renderGearOptions);
   document.getElementById('modal-show-optional').addEventListener('change',renderGearOptions);
   function classGearItemAllowed(item){
+    const evidence=String(item&& (item['Evidence Class']||item.Status) || 'CURRENT');
+    if(item&&item.Item!=='None'&&!/CURRENT/i.test(evidence))return false;
     if(!item||item.Item==='None')return true;
     const id=activeBuild()?.id;
     if(id!=='warrior-fighter'&&id!=='archer-hunter')return true;
@@ -961,7 +956,7 @@
   document.getElementById('preset-efficient')?.addEventListener('click',()=>applyPreset('efficient'));
   document.getElementById('preset-luk')?.addEventListener('click',()=>applyPreset('luk'));
   document.getElementById('clear-gear')?.addEventListener('click',()=>{
-    state.gear={...defaultGear,Weapon:state.level>=10&&activeBuild()?.id==='magician-il-fresh'?"Beginner's Wooden Wand / job wand":'None'};save();renderDashboard();renderEquipment('equipment-window-page','build-summary-page');toast('Build cleared');
+    state.gear={...defaultGear,Weapon:state.level>=10?"Wooden Wand":'None'};save();renderDashboard();renderEquipment('equipment-window-page','build-summary-page');toast('Build cleared');
   });
 
   function renderDashboardEtc(){
