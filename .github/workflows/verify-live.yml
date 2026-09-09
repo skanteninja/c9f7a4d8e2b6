@@ -87,7 +87,7 @@ jobs:
               'id="maps-open-explorer"'
               'data-continent="victoria"'
               'data-continent="ossyria"'
-              'data-continent="ludus"'
+              'data-continent="maple-island"'
               'id="maps-full-world-image"'
               'maps-atlas-world-point'
               'maps-continent-art-image'
