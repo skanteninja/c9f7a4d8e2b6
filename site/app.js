@@ -526,7 +526,7 @@
     tabs.querySelectorAll('[data-skill-tab]').forEach(b=>b.addEventListener('click',()=>{state.skillTab=b.dataset.skillTab;save();renderAtlasSkills()}));
     if(tab==='beginner'){
       grid.innerHTML=`<div class="beginner-milestone-grid"><div><span>AP</span><b>INT first</b><small>No STR/DEX investment. Preserve LUK only for the verified equipment route.</small></div><div><span>GEAR</span><b>Do not shop yet</b><small>Maple Island gear is not a meaningful spending checkpoint for this build.</small></div><div><span>QUESTS</span><b>Clear the island</b><small>Finish nearby quests while moving; protect useful ETCs surfaced in the queue.</small></div><div><span>LV10</span><b>Magician + free wand</b><small>Your first real build milestone. The job wand is a deliberate meso hold.</small></div></div>`;
-      detail.innerHTML=`<span class="detail-kicker">NEXT MILESTONE</span><b>Lv10 · Path of the Magician</b><p>Advance, equip the free job wand, then put the prerequisite point into Energy Bolt before building Magic Claw. No filler purchase is required before that.</p><small class="evidence-inline">Plan status: current pre-launch route · recheck at launch</small>`;
+      detail.innerHTML=`<span class="detail-kicker">NEXT MILESTONE</span><b>Lv10 · Path of the Magician</b><p>Advance, equip the free job wand, then put the prerequisite point into Energy Bolt before building Magic Claw. No filler purchase is required before that.</p><small class="evidence-inline">Plan status: current route · recheck at launch</small>`;
       return;
     }
     const kind=tab==='magician'?'magician':'il';
