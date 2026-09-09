@@ -621,7 +621,7 @@ fs.mkdirSync(out, { recursive: true });
 
 const css = readChunks('styles', 3);
 const guideJson = publicGuide(readChunks('guide', 6));
-const app = publicScript(patchApp(readChunks('app', 4)));
+const app = publicScript(patchApp(readChunks('app', 4))).replaceAll('Plan status: current pre-launch route · recheck at launch', 'Plan status: current route · recheck at launch');
 const visualCss = fs.readFileSync(path.join(source, 'visuals.css'), 'utf8');
 const visuals = publicScript(fs.readFileSync(path.join(source, 'visuals.js'), 'utf8'));
 const visualDbCss = fs.readFileSync(path.join(source, 'visuals-db.css'), 'utf8');
