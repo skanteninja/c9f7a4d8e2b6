@@ -568,7 +568,7 @@ function patchApp(raw) {
 }
 
 function removePageSection(html, page) {
-  const startRe = new RegExp(`<section\\s+data-page=\"${page}\"\\b`, 'i');
+  const startRe = new RegExp(`<section\\s+data-page=\"${page}\"(?:\\s|>)`, 'i');
   const match = startRe.exec(html);
   if (!match) return html;
   const tokenRe = /<\/?section\b[^>]*>/gi;
