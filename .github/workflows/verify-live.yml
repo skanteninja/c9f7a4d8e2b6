@@ -205,3 +205,47 @@ jobs:
           print('live-skill-icon-stability-ok')
           ws.close()
           PY
+
+      - name: Verify live multi-build library and direct build routes
+        env:
+          BASE_URL: https://maplestory-classic.ofri505.workers.dev
+        run: |
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          dump_build() {
+            local build="$1"
+            local page="$2"
+            local output="$3"
+            "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=30000 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID&build=$build&page=$page" >"$output"
+          }
+
+          dump_build magician-il-fresh builds /tmp/tcw-live-build-library.html
+          dump_build warrior-fighter dashboard /tmp/tcw-live-fighter.html
+          dump_build archer-hunter dashboard /tmp/tcw-live-hunter.html
+          dump_build magician-il-fresh dashboard /tmp/tcw-live-il.html
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          library = Path('/tmp/tcw-live-build-library.html').read_text(encoding='utf-8', errors='replace')
+          for name in ('Fighter Build', 'Hunter Build', 'I/L Wizard Build'):
+              assert name in library, f'missing build-library card: {name}'
+          for build_id in ('warrior-fighter', 'archer-hunter', 'magician-il-fresh'):
+              assert f'data-build-select="{build_id}"' in library, f'missing build link: {build_id}'
+          assert 'Luna' not in library, 'engine name leaked into build-library copy'
+
+          checks = [
+              ('/tmp/tcw-live-fighter.html', 'Fighter Build', 'WARRIOR', 'FIGHTER'),
+              ('/tmp/tcw-live-hunter.html', 'Hunter Build', 'BOWMAN', 'HUNTER'),
+              ('/tmp/tcw-live-il.html', 'I/L Wizard Build', 'MAGICIAN', 'WIZARD'),
+          ]
+          for filename, title, class_name, job_name in checks:
+              html = Path(filename).read_text(encoding='utf-8', errors='replace')
+              assert f'id="hero-build-title">{title}</h2>' in html, f'wrong title in {filename}'
+              assert f'class-pill">{class_name}</span>' in html, f'wrong class emblem in {filename}'
+              assert f'job-pill">{job_name}' in html, f'wrong advancement in {filename}'
+          assert 'data-skill-name="Power Strike"' in Path('/tmp/tcw-live-fighter.html').read_text(encoding='utf-8', errors='replace')
+          assert 'data-skill-name="Arrow Blow"' in Path('/tmp/tcw-live-hunter.html').read_text(encoding='utf-8', errors='replace')
+          assert 'data-skill-name="Magic Claw"' in Path('/tmp/tcw-live-il.html').read_text(encoding='utf-8', errors='replace')
+          print('live-multibuild-library-ok')
+          PY
