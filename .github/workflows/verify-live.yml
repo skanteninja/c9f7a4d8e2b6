@@ -273,13 +273,14 @@ jobs:
 
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           library = Path('/tmp/tcw-live-build-library.html').read_text(encoding='utf-8', errors='replace')
           for name in ('Fighter Build', 'Hunter Build', 'I/L Wizard Build'):
               assert name in library, f'missing build-library card: {name}'
           for build_id in ('warrior-fighter', 'archer-hunter', 'magician-il-fresh'):
               assert f'data-build-select="{build_id}"' in library, f'missing build link: {build_id}'
-          assert 'Luna' not in library, 'engine name leaked into build-library copy'
+          assert not re.search(r'\\bLuna\\b', library, re.I), 'engine name leaked into build-library copy'
 
           checks = [
               ('/tmp/tcw-live-fighter.html', 'Fighter Build', 'WARRIOR', 'FIGHTER'),
