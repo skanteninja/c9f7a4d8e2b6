@@ -7,7 +7,6 @@ import argparse, base64, json, re
 CURRENT_DATA='https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/'
 ICON_MEDIA='https://meowdb.com/msclassic/api/assets/icons/'
 WORLD_MAP_MEDIA='https://meowdb.com/msclassic/worldmap/'
-ITEM_MEDIA_PRIMARY='https://api.dreamms.gg/api/GMS/latest/item/'
 PET_MEDIA='https://api.dreamms.gg/api/GMS/latest/pet/'
 CHARACTER_MEDIA='https://api.dreamms.gg/api/GMS/latest/character/'
 MONSTER_MEDIA='https://api.dreamms.gg/api/GMS/latest/mob/'
@@ -36,11 +35,14 @@ def upstream(path):
     parsed=urlsplit(path)
     p=parsed.path
     suffix=('?'+parsed.query) if parsed.query else ''
+    # Keep legacy primary URLs working, but resolve the numeric ID through
+    # the Classic icon catalog instead of the incompatible DreamMS/GMS table.
+    primary_match=re.match(r'^/game-media/items/primary/(\d+)(?:/icon)?$',p)
+    if primary_match: return ICON_MEDIA+primary_match.group(1)
     routes=(
         ('/game-data/',CURRENT_DATA),
         ('/game-media/icons/',ICON_MEDIA),
         ('/game-media/worldmap/',WORLD_MAP_MEDIA),
-        ('/game-media/items/primary/',ITEM_MEDIA_PRIMARY),
         ('/game-media/pets/',PET_MEDIA),
         ('/game-media/characters/',CHARACTER_MEDIA),
         ('/game-media/monsters/',MONSTER_MEDIA),

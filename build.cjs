@@ -10,6 +10,83 @@ const out = path.join(root, 'dist');
 const assetVersion = '0.9.0-class-specific-builds';
 const BRAND = 'Top Classic World Maplestory';
 
+// The OSMS export is the identity authority for the equipment picker.  The
+// original I/L payload was assembled from an older GMS item table whose IDs
+// no longer line up with Classic (for example, 1050003 is Blue Kendo Robe in
+// Classic, not Blue Wizard Robe).  Keep the build-specific recommendations,
+// but normalize every displayed item to the exact Classic name, ID, slot,
+// requirements, and stats before publishing.
+function classicEquipmentIndex() {
+  const audit = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-items.json'), 'utf8'));
+  const byName = new Map();
+  for (const item of (audit.items || [])) {
+    if (item.category !== 'Equipment' || !item.name) continue;
+    if (!byName.has(item.name)) byName.set(item.name, item);
+  }
+  return byName;
+}
+
+const CLASSIC_EQUIPMENT_BY_NAME = classicEquipmentIndex();
+const GEAR_NAME_ALIASES = {
+  "Beginner's Wooden Wand / job wand": 'Wooden Wand'
+};
+
+function canonicalizeGuideInventory(data) {
+  const rename = value => {
+    if (typeof value === 'string') return GEAR_NAME_ALIASES[value] || value;
+    if (Array.isArray(value)) return value.map(rename);
+    if (!value || typeof value !== 'object') return value;
+    const out = {};
+    for (const [key, entry] of Object.entries(value)) out[key] = rename(entry);
+    return out;
+  };
+  const canonicalRow = row => {
+    if (!row || row.Item === 'None' || !row.Item) return row;
+    const requestedName = GEAR_NAME_ALIASES[row.Item] || row.Item;
+    const item = CLASSIC_EQUIPMENT_BY_NAME.get(requestedName);
+    if (!item) {
+      // Keep non-equipment utility entries (pets/mounts) visible, but never
+      // let an unverified record inherit a misleading legacy sprite.
+      return {
+        ...row,
+        Item: requestedName,
+        'Icon URL': '',
+        Status: 'HISTORICAL ONLY · not in current Classic catalog',
+        'Evidence Class': 'HISTORICAL ONLY'
+      };
+    }
+    const stats = item.stats || {};
+    const normalized = {
+      ...row,
+      Item: item.name,
+      Slot: equipmentSlot(item),
+      'Item ID': item.id,
+      'Icon URL': `/game-media/icons/${item.id}`,
+      'Req Lv': Number(stats.reqLevel || 0),
+      'Req STR': Number(stats.reqSTR || 0),
+      'Req DEX': Number(stats.reqDEX || 0),
+      'Req INT': Number(stats.reqINT || 0),
+      'Req LUK': Number(stats.reqLUK || 0),
+      'Req Job': classEquipmentLabel(item),
+      'Req Job ID': Number(stats.reqJob || 0),
+      'Item Type': item.sub_category === 'Weapon' ? (item.weapon_type || 'Weapon') : (item.sub_category || 'Equipment'),
+      'Evidence Class': 'CURRENT / VERIFY'
+    };
+    const statMap = {
+      STR: 'incSTR', DEX: 'incDEX', INT: 'incINT', LUK: 'incLUK',
+      'W.ATK': 'incPAD', 'M.ATK': 'incMAD', WDEF: 'incPDD', MDEF: 'incMDD',
+      Speed: 'incSpeed', Jump: 'incJump', 'Crit%': 'incCritRate', 'Crit DMG': 'incCritDamage'
+    };
+    for (const [field, sourceKey] of Object.entries(statMap)) normalized[field] = Number(stats[sourceKey] || 0);
+    return normalized;
+  };
+
+  const out = {...data};
+  if (Array.isArray(out.gear)) out.gear = out.gear.map(canonicalRow);
+  if (out.gearPresets) out.gearPresets = rename(out.gearPresets);
+  return out;
+}
+
 const FIGHTER_MILESTONES = [
   {level:10, label:'Warrior', detail:'1st job + STR/DEX accuracy route'},
   {level:15, label:'Axe Checkpoint', detail:'first weapon-family decision'},
@@ -511,8 +588,9 @@ function fighterVariant(base) {
   });
   let gear = [{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,'M.ATK':0,'WDEF':0,'MDEF':0,'Crit%':0,'Crit DMG':0,Speed:0,Jump:0,'Req Lv':0,'Req STR':0,'Req DEX':0,'Req LUK':0,Status:'CURRENT / VERIFY','Class Fit':'Any · Fighter','Job Family':'Any','Job Branch':'None','Req Job':'Any','Req Job ID':0,'Item Type':'Empty',Plan:'EMPTY',Priority:'—',Notes:'Empty slot','Highly Recommended':false,'Recommendation Reason':'','Evidence Class':'CURRENT / VERIFY'}, ...warriorItems.map(item => {
     const s = item.stats || {};
-    return {Item:item.name, Slot:equipmentSlot(item), 'Item ID':item.id, 'Icon URL':`/game-media/items/primary/${item.id}`, STR:s.incSTR||0, DEX:s.incDEX||0, INT:s.incINT||0, LUK:s.incLUK||0, 'W.ATK':s.incPAD||0, 'M.ATK':s.incMAD||0, 'WDEF':s.incPDD||0, 'MDEF':s.incMDD||0, 'Crit%':s.incCritRate||0, 'Crit DMG':s.incCritDamage||0, Speed:s.incSpeed||0, Jump:s.incJump||0, 'Req Lv':s.reqLevel||0, 'Req STR':s.reqSTR||0, 'Req DEX':s.reqDEX||0, 'Req LUK':s.reqLUK||0, Status:'CURRENT / VERIFY', 'Class Fit':classEquipmentFit(item,'Warrior','Fighter'), ...equipmentFields(item,'Warrior','Fighter'), Plan:'OPTIONAL', Priority:'Use at the relevant level or when it creates a real damage/accuracy breakpoint', Notes:item.weapon_type ? `${item.weapon_type} · ${item.attack_speed_label || ''}` : `${classEquipmentLabel(item)} Fighter equipment option`, 'Highly Recommended':false, 'Recommendation Reason':'', 'Evidence Class':'CURRENT / VERIFY'};
+    return {Item:item.name, Slot:equipmentSlot(item), 'Item ID':item.id, 'Icon URL':`/game-media/icons/${item.id}`, STR:s.incSTR||0, DEX:s.incDEX||0, INT:s.incINT||0, LUK:s.incLUK||0, 'W.ATK':s.incPAD||0, 'M.ATK':s.incMAD||0, 'WDEF':s.incPDD||0, 'MDEF':s.incMDD||0, 'Crit%':s.incCritRate||0, 'Crit DMG':s.incCritDamage||0, Speed:s.incSpeed||0, Jump:s.incJump||0, 'Req Lv':s.reqLevel||0, 'Req STR':s.reqSTR||0, 'Req DEX':s.reqDEX||0, 'Req LUK':s.reqLUK||0, Status:'CURRENT / VERIFY', 'Class Fit':classEquipmentFit(item,'Warrior','Fighter'), ...equipmentFields(item,'Warrior','Fighter'), Plan:'OPTIONAL', Priority:'Use at the relevant level or when it creates a real damage/accuracy breakpoint', Notes:item.weapon_type ? `${item.weapon_type} · ${item.attack_speed_label || ''}` : `${classEquipmentLabel(item)} Fighter equipment option`, 'Highly Recommended':false, 'Recommendation Reason':'', 'Evidence Class':'CURRENT / VERIFY'};
   })];
+  gear.forEach(row => { if (Number(row['Item ID'] || 0) > 0) row['Icon URL'] = `/game-media/icons/${row['Item ID']}`; });
   const gearPlan = applyGearPlan(gear, [
     {min:1, gear:{Weapon:'Hand Axe'}, reason:'Maple Island starter; the axe family is selected before weapon-specific Fighter SP.'},
     {min:10, gear:{Weapon:'Metal Axe',Hat:'Metal Koif',Top:'Brown Lolico Armor',Bottom:'Brown Lolico Pants',Shoes:'Bronze Grieves',Gloves:'Juno'}, reason:'First Warrior axe checkpoint. Keep the early route cheap and reserve mesos for potions.'},
@@ -651,6 +729,7 @@ function hunterVariant(base) {
     || (i.sub_category!=='Weapon' && /\bBowman\b/.test(classEquipmentLabel(i)) && !/\bMage\b/i.test(classEquipmentLabel(i)))
   ));
   let gear=[{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,WDEF:0,MDEF:0,Speed:0,Jump:0,'Req Lv':0,Status:'CURRENT / VERIFY','Class Fit':'Any · Hunter','Job Family':'Any','Job Branch':'None','Req Job':'Any','Req Job ID':0,'Item Type':'Empty',Plan:'EMPTY','Priority':'—','Highly Recommended':false,'Recommendation Reason':'',Notes:'Empty slot'},...bows.map(i=>{const s=i.stats||{};return {Item:i.name,Slot:equipmentSlot(i),'Item ID':i.id,'Icon URL':`/game-media/items/primary/${i.id}`,STR:s.incSTR||0,DEX:s.incDEX||0,INT:s.incINT||0,LUK:s.incLUK||0,'W.ATK':s.incPAD||0,WDEF:s.incPDD||0,MDEF:s.incMDD||0,Speed:s.incSpeed||0,Jump:s.incJump||0,'Req Lv':s.reqLevel||0,'Req STR':s.reqSTR||0,'Req DEX':s.reqDEX||0,Status:'CURRENT / VERIFY','Class Fit':classEquipmentFit(i,'Bowman','Hunter'),...equipmentFields(i,'Bowman','Hunter'),Plan:'OPTIONAL',Priority:'Use at the relevant bow breakpoint', 'Highly Recommended':false,'Recommendation Reason':'',Notes:i.weapon_type?`${i.weapon_type} · ${i.attack_speed_label || ''}`:`${classEquipmentLabel(i)} Hunter equipment`};})];
+  gear.forEach(row => { if (Number(row['Item ID'] || 0) > 0) row['Icon URL'] = `/game-media/icons/${row['Item ID']}`; });
   const gearPlan = applyGearPlan(gear, [
     {min:10, gear:{Weapon:'War Bow',Hat:'Brown Winter Hat',Top:'Brown Archer Top',Bottom:'Archer Pants',Shoes:'Brown Hard Leather Boots'}, reason:'First Bowman bow and starter armor checkpoint.'},
     {min:15, gear:{Weapon:'Composite Bow',Hat:'Green Feather Hat',Top:'Green Able Armor',Bottom:'Green Able Armor Skirt',Shoes:'Green Woodsman Boots',Gloves:'Basic Archer Gloves'}, reason:'Level-15 bow and first complete Bowman gear checkpoint.'},
@@ -776,7 +855,7 @@ function sanitizePublicGuide(value, key = '') {
 }
 
 function publicGuide(raw) {
-  const data = JSON.parse(raw);
+  const data = canonicalizeGuideInventory(JSON.parse(raw));
   const catalog = multiBuildCatalog(data.catalog);
   const fighter = fighterVariant(data);
   const hunter = hunterVariant(data);
@@ -807,6 +886,25 @@ function publicGuide(raw) {
 
 function patchApp(raw) {
   let app = ownedUrls(raw).replaceAll('MapleStory Classic Builder', BRAND);
+  // Inventory artwork must use the same Classic item ID as the data row.  Do
+  // not fall back to DreamMS/GMS or MapleStory.io IDs: those tables reuse
+  // numeric IDs for different items and caused Blue Kendo Robe to render as a
+  // magician robe.  Missing Classic art is intentionally shown as missing.
+  const legacyItemVisualBlock = /  function meowIcon\(id\)\{[\s\S]*?\n  function hookImageFallback/;
+  const canonicalItemVisualBlock = `  function classicItemIcon(id){ return id ? \`/game-media/icons/\${Math.trunc(Number(id))}\` : ''; }
+  function visualCandidates(item){
+    if(!item || !item['Item ID'] || Number(item['Item ID'])===0) return [];
+    return [classicItemIcon(item['Item ID'])];
+  }
+  function imgTag(item, cls=''){
+    const urls=visualCandidates(item);
+    if(!urls.length) return '';
+    return \`<img class="\${cls}" src="\${esc(urls[0])}" data-visual-source="classic-canonical-item-id" alt="\${esc(item.Item)}">\`;
+  }
+  function hookImageFallback`;
+  if (!legacyItemVisualBlock.test(app)) throw new Error('canonical item visual patch target missing');
+  app = app.replace(legacyItemVisualBlock, canonicalItemVisualBlock);
+  app = app.replaceAll("Beginner's Wooden Wand / job wand", 'Wooden Wand');
   app = app.replace('  const D = window.GUIDE_DATA;', `  let D = window.GUIDE_DATA;
   let requestedBuild = '';
   try {
@@ -874,6 +972,10 @@ function patchApp(raw) {
   app = app.replace(
     "  function gearOptionStats(item,none){",
     "  function sanitizeGearState(){\n    const id=activeBuild()?.id;\n    state.gear={...defaultGear,...(state.gear||{})};\n    Object.keys(state.gear).forEach(slot=>{\n      const name=state.gear[slot];\n      if(!name||name==='None'){state.gear[slot]='None';return;}\n      const item=getGear(name);\n      if(!item || ((id==='warrior-fighter'||id==='archer-hunter')&&!classGearItemAllowed(item))) state.gear[slot]='None';\n    });\n    // Saved data from older builds can contain impossible combinations.\n    // Preserve an existing Overall and remove the mutually exclusive pieces.\n    if(state.gear.Overall!=='None'){\n      state.gear.Top='None';\n      state.gear.Bottom='None';\n    }else if(state.gear.Top!=='None'||state.gear.Bottom!=='None'){\n      state.gear.Overall='None';\n    }\n    return state.gear;\n  }\n  function gearOptionStats(item,none){"
+  );
+  app = app.replace(
+    "  function classGearItemAllowed(item){",
+    "  function classGearItemAllowed(item){\n    const evidence=String(item&& (item['Evidence Class']||item.Status) || 'CURRENT');\n    if(item&&item.Item!=='None'&&!/CURRENT/i.test(evidence))return false;"
   );
   app = app.replace(
     /  function presetAtLevel\(type\)\{[\s\S]*?  function applyPreset\(type\)\{/,

@@ -10,6 +10,36 @@ vm.runInContext(guideSource, context, {filename: 'dist/guide-data.js'});
 const root = context.window.GUIDE_DATA;
 if (!root?.catalog || !root?.buildVariants) throw new Error('Missing multi-build guide data');
 
+const classicItems = JSON.parse(fs.readFileSync('audit/fighter-items.json', 'utf8')).items || [];
+const classicById = new Map(classicItems.filter(item => item.category === 'Equipment').map(item => [String(item.id), item]));
+const slotMap = {
+  Weapon: 'Weapon', Hat: 'Hat', Cap: 'Hat', Top: 'Top', Coat: 'Top', Longcoat: 'Overall',
+  Overall: 'Overall', Bottom: 'Bottom', Pants: 'Bottom', Shoes: 'Shoes', Glove: 'Gloves',
+  Gloves: 'Gloves', Shield: 'Shield', Cape: 'Cape', Ring: 'Ring', Earring: 'Earrings',
+  Earrings: 'Earrings', Accessory: 'Earrings'
+};
+
+function checkCanonicalInventory(guide, name) {
+  const ids = new Map();
+  for (const row of (guide.gear || []).filter(row => row.Item !== 'None')) {
+    const evidence = String(row['Evidence Class'] || row.Status || 'CURRENT');
+    if (/HISTORICAL|UNVERIFIED/i.test(evidence)) {
+      if (row['Icon URL']) throw new Error(`${name} historical item ${row.Item} still has an active icon URL`);
+      continue;
+    }
+    const id = Number(row['Item ID'] || 0);
+    const canonical = classicById.get(String(id));
+    if (!Number.isInteger(id) || id <= 0 || !canonical) throw new Error(`${name} has an unrecognized Classic item ID for ${row.Item}: ${row['Item ID']}`);
+    if (canonical.name !== row.Item) throw new Error(`${name} item identity mismatch: ${row.Item} uses ${id}, canonical name is ${canonical.name}`);
+    if (row['Icon URL'] !== `/game-media/icons/${id}`) throw new Error(`${name} ${row.Item} does not use its canonical icon route`);
+    if (slotMap[canonical.sub_category] && row.Slot !== slotMap[canonical.sub_category]) throw new Error(`${name} ${row.Item} has slot ${row.Slot}, canonical slot is ${slotMap[canonical.sub_category]}`);
+    if (!ids.has(id)) ids.set(id, row.Item);
+    else if (ids.get(id) !== row.Item) throw new Error(`${name} reuses item ID ${id} for multiple names`);
+  }
+}
+
+checkCanonicalInventory(root, 'I/L');
+
 const expected = [
   ['magician-il-fresh', 'magician', 'I/L Wizard Build'],
   ['warrior-fighter', 'warrior', 'Fighter Build'],
@@ -36,6 +66,7 @@ function effectivePreset(guide, level) {
 }
 
 for (const [name, guide] of Object.entries(root.buildVariants)) {
+  checkCanonicalInventory(guide, name);
   if (catalogShape(guide) !== sharedCatalog) throw new Error(`${name} has a divergent build catalog`);
   const skillLevels = guide.skills.map(row => Number(row.Level));
   const level30Rows = skillLevels.filter(level => level === 30).length;
@@ -169,6 +200,17 @@ if (app.includes('state.level=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Nu
 }
 if (!fs.readFileSync(`${outputDir}/progression-gear-visual.js`, 'utf8').includes('progression-avatar-level-controls')) {
   throw new Error('Level-control merge module is missing its avatar footer contract');
+}
+const worker = fs.readFileSync('worker.js', 'utf8');
+if (!worker.includes('ICON_MEDIA + primaryItem[1]') || worker.includes("api.dreamms.gg/api/GMS/latest/item/")) {
+  throw new Error('Worker still routes primary item artwork through the incompatible DreamMS/GMS table');
+}
+const ciProxy = fs.readFileSync('.github/ci_static_proxy.py', 'utf8');
+if (!ciProxy.includes('primary_match') || ciProxy.includes('api.dreamms.gg/api/GMS/latest/item/')) {
+  throw new Error('CI asset proxy still routes primary item artwork through the incompatible DreamMS/GMS table');
+}
+if (!app.includes('classic-canonical-item-id') || app.includes('/game-media/items/fallback/')) {
+  throw new Error('App still exposes legacy item visual fallbacks instead of canonical Classic IDs');
 }
 const indexHtml = fs.readFileSync(`${outputDir}/index.html`, 'utf8');
 for (const token of ['modal-filter-summary', 'modal-show-future', 'data-class-equipment-filters']) {

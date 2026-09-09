@@ -2,7 +2,6 @@ const MAP_GATEWAY_REVISION = 'gms83-world-sheets-v2';
 const CURRENT_DATA = 'https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/';
 const ICON_MEDIA = 'https://meowdb.com/msclassic/api/assets/icons/';
 const WORLD_MAP_MEDIA = 'https://meowdb.com/msclassic/worldmap/';
-const ITEM_MEDIA_PRIMARY = 'https://api.dreamms.gg/api/GMS/latest/item/';
 const PET_MEDIA = 'https://api.dreamms.gg/api/GMS/latest/pet/';
 const CHARACTER_MEDIA = 'https://api.dreamms.gg/api/GMS/latest/character/';
 const MONSTER_MEDIA = 'https://api.dreamms.gg/api/GMS/latest/mob/';
@@ -23,7 +22,11 @@ function upstreamFor(url) {
     const asset = safeMediaPath(p.slice('/game-media/worldmap/'.length));
     return asset ? WORLD_MAP_MEDIA + asset + url.search : null;
   }
-  if (p.startsWith('/game-media/items/primary/')) return ITEM_MEDIA_PRIMARY + p.slice('/game-media/items/primary/'.length) + url.search;
+  // Item IDs are served from the MapleStory Classic icon catalog.  The old
+  // DreamMS/GMS route reused IDs from a different item table (1050003 was
+  // returned as a magician robe), so it could show the wrong class artwork.
+  const primaryItem = p.match(/^\/game-media\/items\/primary\/(\d+)(?:\/icon)?$/);
+  if (primaryItem) return ICON_MEDIA + primaryItem[1];
   if (p.startsWith('/game-media/pets/')) return PET_MEDIA + p.slice('/game-media/pets/'.length) + url.search;
   if (p.startsWith('/game-media/characters/')) return CHARACTER_MEDIA + p.slice('/game-media/characters/'.length) + url.search;
   if (p.startsWith('/game-media/monsters/')) return MONSTER_MEDIA + p.slice('/game-media/monsters/'.length) + url.search;
