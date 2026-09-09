@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.8.8-build-crosscheck';
+const assetVersion = '0.8.9-multibuild-foundation';
 const BRAND = 'Top Classic World Maplestory';
 
 function retainedMapIndex() {
