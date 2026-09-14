@@ -10,23 +10,29 @@ This is the authoritative unresolved-issues list for cross-chat continuity. Do n
 - **P2** — important UX/data-quality issue
 - **P3** — polish / lower-impact issue
 
-## Verification snapshot — 0.9.9 (2026-09-14)
+## Verification snapshot — 0.10.0 (2026-09-14)
 
-The current deployed site is the generated 0.9.9 checkpoint. Source commit `1541de1` and generated-site commit `e8f294c` passed Build Static, Visual/UI, Real Input, Verify Live, and Monster checks; the maps/ETC guard was corrected and passed on `e68792a`, and the selector regression guard passed on `32a0907`.
+Source head a2ac9b9 and generated site checkpoint 6033028 are the current avatar-parity state. Build Static 34858100599, Visual/UI 34858100657, Maps/ETC 34858100699, and Verify Live 34858189737 passed. Real-input 34857418168 passed against the same generated app state. Verify Live included the dedicated avatar parity step and the live same-tier Skill Tree stability step.
 
-Verified in the generated/live UI:
-- Fighter, Hunter, and I/L use the exact required build names and isolated build data.
-- Level 9/10 and 29/30 transitions use the selected numeric level and synchronize the visible job line and active Skill Tree tier.
-- Fighter and Hunter full Skill Trees expose Beginner → Warrior/Archer → Fighter/Hunter; full-page level rows and tier locks update in place.
-- I/L full-page rows update from level 15 to 16 without changing the skill image sources; Magic Claw remains canonical ID `2001003`.
-- Fighter/Hunter avatars use neutral compositor IDs while their canonical Classic loadout icons remain visible; live filters contain no unrelated-class gear.
-- Overall is mutually exclusive with Top and Bottom in the equipment picker; future-level filters remain class-specific.
-- Maps public wording and Classic-beta catalog labels are live.
+Verified in generated/live UI:
+- Fighter Build, Hunter Build, and I/L Wizard Build use isolated build data and exact required names.
+- Level 9/10 and 29/30 transitions use the selected numeric level and synchronize visible job lines and Skill Tree tiers.
+- Fighter and Hunter expose Beginner → Warrior/Archer → Fighter/Hunter, while I/L exposes Beginner → Magician → Wizard (I/L).
+- The inventory’s selected item IDs exactly match the avatar’s compositor IDs at Level 15 for all three builds.
+- All three live avatar PNGs decoded with nonzero dimensions; no legacy avatar icon box was present.
+- Fighter/Hunter filters contain no unrelated magician/weapon-branch gear, and Overall versus Top/Bottom remains exclusive.
+- Maps, Classic same-origin visual routes, and the public Builds tab checks passed.
 
-The transient blink concern remains under observation. The renderer now preserves the relevant dashboard/full-page nodes and live checks show stable image sources, load events, and row state; a human paint-level blink cannot be fully proven by DOM/CI checks alone.
+Resolved in this checkpoint:
+- P1 Fighter/Hunter avatar correctness.
+- P1 cross-class equipment/avatar leakage for the tested curated paths.
+- P1 equipment slot compatibility.
+- The earlier neutral-avatar-plus-icon-strip workaround was removed.
 
-Open work remains for independent Classic/beta research and deeper item/AP/route/content audits, including Fighter axe mechanics and Hunter research parity.
-
+Still open:
+- Human paint-level Skill Tree blink remains under observation; DOM identity, source, load-event, and child-list stability gates pass.
+- Independent Classic/beta research and deeper content audits remain open for Fighter axe mechanics, Hunter progression parity, AP/route/quest detail, and any disputed source claims.
+- The remaining items below are maintained as regression guards until their broader audits are complete.
 ## P1 — Fighter / Hunter completeness parity
 Historical problem: Fighter and Hunter contained substantially less information than I/L and behaved partly like incomplete skeletons.
 
@@ -87,44 +93,28 @@ Verify synchronization of:
 - dashboard copy
 - recommendations
 
-## P1 — Cross-class equipment leakage
-Historical bugs:
-- Fighter/Hunter recommended Magician equipment.
-- Fighter/Hunter avatar visuals displayed Magician items.
-- Example previously flagged: Blue Kendo Robe appearing in the wrong class context.
+## Regression guard — cross-class equipment leakage (resolved 0.10.0)
 
-Audit:
-- recommendation filters
-- default equipment datasets
-- avatar equipment mapping
-- fallback logic
-- per-item job tags
-- per-item level tags
+The previous P1 issue is resolved for the supported curated paths. Fighter/Hunter item rows are class-filtered, canonicalized to Classic IDs, and the live Level-15 parity gate confirms their avatar IDs come from the same selected inventory rows.
 
-Acceptance criteria:
-- No Magician-only item appears as a Fighter/Hunter recommendation unless it is genuinely usable by that class under the target Classic ruleset.
-- No shared fallback silently defaults to I/L gear.
+Keep this guard active:
+- no Magician-only item in Fighter/Hunter recommendations,
+- no cross-table avatar fallback,
+- no shared fallback silently defaulting to I/L gear,
+- future-level results remain class-specific.
+## Regression guard — equipment slot compatibility (resolved 0.10.0)
 
-## P1 — Equipment slot compatibility
-Historical bug: recommendations could show an overall together with top and pants simultaneously.
+Overall versus Top/Bottom is normalized in saved state, presets, inventory presentation, and the avatar payload. Keep testing both directions whenever preset or picker code changes.
+## Regression guard — Fighter/Hunter avatar correctness (resolved 0.10.0)
 
-Required behavior:
-- Overall excludes top + pants recommendations for the same active loadout.
-- Top + pants excludes overall for the same active loadout.
-- Other mutually exclusive slots should follow equivalent logic.
+The live gate now proves:
+- selected inventory item names resolve to their canonical Classic IDs,
+- those IDs are the exact avatar compositor IDs,
+- all three build PNGs render,
+- the avatar uses classic-avatar-preview-v1,
+- the legacy avatar-equipped-icons box is absent.
 
-Verify both recommendation lists and avatar rendering.
-
-## P1 — Fighter/Hunter avatar correctness
-Historical problem: avatar visuals remained Magician-oriented on non-Magician builds.
-
-Verify:
-- correct build-specific equipment assets
-- correct job badge
-- correct item-to-avatar mapping
-- no stale state after switching build/level/item
-- selected/recommended item art matches displayed item name
-
+Reopen this issue only if a future change breaks those assertions or a human visual review finds a paint-level mismatch.
 ## P1 — Skill Tree grouping
 Historical problem: Fighter/Hunter Skill Trees were not reliably separated into Beginner / first job / second job.
 
