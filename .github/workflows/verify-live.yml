@@ -141,6 +141,119 @@ jobs:
           PY
           done
 
+      - name: Verify live avatar and inventory parity
+        env:
+          BASE_URL: https://maplestory-classic.ofri505.workers.dev
+        run: |
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          python3 -m pip install --quiet websocket-client
+          rm -rf /tmp/tcw-avatar-cdp
+          "$chrome" --headless --no-sandbox --disable-gpu --remote-debugging-port=9223 --remote-allow-origins='*' --user-data-dir=/tmp/tcw-avatar-cdp "$BASE_URL/?build=magician-il-fresh&ci=$GITHUB_RUN_ID&avatar-parity=1" >/tmp/tcw-avatar-chrome.log 2>&1 &
+          chrome_pid=$!
+          trap 'kill "$chrome_pid" 2>/dev/null || true' EXIT
+          for i in {1..80}; do
+            curl -fsS http://127.0.0.1:9223/json >/tmp/tcw-avatar-tabs.json 2>/dev/null && break
+            sleep .1
+          done
+          test -s /tmp/tcw-avatar-tabs.json
+          python3 - <<'PY'
+          import json, time
+          import websocket
+
+          tabs=json.load(open('/tmp/tcw-avatar-tabs.json',encoding='utf-8'))
+          page=next((x for x in tabs if x.get('type')=='page' and 'maplestory-classic.ofri505.workers.dev' in x.get('url','')),None)
+          if not page:
+              raise SystemExit('live avatar CDP target missing')
+          ws=websocket.create_connection(page['webSocketDebuggerUrl'],timeout=20)
+          seq=0
+
+          def send(method,params=None):
+              global seq
+              seq+=1
+              ident=seq
+              ws.send(json.dumps({'id':ident,'method':method,'params':params or {}}))
+              while True:
+                  msg=json.loads(ws.recv())
+                  if msg.get('id')==ident:
+                      if 'error' in msg:
+                          raise RuntimeError(f"CDP {method}: {msg['error']}")
+                      return msg.get('result',{})
+
+          def ev(expr, await_promise=False):
+              out=send('Runtime.evaluate',{
+                  'expression':expr,
+                  'awaitPromise':await_promise,
+                  'returnByValue':True,
+                  'userGesture':True
+              })
+              if out.get('exceptionDetails'):
+                  raise RuntimeError(out['exceptionDetails'].get('text','evaluation failed'))
+              return out.get('result',{}).get('value')
+
+          send('Runtime.enable')
+          send('Page.enable')
+          builds=('magician-il-fresh','warrior-fighter','archer-hunter')
+          slots={
+              'Hat':'hat','Eye':'eye','Face':'face_acc','Earrings':'earring',
+              'Top':'top','Overall':'overall','Bottom':'bottom','Shoes':'shoes',
+              'Gloves':'gloves','Cape':'cape','Shield':'shield','Weapon':'weapon'
+          }
+
+          for build in builds:
+              send('Page.navigate',{'url':f"{__import__('os').environ['BASE_URL']}/?build={build}&ci={__import__('os').environ['GITHUB_RUN_ID']}&avatar-parity=1"})
+              ready=None
+              for _ in range(120):
+                  ready=ev("""(()=>({ready:document.readyState==='complete',select:!!document.getElementById('level-select'),avatar:!!document.getElementById('atlas-avatar')}))()""")
+                  if ready and ready['ready'] and ready['select'] and ready['avatar']:
+                      break
+                  time.sleep(.25)
+              if not ready or not (ready['ready'] and ready['select'] and ready['avatar']):
+                  raise AssertionError(f"{build}: page did not become ready: {ready}")
+              ev("""(()=>{const s=document.getElementById('level-select');s.value='15';s.dispatchEvent(new Event('change',{bubbles:true}));return true})()""")
+              result=None
+              for _ in range(100):
+                  result=ev("""(()=>{
+                    const avatar=document.getElementById('atlas-avatar');
+                    const selected=[...document.querySelectorAll('#equipment-window .gear-slot[data-slot]')];
+                    const byName=new Map((window.GUIDE_DATA?.gear||[]).map(row=>[row.Item,String(row['Item ID']||'')]));
+                    const expected={};
+                    const overall=selected.find(node=>node.dataset.slot==='Overall')?.dataset.itemName;
+                    const slotApi={Hat:'hat',Eye:'eye',Face:'face_acc',Earrings:'earring',Top:'top',Overall:'overall',Bottom:'bottom',Shoes:'shoes',Gloves:'gloves',Cape:'cape',Shield:'shield',Weapon:'weapon'};
+                    selected.forEach(node=>{
+                      const slot=node.dataset.slot, name=node.dataset.itemName;
+                      if(!slotApi[slot]||!name||name==='None'||(overall&&overall!=='None'&&(slot==='Top'||slot==='Bottom')))return;
+                      const id=byName.get(name);
+                      if(id&&id!=='0')expected[slotApi[slot]]=id;
+                    });
+                    const actual=Object.fromEntries((avatar?.dataset.avatarGearIds||'').split(';').filter(Boolean).map(part=>part.split('=')));
+                    const img=avatar?.querySelector('.avatar-character');
+                    return {
+                      level:document.getElementById('hero-level')?.textContent||'',
+                      expected,actual,
+                      renderer:avatar?.dataset.avatarRenderer||'',
+                      src:img?.getAttribute('src')||'',
+                      complete:!!img?.complete,
+                      naturalWidth:Number(img?.naturalWidth||0),
+                      hidden:!!img?.hidden,
+                      iconBox:!!avatar?.querySelector('.avatar-equipped-icons')
+                    };
+                  })()""")
+                  if result and result['level']=='15' and result['expected']==result['actual'] and result['complete'] and result['naturalWidth']>0:
+                      break
+                  time.sleep(.5)
+              if not result or result['expected']!=result['actual']:
+                  raise AssertionError(f"{build}: inventory/avatar IDs differ: {result}")
+              if result['renderer']!='classic-avatar-preview-v1' or '/game-media/characters/classic-preview?' not in result['src']:
+                  raise AssertionError(f"{build}: wrong avatar renderer: {result}")
+              if not result['complete'] or result['naturalWidth']<=0 or result['hidden']:
+                  raise AssertionError(f"{build}: avatar PNG did not render: {result}")
+              if result['iconBox']:
+                  raise AssertionError(f"{build}: legacy avatar icon box returned")
+              print(f"live-avatar-parity-ok {build}: {result['actual']}")
+          ws.close()
+          PY
+
       - name: Verify live skill icons never reload on same-tier levels
         env:
           BASE_URL: https://maplestory-classic.ofri505.workers.dev
