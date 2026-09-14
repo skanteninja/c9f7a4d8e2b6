@@ -17,6 +17,7 @@ html.auto-gear-synced .equipment-window{box-shadow:inset 0 0 0 1px rgba(98,212,1
 .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .skill-grid{display:flex!important;flex-flow:row wrap!important;gap:12px!important}
 /* Any class with a second-job skill set gets a horizontal dashboard tree. */
 .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)){width:clamp(410px,55%,440px)!important;max-width:440px!important}
+.dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)) .atlas-skill-tabs .atlas-skill-tab{white-space:nowrap!important}
 .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)) .atlas-skill-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important;grid-auto-flow:row!important}
 .dashboard-v72 .v5-character-hero:has(>.tcw-hero-skill-tree .atlas-skill-grid>.atlas-skill-card:nth-child(4)) .v5-character-copy{padding-right:clamp(390px,52%,430px)!important}
 .dashboard-v72 .v72-secondary-content.tcw-secondary-vacated{display:none!important}
