@@ -1407,6 +1407,6 @@
   hydrateLauncherState();
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.9.3-dashboard-tree-fit').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.9.4-dashboard-tree-fit').catch(()=>{});
   }
 })();
