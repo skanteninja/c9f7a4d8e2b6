@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.9.5-dashboard-tree-fit';
+const assetVersion = '0.9.6-public-map-copy';
 const BRAND = 'Top Classic World Maplestory';
 
 // The OSMS export is the identity authority for the equipment picker.  The
