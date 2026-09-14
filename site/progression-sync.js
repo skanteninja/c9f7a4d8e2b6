@@ -55,16 +55,31 @@
     return out;
   }
 
+  function classScore(skill) {
+    const className = norm(skill?.class_name || '');
+    if (className === 'i l wizard') return 100;
+    if (className === 'magician') return 90;
+    if (className.includes('wizard')) return 40;
+    return 0;
+  }
+
+  function preferredSkill(skills) {
+    return [...skills].sort((a,b) => classScore(b) - classScore(a) || Number(a.id) - Number(b.id))[0] || null;
+  }
+
   function skillIndex() {
     if (!skillPromise) {
       skillPromise = fetch(`${RAW}skills.json`, {cache:'force-cache'})
         .then(r => { if(!r.ok) throw new Error(`skills ${r.status}`); return r.json(); })
         .then(data => {
-          const byName = new Map();
+          const candidates = new Map();
           collectSkills(data).forEach(skill => {
             const key = norm(skill.name);
-            if (key && !byName.has(key)) byName.set(key,skill);
+            if (!key) return;
+            if (!candidates.has(key)) candidates.set(key, []);
+            candidates.get(key).push(skill);
           });
+          const byName = new Map([...candidates].map(([name,skills]) => [name,preferredSkill(skills)]));
           return byName;
         }).catch(() => new Map());
     }

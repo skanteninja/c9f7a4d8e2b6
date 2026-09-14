@@ -1407,6 +1407,6 @@
   hydrateLauncherState();
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.9.1-class-safe-avatar').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.9.2-class-safe-skill-art').catch(()=>{});
   }
 })();
