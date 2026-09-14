@@ -1,0 +1,49 @@
+name: Discord continuity mirror
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/continuity/CHANGELOG.md'
+      - 'docs/continuity/PROJECT_STATE.md'
+      - 'docs/continuity/KNOWN_BUGS.md'
+      - 'docs/continuity/DECISIONS.md'
+  workflow_dispatch:
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Discord message
+        id: message
+        shell: bash
+        run: |
+          REPO="${{ github.repository }}"
+          SHA="${{ github.sha }}"
+          SHORT_SHA="${SHA:0:7}"
+          COMMIT_URL="https://github.com/${REPO}/commit/${SHA}"
+          MESSAGE=$(jq -n \
+            --arg repo "$REPO" \
+            --arg sha "$SHORT_SHA" \
+            --arg url "$COMMIT_URL" \
+            --arg actor "${{ github.actor }}" \
+            --arg msg "${{ github.event.head_commit.message || 'Manual continuity update' }}" \
+            '{content: ("🧠 **MapleStory continuity updated**\n**Repo:** `" + $repo + "`\n**Commit:** `" + $sha + "`\n**By:** " + $actor + "\n**Change:** " + $msg + "\n" + $url)}')
+          echo "payload<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Post to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_CHANGELOG_WEBHOOK }}
+          PAYLOAD: ${{ steps.message.outputs.payload }}
+        shell: bash
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "DISCORD_CHANGELOG_WEBHOOK secret is not configured; skipping Discord notification."
+            exit 0
+          fi
+          curl --fail-with-body \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK_URL"
