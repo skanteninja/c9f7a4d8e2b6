@@ -67,6 +67,12 @@ The derived job must drive:
 - “Do This Now” and Skill Tree should be side-by-side on the dashboard where layout allows.
 - Magic Claw canonical skill ID is `2001003`.
 
+## Skill Tree state-update architecture
+
+- Full-page Skill Tree level changes must update existing rows, tier locks and displayed levels in place when the structure is unchanged.
+- The I/L full-page plan rows are direct children of `#skill-list`, so its updater must target `.skill-row[data-plan-level]` directly rather than assuming the class-build `.skill-level-plan` wrapper.
+- Preserve the no-global-image-prototype-interception decision; image stability comes from renderer ownership and node preservation.
+
 ## Dashboard behavior
 - Training location belongs in the dedicated Training metric, not duplicated under the job title.
 - “Do This Now” content should remain fully readable and must not be truncated.

@@ -2,6 +2,8 @@
 
 Last continuity baseline: 2026-09-14
 
+Current deployed checkpoint: 0.9.9-full-skill-tree-state
+
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:
 - `docs/continuity/KNOWN_BUGS.md`
@@ -76,6 +78,13 @@ These are regression guards. A future change must not silently break them.
 - OSMS high-resolution maps are used where available.
 - Victoria Island should behave as one world-map click target while preserving relevant beta Victoria Island travel points.
 - Sleepywood map was restored.
+
+## Current verified checkpoint
+
+- The live deployment is `0.9.9-full-skill-tree-state`.
+- Build Static, Verify Live, Visual/UI, Real Input, Monster, and Maps/ETC checks are green for the current app checkpoint; the selector guard is also green.
+- The I/L full-page renderer updates `.skill-row[data-plan-level]` state in place. Do not reintroduce a wrapper-dependent selector for I/L plan rows.
+- Full-page Fighter/Hunter row and tier state also update in place. Keep transient paint-level blink under observation even when node/source checks pass.
 
 ## Automatic job progression
 The selected level must determine the current job automatically and all dependent UI must agree.

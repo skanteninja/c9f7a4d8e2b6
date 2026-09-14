@@ -2,6 +2,14 @@
 
 This log exists to make cross-chat handoff quick and reliable. Record meaningful changes, fixes, regressions, research conclusions, and continuity-system updates.
 
+## 2026-09-14 — Multi-build quality checkpoints 0.9.6–0.9.9
+
+- 0.9.6 standardized public Maps wording to the curated Classic-beta catalog and passed live map checks.
+- 0.9.7 exposed Hunter’s visible Beginner → Archer → Hunter tiers while preserving the internal Bowman data branch.
+- 0.9.8 added in-place full-page Fighter/Hunter and I/L Skill Tree state updates.
+- 0.9.9 corrected the I/L plan-row selector, added a regression guard, and passed Build Static, Verify Live, live browser checks, and the prior multi-build gates.
+- Remaining caution: transient paint-level Skill Tree blink remains under observation; independent Classic/beta content research is still open.
+
 ## 2026-09-14 — Continuity hardening
 - Expanded `PROJECT_STATE.md` into a full new-chat handoff covering active builds, product goals, automatic job progression, level-state rules, Skill Tree behavior, equipment invariants, build-specific research direction, data-quality requirements, current priorities, and maintenance protocol.
 - Expanded `KNOWN_BUGS.md` into the authoritative unresolved-issues queue with severity, acceptance criteria, regression checks, database integrity rules, and a verification matrix.

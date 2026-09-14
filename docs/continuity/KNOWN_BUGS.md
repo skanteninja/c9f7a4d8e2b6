@@ -10,6 +10,23 @@ This is the authoritative unresolved-issues list for cross-chat continuity. Do n
 - **P2** — important UX/data-quality issue
 - **P3** — polish / lower-impact issue
 
+## Verification snapshot — 0.9.9 (2026-09-14)
+
+The current deployed site is the generated 0.9.9 checkpoint. Source commit `1541de1` and generated-site commit `e8f294c` passed Build Static, Visual/UI, Real Input, Verify Live, and Monster checks; the maps/ETC guard was corrected and passed on `e68792a`, and the selector regression guard passed on `32a0907`.
+
+Verified in the generated/live UI:
+- Fighter, Hunter, and I/L use the exact required build names and isolated build data.
+- Level 9/10 and 29/30 transitions use the selected numeric level and synchronize the visible job line and active Skill Tree tier.
+- Fighter and Hunter full Skill Trees expose Beginner → Warrior/Archer → Fighter/Hunter; full-page level rows and tier locks update in place.
+- I/L full-page rows update from level 15 to 16 without changing the skill image sources; Magic Claw remains canonical ID `2001003`.
+- Fighter/Hunter avatars use neutral compositor IDs while their canonical Classic loadout icons remain visible; live filters contain no unrelated-class gear.
+- Overall is mutually exclusive with Top and Bottom in the equipment picker; future-level filters remain class-specific.
+- Maps public wording and Classic-beta catalog labels are live.
+
+The transient blink concern remains under observation. The renderer now preserves the relevant dashboard/full-page nodes and live checks show stable image sources, load events, and row state; a human paint-level blink cannot be fully proven by DOM/CI checks alone.
+
+Open work remains for independent Classic/beta research and deeper item/AP/route/content audits, including Fighter axe mechanics and Hunter research parity.
+
 ## P1 — Fighter / Hunter completeness parity
 Historical problem: Fighter and Hunter contained substantially less information than I/L and behaved partly like incomplete skeletons.
 

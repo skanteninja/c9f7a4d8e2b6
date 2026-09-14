@@ -6,6 +6,17 @@ Purpose: preserve bugs that were already solved, partially solved, or observed a
 
 This is historical context, not the unresolved queue. Active unresolved work belongs in `KNOWN_BUGS.md`.
 
+## 2026-09-14 — 0.9.9 full-page Skill Tree state correction
+
+Observed regression:
+- The I/L full-page Skill Tree rows had `data-plan-level` markers but were not inside the Fighter/Hunter-only `.skill-level-plan` wrapper.
+- The in-place update branch therefore found no I/L rows, leaving the highlighted plan row at the prior level even though the selector value changed.
+
+Correction:
+- The I/L branch now updates `#skill-list .skill-row[data-plan-level]` directly.
+- The generated 0.9.9 site was checked live at levels 15 and 16; row state changed correctly and all I/L skill image sources remained unchanged.
+- A multi-build audit token now guards the direct selector, and Build Static plus Verify Live passed after the change.
+
 ## Skill Tree stability
 ### I/L level-change blinking / reload
 Historical symptom:
