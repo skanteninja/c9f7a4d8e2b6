@@ -78,7 +78,9 @@
 
   function removeDuplicateGearUi() {
     document.querySelectorAll('.progression-loadout-strip').forEach(node => node.remove());
-    document.querySelectorAll('.v5-avatar .avatar-equipped-icons').forEach(node => node.remove());
+    if (!['warrior-fighter','archer-hunter'].includes(String(window.TCW_ACTIVE_BUILD_ID || ''))) {
+      document.querySelectorAll('.v5-avatar .avatar-equipped-icons').forEach(node => node.remove());
+    }
   }
 
   function ensureLevelHead(controls) {

@@ -194,7 +194,7 @@
     return [...new Set([mapleIoSkillIcon(skill)].filter(Boolean))];
   }
   function skillImgTag(name, cls='skill-icon'){
-    const skill=D.skillIcons[name], urls=name==='Magic Claw'?['/game-data/data/current/images/skills/2001003.png',...skillVisualCandidates(skill)]:skillVisualCandidates(skill);
+    const skill=D.skillIcons[name], canonicalId=String(skill?.id||'').replace(/[^0-9]/g,''), currentUrl=canonicalId?`/game-data/data/current/images/skills/${canonicalId}.png`:''; const urls=currentUrl?[currentUrl,...skillVisualCandidates(skill)]:skillVisualCandidates(skill);
     if(!urls.length) return '';
     const [primary,...fallbacks]=urls;
     return `<img class="${cls}" src="${esc(primary)}" data-asset-fallbacks="${esc(fallbacks.join('|'))}" data-visual-source="verified-skill-id-legacy-sprite-fallback" alt="${esc(name)}">`;
@@ -455,6 +455,10 @@
   function mapleIoMobAsset(id){ return id?`https://maplestory.io/api/GMS/83/mob/${id}/render/stand`:''; }
   const BASE_CHARACTER_IDS=['47077','21078']; // visual-only hair/face basis; never used as Classic game-data evidence
   function characterItemIds(){
+    // The character compositor uses a newer item table than Classic.  Its
+    // numeric IDs are not interchangeable, so researched class builds use a
+    // neutral base render and keep the exact Classic gear icons beside it.
+    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)) return [...BASE_CHARACTER_IDS];
     const visible=['Hat','Face','Eye','Earrings','Pendant','Cape','Shield','Gloves','Weapon','Shoes'];
     const bodySlots=state.gear.Overall!=='None' ? ['Overall'] : ['Top','Bottom'];
     const ids=[...BASE_CHARACTER_IDS];
@@ -480,6 +484,7 @@
   function renderAtlasAvatar(){
     const root=document.getElementById('atlas-avatar'); if(!root)return;
     const equipped=['Hat','Overall','Weapon','Shield','Cape','Gloves','Shoes'].map(s=>getGear(state.gear[s])).filter(Boolean).filter(x=>x.Item!=='None').slice(0,5);
+    root.dataset.buildId=String(activeBuild()?.id||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh');
     root.innerHTML=`<div class="avatar-aura"></div><img class="avatar-character" src="${esc(characterRenderUrl())}" alt="${esc(activeBuild()?.name||"Equipped character")}"><div class="classic-avatar-placeholder avatar-render-fallback" hidden><span class="pixel-head">✦</span><b>LOADOUT PREVIEW</b><small>Renderer unavailable — gear icons shown below</small></div><div class="avatar-equipped-icons">${equipped.map(x=>`<span title="${esc(x.Item)}">${imgTag(x)}</span>`).join('')}</div><div class="avatar-job-badge">${esc(activeBuild()?.shortName||"I/L")}</div>`;
     const img=root.querySelector('.avatar-character'), fallback=root.querySelector('.avatar-render-fallback');
     if(img){
@@ -1402,6 +1407,6 @@
   hydrateLauncherState();
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.9.0-class-specific-builds').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.9.1-class-safe-avatar').catch(()=>{});
   }
 })();
