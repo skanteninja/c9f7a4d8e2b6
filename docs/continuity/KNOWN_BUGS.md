@@ -2,33 +2,254 @@
 
 Last continuity baseline: 2026-09-14
 
-This is the authoritative unresolved-issues list for cross-chat continuity. Remove or mark items resolved only after verification.
+This is the authoritative unresolved-issues list for cross-chat continuity. Do not mark an issue resolved merely because code was edited. Resolution requires verification in the generated/live UI or validated data output.
 
-## Fighter / Hunter parity
-- Fighter and Hunter still need a completeness audit against I/L; historically they had substantially less content.
-- Verify skill trees are correctly separated by Beginner / first job / second job sections.
-- Verify build-specific AP, skills, equipment, buffs, routes, quests, ETC, visuals, and dashboard content.
+## Severity legend
+- **P0** — breaks core use or corrupts project-wide state
+- **P1** — major build correctness/parity issue
+- **P2** — important UX/data-quality issue
+- **P3** — polish / lower-impact issue
 
-## Level handling
-- Historical regression: selecting level 10 could display/apply level 9.
-- Verify the exact selected level propagates everywhere on Fighter and Hunter, not only I/L.
+## P1 — Fighter / Hunter completeness parity
+Historical problem: Fighter and Hunter contained substantially less information than I/L and behaved partly like incomplete skeletons.
 
-## Dashboard / Skill Tree
-- Historical regression: Fighter dashboard Skill Tree returned to an unintended vertical layout.
-- Verify dashboard Skill Tree layout is consistent across all builds.
-- Verify job title, skill allocation, job pills, avatar badge, and Skill Tree section all follow automatic class progression.
+Verify and complete, build by build:
+- Beginner / first-job / second-job Skill Tree sections
+- level-by-level SP allocation
+- AP/stat plan
+- equipment progression
+- recommended items and explanations
+- training routes
+- quests
+- ETC/material recommendations
+- buffs / consumables
+- dashboard summaries
+- avatar/equipment visuals
+- future-level items
+- class-specific “Do This Now” guidance
 
-## Equipment / avatar
-- Historical bug: Fighter/Hunter recommendations showed Magician equipment.
-- Historical bug: Fighter/Hunter avatar visuals showed Magician equipment.
-- Historical bug: incompatible equipment could be recommended together (overall plus top/pants).
-- Audit item names, item images, class requirements, level requirements, and slot compatibility against Classic-era sources.
-- Verify “Show future-level items” exists and works in every build.
+Acceptance criteria:
+- Fighter and Hunter should not feel like trimmed I/L variants.
+- No section should silently fall back to I/L/Magician data.
 
-## Data quality
-- Re-evaluate weapon recommendations per build rather than inheriting another class’s assumptions.
-- Fighter weapon logic should account for beta-specific mechanics such as axe-related bleed if that behavior is confirmed by current Classic sources.
-- Keep all database entries explicitly tagged by job and level requirement where relevant.
+## P1 — Exact level handling / off-by-one regression
+Historical regression: selecting level 10 could display or apply level 9.
 
-## Verification rule
-A fix is not complete until it is checked in the live UI or against the generated build output, not merely changed in source code.
+Must verify on Fighter, Hunter and I/L:
+- visible selected level
+- job title
+- skill SP state
+- skill grouping
+- equipment level filters
+- future-level item logic
+- dashboard metrics
+- training recommendation
+- avatar/job badge
+
+Acceptance criteria:
+- Level N is represented as N everywhere.
+- No array-index conversion causes N-1 behavior.
+- Level selectors/ranges are present and consistent on all builds.
+
+## P1 — Automatic job progression consistency
+The level-derived job must be a single source of truth.
+
+Expected:
+- Fighter: Beginner 1–9 → Warrior 10–29 → Fighter 30+
+- Hunter: Beginner 1–9 → Archer 10–29 → Hunter 30+
+- I/L: Beginner 1–9 → Magician 10–29 → Wizard (I/L) 30+
+
+Historical problem: different UI areas could disagree on current job.
+
+Verify synchronization of:
+- Active Build title
+- Skill Tree section
+- skill allocation source
+- avatar badge
+- job pills/labels
+- dashboard copy
+- recommendations
+
+## P1 — Cross-class equipment leakage
+Historical bugs:
+- Fighter/Hunter recommended Magician equipment.
+- Fighter/Hunter avatar visuals displayed Magician items.
+- Example previously flagged: Blue Kendo Robe appearing in the wrong class context.
+
+Audit:
+- recommendation filters
+- default equipment datasets
+- avatar equipment mapping
+- fallback logic
+- per-item job tags
+- per-item level tags
+
+Acceptance criteria:
+- No Magician-only item appears as a Fighter/Hunter recommendation unless it is genuinely usable by that class under the target Classic ruleset.
+- No shared fallback silently defaults to I/L gear.
+
+## P1 — Equipment slot compatibility
+Historical bug: recommendations could show an overall together with top and pants simultaneously.
+
+Required behavior:
+- Overall excludes top + pants recommendations for the same active loadout.
+- Top + pants excludes overall for the same active loadout.
+- Other mutually exclusive slots should follow equivalent logic.
+
+Verify both recommendation lists and avatar rendering.
+
+## P1 — Fighter/Hunter avatar correctness
+Historical problem: avatar visuals remained Magician-oriented on non-Magician builds.
+
+Verify:
+- correct build-specific equipment assets
+- correct job badge
+- correct item-to-avatar mapping
+- no stale state after switching build/level/item
+- selected/recommended item art matches displayed item name
+
+## P1 — Skill Tree grouping
+Historical problem: Fighter/Hunter Skill Trees were not reliably separated into Beginner / first job / second job.
+
+Required:
+- Fighter: Beginner / Warrior / Fighter
+- Hunter: Beginner / Archer / Hunter
+- I/L: Beginner / Magician / Wizard (I/L)
+
+Verify section visibility and SP calculations at boundary levels 9, 10, 29, 30 and later levels.
+
+## P2 — Fighter dashboard Skill Tree layout regression
+Historical regression: Fighter dashboard Skill Tree returned to an unintended vertical layout after a similar issue had already been solved elsewhere.
+
+Verify:
+- layout matches intended compact/horizontal presentation
+- responsive behavior remains usable on narrower widths
+- changing level does not cause layout jumping/remounting
+
+## P2 — “Show future-level items” inconsistency
+Historical issue: feature was missing or nonfunctional on Fighter/Hunter.
+
+Required:
+- feature exists on every supported build
+- off = current-level-valid items only according to intended recommendation logic
+- on = future relevant items become visible without introducing wrong-class gear
+- future items retain correct level/job metadata
+
+## P2 — Item name / icon / metadata mismatch
+Historical concern: some item names, visuals or metadata did not agree with OSMS / henesys.gg / MeowDB.
+
+Audit each supported recommendation for:
+- canonical Classic-era name
+- image/icon
+- slot
+- required level
+- required job/class
+- relevant stats
+- recipe/crafting information where shown
+
+If sources disagree, document the conflict rather than guessing.
+
+## P2 — Fighter weapon-path research
+Do not inherit a generic “sword + shield” recommendation without Classic-specific validation.
+
+Investigate:
+- swords vs axes
+- one-handed vs two-handed considerations where relevant
+- shield implications
+- beta-specific axe mechanics
+- previously flagged claim that axes may apply bleed in the beta
+
+The bleed claim is **not automatically accepted as fact**. Confirm against current Classic/beta evidence before encoding it into recommendations.
+
+## P2 — Hunter independent progression audit
+Hunter must be researched independently for:
+- AP/stat plan
+- weapon progression
+- armor/equipment progression
+- skills/SP order
+- training locations
+- quests
+- buffs/consumables
+
+Do not inherit Magician/Fighter assumptions.
+
+## P2 — I/L regression guard
+Shared-code fixes for Fighter/Hunter must not break established I/L behavior.
+
+Regression checks:
+- Skill Tree does not blink/reload on level change
+- skill-card identity remains stable
+- learned coloring remains stable
+- 0-SP greying remains correct
+- Magic Claw ID remains `2001003`
+- exact-level behavior remains correct
+- dashboard layout remains intact
+- equipment filtering remains class-correct
+
+## P2 — Duplicate training location regression
+Previously fixed: training text appeared under the job title and again in the Training metric.
+
+Required:
+- keep it only in the Training metric
+- verify new build/dashboard templates do not reintroduce the duplicate
+
+## P2 — “Do This Now” truncation regression
+Previously fixed.
+
+Required:
+- long instructions remain readable
+- responsive changes do not bring clipping/truncation back
+
+## P2 — Map / routing regression guards
+Previously fixed behavior to verify after map-related changes:
+- monster icons route through same-origin paths
+- use OSMS high-resolution maps where available
+- Victoria Island remains a single world-map click target
+- beta Victoria Island travel points remain available
+- Sleepywood remains restored/accessible
+
+## P3 — Content completeness / consistency audit
+Across all builds, verify:
+- terminology is consistent
+- “Highly recommended” labels are applied intentionally
+- skill icons match skill names
+- item icons fit equipment slots
+- no placeholder/modern/non-Classic assets remain
+- dashboard wording does not repeat the same information unnecessarily
+
+## Database integrity rule
+Where relevant, supported items should explicitly carry:
+- item ID
+- canonical name
+- slot
+- job/class restriction
+- level requirement
+- icon/image mapping
+- build relevance
+
+Shared data must not depend on implicit “Magician by default” behavior.
+
+## Verification matrix for every meaningful fix
+Test at minimum:
+- level 1
+- level 9
+- level 10
+- level 29
+- level 30
+- one midgame level relevant to the build
+- highest currently supported level (historically 70 for the original builder scope)
+
+Also test:
+- switching builds
+- switching levels repeatedly
+- toggling future-level items
+- changing equipment selections
+- returning to a previously viewed build
+
+## Definition of resolved
+An issue may be moved out of this file only when:
+1. root cause has been addressed,
+2. generated/live UI has been checked,
+3. boundary cases relevant to the issue have been checked,
+4. known-good behavior in other builds has not regressed,
+5. the fix is recorded in `FIX_HISTORY.md` / `CHANGELOG.md`.
