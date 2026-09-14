@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 from urllib.request import Request, urlopen
 import argparse, base64, json, re
 
@@ -9,6 +9,7 @@ ICON_MEDIA='https://meowdb.com/msclassic/api/assets/icons/'
 WORLD_MAP_MEDIA='https://meowdb.com/msclassic/worldmap/'
 PET_MEDIA='https://api.dreamms.gg/api/GMS/latest/pet/'
 CHARACTER_MEDIA='https://api.dreamms.gg/api/GMS/latest/character/'
+CLASSIC_AVATAR_PREVIEW='https://meowdb.com/msclassic/api/avatar-preview'
 MONSTER_MEDIA='https://api.dreamms.gg/api/GMS/latest/mob/'
 ITEM_MEDIA_FALLBACK='https://maplestory.io/api/GMS/83/item/'
 SKILL_MEDIA='https://maplestory.io/api/wz/img/GMS/83/Skill/'
@@ -30,6 +31,46 @@ LEGACY_FIXTURE=[
     {'id':'800000000','name':'Mushroom Shrine','street_name':'Zipangu','map_mark':'MushroomShrine'},
 ]
 
+CLASSIC_AVATAR_SLOT_QUERY=(
+    ('hat','hat'),('eye','eye'),('face_acc','face_acc'),('earring','earring'),
+    ('top','top'),('overall','overall'),('bottom','bottom'),('shoes','shoes'),
+    ('gloves','gloves'),('cape','cape'),('shield','shield'),('weapon','weapon'),
+)
+
+
+def classic_avatar_number(query, key, allow_zero=False):
+    values=query.get(key, [])
+    raw=values[0] if values else ''
+    if not re.fullmatch(r'\\d{1,9}', raw): return None
+    value=int(raw)
+    if value < (0 if allow_zero else 1): return None
+    return value
+
+
+def classic_avatar_body(path):
+    query=parse_qs(urlsplit(path).query, keep_blank_values=True)
+    regular={}
+    for query_key, api_key in CLASSIC_AVATAR_SLOT_QUERY:
+        value=classic_avatar_number(query, query_key)
+        if value is not None: regular[api_key]=value
+    if 'overall' in regular:
+        regular.pop('top', None); regular.pop('bottom', None)
+    skin=classic_avatar_number(query, 'skin', True)
+    return {
+        'appearance': {
+            'skin': skin if skin is not None else 0,
+            'hairId': classic_avatar_number(query, 'hair') or 30000,
+            'faceId': classic_avatar_number(query, 'face') or 20000,
+            'cashEquipment': {},
+            'regularEquipment': regular,
+            'emote': None,
+        },
+        'direction': 'right',
+        'frame': 0,
+        'expression': 'default',
+        'pose': 'stand',
+    }
+
 
 def upstream(path):
     parsed=urlsplit(path)
@@ -39,7 +80,8 @@ def upstream(path):
     # the Classic icon catalog instead of the incompatible DreamMS/GMS table.
     primary_match=re.match(r'^/game-media/items/primary/(\d+)(?:/icon)?$',p)
     if primary_match: return ICON_MEDIA+primary_match.group(1)
-    routes=(
+    if p=='/game-media/characters/classic-preview': return None
+    routes=()
         ('/game-data/',CURRENT_DATA),
         ('/game-media/icons/',ICON_MEDIA),
         ('/game-media/worldmap/',WORLD_MAP_MEDIA),
@@ -57,8 +99,8 @@ def upstream(path):
 def handler(directory):
     class H(SimpleHTTPRequestHandler):
         def __init__(self,*args,**kwargs): super().__init__(*args,directory=directory,**kwargs)
-        def send_bytes(self,data,content_type):
-            self.send_response(200);self.send_header('Content-Type',content_type);self.send_header('Cache-Control','no-store');self.send_header('Content-Length',str(len(data)));self.end_headers();self.wfile.write(data)
+        def send_bytes(self,data,content_type,status=200):
+            self.send_response(status);self.send_header('Content-Type',content_type);self.send_header('Cache-Control','no-store');self.send_header('Content-Length',str(len(data)));self.end_headers();self.wfile.write(data)
         def do_GET(self):
             parsed=urlsplit(self.path);p=parsed.path
             if p=='/game-data/legacy/maps.json':
@@ -66,6 +108,13 @@ def handler(directory):
                 return self.send_bytes(data,'application/json; charset=utf-8')
             if re.match(r'^/game-media/worldmap-legacy/[a-z0-9-]+\.png$',p,re.I) or re.match(r'^/game-media/legacy-map/\d{1,9}/minimap$',p):
                 return self.send_bytes(TINY_PNG,'image/png')
+            if p=='/game-media/characters/classic-preview':
+                try:
+                    req=Request(CLASSIC_AVATAR_PREVIEW,data=json.dumps(classic_avatar_body(self.path)).encode(),method='POST',headers={'User-Agent':'Top-Classic-World-CI/1.0','Accept':'image/png','Content-Type':'application/json'})
+                    with urlopen(req,timeout=20) as r:
+                        return self.send_bytes(r.read(),r.headers.get('Content-Type','image/png'),r.status)
+                except Exception as exc:
+                    return self.send_error(502,str(exc))
             target=upstream(self.path)
             if not target: return super().do_GET()
             try:

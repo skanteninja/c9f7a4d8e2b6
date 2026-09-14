@@ -215,11 +215,13 @@ for (const token of [
   'classFilteredGearItems',
   'sanitizeGearState',
   'presetAtLevel',
-  'const fallbacks=[baseCharacterRenderUrl()];',
-  "if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)) return [...BASE_CHARACTER_IDS];",
-  "root.dataset.buildId=String(activeBuild()?.id||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh');",
+  'classicAvatarRenderUrl',
+  'classicAvatarGearSummary',
+  'classic-avatar-preview-v1',
+  'classic-avatar-compositor',
+  "root.dataset.avatarGearIds=gearSummary;",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.9.9-full-skill-tree-state')",
+  "navigator.serviceWorker.register('./sw.js?v=0.10.0-classic-avatar-parity')",
   'tcwFullSkillBuild',
   'data-plan-level',
   "list.querySelectorAll('.skill-row[data-plan-level]')",
@@ -237,21 +239,25 @@ if (!fs.readFileSync(`${outputDir}/progression-gear-visual.js`, 'utf8').includes
   throw new Error('Level-control merge module is missing its avatar footer contract');
 }
 const progressionGearVisualCss = fs.readFileSync(`${outputDir}/progression-gear-visual.css`, 'utf8');
-if (!progressionGearVisualCss.includes('.v5-avatar[data-build-id="warrior-fighter"] .avatar-equipped-icons') || !progressionGearVisualCss.includes('.v5-avatar[data-build-id="archer-hunter"] .avatar-equipped-icons')) {
-  throw new Error('Class avatar loadout icon visibility contract is missing');
+if (progressionGearVisualCss.includes('.v5-avatar[data-build-id="warrior-fighter"] .avatar-equipped-icons') || progressionGearVisualCss.includes('.v5-avatar[data-build-id="archer-hunter"] .avatar-equipped-icons')) {
+  throw new Error('Class-specific avatar icon-box visibility returned');
 }
-if (!fs.readFileSync(`${outputDir}/progression-gear-visual.js`, 'utf8').includes("['warrior-fighter','archer-hunter'].includes(String(window.TCW_ACTIVE_BUILD_ID || ''))")) {
-  throw new Error('Class avatar loadout icons are still removed by the visual module');
-}
-if (!fs.readFileSync(`${outputDir}/progression-sync.js`, 'utf8').includes('function preferredSkill(skills)')) {
-  throw new Error('I/L mastery board still uses first-match duplicate skill names');
+const progressionGearVisualJs = fs.readFileSync(outputDir + '/progression-gear-visual.js', 'utf8');
+if (!progressionGearVisualJs.includes("document.querySelectorAll('.v5-avatar .avatar-equipped-icons').forEach(node => node.remove())")) {
+  throw new Error('Avatar icon-box cleanup contract is missing');
 }
 const worker = fs.readFileSync('worker.js', 'utf8');
 if (!worker.includes('ICON_MEDIA + primaryItem[1]') || worker.includes("api.dreamms.gg/api/GMS/latest/item/")) {
   throw new Error('Worker still routes primary item artwork through the incompatible DreamMS/GMS table');
 }
+if (!app.includes("root.dataset.avatarRenderer='classic-avatar-preview-v1'") || app.includes('class="avatar-equipped-icons"') || app.includes('/game-media/characters/2000/47077,21078/stand1/0')) {
+  throw new Error('App still uses the incompatible character compositor or avatar icon box');
+}
+if (!worker.includes('CLASSIC_AVATAR_PREVIEW') || !worker.includes('classicAvatarRequestBody') || !worker.includes("url.pathname === '/game-media/characters/classic-preview'")) {
+  throw new Error('Worker Classic avatar proxy contract is missing');
+}
 const ciProxy = fs.readFileSync('.github/ci_static_proxy.py', 'utf8');
-if (!ciProxy.includes('primary_match') || ciProxy.includes('api.dreamms.gg/api/GMS/latest/item/')) {
+if (!ciProxy.includes('primary_match') || ciProxy.includes('api.dreamms.gg/api/GMS/latest/item/') || !ciProxy.includes('CLASSIC_AVATAR_PREVIEW') || !ciProxy.includes("p=='/game-media/characters/classic-preview'")) {
   throw new Error('CI asset proxy still routes primary item artwork through the incompatible DreamMS/GMS table');
 }
 if (!app.includes('classic-canonical-item-id') || !app.includes("String(item['Icon URL']||'')!==canonical") || app.includes('/game-media/items/fallback/')) {

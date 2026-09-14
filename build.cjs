@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.9.9-full-skill-tree-state';
+const assetVersion = '0.10.0-classic-avatar-parity';
 const BRAND = 'Top Classic World Maplestory';
 
 // The OSMS export is the identity authority for the equipment picker.  The
@@ -1039,6 +1039,81 @@ function patchApp(raw) {
     root.innerHTML=`;
   if(!app.includes(avatarMarkupNeedle)) throw new Error('avatar build identity patch target missing');
   app=app.replace(avatarMarkupNeedle, avatarMarkupReplacement);
+  const classicAvatarStart=app.indexOf('  const BASE_CHARACTER_IDS=');
+  const classicAvatarEnd=app.indexOf('\\n  function renderClassAtlasSkills()', classicAvatarStart);
+  if(classicAvatarStart<0||classicAvatarEnd<0) throw new Error('Classic avatar renderer patch target missing');
+  const classicAvatarBlock = `  const CLASSIC_AVATAR_FIELDS=[
+    ['Hat','hat'],['Eye','eye'],['Face','face_acc'],['Earrings','earring'],
+    ['Top','top'],['Overall','overall'],['Bottom','bottom'],['Shoes','shoes'],
+    ['Gloves','gloves'],['Cape','cape'],['Shield','shield'],['Weapon','weapon']
+  ];
+  const CLASSIC_AVATAR_APPEARANCE=Object.freeze({skin:0,hairId:30000,faceId:20000});
+  function classicAvatarItemId(slot){
+    const item=getGear(state.gear?.[slot]);
+    const id=Math.trunc(Number(item?.['Item ID']||0));
+    const evidence=String(item?.['Evidence Class']||'');
+    if(!item||item.Item==='None'||!Number.isSafeInteger(id)||id<=0||!/CURRENT/i.test(evidence))return 0;
+    return id;
+  }
+  function classicAvatarGear(){
+    const gear={};
+    const overall=classicAvatarItemId('Overall');
+    for(const [stateSlot,apiSlot] of CLASSIC_AVATAR_FIELDS){
+      if(overall&&(stateSlot==='Top'||stateSlot==='Bottom'))continue;
+      const id=stateSlot==='Overall'?overall:classicAvatarItemId(stateSlot);
+      if(id)gear[apiSlot]=id;
+    }
+    if(overall){delete gear.top;delete gear.bottom;gear.overall=overall;}
+    return gear;
+  }
+  function classicAvatarGearSummary(){
+    const gear=classicAvatarGear();
+    return CLASSIC_AVATAR_FIELDS.map(([,apiSlot])=>gear[apiSlot]?apiSlot+'='+gear[apiSlot]:'').filter(Boolean).join(';');
+  }
+  function classicAvatarRenderUrl(){
+    const params=new URLSearchParams({skin:String(CLASSIC_AVATAR_APPEARANCE.skin),hair:String(CLASSIC_AVATAR_APPEARANCE.hairId),face:String(CLASSIC_AVATAR_APPEARANCE.faceId),pose:'stand',direction:'right',frame:'0',expression:'default'});
+    Object.entries(classicAvatarGear()).forEach(([slot,id])=>params.set(slot,String(id)));
+    return '/game-media/characters/classic-preview?'+params.toString();
+  }
+  function renderAtlasAvatar(){
+    const root=document.getElementById('atlas-avatar');if(!root)return;
+    const buildId=String(activeBuild()?.id||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh');
+    const label=activeBuild()?.name||'Equipped character';
+    const src=classicAvatarRenderUrl();
+    const gearSummary=classicAvatarGearSummary();
+    root.dataset.buildId=buildId;
+    root.dataset.avatarRenderer='classic-avatar-preview-v1';
+    root.dataset.avatarGearIds=gearSummary;
+    root.querySelectorAll('.avatar-equipped-icons').forEach(node=>node.remove());
+    let img=root.querySelector('.avatar-character');
+    let fallback=root.querySelector('.avatar-render-fallback');
+    let badge=root.querySelector('.avatar-job-badge');
+    if(!img||!fallback||!badge){
+      root.innerHTML='<div class="avatar-aura"></div><img class="avatar-character" alt=""><div class="classic-avatar-placeholder avatar-render-fallback" hidden><span class="pixel-head">✦</span><b>LOADOUT PREVIEW</b><small>Classic preview unavailable — inventory remains exact</small></div><div class="avatar-job-badge"></div>';
+      img=root.querySelector('.avatar-character');
+      fallback=root.querySelector('.avatar-render-fallback');
+      badge=root.querySelector('.avatar-job-badge');
+    }
+    if(badge)badge.textContent=activeBuild()?.shortName||'I/L';
+    if(img){
+      img.alt=label;
+      img.dataset.assetHooked='1';
+      img.dataset.avatarGearIds=gearSummary;
+      img.dataset.visualSource='classic-avatar-compositor';
+      if(!img.dataset.avatarErrorHooked){
+        img.dataset.avatarErrorHooked='1';
+        img.addEventListener('error',()=>{img.hidden=true;if(fallback)fallback.hidden=false;});
+        img.addEventListener('load',()=>{img.hidden=false;if(fallback)fallback.hidden=true;});
+      }
+      if(img.getAttribute('src')!==src){
+        img.hidden=false;
+        if(fallback)fallback.hidden=true;
+        img.src=src;
+      }
+    }
+    hookImageFallback(root);
+  }`;
+  app=app.slice(0,classicAvatarStart)+classicAvatarBlock+app.slice(classicAvatarEnd);
   app = app.replace(
     "  function renderGearOptions(){",
     "  function classGearItemAllowed(item){\n    if(!item||item.Item==='None')return true;\n    const id=activeBuild()?.id;\n    if(id!=='warrior-fighter'&&id!=='archer-hunter')return true;\n    const text=String(item['Class Fit']||'')+' '+String(item['Req Job']||'');\n    const forbidden=/(mage|magician|wizard|cleric|thief|crossbow|spear|polearm|blunt)/i;\n    if(forbidden.test(text))return false;\n    if(id==='warrior-fighter')return /(warrior|any|fighter)/i.test(text);\n    return /(bowman|hunter|any)/i.test(text);\n  }\n  function classFilteredGearItems(slot){return gearItemsForSlot(slot).filter(classGearItemAllowed);}\n  function gearOptionStats(item,none){\n    if(none)return '';\n    const id=activeBuild()?.id;\n    if(id==='warrior-fighter') return `Lv ${item['Req Lv']||0}<br>W.ATK ${item['W.ATK']||0} · DEX ${item.DEX||0}<br>WDEF ${item.WDEF||0} · Speed ${item.Speed||0}`;\n    if(id==='archer-hunter') return `Lv ${item['Req Lv']||0}<br>W.ATK ${item['W.ATK']||0} · STR ${item.STR||0}<br>WDEF ${item.WDEF||0} · Speed ${item.Speed||0}`;\n    return `Lv ${item['Req Lv']||0}<br>INT ${item.INT||0} · LUK ${item.LUK||0}<br>M.ATK ${item['M.ATK']||0}<br>Crit ${item['Crit%']||0}% · CDMG ${item['Crit DMG']||0}%`;\n  }\n  function gearOptionMeta(item,none){\n    if(none)return '';\n    const id=activeBuild()?.id;\n    const job=String(item['Req Job']||item['Class Fit']||'Any');\n    const stat=id==='warrior-fighter'?`STR ${item['Req STR']||0} · DEX ${item['Req DEX']||0}`:id==='archer-hunter'?`STR ${item['Req STR']||0} · DEX ${item['Req DEX']||0}`:'';\n    return [`Lv ${item['Req Lv']||0}`,job,stat].filter(Boolean).join(' · ');\n  }\n  function updateGearFilterUi(){\n    const id=activeBuild()?.id, profile=activeBuild()||{}, branch=id==='warrior-fighter'?'Warrior / Fighter':id==='archer-hunter'?'Bowman / Hunter':(profile.shortName||'class');\n    const row=document.querySelector('[data-class-equipment-filters]'); if(row)row.hidden=false;\n    const future=document.getElementById('modal-future-label'), optional=document.getElementById('modal-optional-label');\n    if(future)future.textContent='Show future-level '+branch+' items';\n    if(optional)optional.textContent='Show all curated '+branch+' options';\n  }\n  function renderGearOptions(){"
