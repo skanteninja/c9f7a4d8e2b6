@@ -6,6 +6,35 @@ Purpose: preserve bugs that were already solved, partially solved, or observed a
 
 This is historical context, not the unresolved queue. Active unresolved work belongs in `KNOWN_BUGS.md`.
 
+## 2026-09-14 — 0.10.0 inventory/avatar identity correction
+
+Reported symptom:
+- The equipment inventory showed one item while the character avatar visibly wore a different item, especially a magician-looking hat/robe on Fighter or Hunter.
+- Fighter/Hunter also showed canonical item icons in a separate box instead of wearing the selected gear.
+
+Root cause:
+- The inventory data was Classic/OSMS keyed, but /game-media/characters/... proxied to DreamMS/GMS latest. Those services use a different numeric item table, so a valid Classic ID could render unrelated artwork.
+- The class-specific neutral-avatar workaround prevented wrong-ID artwork but intentionally removed worn equipment from the Fighter/Hunter composite.
+- Public-guide sanitization removes internal Evidence Class fields, so a runtime guard based only on that hidden field rejected otherwise valid public items.
+
+Correction:
+- Added a same-origin /game-media/characters/classic-preview route backed by the Classic-compatible MeowDB avatar-preview API.
+- The client builds the avatar query from the same state.gear values used to render the inventory. It maps Hat/Eye/Face/Earrings/Top/Overall/Bottom/Shoes/Gloves/Cape/Shield/Weapon to the compositor’s regularEquipment keys.
+- The client accepts an item only when its public Icon URL is exactly /game-media/icons/<same Item ID>; this prevents mismatched or historical records from entering the avatar payload.
+- Overall suppresses Top and Bottom in both state normalization and compositor payload.
+- Fighter, Hunter, and I/L all use the worn-equipment compositor. The legacy avatar-equipped-icons box is removed by both the renderer and the visual enhancement module.
+- The Worker and CI proxy have a timeout-safe upstream request path and explicit unavailable handling.
+
+Verification:
+- Build Static, Visual/UI, Maps/ETC, Real Input, and Verify Live gates passed.
+- Verify Live run 34858189737 checked exact inventory/avatar ID equality and decoded PNGs for all three builds at Level 15.
+- Commits in the debugging sequence: a3cda727 (initial parity implementation), 3aadea538 (generator boundary repair), aacff233 (CI proxy syntax repair), fcc138049 (public canonical icon acceptance), 4350fedc (live parity gate), and a2ac9b9 (upstream timeout).
+- Generated site checkpoint: 6033028.
+
+Operational lesson:
+- Do not route Classic equipment IDs through a newer GMS/DreamMS character compositor.
+- Do not restore the global image-prototype source interception experiment; ownership and canonical public paths are the stable boundary.
+
 ## 2026-09-14 — 0.9.9 full-page Skill Tree state correction
 
 Observed regression:
