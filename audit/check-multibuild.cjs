@@ -214,7 +214,7 @@ for (const token of [
   "if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)) return [...BASE_CHARACTER_IDS];",
   "root.dataset.buildId=String(activeBuild()?.id||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh');",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.9.3-dashboard-tree-fit')",
+  "navigator.serviceWorker.register('./sw.js?v=0.9.4-dashboard-tree-fit')",
   'const next=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));',
   'renderLevelPage();',
   'grid.dataset.classSkillTier===tier.id',
