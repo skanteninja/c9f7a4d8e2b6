@@ -1158,7 +1158,6 @@
     list.dataset.tcwFullSkillBuild='magician-il-fresh';
   }
 
-
   ['etc-search','etc-current-only','etc-hide-done'].forEach(id=>document.getElementById(id).addEventListener('input',renderEtc));
   function renderEtc(){
     const q=document.getElementById('etc-search').value.trim().toLowerCase();
