@@ -1407,6 +1407,6 @@
   hydrateLauncherState();
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.9.6-public-map-copy').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.9.7-hunter-skill-tier-label').catch(()=>{});
   }
 })();

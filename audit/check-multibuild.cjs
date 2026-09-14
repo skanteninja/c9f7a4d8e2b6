@@ -183,7 +183,7 @@ if (root.buildVariants.hunter?.id !== 'archer-hunter' || root.buildVariants.hunt
   throw new Error('Hunter variant identity metadata is stale');
 }
 
-const bowman = root.catalog.classes.find(row => row.id === 'bowman');
+const hunterTiers = root.buildVariants.hunter?.skillTiers || [];\nif (hunterTiers.map(row => row.label).join('|') !== 'Beginner|Archer · 1st Job|Hunter · 2nd Job · Bow') {\n  throw new Error('Hunter skill tiers must expose Beginner, Archer, and Hunter');\n}\n\nconst bowman = root.catalog.classes.find(row => row.id === 'bowman');
 if (bowman?.status !== 'active') throw new Error('Hunter did not activate the Bowman class');
 
 const app = fs.readFileSync(`${outputDir}/app.js`, 'utf8');
@@ -214,7 +214,7 @@ for (const token of [
   "if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)) return [...BASE_CHARACTER_IDS];",
   "root.dataset.buildId=String(activeBuild()?.id||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh');",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.9.6-public-map-copy')",
+  "navigator.serviceWorker.register('./sw.js?v=0.9.7-hunter-skill-tier-label')",
   'const next=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));',
   'renderLevelPage();',
   'grid.dataset.classSkillTier===tier.id',
