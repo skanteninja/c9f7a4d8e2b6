@@ -58,16 +58,29 @@ async function classicAvatarAsset(request, url, ctx) {
   const cache = caches.default;
   const cached = await cache.match(request);
   if (cached) return cached;
-  const response = await fetch(CLASSIC_AVATAR_PREVIEW, {
-    method: 'POST',
-    redirect: 'follow',
-    headers: {
-      Accept: 'image/png',
-      'Content-Type': 'application/json',
-      'User-Agent': 'Top-Classic-World-Maplestory/1.0'
-    },
-    body: JSON.stringify(classicAvatarRequestBody(url))
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  let response;
+  try {
+    response = await fetch(CLASSIC_AVATAR_PREVIEW, {
+      method: 'POST',
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: {
+        Accept: 'image/png',
+        'Content-Type': 'application/json',
+        'User-Agent': 'Top-Classic-World-Maplestory/1.0'
+      },
+      body: JSON.stringify(classicAvatarRequestBody(url))
+    });
+  } catch {
+    return new Response('Classic avatar unavailable', {
+      status: 504,
+      headers: {'Cache-Control': 'no-store', 'Retry-After': '30'}
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
   if (!response.ok) return new Response('Classic avatar unavailable', { status: response.status });
   const headers = new Headers();
   headers.set('Content-Type', response.headers.get('Content-Type') || 'image/png');
