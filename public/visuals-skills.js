@@ -3,6 +3,7 @@
   const RAW='https://raw.githubusercontent.com/ohmi69/osms_datamine_dashboard/main/data/current/';
   const MAPLE_WZ='https://maplestory.io/api/wz/img/GMS/83/Skill/';
   const BEGINNER_ORDER=['Nimble Feet','Three Snails','Recovery'];
+  const BUILD_ID=String(window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh');
   let skillIndexPromise=null;
   let timer=null;
   const norm=v=>String(v??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
@@ -43,11 +44,42 @@
     Object.values(value).forEach(v=>{if(v&&typeof v==='object')collectSkills(v,out);});
     return out;
   }
+  function classScore(skill){
+    const className=norm(skill?.class_name||'');
+    const job=norm(skill?.job||'');
+    if(BUILD_ID==='magician-il-fresh'){
+      if(className==='i l wizard')return 100;
+      if(className==='magician')return 90;
+      if(className.includes('wizard'))return 40;
+      if(className==='cleric')return 10;
+      if(job==='1st job'&&className==='magician')return 90;
+      return 0;
+    }
+    if(BUILD_ID==='warrior-fighter'){
+      if(className==='fighter')return 100;
+      if(className==='warrior')return 90;
+      if(className==='swordsman')return 80;
+      if(className==='page'||className==='spearman')return 10;
+      return 0;
+    }
+    if(BUILD_ID==='archer-hunter'){
+      if(className==='hunter')return 100;
+      if(className==='bowman')return 90;
+      if(className==='archer')return 80;
+      if(className==='crossbowman')return 10;
+      return 0;
+    }
+    return 0;
+  }
+  function preferredSkill(rows){
+    return [...rows].sort((a,b)=>classScore(b)-classScore(a)||Number(a.id)-Number(b.id))[0]||null;
+  }
   function skillIndex(){
     if(!skillIndexPromise){
       skillIndexPromise=fetch(`${RAW}skills.json`,{cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error(`skills.json HTTP ${r.status}`);return r.json();}).then(data=>{
-        const rows=collectSkills(data);const byId=new Map(),byName=new Map();
-        rows.forEach(s=>{const id=Number(s.id);if(Number.isFinite(id)&&!byId.has(id))byId.set(id,s);const n=norm(s.name);if(n&&!byName.has(n))byName.set(n,s);});
+        const rows=collectSkills(data);const byId=new Map(),candidates=new Map();
+        rows.forEach(s=>{const id=Number(s.id);if(Number.isFinite(id)&&!byId.has(id))byId.set(id,s);const n=norm(s.name);if(n){if(!candidates.has(n))candidates.set(n,[]);candidates.get(n).push(s);}});
+        const byName=new Map([...candidates].map(([name,skills])=>[name,preferredSkill(skills)]));
         const names=[...byName.keys()].sort((a,b)=>b.length-a.length);
         return{rows,byId,byName,names};
       }).catch(()=>({rows:[],byId:new Map(),byName:new Map(),names:[]}));

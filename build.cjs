@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.9.0-class-specific-builds';
+const assetVersion = '0.9.1-class-safe-avatar';
 const BRAND = 'Top Classic World Maplestory';
 
 // The OSMS export is the identity authority for the equipment picker.  The
@@ -30,6 +30,38 @@ const CLASSIC_EQUIPMENT_BY_NAME = classicEquipmentIndex();
 const GEAR_NAME_ALIASES = {
   "Beginner's Wooden Wand / job wand": 'Wooden Wand'
 };
+
+// The legacy I/L payload carried several stale or ambiguous skill IDs.  Keep
+// the public guide's first-render identity aligned with the current Classic
+// skill table; the visual layer applies the same IDs to the fetched artwork.
+const CLASSIC_IL_SKILL_IDS = Object.freeze({
+  'Improved MP Recovery': 2000000,
+  'Max MP Increase': 2000001,
+  'Magic Guard': 2001000,
+  'Magic Armor': 2001001,
+  'Energy Bolt': 2001002,
+  'Magic Claw': 2001003,
+  'Teleport': 2201001,
+  'MP Eater': 2200000,
+  'Meditation': 2201000,
+  'Slow': 2201002,
+  'Cold Beam': 2201003,
+  'Thunder Bolt': 2201004
+});
+
+function canonicalizeGuideSkills(data) {
+  if (!data?.skillIcons || typeof data.skillIcons !== 'object') return data;
+  const skillIcons = {...data.skillIcons};
+  for (const [name, id] of Object.entries(CLASSIC_IL_SKILL_IDS)) {
+    if (!skillIcons[name]) continue;
+    skillIcons[name] = {
+      ...skillIcons[name],
+      id,
+      url: `/game-media/icons/${id}`
+    };
+  }
+  return {...data, skillIcons};
+}
 
 function canonicalizeGuideInventory(data) {
   const rename = value => {
@@ -646,6 +678,7 @@ function fighterVariant(base) {
   const quests = buildQuestRows(fighterQuests, 'Fighter Build');
   const etc = buildEtcRows(base.etc, fighterQuests, 'Fighter Build');
   return {
+    id:'warrior-fighter', classId:'warrior', branchId:'fighter',
     catalog:base.catalog, meta:{...base.meta}, dashboardMilestones:FIGHTER_MILESTONES,
     skills, skillOrder, skillTiers, skillIcons, gear, weapons:weaponRows, armor:gear,
     weaponPaths:{
@@ -675,7 +708,7 @@ function hunterVariant(base) {
   ];
   const all = groups.flatMap(g => g.skills || []).filter(s => !/Crossbow|Iron Arrow/.test(s.name));
   const beginner = beginnerSkillRows();
-  const skillOrder = ['Three Snails','Recovery','Nimble Feet','Critical Shot','The Eye of Amazon','Focus','Power Knockback','Arrow Blow','Bow Mastery',"Amazon's Judgement",'Bow Booster','Soul Arrow: Bow','Final Attack: Bow','Arrow Bomb: Bow'];
+  const skillOrder = ['Three Snails','Recovery','Nimble Feet','Critical Shot','The Eye of Amazon','Focus','Power Knockback','Arrow Blow','Double Shot','Bow Mastery',"Amazon's Judgement",'Bow Booster','Soul Arrow: Bow','Final Attack: Bow','Arrow Bomb: Bow'];
   const skillTiers = [
     {id:'beginner', label:'Beginner', opens:1, names:['Three Snails','Recovery','Nimble Feet']},
     {id:'bowman', label:'Bowman · 1st Job', opens:10, names:['Critical Shot','The Eye of Amazon','Focus','Power Knockback','Arrow Blow','Double Shot']},
@@ -769,6 +802,7 @@ function hunterVariant(base) {
   const questRows = buildQuestRows(hunterQuests, 'Hunter Build');
   const etc = buildEtcRows(base.etc, hunterQuests, 'Hunter Build');
   return {
+    id:'archer-hunter', classId:'bowman', branchId:'hunter',
     catalog:base.catalog, meta:{...base.meta}, dashboardMilestones:HUNTER_MILESTONES,
     skills, skillOrder, skillTiers, skillIcons, gear,
     weapons:gear.filter(x=>x.Slot==='Weapon').map(x=>({Lv:x['Req Lv']||1,Weapon:x.Item,Type:x['Item ID'],'Weapon Type':'Bow','W.ATK':x['W.ATK']||0,Speed:x.Speed||0,'Req STR':x['Req STR']||0,'Upgrade Priority':['War Bow','Composite Bow',"Hunter's Bow",'Battle Bow','Ryden','Red Viper','Vaulter 2000','Olympus','Asianic Bow','Golden Hinkel'].includes(x.Item)?'CORE · BUY AT BREAKPOINT':'OPTIONAL','Why':x.Notes||'Bow breakpoint'})).sort((a,b)=>Number(a.Lv)-Number(b.Lv)||String(a.Weapon).localeCompare(String(b.Weapon))),
@@ -855,7 +889,7 @@ function sanitizePublicGuide(value, key = '') {
 }
 
 function publicGuide(raw) {
-  const data = canonicalizeGuideInventory(JSON.parse(raw));
+  const data = canonicalizeGuideSkills(canonicalizeGuideInventory(JSON.parse(raw)));
   const catalog = multiBuildCatalog(data.catalog);
   const fighter = fighterVariant(data);
   const hunter = hunterVariant(data);
@@ -876,8 +910,8 @@ function publicGuide(raw) {
   }
   // Variants are rendered through the same dashboard/runtime as I/L. Keep the
   // shared max-level metadata and milestone model on every selected guide.
-  fighter.meta = {...(data.meta || {}), title: BRAND};
-  hunter.meta = {...(data.meta || {}), title: BRAND};
+  fighter.meta = {...(data.meta || {}), title: BRAND, buildId:'warrior-fighter'};
+  hunter.meta = {...(data.meta || {}), title: BRAND, buildId:'archer-hunter'};
   fighter.dashboardMilestones = fighter.dashboardMilestones || FIGHTER_MILESTONES;
   hunter.dashboardMilestones = hunter.dashboardMilestones || HUNTER_MILESTONES;
   if (Array.isArray(data.sources)) data.sources = [];
@@ -967,6 +1001,43 @@ function patchApp(raw) {
     "    const fallbacks=[mapleIoCharacterRenderUrl(),baseCharacterRenderUrl(),baseMapleIoCharacterRenderUrl()];",
     "    const fallbacks=[baseCharacterRenderUrl()];"
   );
+  const characterIdsNeedle = `  function characterItemIds(){
+    const visible=['Hat','Face','Eye','Earrings','Pendant','Cape','Shield','Gloves','Weapon','Shoes'];
+    const bodySlots=state.gear.Overall!=='None' ? ['Overall'] : ['Top','Bottom'];
+    const ids=[...BASE_CHARACTER_IDS];
+    [...visible,...bodySlots].forEach(slot=>{
+      const it=getGear(state.gear[slot]);
+      if(it&&Number(it['Item ID'])>0 && !['HISTORICAL ONLY','UNVERIFIED'].includes(String(it['Evidence Class']||''))) ids.push(String(Math.trunc(Number(it['Item ID']))));
+    });
+    return ids;
+  }`;
+  const characterIdsReplacement = `  function characterItemIds(){
+    // The character compositor uses a newer item table than Classic.  Its
+    // numeric IDs are not interchangeable, so researched class builds use a
+    // neutral base render and keep the exact Classic gear icons beside it.
+    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)) return [...BASE_CHARACTER_IDS];
+    const visible=['Hat','Face','Eye','Earrings','Pendant','Cape','Shield','Gloves','Weapon','Shoes'];
+    const bodySlots=state.gear.Overall!=='None' ? ['Overall'] : ['Top','Bottom'];
+    const ids=[...BASE_CHARACTER_IDS];
+    [...visible,...bodySlots].forEach(slot=>{
+      const it=getGear(state.gear[slot]);
+      if(it&&Number(it['Item ID'])>0 && !['HISTORICAL ONLY','UNVERIFIED'].includes(String(it['Evidence Class']||''))) ids.push(String(Math.trunc(Number(it['Item ID']))));
+    });
+    return ids;
+  }`;
+  if(!app.includes(characterIdsNeedle)) throw new Error('class-safe avatar ID patch target missing');
+  app=app.replace(characterIdsNeedle, characterIdsReplacement);
+  const avatarMarkupNeedle = `  function renderAtlasAvatar(){
+    const root=document.getElementById('atlas-avatar'); if(!root)return;
+    const equipped=['Hat','Overall','Weapon','Shield','Cape','Gloves','Shoes'].map(s=>getGear(state.gear[s])).filter(Boolean).filter(x=>x.Item!=='None').slice(0,5);
+    root.innerHTML=`;
+  const avatarMarkupReplacement = `  function renderAtlasAvatar(){
+    const root=document.getElementById('atlas-avatar'); if(!root)return;
+    const equipped=['Hat','Overall','Weapon','Shield','Cape','Gloves','Shoes'].map(s=>getGear(state.gear[s])).filter(Boolean).filter(x=>x.Item!=='None').slice(0,5);
+    root.dataset.buildId=String(activeBuild()?.id||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh');
+    root.innerHTML=`;
+  if(!app.includes(avatarMarkupNeedle)) throw new Error('avatar build identity patch target missing');
+  app=app.replace(avatarMarkupNeedle, avatarMarkupReplacement);
   app = app.replace(
     "  function renderGearOptions(){",
     "  function classGearItemAllowed(item){\n    if(!item||item.Item==='None')return true;\n    const id=activeBuild()?.id;\n    if(id!=='warrior-fighter'&&id!=='archer-hunter')return true;\n    const text=String(item['Class Fit']||'')+' '+String(item['Req Job']||'');\n    const forbidden=/(mage|magician|wizard|cleric|thief|crossbow|spear|polearm|blunt)/i;\n    if(forbidden.test(text))return false;\n    if(id==='warrior-fighter')return /(warrior|any|fighter)/i.test(text);\n    return /(bowman|hunter|any)/i.test(text);\n  }\n  function classFilteredGearItems(slot){return gearItemsForSlot(slot).filter(classGearItemAllowed);}\n  function gearOptionStats(item,none){\n    if(none)return '';\n    const id=activeBuild()?.id;\n    if(id==='warrior-fighter') return `Lv ${item['Req Lv']||0}<br>W.ATK ${item['W.ATK']||0} · DEX ${item.DEX||0}<br>WDEF ${item.WDEF||0} · Speed ${item.Speed||0}`;\n    if(id==='archer-hunter') return `Lv ${item['Req Lv']||0}<br>W.ATK ${item['W.ATK']||0} · STR ${item.STR||0}<br>WDEF ${item.WDEF||0} · Speed ${item.Speed||0}`;\n    return `Lv ${item['Req Lv']||0}<br>INT ${item.INT||0} · LUK ${item.LUK||0}<br>M.ATK ${item['M.ATK']||0}<br>Crit ${item['Crit%']||0}% · CDMG ${item['Crit DMG']||0}%`;\n  }\n  function gearOptionMeta(item,none){\n    if(none)return '';\n    const id=activeBuild()?.id;\n    const job=String(item['Req Job']||item['Class Fit']||'Any');\n    const stat=id==='warrior-fighter'?`STR ${item['Req STR']||0} · DEX ${item['Req DEX']||0}`:id==='archer-hunter'?`STR ${item['Req STR']||0} · DEX ${item['Req DEX']||0}`:'';\n    return [`Lv ${item['Req Lv']||0}`,job,stat].filter(Boolean).join(' · ');\n  }\n  function updateGearFilterUi(){\n    const id=activeBuild()?.id, profile=activeBuild()||{}, branch=id==='warrior-fighter'?'Warrior / Fighter':id==='archer-hunter'?'Bowman / Hunter':(profile.shortName||'class');\n    const row=document.querySelector('[data-class-equipment-filters]'); if(row)row.hidden=false;\n    const future=document.getElementById('modal-future-label'), optional=document.getElementById('modal-optional-label');\n    if(future)future.textContent='Show future-level '+branch+' items';\n    if(optional)optional.textContent='Show all curated '+branch+' options';\n  }\n  function renderGearOptions(){"
@@ -1232,7 +1303,7 @@ function patchApp(raw) {
   // before the asynchronous canonical image layer has loaded the skill index.
   const clawNeedle = '    const skill=D.skillIcons[name], urls=skillVisualCandidates(skill);';
   if(!app.includes(clawNeedle)) throw new Error('canonical Magic Claw patch target missing');
-  app=app.replace(clawNeedle, "    const skill=D.skillIcons[name], urls=name==='Magic Claw'?['/game-data/data/current/images/skills/2001003.png',...skillVisualCandidates(skill)]:skillVisualCandidates(skill);");
+  app=app.replace(clawNeedle, "    const skill=D.skillIcons[name], canonicalId=String(skill?.id||'').replace(/[^0-9]/g,''), currentUrl=canonicalId?`/game-data/data/current/images/skills/${canonicalId}.png`:''; const urls=currentUrl?[currentUrl,...skillVisualCandidates(skill)]:skillVisualCandidates(skill);");
 
   // The renderer owns node lifetime. Event-capture ID masking cannot protect native
   // input: microtask checkpoints may restore IDs before target listeners run.

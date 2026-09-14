@@ -40,6 +40,24 @@ function checkCanonicalInventory(guide, name) {
 
 checkCanonicalInventory(root, 'I/L');
 
+const expectedClassicIlSkillIds = {
+  'Improved MP Recovery': 2000000,
+  'Max MP Increase': 2000001,
+  'Magic Guard': 2001000,
+  'Magic Armor': 2001001,
+  'Energy Bolt': 2001002,
+  'Magic Claw': 2001003,
+  'Teleport': 2201001,
+  'MP Eater': 2200000,
+  'Meditation': 2201000,
+  'Slow': 2201002,
+  'Cold Beam': 2201003,
+  'Thunder Bolt': 2201004
+};
+for (const [skill, id] of Object.entries(expectedClassicIlSkillIds)) {
+  if (Number(root.skillIcons?.[skill]?.id) !== id) throw new Error(`I/L skill ID mismatch for ${skill}`);
+}
+
 const expected = [
   ['magician-il-fresh', 'magician', 'I/L Wizard Build'],
   ['warrior-fighter', 'warrior', 'Fighter Build'],
@@ -158,6 +176,13 @@ for (const [id, classId, name] of expected) {
   }
 }
 
+if (root.buildVariants.fighter?.id !== 'warrior-fighter' || root.buildVariants.fighter?.meta?.buildId !== 'warrior-fighter') {
+  throw new Error('Fighter variant identity metadata is stale');
+}
+if (root.buildVariants.hunter?.id !== 'archer-hunter' || root.buildVariants.hunter?.meta?.buildId !== 'archer-hunter') {
+  throw new Error('Hunter variant identity metadata is stale');
+}
+
 const bowman = root.catalog.classes.find(row => row.id === 'bowman');
 if (bowman?.status !== 'active') throw new Error('Hunter did not activate the Bowman class');
 
@@ -186,8 +211,10 @@ for (const token of [
   'sanitizeGearState',
   'presetAtLevel',
   'const fallbacks=[baseCharacterRenderUrl()];',
+  "if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)) return [...BASE_CHARACTER_IDS];",
+  "root.dataset.buildId=String(activeBuild()?.id||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh');",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.9.0-class-specific-builds')",
+  "navigator.serviceWorker.register('./sw.js?v=0.9.1-class-safe-avatar')",
   'const next=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));',
   'renderLevelPage();',
   'grid.dataset.classSkillTier===tier.id',
@@ -200,6 +227,13 @@ if (app.includes('state.level=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Nu
 }
 if (!fs.readFileSync(`${outputDir}/progression-gear-visual.js`, 'utf8').includes('progression-avatar-level-controls')) {
   throw new Error('Level-control merge module is missing its avatar footer contract');
+}
+const progressionGearVisualCss = fs.readFileSync(`${outputDir}/progression-gear-visual.css`, 'utf8');
+if (!progressionGearVisualCss.includes('.v5-avatar[data-build-id="warrior-fighter"] .avatar-equipped-icons') || !progressionGearVisualCss.includes('.v5-avatar[data-build-id="archer-hunter"] .avatar-equipped-icons')) {
+  throw new Error('Class avatar loadout icon visibility contract is missing');
+}
+if (!fs.readFileSync(`${outputDir}/progression-gear-visual.js`, 'utf8').includes("['warrior-fighter','archer-hunter'].includes(String(window.TCW_ACTIVE_BUILD_ID || ''))")) {
+  throw new Error('Class avatar loadout icons are still removed by the visual module');
 }
 const worker = fs.readFileSync('worker.js', 'utf8');
 if (!worker.includes('ICON_MEDIA + primaryItem[1]') || worker.includes("api.dreamms.gg/api/GMS/latest/item/")) {
