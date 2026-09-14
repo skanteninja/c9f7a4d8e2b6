@@ -711,7 +711,8 @@ function hunterVariant(base) {
   const skillOrder = ['Three Snails','Recovery','Nimble Feet','Critical Shot','The Eye of Amazon','Focus','Power Knockback','Arrow Blow','Double Shot','Bow Mastery',"Amazon's Judgement",'Bow Booster','Soul Arrow: Bow','Final Attack: Bow','Arrow Bomb: Bow'];
   const skillTiers = [
     {id:'beginner', label:'Beginner', opens:1, names:['Three Snails','Recovery','Nimble Feet']},
-// The Classic data branch remains `bowman`; the visible skill-tier name follows the project handoff: Beginner → Archer → Hunter.\n    {id:'bowman', label:'Archer · 1st Job', opens:10, names:['Critical Shot','The Eye of Amazon','Focus','Power Knockback','Arrow Blow','Double Shot']},
+// The Classic data branch remains `bowman`; the visible skill-tier name follows the project handoff: Beginner → Archer → Hunter.
+    {id:'bowman', label:'Archer · 1st Job', opens:10, names:['Critical Shot','The Eye of Amazon','Focus','Power Knockback','Arrow Blow','Double Shot']},
     {id:'hunter', label:'Hunter · 2nd Job · Bow', opens:30, names:['Bow Mastery',"Amazon's Judgement",'Final Attack: Bow','Bow Booster','Soul Arrow: Bow','Arrow Bomb: Bow']}
   ];
   const skillIcons = Object.fromEntries(all.map(s => [s.name,{id:s.id,max:s.max_level,role:s.passive?'Passive':(s.mechanics?.label||'Combat skill'),desc:String(s.description||'').replace(/\s+/g,' ').trim()}]));
