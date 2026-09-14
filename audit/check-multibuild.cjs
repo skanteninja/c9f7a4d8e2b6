@@ -222,6 +222,7 @@ for (const token of [
   "navigator.serviceWorker.register('./sw.js?v=0.9.9-full-skill-tree-state')",
   'tcwFullSkillBuild',
   'data-plan-level',
+  "list.querySelectorAll('.skill-row[data-plan-level]')",
   'const next=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));',
   'renderLevelPage();',
   'grid.dataset.classSkillTier===tier.id',
