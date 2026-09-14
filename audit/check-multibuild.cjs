@@ -214,7 +214,7 @@ for (const token of [
   "if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)) return [...BASE_CHARACTER_IDS];",
   "root.dataset.buildId=String(activeBuild()?.id||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh');",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.9.1-class-safe-avatar')",
+  "navigator.serviceWorker.register('./sw.js?v=0.9.2-class-safe-skill-art')",
   'const next=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));',
   'renderLevelPage();',
   'grid.dataset.classSkillTier===tier.id',
@@ -234,6 +234,9 @@ if (!progressionGearVisualCss.includes('.v5-avatar[data-build-id="warrior-fighte
 }
 if (!fs.readFileSync(`${outputDir}/progression-gear-visual.js`, 'utf8').includes("['warrior-fighter','archer-hunter'].includes(String(window.TCW_ACTIVE_BUILD_ID || ''))")) {
   throw new Error('Class avatar loadout icons are still removed by the visual module');
+}
+if (!fs.readFileSync(`${outputDir}/progression-sync.js`, 'utf8').includes('function preferredSkill(skills)')) {
+  throw new Error('I/L mastery board still uses first-match duplicate skill names');
 }
 const worker = fs.readFileSync('worker.js', 'utf8');
 if (!worker.includes('ICON_MEDIA + primaryItem[1]') || worker.includes("api.dreamms.gg/api/GMS/latest/item/")) {
