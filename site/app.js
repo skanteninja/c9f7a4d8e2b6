@@ -1117,7 +1117,7 @@
     }
     const list=document.getElementById('skill-list');
     if(list?.dataset.tcwFullSkillBuild==='magician-il-fresh'){
-      list.querySelectorAll('.skill-level-plan .skill-row[data-plan-level]').forEach(row=>row.classList.toggle('current',Number(row.dataset.planLevel)===state.level));
+      list.querySelectorAll('.skill-row[data-plan-level]').forEach(row=>row.classList.toggle('current',Number(row.dataset.planLevel)===state.level));
       return;
     }
     const currentSkillIds={
@@ -1433,6 +1433,6 @@
   hydrateLauncherState();
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.9.8-full-skill-tree-stability').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.9.9-full-skill-tree-state').catch(()=>{});
   }
 })();
