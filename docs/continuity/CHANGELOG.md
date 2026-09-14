@@ -19,6 +19,7 @@ Verification evidence:
 - Build Static: 34858100599 — success.
 - Visual/UI: 34858100657 — success.
 - Maps/ETC: 34858100699 — success.
+- Monster integrity: 34857418180 — success on the same generated app checkpoint.
 - Real-input: 34857418168 — success on the same generated app checkpoint.
 - Verify Live: 34858189737 — success, including live avatar parity and live same-tier Skill Tree stability.
 - Exact live Level-15 parity was observed for I/L (1002019, 1050001, 1082003, 1092002, 1372001), Fighter (1002036, 1051000, 1072015, 1082002, 1312002), and Hunter (1002043, 1041020, 1061016, 1072018, 1082004, 1452001).
