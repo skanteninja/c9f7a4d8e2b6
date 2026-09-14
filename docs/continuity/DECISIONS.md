@@ -89,6 +89,18 @@ The derived job must drive:
 - Only items relevant to the supported Classic build path should appear; exclude non-Classic items.
 - Shared systems must never default to Magician equipment for Fighter/Hunter.
 
+## Avatar / inventory identity contract
+
+- Inventory item names, canonical Classic IDs, public icon URLs, and avatar compositor IDs must describe the same item.
+- The only accepted public equipment identity is the canonical route /game-media/icons/<Item ID>; a character compositor must not interpret Classic numeric IDs through a newer GMS/DreamMS table.
+- The avatar renderer reads the selected build’s state.gear and maps it directly to the Classic-compatible compositor payload. It must not maintain a second independent equipment selection.
+- The supported regular equipment mapping is Hat → hat, Eye → eye, Face → face_acc, Earrings → earring, Top → top, Overall → overall, Bottom → bottom, Shoes → shoes, Gloves → gloves, Cape → cape, Shield → shield, Weapon → weapon.
+- Overall is mutually exclusive with Top and Bottom in state, inventory presentation, and avatar payload.
+- Fighter, Hunter, and I/L use the same worn-equipment renderer; class-specific icon strips are not an acceptable substitute.
+- If the compositor is unavailable, show an explicit neutral placeholder while leaving the exact inventory selection intact. Never substitute visually similar or cross-table artwork.
+- Upstream avatar requests are bounded by a timeout and successful same-origin PNG responses are cacheable. The source can change only when the selected gear payload changes.
+- The no-global-image-prototype-interception decision remains permanent.
+
 ## I/L-specific durable direction
 - LUK plan should be definitive and tied to actual equipment requirements rather than a generic “safe no-scroll” recommendation.
 - User is willing to use 100%/60% scrolls.
