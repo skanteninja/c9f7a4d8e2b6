@@ -453,48 +453,75 @@
   };
   function mobAsset(id){ return id?`/game-media/monsters/${id}/render/stand?format=png&resize=2`:''; }
   function mapleIoMobAsset(id){ return id?`https://maplestory.io/api/GMS/83/mob/${id}/render/stand`:''; }
-  const BASE_CHARACTER_IDS=['47077','21078']; // visual-only hair/face basis; never used as Classic game-data evidence
-  function characterItemIds(){
-    // The character compositor uses a newer item table than Classic.  Its
-    // numeric IDs are not interchangeable, so researched class builds use a
-    // neutral base render and keep the exact Classic gear icons beside it.
-    if(['warrior-fighter','archer-hunter'].includes(activeBuild()?.id)) return [...BASE_CHARACTER_IDS];
-    const visible=['Hat','Face','Eye','Earrings','Pendant','Cape','Shield','Gloves','Weapon','Shoes'];
-    const bodySlots=state.gear.Overall!=='None' ? ['Overall'] : ['Top','Bottom'];
-    const ids=[...BASE_CHARACTER_IDS];
-    [...visible,...bodySlots].forEach(slot=>{
-      const it=getGear(state.gear[slot]);
-      if(it&&Number(it['Item ID'])>0 && !['HISTORICAL ONLY','UNVERIFIED'].includes(String(it['Evidence Class']||''))) ids.push(String(Math.trunc(Number(it['Item ID']))));
-    });
-    return ids;
+  const CLASSIC_AVATAR_FIELDS=[
+    ['Hat','hat'],['Eye','eye'],['Face','face_acc'],['Earrings','earring'],
+    ['Top','top'],['Overall','overall'],['Bottom','bottom'],['Shoes','shoes'],
+    ['Gloves','gloves'],['Cape','cape'],['Shield','shield'],['Weapon','weapon']
+  ];
+  const CLASSIC_AVATAR_APPEARANCE=Object.freeze({skin:0,hairId:30000,faceId:20000});
+  function classicAvatarItemId(slot){
+    const item=getGear(state.gear?.[slot]);
+    const id=Math.trunc(Number(item?.['Item ID']||0));
+    const icon=String(item?.['Icon URL']||'');
+    const canonical='/game-media/icons/'+id;
+    if(!item||item.Item==='None'||!Number.isSafeInteger(id)||id<=0||icon!==canonical)return 0;
+    return id;
   }
-  function characterRenderUrl(){
-    const ids=characterItemIds();
-    return `/game-media/characters/2000/${ids.join(',')}/stand1/0?resize=2&format=png`;
+  function classicAvatarGear(){
+    const gear={};
+    const overall=classicAvatarItemId('Overall');
+    for(const [stateSlot,apiSlot] of CLASSIC_AVATAR_FIELDS){
+      if(overall&&(stateSlot==='Top'||stateSlot==='Bottom'))continue;
+      const id=stateSlot==='Overall'?overall:classicAvatarItemId(stateSlot);
+      if(id)gear[apiSlot]=id;
+    }
+    if(overall){delete gear.top;delete gear.bottom;gear.overall=overall;}
+    return gear;
   }
-  function mapleIoCharacterRenderUrl(ids=characterItemIds()){
-    return `https://maplestory.io/api/GMS/83/Character/2000/${ids.join(',')}/stand1/0?resize=2`;
+  function classicAvatarGearSummary(){
+    const gear=classicAvatarGear();
+    return CLASSIC_AVATAR_FIELDS.map(([,apiSlot])=>gear[apiSlot]?apiSlot+'='+gear[apiSlot]:'').filter(Boolean).join(';');
   }
-  function baseCharacterRenderUrl(){
-    return `/game-media/characters/2000/${BASE_CHARACTER_IDS.join(',')}/stand1/0?resize=2&format=png`;
-  }
-  function baseMapleIoCharacterRenderUrl(){
-    return mapleIoCharacterRenderUrl(BASE_CHARACTER_IDS);
+  function classicAvatarRenderUrl(){
+    const params=new URLSearchParams({skin:String(CLASSIC_AVATAR_APPEARANCE.skin),hair:String(CLASSIC_AVATAR_APPEARANCE.hairId),face:String(CLASSIC_AVATAR_APPEARANCE.faceId),pose:'stand',direction:'right',frame:'0',expression:'default'});
+    Object.entries(classicAvatarGear()).forEach(([slot,id])=>params.set(slot,String(id)));
+    return '/game-media/characters/classic-preview?'+params.toString();
   }
   function renderAtlasAvatar(){
-    const root=document.getElementById('atlas-avatar'); if(!root)return;
-    const equipped=['Hat','Overall','Weapon','Shield','Cape','Gloves','Shoes'].map(s=>getGear(state.gear[s])).filter(Boolean).filter(x=>x.Item!=='None').slice(0,5);
-    root.dataset.buildId=String(activeBuild()?.id||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh');
-    root.innerHTML=`<div class="avatar-aura"></div><img class="avatar-character" src="${esc(characterRenderUrl())}" alt="${esc(activeBuild()?.name||"Equipped character")}"><div class="classic-avatar-placeholder avatar-render-fallback" hidden><span class="pixel-head">✦</span><b>LOADOUT PREVIEW</b><small>Renderer unavailable — gear icons shown below</small></div><div class="avatar-equipped-icons">${equipped.map(x=>`<span title="${esc(x.Item)}">${imgTag(x)}</span>`).join('')}</div><div class="avatar-job-badge">${esc(activeBuild()?.shortName||"I/L")}</div>`;
-    const img=root.querySelector('.avatar-character'), fallback=root.querySelector('.avatar-render-fallback');
+    const root=document.getElementById('atlas-avatar');if(!root)return;
+    const buildId=String(activeBuild()?.id||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh');
+    const label=activeBuild()?.name||'Equipped character';
+    const src=classicAvatarRenderUrl();
+    const gearSummary=classicAvatarGearSummary();
+    root.dataset.buildId=buildId;
+    root.dataset.avatarRenderer='classic-avatar-preview-v1';
+    root.dataset.avatarGearIds=gearSummary;
+    root.querySelectorAll('.avatar-equipped-icons').forEach(node=>node.remove());
+    let img=root.querySelector('.avatar-character');
+    let fallback=root.querySelector('.avatar-render-fallback');
+    let badge=root.querySelector('.avatar-job-badge');
+    if(!img||!fallback||!badge){
+      root.innerHTML='<div class="avatar-aura"></div><img class="avatar-character" alt=""><div class="classic-avatar-placeholder avatar-render-fallback" hidden><span class="pixel-head">✦</span><b>LOADOUT PREVIEW</b><small>Classic preview unavailable — inventory remains exact</small></div><div class="avatar-job-badge"></div>';
+      img=root.querySelector('.avatar-character');
+      fallback=root.querySelector('.avatar-render-fallback');
+      badge=root.querySelector('.avatar-job-badge');
+    }
+    if(badge)badge.textContent=activeBuild()?.shortName||'I/L';
     if(img){
+      img.alt=label;
       img.dataset.assetHooked='1';
-      const fallbacks=[baseCharacterRenderUrl()];
-      img.onerror=()=>{
-        const next=fallbacks.shift();
-        if(next){ img.src=next; return; }
-        img.hidden=true; if(fallback) fallback.hidden=false;
-      };
+      img.dataset.avatarGearIds=gearSummary;
+      img.dataset.visualSource='classic-avatar-compositor';
+      if(!img.dataset.avatarErrorHooked){
+        img.dataset.avatarErrorHooked='1';
+        img.addEventListener('error',()=>{img.hidden=true;if(fallback)fallback.hidden=false;});
+        img.addEventListener('load',()=>{img.hidden=false;if(fallback)fallback.hidden=true;});
+      }
+      if(img.getAttribute('src')!==src){
+        img.hidden=false;
+        if(fallback)fallback.hidden=true;
+        img.src=src;
+      }
     }
     hookImageFallback(root);
   }
@@ -1433,6 +1460,6 @@
   hydrateLauncherState();
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.9.9-full-skill-tree-state').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.10.0-classic-avatar-parity').catch(()=>{});
   }
 })();
