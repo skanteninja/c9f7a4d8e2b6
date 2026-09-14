@@ -183,7 +183,12 @@ if (root.buildVariants.hunter?.id !== 'archer-hunter' || root.buildVariants.hunt
   throw new Error('Hunter variant identity metadata is stale');
 }
 
-const hunterTiers = root.buildVariants.hunter?.skillTiers || [];\nif (hunterTiers.map(row => row.label).join('|') !== 'Beginner|Archer · 1st Job|Hunter · 2nd Job · Bow') {\n  throw new Error('Hunter skill tiers must expose Beginner, Archer, and Hunter');\n}\n\nconst bowman = root.catalog.classes.find(row => row.id === 'bowman');
+const hunterTiers = root.buildVariants.hunter?.skillTiers || [];
+if (hunterTiers.map(row => row.label).join('|') !== 'Beginner|Archer · 1st Job|Hunter · 2nd Job · Bow') {
+  throw new Error('Hunter skill tiers must expose Beginner, Archer, and Hunter');
+}
+
+const bowman = root.catalog.classes.find(row => row.id === 'bowman');
 if (bowman?.status !== 'active') throw new Error('Hunter did not activate the Bowman class');
 
 const app = fs.readFileSync(`${outputDir}/app.js`, 'utf8');
