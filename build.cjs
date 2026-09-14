@@ -1051,8 +1051,9 @@ function patchApp(raw) {
   function classicAvatarItemId(slot){
     const item=getGear(state.gear?.[slot]);
     const id=Math.trunc(Number(item?.['Item ID']||0));
-    const evidence=String(item?.['Evidence Class']||'');
-    if(!item||item.Item==='None'||!Number.isSafeInteger(id)||id<=0||!/CURRENT/i.test(evidence))return 0;
+    const icon=String(item?.['Icon URL']||'');
+    const canonical='/game-media/icons/'+id;
+    if(!item||item.Item==='None'||!Number.isSafeInteger(id)||id<=0||icon!==canonical)return 0;
     return id;
   }
   function classicAvatarGear(){
