@@ -39,7 +39,7 @@
     }
     const list=document.getElementById('skill-list');
     if(list?.dataset.tcwFullSkillBuild==='magician-il-fresh'){
-      list.querySelectorAll('.skill-level-plan .skill-row[data-plan-level]').forEach(row=>row.classList.toggle('current',Number(row.dataset.planLevel)===state.level));
+      list.querySelectorAll('.skill-row[data-plan-level]').forEach(row=>row.classList.toggle('current',Number(row.dataset.planLevel)===state.level));
       return;
     }
     const currentSkillIds={
