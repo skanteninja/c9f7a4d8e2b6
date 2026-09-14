@@ -1040,7 +1040,7 @@ function patchApp(raw) {
   if(!app.includes(avatarMarkupNeedle)) throw new Error('avatar build identity patch target missing');
   app=app.replace(avatarMarkupNeedle, avatarMarkupReplacement);
   const classicAvatarStart=app.indexOf('  const BASE_CHARACTER_IDS=');
-  const classicAvatarEnd=app.indexOf('\\n  function renderClassAtlasSkills()', classicAvatarStart);
+  const classicAvatarEnd=app.indexOf('\n  function renderClassAtlasSkills()', classicAvatarStart);
   if(classicAvatarStart<0||classicAvatarEnd<0) throw new Error('Classic avatar renderer patch target missing');
   const classicAvatarBlock = `  const CLASSIC_AVATAR_FIELDS=[
     ['Hat','hat'],['Eye','eye'],['Face','face_acc'],['Earrings','earring'],
