@@ -41,7 +41,7 @@ CLASSIC_AVATAR_SLOT_QUERY=(
 def classic_avatar_number(query, key, allow_zero=False):
     values=query.get(key, [])
     raw=values[0] if values else ''
-    if not re.fullmatch(r'\\d{1,9}', raw): return None
+    if not re.fullmatch(r'\d{1,9}', raw): return None
     value=int(raw)
     if value < (0 if allow_zero else 1): return None
     return value
@@ -81,7 +81,7 @@ def upstream(path):
     primary_match=re.match(r'^/game-media/items/primary/(\d+)(?:/icon)?$',p)
     if primary_match: return ICON_MEDIA+primary_match.group(1)
     if p=='/game-media/characters/classic-preview': return None
-    routes=()
+    routes=(
         ('/game-data/',CURRENT_DATA),
         ('/game-media/icons/',ICON_MEDIA),
         ('/game-media/worldmap/',WORLD_MAP_MEDIA),
