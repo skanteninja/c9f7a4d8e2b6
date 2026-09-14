@@ -33,6 +33,7 @@ Still open:
 - Human paint-level Skill Tree blink remains under observation; DOM identity, source, load-event, and child-list stability gates pass.
 - Independent Classic/beta research and deeper content audits remain open for Fighter axe mechanics, Hunter progression parity, AP/route/quest detail, and any disputed source claims.
 - The remaining items below are maintained as regression guards until their broader audits are complete.
+
 ## P1 — Fighter / Hunter completeness parity
 Historical problem: Fighter and Hunter contained substantially less information than I/L and behaved partly like incomplete skeletons.
 
