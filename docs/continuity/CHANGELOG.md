@@ -2,6 +2,15 @@
 
 This log exists to make cross-chat handoff quick and reliable. Record meaningful changes, fixes, regressions, research conclusions, and continuity-system updates.
 
+## 2026-09-15 — 0.10.2 session/gender flow
+
+- Added Continue versus Reset when a player returns to a build with saved progress.
+- Added a second reset-confirmation modal that spells out the exact progress categories that will be lost and limits the reset to the active build.
+- Added required Male/Female selection for fresh and reset builds, with a one-time choice for older saved builds that have no gender.
+- Persisted gender per build, filtered gender-locked equipment, cleared incompatible saved gear, and mapped gender to the Classic avatar compositor.
+- Verified the visible flow in Cloud Browser QA, including the reset-to-gender path, female-only and male-only equipment options, and matching avatar identity.
+- Build Static 34983348769, Maps/ETC 34983519233, Real Input 34983348845, and Verify Live 34985164756 passed; live build-info reports 0.10.2-session-gender-flow.
+
 ## 2026-09-15 — 0.10.1 dashboard containment
 
 - Added QUALITY_STANDARD.md and IMPLEMENTATION_BACKLOG.md.

@@ -50,3 +50,5 @@ The intended result is that the user should not have to retell the history of th
 ## Latest audit note
 
 The 2026-09-15 audit used Product Design evidence, cloud Browser QA, TinyFish live extraction, and selective Firecrawl research. Mobbin is connected but its search endpoint is paid-plan gated in the current account, so it is a documented evidence limit rather than a source for this checkpoint.
+
+The current live checkpoint is `0.10.2-session-gender-flow`. A saved build now asks whether to Continue or Reset; Reset requires a second confirmation with a loss summary. Fresh and reset sessions require Male/Female selection, and the selected gender is persisted per build, reflected in the Classic avatar, and applied to gender-locked equipment filtering. Verify Live `34985164756` passed after Cloud Browser QA exercised the full flow.

@@ -6,6 +6,25 @@ Purpose: preserve bugs that were already solved, partially solved, or observed a
 
 This is historical context, not the unresolved queue. Active unresolved work belongs in `KNOWN_BUGS.md`.
 
+## 2026-09-15 — 0.10.2 session resume/reset and gender flow
+
+User-visible problems:
+- Re-entering a build gave no clear choice between continuing saved work and starting that build over.
+- Reset had no dedicated loss explanation/confirmation boundary.
+- Character gender was not persisted or used consistently, so the avatar and equipment picker could present female gear for a male character.
+
+Correction:
+- Added a saved-build entry modal with Continue and Reset actions.
+- Added a second destructive-reset dialog that lists the level/page, equipment/loadout, skills, quests/ETC, and gender that will be cleared, while keeping other build saves untouched.
+- Added required Male/Female selection for fresh and reset sessions, plus a one-time choice for older saves without a gender.
+- Added per-build gender persistence, gender-aware item metadata/filtering, incompatible-gear sanitization, and Classic avatar body IDs (male hair/face 30000/20000; female hair/face 31000/21000).
+- Kept Fighter, Hunter, and I/L on the same worn-equipment renderer and made the picker expose the active gender.
+
+Verification:
+- Local build, generated JavaScript syntax, and multi-build audit passed.
+- Cloud Browser QA captured Continue/Reset, reset confirmation, reset-to-gender, female-filtered gear, male-filtered gear, and the matching avatar dataset/src.
+- Build Static 34983348769, Maps/ETC 34983519233, Real Input 34983348845, and Verify Live 34985164756 passed. The prior Verify Live skill-stability failure was a transient CDP execution-context race; the follow-up live run passed.
+
 ## 2026-09-15 — 0.10.1 dashboard containment
 
 Observed in the live 0.10.0 UI:

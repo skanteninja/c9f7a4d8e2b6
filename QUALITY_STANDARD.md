@@ -1,7 +1,7 @@
 # MapleStory Classic Builder — Quality Standard
 
 Status: working release contract, established 2026-09-15
-Current live checkpoint: `0.10.1-dashboard-containment`
+Current live checkpoint: `0.10.2-session-gender-flow`
 
 This document defines what “ready” means for the public MapleStory Classic Builder. It is intentionally stricter than “the page loads”: the builder is a data product, a planner, and a visual interface at the same time.
 
@@ -26,6 +26,7 @@ The supported build names are exact and stable:
 5. **Equipment compatibility.** Overall is exclusive with Top/Bottom in saved state, picker state, displayed inventory, and avatar compositor input.
 6. **Stable interaction identity.** Same-tier level changes update allocation/status without remounting stable Skill Tree cards or reloading their artwork.
 7. **Public-source boundary.** The public UI does not expose internal provider, provenance, or maintenance language that is not useful to a player.
+8. **Session safety and character identity.** Returning to a saved build offers Continue or Reset; Reset requires explicit confirmation with a loss summary; fresh/reset sessions require a gender choice that persists, filters locked equipment, and drives the avatar body.
 
 ## Quality dimensions
 
@@ -40,6 +41,8 @@ The supported build names are exact and stable:
 
 - Primary tasks are discoverable from the dashboard: build selection, exact-level change, equipment selection, Skill Tree, route, quests, and ETC planner.
 - A modal can be opened, filtered, scrolled, and dismissed without losing the current build or level.
+- Re-entering a saved build exposes Continue and Reset choices; destructive reset is separately confirmed and scoped to the active build.
+- Male/female selection is required for fresh/reset sessions and is reflected in the avatar and equipment compatibility labels.
 - Visible controls have useful names, focus styles, keyboard behavior, and state announcements where state changes matter.
 - Browser history/back navigation returns to the expected page and build.
 
@@ -74,7 +77,7 @@ The supported build names are exact and stable:
 | Exact-level | Levels 1, 9, 10, 15, 29, 30, 50 on all builds | Any job, SP, gear, route, or avatar disagreement |
 | Visual/UI | Dashboard, Build Library, full Skill Tree, Equipment, Maps, Quests, ETC, DB, Cash Shop, Beauty | Broken image, external image URL, page overflow, missing state marker, or layout collision |
 | Real input | Keyboard level change, navigation, picker open/filter/close, history/back | Focus trap, inaccessible control, or state not saved/synchronized |
-| Live | Same checks against the deployed URL and exact build checkpoint | Any live-only regression or unverified deployment |
+| Live | Same checks against the deployed URL and exact build checkpoint, including Continue/Reset, reset confirmation, gender choice, and gender-filtered equipment | Any live-only regression or unverified deployment |
 
 ## Evidence rules
 

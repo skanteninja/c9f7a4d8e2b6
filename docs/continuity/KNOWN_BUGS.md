@@ -10,9 +10,9 @@ This is the authoritative unresolved-issues list for cross-chat continuity. Do n
 - **P2** — important UX/data-quality issue
 - **P3** — polish / lower-impact issue
 
-## Verification snapshot — 0.10.1 (2026-09-15)
+## Verification snapshot — 0.10.2 (2026-09-15)
 
-Source commit d793e2d and generated site commit 2a6b451 are the current deployed containment state. Build Static 34976326799, Visual/UI 34976326791, Maps/ETC 34976326839, Monster integrity 34976326812, and Real-input 34976326817 passed. Verify Live 34976424625 passed on attempt 3 after publication and included the dedicated avatar parity step and the live same-tier Skill Tree stability step.
+Source commit `fdce45b7581663982c211a8c64400b05dd6dc598` and generated site commit `1dd8ff67b9eef43cb5c1c974bd603181902bac3b` are the current deployed session/gender state. Build Static `34983348769`, Maps/ETC `34983519233`, and Real-input `34983348845` passed. Verify Live `34985164756` passed after the follow-up retry and included the dedicated avatar parity step and the live same-tier Skill Tree stability step.
 
 Verified in generated/live UI:
 - Fighter Build, Hunter Build, and I/L Wizard Build use isolated build data and exact required names.
@@ -22,23 +22,26 @@ Verified in generated/live UI:
 - All three live avatar PNGs decoded with nonzero dimensions; no legacy avatar icon box was present.
 - Fighter/Hunter filters contain no unrelated magician/weapon-branch gear, and Overall versus Top/Bottom remains exclusive.
 - Maps, Classic same-origin visual routes, and the public Builds tab checks passed.
-- The live 0.10.1 desktop containment check shows all required navigation labels visible, no page-level horizontal overflow, separated dashboard metric/footer regions, and wrapped equipment-picker metadata at the audited viewport.
+- The live 0.10.2 desktop containment check shows all required navigation labels visible, no page-level horizontal overflow, separated dashboard metric/footer regions, and wrapped equipment-picker metadata at the audited viewport.
+- Returning to a saved Fighter build displayed Continue and Reset choices. Reset opened a second confirmation dialog listing the exact categories cleared and stating that other build saves remain untouched.
+- Confirmed reset cleared the active build and immediately required a new gender choice. Selecting Female produced a female avatar and female-only equipment options; selecting Male produced a male avatar and male-only equipment options.
 
 Additional live audit evidence on 2026-09-15:
 - Cloud Browser trusted input changed levels on I/L, Fighter, and Hunter; I/L passed 9→10 and 29→30, while Fighter and Hunter passed the 29→30 job transition with class-correct visible titles.
 - The formal repository real-input script was not executable in this workspace because websocket-client is missing and no local Chrome binary is available. This is an environment blocker, not a product pass.
-- The deployed build-info reports 0.10.1-dashboard-containment. The local formal real-input script remains unavailable in this workspace, but the GitHub Actions real-input gate passed for the generated checkpoint.
+- The deployed build-info reports 0.10.2-session-gender-flow. The local formal real-input script remains unavailable in this workspace, but the GitHub Actions real-input gate passed for the generated checkpoint.
 
 Resolved in this checkpoint:
 - P1 Fighter/Hunter avatar correctness.
 - P1 cross-class equipment/avatar leakage for the tested curated paths.
 - P1 equipment slot compatibility.
+- P1 session resume/reset scoping and gender-aware equipment/avatar identity for the tested builds.
 - The earlier neutral-avatar-plus-icon-strip workaround was removed.
 
 Still open:
 - Human paint-level Skill Tree blink remains under observation; DOM identity, source, load-event, and child-list stability gates pass.
 - Independent Classic/beta research and deeper content audits remain open for Fighter axe mechanics, Hunter progression parity, AP/route/quest detail, and any disputed source claims.
-- Product Design follow-ups remain open for narrow-width/accessibility coverage, missing route thumbnails, Build Library density, and the human-visible Skill Tree blink. The audited desktop navigation, dashboard containment, and picker overflow findings were addressed in 0.10.1.
+- Product Design follow-ups remain open for narrow-width/accessibility coverage, missing route thumbnails, Build Library density, and the human-visible Skill Tree blink. The audited desktop navigation, dashboard containment, and picker overflow findings were addressed in 0.10.1; session/gender flow was added and verified in 0.10.2.
 - The remaining items below are maintained as regression guards until their broader audits are complete.
 
 ## P1 — Fighter / Hunter completeness parity
@@ -134,6 +137,21 @@ The live gate now proves:
 - the legacy avatar-equipped-icons box is absent.
 
 Reopen this issue only if a future change breaks those assertions or a human visual review finds a paint-level mismatch.
+
+## Regression guard — session resume/reset and gender identity (resolved 0.10.2)
+
+The active build now owns its saved session state and character gender.
+
+Keep testing:
+- returning to a build with meaningful saved progress shows Continue and Reset;
+- Reset requires a second explicit confirmation and lists level/page position, gear/loadout, skills, quests/ETC, and gender as the cleared categories;
+- confirming Reset clears only the active build and leads to gender selection;
+- fresh and reset sessions cannot proceed without choosing Male or Female;
+- the saved gender changes the Classic avatar body and filters gender-locked equipment;
+- changing gender sanitizes incompatible equipped items rather than leaving a contradictory avatar/loadout;
+- switching between builds does not reuse another build’s session or gender.
+
+Reopen this issue if any build can bypass the choice, reset another build, retain cleared progress, or show equipment incompatible with the selected gender.
 ## P1 — Skill Tree grouping
 Historical problem: Fighter/Hunter Skill Trees were not reliably separated into Beginner / first job / second job.
 

@@ -4,11 +4,20 @@ Last continuity baseline: 2026-09-15
 
 Use this file for settled choices that future chats should preserve unless new evidence justifies changing them.
 
+## 2026-09-15 — Session safety and gender-aware character identity
+
+- A build with meaningful saved progress must present a Continue-versus-Reset choice on entry. Continuing preserves the existing build; Reset is scoped to the active build only.
+- Reset is intentionally two-step. The second dialog must explicitly name what is lost: level/page position, equipment/loadout, skills, completed quests/ETC counts, and selected gender. It must state that other build saves and the guide remain untouched.
+- Fresh builds and reset builds require an explicit Male or Female choice before proceeding. Existing saved builds without a gender receive the choice once before equipment can be trusted.
+- Gender is persisted inside each build’s own saved state, not as a global preference. It controls both the Classic avatar compositor body and gender-locked equipment filtering.
+- When a gender change makes saved gear incompatible, the incompatible slot is cleared and the user is told what happened; contradictory gear/avatar state is not allowed.
+- Keep gender labels visible in the picker so a player can understand why an item is included or excluded. Do not silently show the opposite gender’s equipment.
+
 ## 2026-09-15 — Quality contract and audit evidence
 
 - QUALITY_STANDARD.md is the release contract; IMPLEMENTATION_BACKLOG.md is the ordered queue. A source edit or local build is not a deployment.
 - Product Design screenshots and cloud Browser QA are the primary visual/interaction evidence for the current audit. TinyFish is useful for live shell extraction. Mobbin remains optional comparative evidence because the connected search endpoint is paid-plan gated.
-- The live baseline is 0.10.1-dashboard-containment. Build Static published generated site commit 2a6b451, and Verify Live run 34976424625 attempt 3 passed after publication.
+- The earlier live baseline was 0.10.1-dashboard-containment. The current live checkpoint is 0.10.2-session-gender-flow, generated site commit 1dd8ff67b9eef43cb5c1c974bd603181902bac3b, with Verify Live run 34985164756 passed after the follow-up retry.
 
 ## 2026-09-15 — Shared dashboard containment
 

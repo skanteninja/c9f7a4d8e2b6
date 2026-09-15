@@ -3,6 +3,14 @@
 Last prioritized: 2026-09-15
 Ordering follows the quality contract in [QUALITY_STANDARD.md](QUALITY_STANDARD.md). “Implemented locally” never means “deployed” until the live gate passes.
 
+## 0.10.2 completed in the verified live checkpoint
+
+- Added Continue vs Reset when a build has saved progress.
+- Added an explicit reset confirmation with a concrete loss summary and active-build-only scope.
+- Added required male/female selection for fresh and reset sessions.
+- Persisted gender per build, filtered gender-locked equipment, sanitized incompatible saved gear, and mapped gender to the Classic avatar compositor.
+- Verified through Cloud Browser QA and Verify Live `34985164756`; generated site reports `0.10.2-session-gender-flow`.
+
 ## P0 — release blockers
 
 None currently identified. Re-open P0 if a change corrupts shared progress, makes a supported build unusable, or publishes a wrong-class avatar/item identity.

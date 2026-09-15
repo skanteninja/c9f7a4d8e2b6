@@ -2,8 +2,8 @@
 
 Last continuity baseline: 2026-09-15
 
-Current deployed checkpoint: 0.10.1-dashboard-containment
-Current source checkpoint: 0.10.1-dashboard-containment
+Current deployed checkpoint: 0.10.2-session-gender-flow
+Current source checkpoint: 0.10.2-session-gender-flow
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:
@@ -84,15 +84,24 @@ These are regression guards. A future change must not silently break them.
 
 ## Current verified checkpoint
 
-- Source commit d793e2d contains the quality contract, prioritized backlog, live audit record, shared dashboard-containment CSS, and the 0.10.1 build-token update.
-- Generated site commit 2a6b451 is deployed and reports 0.10.1-dashboard-containment.
-- Build Static 34976326799, Visual/UI 34976326791, Maps/ETC 34976326839, Monster integrity 34976326812, and Real Input 34976326817 passed for the generated app state. Verify Live 34976424625, attempt 3, passed after publication and includes the exact live avatar/inventory parity test and same-tier Skill Tree stability test.
+- Source commit `fdce45b7581663982c211a8c64400b05dd6dc598` contains the session resume/reset flow, gender selection, gender-aware equipment filtering, Classic avatar gender mapping, quality contract, prioritized backlog, and the 0.10.2 build-token update.
+- Generated site commit `1dd8ff67b9eef43cb5c1c974bd603181902bac3b` is deployed and reports `0.10.2-session-gender-flow`.
+- Build Static `34983348769`, Maps/ETC `34983519233`, and Real Input `34983348845` passed for the generated app state. Verify Live `34985164756` passed after the follow-up live retry and includes the exact live avatar/inventory parity test and same-tier Skill Tree stability test.
 - At live Level 15, I/L, Fighter, and Hunter inventory selections match the exact IDs sent to the avatar compositor, all three PNGs render, and no avatar icon strip is present.
 - The live desktop containment check shows the required navigation labels visible without page-level horizontal overflow, the metric/footer regions separated, and the equipment picker metadata wrapped inside its cards at the audited viewport.
+- Live Browser QA verified the saved-build entry prompt, the destructive reset confirmation list, reset-to-gender flow, persisted male/female avatar identity, and gender-filtered equipment options.
 - The I/L full-page renderer updates .skill-row[data-plan-level] state in place. Do not reintroduce a wrapper-dependent selector for I/L plan rows.
 - Full-page Fighter/Hunter row and tier state also update in place. Keep transient paint-level blink under observation even when node/source checks pass.
 
-## 2026-09-15 audit and 0.10.1 deployed status
+## 2026-09-15 audit and 0.10.2 deployed status
+
+- Added a per-build session entry flow. Returning to a build with saved progress now asks whether to continue or reset. Reset opens a second confirmation dialog that lists the level/page position, equipment/loadout, skill allocations, completed quests/ETC counts, and gender that will be cleared. Other build saves and the guide remain untouched.
+- Added a required male/female choice for fresh and reset sessions. The choice is saved with the active build, changes the Classic avatar compositor appearance, and filters gender-locked equipment in the inventory picker. Existing saved builds without a gender are asked once before continuing.
+- Added the gender field to canonical equipment rows and sanitized saved gear when a gender change makes an item incompatible. Fighter, Hunter, and I/L share the same gender-aware worn-equipment renderer.
+- Built 0.10.2-session-gender-flow and passed static multi-build, generated JavaScript, Maps/ETC, and Real Input checks. Verify Live run 34985164756 passed all live steps after a transient CDP execution-context failure on the previous attempt.
+- Cloud Browser QA captured the Continue/Reset prompt, reset-loss confirmation, gender choice, female-filtered equipment, and male-filtered equipment at a later level. The male avatar resolves to hair 30000 / face 20000; the female avatar resolves to hair 31000 / face 21000.
+
+## 2026-09-15 — 0.10.1 dashboard containment baseline
 
 - Created QUALITY_STANDARD.md and IMPLEMENTATION_BACKLOG.md as the release contract and ordered work queue.
 - Product Design/browser audit found three visible priorities: desktop navigation horizontal overflow, compact dashboard metric/footer collision and Skill Tree compression, and horizontal overflow/clipping in the equipment picker.

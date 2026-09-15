@@ -69,3 +69,20 @@ No unresolved Fighter/Hunter mechanic was promoted to “confirmed” in this pa
 The generated site was published as commit `2a6b451` and the live build-info endpoint reported `0.10.1-dashboard-containment`. A follow-up live Browser capture at approximately 1363×936 showed the required navigation wrapping into visible rows, no page-level horizontal overflow, separated dashboard metric/footer regions, and contained equipment-picker metadata. Computed page `scrollWidth` matched `clientWidth` in the live Hunter Level 30 check.
 
 GitHub Actions Verify Live run `34976424625`, attempt 3, passed after two transient CDP execution-context races. Its final job passed the live dashboard, Fighter/Hunter route, avatar/inventory parity, and same-tier Skill Tree stability steps. The human-visible Skill Tree blink remains an observation item; narrow-width, text-size, keyboard-only, and assistive-technology checks remain open.
+
+## 0.10.2 session and gender follow-up
+
+The same live URL was re-entered with a saved Fighter session after the session/gender implementation. Cloud Browser QA captured and inspected these visible states:
+
+- `maplestory-session-resume-1789483600199.jpg`: “Continue this build?” with Continue and Reset actions, plus a note explaining that the saved Fighter build still needs a character choice.
+- `maplestory-session-gender-1789483646903.jpg`: “Choose your character” with distinct Male and Female choice cards, explanatory copy, and visible keyboard focus.
+- `maplestory-session-reset-1789483898659.jpg`: “Are you sure?” reset confirmation with a concrete loss list: level/page position, equipment/loadout, skills/level checks, completed quests/ETC counts, and selected gender. The dialog also states that other build saves and the guide stay untouched.
+
+Interaction results:
+
+- Continue preserved the existing build and then required the missing gender choice.
+- Female selection produced a visible `FEMALE` avatar badge and the female Classic avatar query (`hair=31000&face=21000`). The Fighter Top picker labeled itself `FEMALE EQUIPMENT` and showed compatible female-only options.
+- Re-entering the same build displayed the saved gender in the entry prompt. Reset cleared the active Fighter loadout and returned directly to gender selection.
+- Male selection produced a visible `MALE` avatar badge and the Classic avatar query (`hair=30000&face=20000`). At Level 30, the Fighter Top picker labeled itself `MALE EQUIPMENT` and showed male-only options such as Brown Lolico Armor and Red Hwarang Shirt; no female-only options appeared in the inspected list.
+
+The follow-up generated checkpoint reports `0.10.2-session-gender-flow`. Build Static `34983348769`, Maps/ETC `34983519233`, Real Input `34983348845`, and Verify Live `34985164756` passed. The previous live stability failure was reproduced as a CDP execution-context race and was not repeated in the successful follow-up run.
