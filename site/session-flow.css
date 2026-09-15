@@ -1,0 +1,35 @@
+/* Session entry: the build choice is deliberately explicit and keyboard-visible. */
+.session-modal{z-index:1200}
+.session-modal .modal-card{width:min(590px,calc(100% - 28px));margin:clamp(24px,11vh,110px) auto;padding:24px;background:linear-gradient(145deg,#171525,#101019 68%);border-color:rgba(141,124,255,.34);box-shadow:0 24px 90px rgba(0,0,0,.55)}
+.session-modal .modal-head{align-items:flex-start}
+.session-modal .modal-head h2{font-size:25px;letter-spacing:-.025em}
+.session-copy{margin:14px 0 6px;color:#d2d0dc;font-size:13px;line-height:1.55}
+.session-note{margin:0;color:#858296;font-size:10px;line-height:1.5}
+.session-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}
+.session-actions button{cursor:pointer}
+.session-choice-actions{display:grid;grid-template-columns:1fr 1fr}
+.session-choice-actions .primary-btn,.session-choice-actions .danger-btn{min-height:48px}
+.session-danger-list{display:grid;gap:8px;margin:17px 0 12px;padding:14px 16px;border:1px solid rgba(255,107,114,.2);border-radius:12px;background:rgba(255,107,114,.045);color:#d6d3df;font-size:11px;line-height:1.35}
+.session-danger-list li::marker{color:#ff8e94}
+.session-warning{color:#ffb3a0;font-size:10px;line-height:1.45}
+.session-modal .ghost-btn{min-height:44px}
+.session-modal .danger-btn{min-height:44px}
+.gender-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.gender-choice{display:grid;grid-template-columns:44px 1fr;grid-template-rows:auto auto;align-items:center;gap:2px 10px;min-width:0;padding:13px;text-align:left;color:#f5f1ff;background:#11111b;border:1px solid #312e47;border-radius:13px;cursor:pointer;transition:.17s}
+.gender-choice:hover{border-color:#7770a8;background:#191727;transform:translateY(-1px)}
+.gender-choice:focus-visible,.session-modal button:focus-visible{outline:2px solid #73d9ff;outline-offset:3px}
+.gender-choice-icon{grid-row:1 / span 2;display:grid;place-items:center;width:42px;height:42px;border-radius:11px;background:rgba(141,124,255,.16);color:#c4baff;font-size:24px;font-weight:900}
+.gender-choice[data-gender="female"] .gender-choice-icon{background:rgba(255,133,188,.13);color:#ffabd2}
+.gender-choice b{font-size:13px}
+.gender-choice small{color:#8e8ba0;font-size:9px;line-height:1.35}
+.gender-filter-badge{display:inline-flex;align-items:center;min-height:30px;padding:5px 9px;border:1px solid rgba(115,217,255,.24);border-radius:999px;background:rgba(115,217,255,.06);color:#8ee3ff;font-size:9px;font-weight:800;letter-spacing:.04em}
+.gear-option .gear-requirements .gear-gender-only{color:#ffb4d6}
+.avatar-gender-badge{position:absolute;left:12px;bottom:12px;z-index:4;padding:4px 7px;border:1px solid rgba(115,217,255,.26);border-radius:999px;background:rgba(7,10,17,.82);color:#9be8ff;font-size:7px;font-weight:900;letter-spacing:.1em;line-height:1}
+.avatar-gender-badge[data-gender="female"]{border-color:rgba(255,133,188,.3);color:#ffb7da}
+body.session-modal-open{overflow:hidden}
+
+@media(max-width:600px){
+  .session-modal .modal-card{padding:19px;margin:24px auto}
+  .session-modal .modal-head h2{font-size:21px}
+  .session-choice-actions,.gender-choice-grid{grid-template-columns:1fr}
+}

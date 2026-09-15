@@ -26,6 +26,85 @@
   };
   const STATE_UPDATED_KEY = `${KEY}.updatedAt`;
   let state = loadState();
+  const SESSION_MODAL_IDS=['session-entry-modal','session-reset-modal','session-gender-modal'];
+  let sessionEntryStarted=false;
+  let sessionEntryReady=false;
+  let sessionLastFocus=null;
+  function sessionBuildName(){return activeBuild()?.name||'this build';}
+  function sessionFlowSuppressed(){
+    const params=new URLSearchParams(location.search);
+    return ['ci','qa','test','avatar-parity','skill-stability'].some(key=>params.has(key));
+  }
+  function sessionModal(id){return document.getElementById(id);}
+  function closeSessionModal(id){
+    const node=sessionModal(id);if(!node)return;
+    node.classList.remove('open');node.setAttribute('aria-hidden','true');
+    if(!document.querySelector('.session-modal.open')){
+      document.body.classList.remove('session-modal-open');
+      if(sessionLastFocus&&typeof sessionLastFocus.focus==='function')sessionLastFocus.focus();
+    }
+  }
+  function openSessionModal(id){
+    const node=sessionModal(id);if(!node)return;
+    sessionLastFocus=document.activeElement;
+    SESSION_MODAL_IDS.filter(other=>other!==id).forEach(closeSessionModal);
+    node.classList.add('open');node.setAttribute('aria-hidden','false');document.body.classList.add('session-modal-open');
+    const first=node.querySelector('button:not([disabled])');
+    if(first)setTimeout(()=>first.focus(),0);
+  }
+  function showResumeDialog(){
+    const name=sessionBuildName();
+    const copy=document.getElementById('session-entry-copy');
+    const note=document.getElementById('session-entry-note');
+    if(copy)copy.textContent='We found saved progress for '+name+'. Continue where you left off, or reset this build and start fresh.';
+    if(note)note.textContent=state.gender?'Saved on this browser · '+state.gender+' avatar selected.':'This build still needs a character choice before equipment can be filtered.';
+    openSessionModal('session-entry-modal');
+  }
+  function showResetDialog(){
+    const copy=document.getElementById('session-reset-copy');
+    if(copy)copy.textContent='Resetting '+sessionBuildName()+' permanently clears its saved progress on this browser.';
+    openSessionModal('session-reset-modal');
+  }
+  function showGenderDialog(){
+    const copy=document.getElementById('session-gender-copy');
+    if(copy)copy.textContent='Choose the character body for '+sessionBuildName()+'. This choice controls gender-locked equipment and the avatar preview.';
+    openSessionModal('session-gender-modal');
+  }
+  function resetCurrentBuild(){
+    const buildId=window.TCW_ACTIVE_BUILD_ID||state.activeBuildId||D.catalog?.activeBuildId||'magician-il-fresh';
+    localStorage.removeItem(KEY);localStorage.removeItem(STATE_UPDATED_KEY);
+    state=normalizeState({level:1,page:'dashboard',activeBuildId:buildId,quests:{},skills:{},etcHeld:{},etcDone:{},levelChecks:{},skillTab:'auto',targetUpgrade:'auto',gear:{...defaultGear},gender:''});
+    save();renderAll();closeSessionModal('session-reset-modal');showGenderDialog();toast(sessionBuildName()+' reset · choose an avatar gender');
+  }
+  function chooseSessionGender(gender){
+    if(gender!=='male'&&gender!=='female')return;
+    const incompatible=Object.entries(state.gear||{}).filter(([slot,name])=>name&&name!=='None'&&!genderGearItemAllowed(getGear(name),gender)).map(([slot])=>slot);
+    state.gender=gender;
+    sanitizeGearState();
+    save();renderAll();closeSessionModal('session-gender-modal');
+    toast((gender==='male'?'Male avatar selected':'Female avatar selected')+(incompatible.length?' · '+incompatible.length+' incompatible slot'+(incompatible.length===1?'':'s')+' cleared':''));
+  }
+  function continueSession(){
+    closeSessionModal('session-entry-modal');
+    if(state.gender==='male'||state.gender==='female')return;
+    showGenderDialog();
+  }
+  function startSessionFlow(){
+    if(!sessionEntryReady||sessionFlowSuppressed()||document.querySelector('.session-modal.open'))return;
+    if(hasMeaningfulProgress(state))showResumeDialog();else showGenderDialog();
+  }
+  function startSessionEntry(){
+    if(sessionEntryStarted)return;
+    sessionEntryStarted=true;startSessionFlow();
+  }
+  function afterSessionHydration(){sessionEntryReady=true;startSessionFlow();}
+  document.getElementById('session-continue')?.addEventListener('click',continueSession);
+  document.getElementById('session-reset')?.addEventListener('click',showResetDialog);
+  document.getElementById('session-reset-cancel')?.addEventListener('click',()=>{closeSessionModal('session-reset-modal');showResumeDialog();});
+  document.getElementById('session-reset-confirm')?.addEventListener('click',resetCurrentBuild);
+  document.querySelectorAll('[data-session-gender]').forEach(button=>button.addEventListener('click',()=>chooseSessionGender(button.dataset.sessionGender)));
+  window.TCW_SESSION_ENTRY={start:startSessionEntry,afterHydration:afterSessionHydration,requestReset:showResetDialog};
+
   let activeSlot = null;
   let launcherStateReady = false;
   let launcherSaveTimer = null;
@@ -86,6 +165,7 @@
       levelChecks:raw.levelChecks||{},
       skillTab:raw.skillTab||'auto',
       targetUpgrade:raw.targetUpgrade||'auto',
+      gender:raw.gender==='female'?'female':raw.gender==='male'?'male':'',
       gear
     };
   }
@@ -94,7 +174,7 @@
     catch(e){ return normalizeState({}); }
   }
   function hasMeaningfulProgress(s=state){
-    return Number(s.level)>1 || Object.values(s.quests||{}).some(Boolean) || Object.values(s.skills||{}).some(Boolean) || Object.values(s.etcHeld||{}).some(v=>Number(v)>0) || Object.values(s.etcDone||{}).some(Boolean) || Object.values(s.gear||{}).some(v=>v&&v!=='None');
+    return s.gender==='male' || s.gender==='female' || Number(s.level)>1 || s.page!=='dashboard' || s.skillTab!=='auto' || s.targetUpgrade!=='auto' || Object.values(s.quests||{}).some(Boolean) || Object.values(s.skills||{}).some(Boolean) || Object.values(s.etcHeld||{}).some(v=>Number(v)>0) || Object.values(s.etcDone||{}).some(Boolean) || Object.values(s.levelChecks||{}).some(Boolean) || Object.values(s.gear||{}).some(v=>v&&v!=='None');
   }
   function scheduleLauncherStateSave(updatedAt=Date.now()){
     if(!launcherStateReady || !/^https?:$/.test(location.protocol)) return;
@@ -379,6 +459,7 @@
   document.body.addEventListener('click',e=>{const b=e.target.closest('[data-build-select]');if(!b)return;e.preventDefault();const id=b.dataset.buildSelect;if(!D.catalog?.builds?.some(x=>x.id===id&&x.status==='active'))return;window.TCW_ACTIVE_BUILD_ID=id;const u=new URL(location.href);u.searchParams.set('build',id);u.searchParams.set('page','dashboard');location.assign(u.pathname+u.search+u.hash);});
   document.addEventListener('keydown',e=>{
     if(e.key!=='Escape') return;
+    if(document.querySelector('.session-modal.open')){e.preventDefault();return;}
     const modal=document.getElementById('gear-modal');
     if(modal?.classList.contains('open')){ closeModal(); return; }
     if(state.page!=='dashboard') setPage('dashboard');
@@ -458,7 +539,10 @@
     ['Top','top'],['Overall','overall'],['Bottom','bottom'],['Shoes','shoes'],
     ['Gloves','gloves'],['Cape','cape'],['Shield','shield'],['Weapon','weapon']
   ];
-  const CLASSIC_AVATAR_APPEARANCE=Object.freeze({skin:0,hairId:30000,faceId:20000});
+  const CLASSIC_AVATAR_APPEARANCE=Object.freeze({
+    male:{skin:0,hairId:30000,faceId:20000},
+    female:{skin:0,hairId:31000,faceId:21000}
+  });
   function classicAvatarItemId(slot){
     const item=getGear(state.gear?.[slot]);
     const id=Math.trunc(Number(item?.['Item ID']||0));
@@ -483,30 +567,37 @@
     return CLASSIC_AVATAR_FIELDS.map(([,apiSlot])=>gear[apiSlot]?apiSlot+'='+gear[apiSlot]:'').filter(Boolean).join(';');
   }
   function classicAvatarRenderUrl(){
-    const params=new URLSearchParams({skin:String(CLASSIC_AVATAR_APPEARANCE.skin),hair:String(CLASSIC_AVATAR_APPEARANCE.hairId),face:String(CLASSIC_AVATAR_APPEARANCE.faceId),pose:'stand',direction:'right',frame:'0',expression:'default'});
+    const gender=state.gender==='female'?'female':'male';
+    const appearance=CLASSIC_AVATAR_APPEARANCE[gender];
+    const params=new URLSearchParams({skin:String(appearance.skin),hair:String(appearance.hairId),face:String(appearance.faceId),pose:'stand',direction:'right',frame:'0',expression:'default'});
     Object.entries(classicAvatarGear()).forEach(([slot,id])=>params.set(slot,String(id)));
     return '/game-media/characters/classic-preview?'+params.toString();
   }
   function renderAtlasAvatar(){
     const root=document.getElementById('atlas-avatar');if(!root)return;
+    const gender=state.gender==='female'?'female':'male';
     const buildId=String(activeBuild()?.id||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh');
     const label=activeBuild()?.name||'Equipped character';
     const src=classicAvatarRenderUrl();
     const gearSummary=classicAvatarGearSummary();
     root.dataset.buildId=buildId;
     root.dataset.avatarRenderer='classic-avatar-preview-v1';
+    root.dataset.avatarGender=gender;
     root.dataset.avatarGearIds=gearSummary;
     root.querySelectorAll('.avatar-equipped-icons').forEach(node=>node.remove());
     let img=root.querySelector('.avatar-character');
     let fallback=root.querySelector('.avatar-render-fallback');
     let badge=root.querySelector('.avatar-job-badge');
-    if(!img||!fallback||!badge){
-      root.innerHTML='<div class="avatar-aura"></div><img class="avatar-character" alt=""><div class="classic-avatar-placeholder avatar-render-fallback" hidden><span class="pixel-head">✦</span><b>LOADOUT PREVIEW</b><small>Classic preview unavailable — inventory remains exact</small></div><div class="avatar-job-badge"></div>';
+    let genderBadge=root.querySelector('.avatar-gender-badge');
+    if(!img||!fallback||!badge||!genderBadge){
+      root.innerHTML='<div class="avatar-aura"></div><img class="avatar-character" alt=""><div class="classic-avatar-placeholder avatar-render-fallback" hidden><span class="pixel-head">✦</span><b>LOADOUT PREVIEW</b><small>Classic preview unavailable — inventory remains exact</small></div><div class="avatar-job-badge"></div><div class="avatar-gender-badge"></div>';
       img=root.querySelector('.avatar-character');
       fallback=root.querySelector('.avatar-render-fallback');
       badge=root.querySelector('.avatar-job-badge');
+      genderBadge=root.querySelector('.avatar-gender-badge');
     }
     if(badge)badge.textContent=activeBuild()?.shortName||'I/L';
+    if(genderBadge){genderBadge.textContent=gender.toUpperCase();genderBadge.dataset.gender=gender;}
     if(img){
       img.alt=label;
       img.dataset.assetHooked='1';
@@ -873,10 +964,27 @@
   document.querySelectorAll('[data-close-modal]').forEach(x=>x.addEventListener('click',closeModal));
   document.getElementById('modal-show-future').addEventListener('change',renderGearOptions);
   document.getElementById('modal-show-optional').addEventListener('change',renderGearOptions);
+  function itemGender(item){
+    const raw=item?.Gender??item?.gender??item?.['Req Gender']??'';
+    const value=String(raw).trim().toLowerCase();
+    if(/female|^f$/.test(value))return'female';
+    if(/male|^m$/.test(value))return'male';
+    return'unisex';
+  }
+  function itemGenderLabel(item){
+    const gender=itemGender(item);
+    return gender==='female'?'Female only':gender==='male'?'Male only':'';
+  }
+  function genderGearItemAllowed(item,selectedGender=state.gender){
+    if(!item||item.Item==='None')return true;
+    const gender=itemGender(item);
+    return !selectedGender||gender==='unisex'||gender===selectedGender;
+  }
   function classGearItemAllowed(item){
     const evidence=String(item&& (item['Evidence Class']||item.Status) || 'CURRENT');
     if(item&&item.Item!=='None'&&!/CURRENT/i.test(evidence))return false;
     if(!item||item.Item==='None')return true;
+    if(!genderGearItemAllowed(item))return false;
     const id=activeBuild()?.id;
     if(id!=='warrior-fighter'&&id!=='archer-hunter')return true;
     const text=String(item['Class Fit']||'')+' '+String(item['Req Job']||'');
@@ -893,7 +1001,7 @@
       const name=state.gear[slot];
       if(!name||name==='None'){state.gear[slot]='None';return;}
       const item=getGear(name);
-      if(!item || ((id==='warrior-fighter'||id==='archer-hunter')&&!classGearItemAllowed(item))) state.gear[slot]='None';
+      if(!item || !genderGearItemAllowed(item) || ((id==='warrior-fighter'||id==='archer-hunter')&&!classGearItemAllowed(item))) state.gear[slot]='None';
     });
     // Saved data from older builds can contain impossible combinations.
     // Preserve an existing Overall and remove the mutually exclusive pieces.
@@ -917,14 +1025,16 @@
     const id=activeBuild()?.id;
     const job=String(item['Req Job']||item['Class Fit']||'Any');
     const stat=id==='warrior-fighter'?`STR ${item['Req STR']||0} · DEX ${item['Req DEX']||0}`:id==='archer-hunter'?`STR ${item['Req STR']||0} · DEX ${item['Req DEX']||0}`:'';
-    return [`Lv ${item['Req Lv']||0}`,job,stat].filter(Boolean).join(' · ');
+    const gender=itemGenderLabel(item);
+    return [`Lv ${item['Req Lv']||0}`,job,stat,gender].filter(Boolean).join(' · ');
   }
   function updateGearFilterUi(){
     const id=activeBuild()?.id, profile=activeBuild()||{}, branch=id==='warrior-fighter'?'Warrior / Fighter':id==='archer-hunter'?'Bowman / Hunter':(profile.shortName||'class');
     const row=document.querySelector('[data-class-equipment-filters]'); if(row)row.hidden=false;
-    const future=document.getElementById('modal-future-label'), optional=document.getElementById('modal-optional-label');
+    const future=document.getElementById('modal-future-label'), optional=document.getElementById('modal-optional-label'), gender=document.getElementById('modal-gender-label');
     if(future)future.textContent='Show future-level '+branch+' items';
     if(optional)optional.textContent='Show all curated '+branch+' options';
+    if(gender){gender.textContent=state.gender?(state.gender==='female'?'FEMALE EQUIPMENT':'MALE EQUIPMENT'):'CHOOSE GENDER';gender.dataset.gender=state.gender||'unset';}
   }
   function renderGearOptions(){
     const root=document.getElementById('gear-options');
@@ -940,8 +1050,8 @@
     if(!showOptional) items=items.filter(x=>x.Item==='None'||['CORE','FREE / HOLD'].includes(String(x.Plan||'')));
     const summary=document.getElementById('modal-filter-summary');
     if(summary){
-      const profile=activeBuild()||{}, branch=profile.shortName||'Class';
-      summary.textContent=`${branch} equipment · Level ${state.level} · ${futureCount} future-level item${futureCount===1?'':'s'} ${showFuture?'shown':'hidden'} · ${Math.max(0,beforeLevelFilter-1)} class-matched option${beforeLevelFilter-1===1?'':'s'}`;
+      const profile=activeBuild()||{}, branch=profile.shortName||'Class', gender=state.gender?state.gender[0].toUpperCase()+state.gender.slice(1):'all genders';
+      summary.textContent=`${branch} equipment · ${gender} · Level ${state.level} · ${futureCount} future-level item${futureCount===1?'':'s'} ${showFuture?'shown':'hidden'} · ${Math.max(0,beforeLevelFilter-1)} compatible option${beforeLevelFilter-1===1?'':'s'}`;
     }
     if(items.length===1 && items[0].Item==='None'){
       root.innerHTML=`<div class="empty-option">No meaningful ${esc(activeSlot)} target is in the curated class equipment pool yet. That is deliberate: an empty slot is better than chasing filler gear.</div>`;
@@ -1427,9 +1537,7 @@
     catch(err){toast('Could not import that JSON file');}
     e.target.value='';
   });
-  document.getElementById('reset-progress')?.addEventListener('click',()=>{
-    if(confirm('Reset level, quests, ETC counts and equipped build on this browser?')){localStorage.removeItem(KEY);localStorage.removeItem(STATE_UPDATED_KEY);state=loadState();save();renderAll();toast('Local progress reset');}
-  });
+  document.getElementById('reset-progress')?.addEventListener('click',()=>window.TCW_SESSION_ENTRY?.requestReset?.());
   document.getElementById('cache-assets')?.addEventListener('click',async()=>{
     const urls=[...new Set([
       ...D.gear.filter(g=>Number(g['Item ID'])>0&&!['HISTORICAL ONLY','UNVERIFIED'].includes(String(g['Evidence Class']||''))).flatMap(g=>visualCandidates(g)),
@@ -1457,9 +1565,10 @@
   renderQuestFilters();
   renderAll();
   hookImageFallback();
-  hydrateLauncherState();
+  window.TCW_SESSION_ENTRY?.start();
+  hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.10.1-dashboard-containment').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.10.2-session-gender-flow').catch(()=>{});
   }
 })();
