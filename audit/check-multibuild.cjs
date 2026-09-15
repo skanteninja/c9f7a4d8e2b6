@@ -232,7 +232,7 @@ for (const token of [
   'faceId:21000',
   "root.dataset.avatarGearIds=gearSummary;",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.10.2-session-gender-flow')",
+  "navigator.serviceWorker.register('./sw.js?v=0.10.3-session-focus-trap')",
   'tcwFullSkillBuild',
   'data-plan-level',
   "list.querySelectorAll('.skill-row[data-plan-level]')",
