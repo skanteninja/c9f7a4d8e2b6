@@ -2,6 +2,14 @@
 
 This log exists to make cross-chat handoff quick and reliable. Record meaningful changes, fixes, regressions, research conclusions, and continuity-system updates.
 
+## 2026-09-15 — 0.10.3 session-dialog focus containment
+
+- Added keyboard focus containment to the Continue/Reset, reset-confirmation, and gender dialogs, including forward/reverse wraparound.
+- Added a release guard for the focus trap and bumped the runtime/service-worker asset token to `0.10.3-session-focus-trap` after live testing found the previous cache still serving 0.10.2 JavaScript.
+- Rebuilt and published generated site commit `3fd241a7b867d9557ac04aeeb07e40004856d06e`; live `build-info.txt` reports `0.10.3-session-focus-trap`.
+- Build Static `34999140109`, Visual/UI `34999140175`, Monster `34999140162`, Maps/ETC `34999140053`, Real Input `34999140243`, and Verify Live `34999212897` passed.
+- Live Browser QA confirmed Continue → Reset → Continue, reset confirmation wraparound, Male → Female → Male, male avatar identity, and clean visible application assets. The only console errors were from the browser environment’s metadata extension.
+
 ## 2026-09-15 — 0.10.2 session/gender flow
 
 - Added Continue versus Reset when a player returns to a build with saved progress.

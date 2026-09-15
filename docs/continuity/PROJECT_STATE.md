@@ -2,8 +2,8 @@
 
 Last continuity baseline: 2026-09-15
 
-Current deployed checkpoint: 0.10.2-session-gender-flow
-Current source checkpoint: 0.10.2-session-gender-flow
+Current deployed checkpoint: 0.10.3-session-focus-trap
+Current source checkpoint: 0.10.3-session-focus-trap
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:
@@ -84,14 +84,23 @@ These are regression guards. A future change must not silently break them.
 
 ## Current verified checkpoint
 
-- Source commit `fdce45b7581663982c211a8c64400b05dd6dc598` contains the session resume/reset flow, gender selection, gender-aware equipment filtering, Classic avatar gender mapping, quality contract, prioritized backlog, and the 0.10.2 build-token update.
-- Generated site commit `1dd8ff67b9eef43cb5c1c974bd603181902bac3b` is deployed and reports `0.10.2-session-gender-flow`.
-- Build Static `34983348769`, Maps/ETC `34983519233`, and Real Input `34983348845` passed for the generated app state. Verify Live `34985164756` passed after the follow-up live retry and includes the exact live avatar/inventory parity test and same-tier Skill Tree stability test.
+- Source commit `0d916a29d6384e4d3b836997086799e8680817b0` contains the session resume/reset flow, gender selection, gender-aware equipment filtering, Classic avatar gender mapping, keyboard focus containment, and the 0.10.3 build-token update.
+- Generated site commit `3fd241a7b867d9557ac04aeeb07e40004856d06e` is deployed and reports `0.10.3-session-focus-trap`.
+- Build Static `34999140109`, Visual/UI `34999140175`, Monster `34999140162`, Maps/ETC `34999140053`, and Real Input `34999140243` passed for the generated app state. Verify Live `34999212897` passed after the generated site deployed and includes the live session-flow, avatar/inventory parity, and same-tier Skill Tree stability checks.
 - At live Level 15, I/L, Fighter, and Hunter inventory selections match the exact IDs sent to the avatar compositor, all three PNGs render, and no avatar icon strip is present.
 - The live desktop containment check shows the required navigation labels visible without page-level horizontal overflow, the metric/footer regions separated, and the equipment picker metadata wrapped inside its cards at the audited viewport.
 - Live Browser QA verified the saved-build entry prompt, the destructive reset confirmation list, reset-to-gender flow, persisted male/female avatar identity, and gender-filtered equipment options.
+- Live Browser QA verified Tab, Shift+Tab, and wraparound focus behavior in the saved-build, reset-confirmation, and gender dialogs. The live console contained no application-origin errors; visible application images loaded successfully. The only errors were emitted by the browser environment’s metadata extension.
 - The I/L full-page renderer updates .skill-row[data-plan-level] state in place. Do not reintroduce a wrapper-dependent selector for I/L plan rows.
 - Full-page Fighter/Hunter row and tier state also update in place. Keep transient paint-level blink under observation even when node/source checks pass.
+
+## 2026-09-15 — 0.10.3 focus containment and cache refresh
+
+- The Product Design accessibility follow-up found that the first published focus-trap patch was still served from the old `0.10.2-session-gender-flow` service-worker asset cache. The build token and all release guards were bumped to `0.10.3-session-focus-trap` so runtime changes are cache-visible.
+- Added a shared session-dialog focus trap. Live keyboard checks now cycle Continue → Reset → Continue, Reset Cancel → Reset Confirm → Reset Cancel, and Male → Female → Male; reverse Shift+Tab traversal also remains inside each dialog.
+- The fresh-build gender dialog visibly presents Male/Female choices and the selected male path resolves to a `MALE` badge and `avatar=male` after confirmation.
+- The live build-info endpoint reports `0.10.3-session-focus-trap`. Build Static `34999140109`, Visual/UI `34999140175`, Monster `34999140162`, Maps/ETC `34999140053`, Real Input `34999140243`, and Verify Live `34999212897` passed.
+- New evidence capture: `maplestory-audit-gender-focus-20260915.jpg`. The live application had 22 visible images with zero failed/incomplete images in the inspected state; console errors were extension-origin only.
 
 ## 2026-09-15 audit and 0.10.2 deployed status
 

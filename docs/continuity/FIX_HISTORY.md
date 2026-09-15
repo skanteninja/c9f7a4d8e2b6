@@ -6,6 +6,21 @@ Purpose: preserve bugs that were already solved, partially solved, or observed a
 
 This is historical context, not the unresolved queue. Active unresolved work belongs in `KNOWN_BUGS.md`.
 
+## 2026-09-15 — 0.10.3 session-dialog focus containment
+
+Observed regression:
+- The Continue/Reset dialog allowed Tab focus to escape into the page. The first source patch was also not visible on the deployed site because the service worker continued serving the `0.10.2-session-gender-flow` runtime asset.
+
+Correction:
+- Added one shared focus-trap listener for the session entry, reset confirmation, and gender dialogs. It keeps forward and reverse keyboard traversal inside the visible modal controls and handles focus that starts outside the dialog.
+- Added the focus-trap requirement to the multi-build audit guard.
+- Bumped the build/service-worker token to `0.10.3-session-focus-trap` across the source build and release checks so the runtime update is cache-visible.
+
+Verification:
+- Local build, generated JavaScript syntax, multi-build audit, and `git diff --check` passed.
+- Build Static `34999140109`, Visual/UI `34999140175`, Monster `34999140162`, Maps/ETC `34999140053`, Real Input `34999140243`, and Verify Live `34999212897` passed.
+- Live Browser QA confirmed focus wraparound in all three dialogs, a male selection resolving to the `MALE` badge/`avatar=male`, 22 visible images with no failed/incomplete images, and no site-origin console errors. Browser metadata-extension errors were isolated from application evidence.
+
 ## 2026-09-15 — 0.10.2 session resume/reset and gender flow
 
 User-visible problems:

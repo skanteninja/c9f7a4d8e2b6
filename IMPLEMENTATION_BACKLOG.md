@@ -3,6 +3,13 @@
 Last prioritized: 2026-09-15
 Ordering follows the quality contract in [QUALITY_STANDARD.md](QUALITY_STANDARD.md). “Implemented locally” never means “deployed” until the live gate passes.
 
+## 0.10.3 completed in the verified live checkpoint
+
+- Added a shared keyboard focus trap for the Continue/Reset, destructive reset, and gender dialogs so Tab and Shift+Tab cannot escape an open session modal.
+- Bumped the runtime asset token to `0.10.3-session-focus-trap` so the new session-flow JavaScript cannot remain hidden behind the previous service-worker cache.
+- Added the focus-trap requirement to the multi-build audit guard and verified the live app after the cache refresh.
+- Build Static `34999140109`, Visual/UI `34999140175`, Monster `34999140162`, Maps/ETC `34999140053`, Real Input `34999140243`, and Verify Live `34999212897` passed. The generated site reports `0.10.3-session-focus-trap`.
+
 ## 0.10.2 completed in the verified live checkpoint
 
 - Added Continue vs Reset when a build has saved progress.
@@ -77,7 +84,7 @@ Evidence: live Browser capture after generated site commit 2a6b451; Verify Live 
 
 ### P2.2 — Run a narrow-width and text-size accessibility pass
 
-Status: open.
+Status: open; the 0.10.3 follow-up verified keyboard focus containment for all three session dialogs at the live desktop viewport, but narrow-width, text-size, and assistive-technology coverage remain outstanding.
 
 Test nav, dashboard, picker, Skill Tree, tables/cards, focus order, Escape behavior, and text enlargement. Screenshots so far are desktop evidence only.
 

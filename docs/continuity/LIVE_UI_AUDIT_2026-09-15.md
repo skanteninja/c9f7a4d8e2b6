@@ -3,6 +3,7 @@
 URL: `https://maplestory-classic.ofri505.workers.dev`
 Initial observed checkpoint: `0.10.0-classic-avatar-parity`
 Post-publish checkpoint: `0.10.1-dashboard-containment`
+Current follow-up checkpoint: `0.10.3-session-focus-trap`
 Viewport: approximately 1363×936 browser content area
 
 ## Scope and evidence
@@ -86,3 +87,18 @@ Interaction results:
 - Male selection produced a visible `MALE` avatar badge and the Classic avatar query (`hair=30000&face=20000`). At Level 30, the Fighter Top picker labeled itself `MALE EQUIPMENT` and showed male-only options such as Brown Lolico Armor and Red Hwarang Shirt; no female-only options appeared in the inspected list.
 
 The follow-up generated checkpoint reports `0.10.2-session-gender-flow`. Build Static `34983348769`, Maps/ETC `34983519233`, Real Input `34983348845`, and Verify Live `34985164756` passed. The previous live stability failure was reproduced as a CDP execution-context race and was not repeated in the successful follow-up run.
+
+## 0.10.3 accessibility and runtime-delivery follow-up
+
+The follow-up was prompted by the first focus-trap patch appearing to have no effect in the live browser. The live build-info endpoint was still reporting `0.10.2-session-gender-flow`, so the runtime change was hidden by the prior service-worker cache. The asset/build token was bumped to `0.10.3-session-focus-trap`, the generated site was rebuilt, and Verify Live `34999212897` passed after publication. The deployed generated site commit is `3fd241a7b867d9557ac04aeeb07e40004856d06e`.
+
+Evidence capture: `maplestory-audit-gender-focus-20260915.jpg`.
+
+Observed live interaction results:
+
+- On the saved-build entry dialog, the initial focus was Continue; Tab moved to Reset, the next Tab wrapped to Continue, and Shift+Tab from Continue moved back to Reset.
+- On the destructive reset dialog, Tab moved from Keep my progress to Yes, reset this build, the next Tab wrapped to Keep my progress, and reverse traversal stayed inside the two controls.
+- After confirming reset, the gender dialog presented Male and Female choices with visible focus. Tab moved Male → Female → Male, and the selected Male path closed the modal with a visible `MALE` badge and `avatar=male`.
+- The live app reported 22 visible images, zero failed/incomplete visible images, and no application-origin console errors. The repeated errors were from the browser metadata extension at `chrome-extension://kcdongibgcplmaagnmgpjhpjgmmaaaaa/...`.
+
+This is a targeted keyboard/modal check at the audited desktop viewport, not closure of the broader P2.2 narrow-width, text-size, or assistive-technology audit. The human-visible Skill Tree blink and the independent Fighter/Hunter content audit remain open.

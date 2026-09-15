@@ -1,7 +1,7 @@
 # MapleStory Classic Builder — Quality Standard
 
 Status: working release contract, established 2026-09-15
-Current live checkpoint: `0.10.2-session-gender-flow`
+Current live checkpoint: `0.10.3-session-focus-trap`
 
 This document defines what “ready” means for the public MapleStory Classic Builder. It is intentionally stricter than “the page loads”: the builder is a data product, a planner, and a visual interface at the same time.
 
@@ -27,6 +27,7 @@ The supported build names are exact and stable:
 6. **Stable interaction identity.** Same-tier level changes update allocation/status without remounting stable Skill Tree cards or reloading their artwork.
 7. **Public-source boundary.** The public UI does not expose internal provider, provenance, or maintenance language that is not useful to a player.
 8. **Session safety and character identity.** Returning to a saved build offers Continue or Reset; Reset requires explicit confirmation with a loss summary; fresh/reset sessions require a gender choice that persists, filters locked equipment, and drives the avatar body.
+9. **Modal focus containment.** While a session dialog is open, keyboard focus stays inside that dialog and cycles through its visible controls; publishing a runtime session-flow change also invalidates the prior service-worker asset token.
 
 ## Quality dimensions
 
@@ -43,6 +44,7 @@ The supported build names are exact and stable:
 - A modal can be opened, filtered, scrolled, and dismissed without losing the current build or level.
 - Re-entering a saved build exposes Continue and Reset choices; destructive reset is separately confirmed and scoped to the active build.
 - Male/female selection is required for fresh/reset sessions and is reflected in the avatar and equipment compatibility labels.
+- Session dialogs keep keyboard focus contained, restore focus to the initiating control after dismissal, and remain usable with Tab, Shift+Tab, and Escape behavior.
 - Visible controls have useful names, focus styles, keyboard behavior, and state announcements where state changes matter.
 - Browser history/back navigation returns to the expected page and build.
 
@@ -86,6 +88,7 @@ The supported build names are exact and stable:
 - Separate observed facts from inferences and source-backed game-data claims.
 - Treat the current human-visible Skill Tree blink as open until a reproducible paint-level cause is found or repeated clean captures close it.
 - Record tool limits: Mobbin references are optional comparative evidence and require an account plan; direct product screenshots and browser checks remain the source of truth for this repo.
+- Separate browser-extension console errors from application errors; a live release is clean only when site-origin errors are absent and visible application assets load successfully.
 
 ## Definition of done for a change
 

@@ -4,6 +4,12 @@ Last continuity baseline: 2026-09-15
 
 Use this file for settled choices that future chats should preserve unless new evidence justifies changing them.
 
+## 2026-09-15 — Session-dialog focus and cache invalidation
+
+- Every session modal must trap Tab and Shift+Tab within its visible controls, including Continue/Reset, destructive reset confirmation, and Male/Female selection. Focus must wrap at both ends and return to the initiating control when the modal closes.
+- A runtime session-flow change is not complete until its asset/service-worker token changes or an equivalent cache invalidation is verified. The live focus patch was initially hidden by the 0.10.2 asset cache, so the published checkpoint is `0.10.3-session-focus-trap`.
+- Browser extension errors are not application failures; live console evidence must report the origin of errors and separately verify visible application assets.
+
 ## 2026-09-15 — Session safety and gender-aware character identity
 
 - A build with meaningful saved progress must present a Continue-versus-Reset choice on entry. Continuing preserves the existing build; Reset is scoped to the active build only.
@@ -17,7 +23,7 @@ Use this file for settled choices that future chats should preserve unless new e
 
 - QUALITY_STANDARD.md is the release contract; IMPLEMENTATION_BACKLOG.md is the ordered queue. A source edit or local build is not a deployment.
 - Product Design screenshots and cloud Browser QA are the primary visual/interaction evidence for the current audit. TinyFish is useful for live shell extraction. Mobbin remains optional comparative evidence because the connected search endpoint is paid-plan gated.
-- The earlier live baseline was 0.10.1-dashboard-containment. The current live checkpoint is 0.10.2-session-gender-flow, generated site commit 1dd8ff67b9eef43cb5c1c974bd603181902bac3b, with Verify Live run 34985164756 passed after the follow-up retry.
+- The earlier live baseline was 0.10.2-session-gender-flow. The current live checkpoint is 0.10.3-session-focus-trap, generated site commit 3fd241a7b867d9557ac04aeeb07e40004856d06e, with Verify Live run 34999212897 passed after the asset-token refresh.
 
 ## 2026-09-15 — Shared dashboard containment
 
