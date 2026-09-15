@@ -2,8 +2,8 @@
 
 Last continuity baseline: 2026-09-15
 
-Current deployed checkpoint: 0.10.0-classic-avatar-parity
-Current source candidate: 0.10.1-dashboard-containment (built locally; not deployed)
+Current deployed checkpoint: 0.10.1-dashboard-containment
+Current source checkpoint: 0.10.1-dashboard-containment
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:
@@ -84,22 +84,24 @@ These are regression guards. A future change must not silently break them.
 
 ## Current verified checkpoint
 
-- Source head a2ac9b9 contains the Classic-compatible avatar route, public canonical icon identity guard, and bounded compositor request.
-- Generated site checkpoint 6033028 is deployed and reports 0.10.0-classic-avatar-parity.
-- Build Static, Visual/UI, Maps/ETC, Real Input, and Verify Live gates are green for the current generated app state; Verify Live 34858189737 includes the exact live avatar/inventory parity test and same-tier Skill Tree stability test.
+- Source commit d793e2d contains the quality contract, prioritized backlog, live audit record, shared dashboard-containment CSS, and the 0.10.1 build-token update.
+- Generated site commit 2a6b451 is deployed and reports 0.10.1-dashboard-containment.
+- Build Static 34976326799, Visual/UI 34976326791, Maps/ETC 34976326839, Monster integrity 34976326812, and Real Input 34976326817 passed for the generated app state. Verify Live 34976424625, attempt 3, passed after publication and includes the exact live avatar/inventory parity test and same-tier Skill Tree stability test.
 - At live Level 15, I/L, Fighter, and Hunter inventory selections match the exact IDs sent to the avatar compositor, all three PNGs render, and no avatar icon strip is present.
+- The live desktop containment check shows the required navigation labels visible without page-level horizontal overflow, the metric/footer regions separated, and the equipment picker metadata wrapped inside its cards at the audited viewport.
 - The I/L full-page renderer updates .skill-row[data-plan-level] state in place. Do not reintroduce a wrapper-dependent selector for I/L plan rows.
 - Full-page Fighter/Hunter row and tier state also update in place. Keep transient paint-level blink under observation even when node/source checks pass.
 
-## 2026-09-15 audit and source-candidate status
+## 2026-09-15 audit and 0.10.1 deployed status
 
 - Created QUALITY_STANDARD.md and IMPLEMENTATION_BACKLOG.md as the release contract and ordered work queue.
 - Product Design/browser audit found three visible priorities: desktop navigation horizontal overflow, compact dashboard metric/footer collision and Skill Tree compression, and horizontal overflow/clipping in the equipment picker.
-- Added a shared source CSS containment patch and bumped the local build token to 0.10.1-dashboard-containment. The patch is built and static-checked, but it has not been published to the Worker.
-- Cloud Browser QA against the currently deployed 0.10.0 checkpoint exercised trusted level input on I/L, Fighter and Hunter. I/L passed 9→10 and 29→30 with canonical Magic Claw artwork; Fighter and Hunter passed 29→30 with the expected job titles and no Magician gear text in the inspected build surfaces.
+- Added a shared source CSS containment patch and bumped the build token to 0.10.1-dashboard-containment. Build Static published the generated site commit 2a6b451 to the Worker.
+- Cloud Browser QA against the published 0.10.1 checkpoint exercised trusted level input on I/L, Fighter and Hunter. I/L passed 9→10 and 29→30 with canonical Magic Claw artwork; Fighter and Hunter passed 29→30 with the expected job titles and no Magician gear text in the inspected build surfaces. A live Hunter Level 30 capture confirmed the wrapped navigation and separated dashboard regions.
+- The post-build live verification run 34976424625 passed on attempt 3 after two transient CDP execution-context races; the final job completed all live browser, avatar/inventory, and same-tier Skill Tree checks.
 - The repository real-input script could not run in this workspace because the Python environment lacks websocket-client; the local Chrome binary required by the CI script is also unavailable. Cloud Browser results are recorded as equivalent live-input evidence, not as a replacement for the formal CI gate.
 - Mobbin search is connected but paid-plan gated. TinyFish successfully extracted the deployed public shell. Firecrawl research cross-checked Hunter skill/progression references; no Fighter axe-bleed claim was promoted to confirmed.
-- Live build-info still reports 0.10.0-classic-avatar-parity. Do not call the 0.10.1 candidate deployed until CI publishes it and live verification passes.
+- The next implementation priority is the independent Fighter/Hunter Classic data audit; narrow-width/accessibility validation and the human-visible Skill Tree blink remain open.
 ## Automatic job progression
 The selected level must determine the current job automatically and all dependent UI must agree.
 

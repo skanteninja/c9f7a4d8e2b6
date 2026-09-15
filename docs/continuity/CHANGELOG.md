@@ -2,7 +2,7 @@
 
 This log exists to make cross-chat handoff quick and reliable. Record meaningful changes, fixes, regressions, research conclusions, and continuity-system updates.
 
-## 2026-09-15 — Unreleased 0.10.1 dashboard containment
+## 2026-09-15 — 0.10.1 dashboard containment
 
 - Added QUALITY_STANDARD.md and IMPLEMENTATION_BACKLOG.md.
 - Added the Product Design/browser audit record with measured desktop navigation, dashboard, picker, route-thumbnail, and Build Library findings.
@@ -10,7 +10,9 @@ This log exists to make cross-chat handoff quick and reliable. Record meaningful
 - Cross-checked Hunter progression references with Firecrawl; Fighter axe-bleed behavior remains unconfirmed and was not promoted to settled data.
 - Built 0.10.1-dashboard-containment successfully and passed the static multi-build and generated JavaScript checks.
 - Cloud Browser trusted-input checks passed across I/L, Fighter, and Hunter. The formal Python real-input script was blocked by the workspace’s missing websocket-client dependency and unavailable local Chrome.
-- This candidate is not deployed. Live build-info remains 0.10.0-classic-avatar-parity pending publish and live verification.
+- Build Static published generated site commit 2a6b451; live build-info reports 0.10.1-dashboard-containment.
+- Post-build Verify Live run 34976424625 passed on attempt 3, including live browser, Fighter/Hunter route, avatar/inventory parity, and same-tier Skill Tree stability checks. The first two attempts hit transient CDP execution-context races and were not treated as release evidence.
+- A live Hunter Level 30 capture at the audited desktop viewport confirmed the wrapped navigation, separated metric/footer regions, and contained dashboard layout. Narrow-width/accessibility review, route thumbnails, Build Library density, and the human-visible Skill Tree blink remain open.
 
 ## 2026-09-14 — 0.10.0 Classic avatar parity
 

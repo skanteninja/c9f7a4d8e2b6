@@ -1,7 +1,7 @@
 # MapleStory Classic Builder — Quality Standard
 
 Status: working release contract, established 2026-09-15
-Current live checkpoint: `0.10.0-classic-avatar-parity`
+Current live checkpoint: `0.10.1-dashboard-containment`
 
 This document defines what “ready” means for the public MapleStory Classic Builder. It is intentionally stricter than “the page loads”: the builder is a data product, a planner, and a visual interface at the same time.
 

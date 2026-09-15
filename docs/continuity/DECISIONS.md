@@ -8,12 +8,13 @@ Use this file for settled choices that future chats should preserve unless new e
 
 - QUALITY_STANDARD.md is the release contract; IMPLEMENTATION_BACKLOG.md is the ordered queue. A source edit or local build is not a deployment.
 - Product Design screenshots and cloud Browser QA are the primary visual/interaction evidence for the current audit. TinyFish is useful for live shell extraction. Mobbin remains optional comparative evidence because the connected search endpoint is paid-plan gated.
-- The live baseline remains 0.10.0-classic-avatar-parity. The dashboard-containment candidate is intentionally tracked as local until CI publishes it and the live URL reports the new checkpoint.
+- The live baseline is 0.10.1-dashboard-containment. Build Static published generated site commit 2a6b451, and Verify Live run 34976424625 attempt 3 passed after publication.
 
 ## 2026-09-15 — Shared dashboard containment
 
 - Keep the containment fix in shared progression-sync CSS so I/L, Fighter, and Hunter receive the same navigation, metric/footer, compact Skill Tree, and picker overflow safeguards.
 - Prefer wrapping and min-width constraints over hiding required labels or redesigning the visual language during this release. Revisit broader hierarchy changes only after the narrow-width/accessibility audit.
+- The containment patch is verified at the audited desktop viewport in the live 0.10.1 build. Do not treat that as completion of the narrow-width/accessibility pass.
 
 ## 2026-09-15 — Research status boundary
 

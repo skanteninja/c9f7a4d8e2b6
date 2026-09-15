@@ -6,7 +6,7 @@ Purpose: preserve bugs that were already solved, partially solved, or observed a
 
 This is historical context, not the unresolved queue. Active unresolved work belongs in `KNOWN_BUGS.md`.
 
-## 2026-09-15 — 0.10.1 dashboard containment candidate
+## 2026-09-15 — 0.10.1 dashboard containment
 
 Observed in the live 0.10.0 UI:
 - required desktop navigation labels extended beyond the visible nav width;
@@ -25,10 +25,12 @@ Verification:
 - cloud Browser trusted-input checks passed on I/L, Fighter, and Hunter, including I/L 9→10 and 29→30 plus Fighter/Hunter 29→30;
 - the formal Python real-input script could not start because websocket-client is not installed in this workspace, and no local Chrome binary is available for the CI-style checks.
 
-Deployment status:
-- not deployed or claimed as deployed;
-- the live build-info endpoint still reports 0.10.0-classic-avatar-parity;
-- the CSS/layout corrections remain open until the generated artifact is published and live visual verification passes.
+Deployment and verification:
+- Build Static published generated site commit 2a6b451;
+- the live build-info endpoint reports 0.10.1-dashboard-containment;
+- Verify Live run 34976424625 passed on attempt 3 after two transient CDP execution-context races;
+- a live Browser capture at the audited desktop viewport confirmed that navigation wraps without page-level horizontal overflow, dashboard metric/footer regions are separated, and picker metadata stays within its cards;
+- narrow-width/accessibility validation and the human-visible Skill Tree blink remain open follow-ups.
 
 ## 2026-09-14 — 0.10.0 inventory/avatar identity correction
 

@@ -37,7 +37,7 @@ Acceptance:
 
 ### P1.3 — Preserve dashboard hierarchy while making all actions visible
 
-Status: implemented in source candidate 0.10.1-dashboard-containment; generated/static checks pass; live verification pending publish.
+Status: verified in generated/live 0.10.1-dashboard-containment at the audited desktop viewport. Narrow-width/accessibility validation remains in P2.2.
 
 Remove the measured dashboard metric/level-footer collision, keep the compact Skill Tree readable, and make all required top navigation visible without a desktop horizontal scroll. Evidence: live captures at 1363×936 and computed metric bottom `471` versus footer top `456`; navigation scroll width `1234` versus client width `1038`.
 
@@ -48,11 +48,13 @@ Acceptance:
 - level changes do not change hero height unexpectedly or remount the tree;
 - the 3 queue cards retain equal height and internal scrolling.
 
+Evidence: live Browser geometry/capture after generated site commit 2a6b451; Verify Live 34976424625 attempt 3 passed.
+
 ## P2 — important UX and data-quality work
 
 ### P2.1 — Contain the equipment picker at every supported width
 
-Status: implemented in source candidate 0.10.1-dashboard-containment; generated/static checks pass; live verification pending publish.
+Status: verified in generated/live 0.10.1-dashboard-containment at the audited desktop viewport. Narrow-width/accessibility validation remains in P2.2.
 
 The live Fighter picker measured modal `scrollWidth 797` versus `clientWidth 763` and an option card `scrollWidth 410` versus `clientWidth 357`; the saved capture shows clipped requirement/stat text and an internal horizontal scrollbar.
 
@@ -62,6 +64,8 @@ Acceptance:
 - item name, level, class/job requirement, and stat block wrap within the card;
 - future-level and optional filters remain visible and keyboard-operable;
 - the single-column narrow layout still works.
+
+Evidence: live Browser capture after generated site commit 2a6b451; Verify Live 34976424625 attempt 3 passed.
 
 ### P2.2 — Run a narrow-width and text-size accessibility pass
 
@@ -115,9 +119,8 @@ Verify axe versus sword/one-handed/two-handed implications for Fighter and bow/s
 
 ## Execution order
 
-1. Finish and verify the P1.3/P2.1 containment patch.
-2. Run the full static, UI, real-input, and live verification matrix.
-3. Complete independent Fighter/Hunter data research and update recommendations only where evidence supports it.
-4. Revisit Skill Tree blink with the new layout and fresh captures.
-5. Run the narrow-width/accessibility and route-thumbnail audits.
-6. Rebalance Build Library and apply P3 polish.
+1. Complete independent Fighter/Hunter data research and update recommendations only where evidence supports it.
+2. Revisit Skill Tree blink with the new layout and fresh captures.
+3. Run the narrow-width/accessibility and route-thumbnail audits.
+4. Rebalance Build Library and apply P3 polish.
+5. Run the full verification matrix after each meaningful change.

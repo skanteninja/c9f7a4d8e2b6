@@ -1,7 +1,8 @@
 # Live UI Audit — 2026-09-15
 
 URL: `https://maplestory-classic.ofri505.workers.dev`
-Observed checkpoint: `0.10.0-classic-avatar-parity`
+Initial observed checkpoint: `0.10.0-classic-avatar-parity`
+Post-publish checkpoint: `0.10.1-dashboard-containment`
 Viewport: approximately 1363×936 browser content area
 
 ## Scope and evidence
@@ -62,3 +63,9 @@ Firecrawl search and structured extracts were limited to the open research quest
 - [Metaroad — Hunter leveling guide](https://metaroad.gg/maplestory-classic/build-guides/hunter-leveling-guide) independently supplies a skill order, STR/DEX guidance, level bands, and training recommendations. It is a guide recommendation, not a substitute for the project’s own Classic data audit.
 
 No unresolved Fighter/Hunter mechanic was promoted to “confirmed” in this pass.
+
+## Post-publish containment verification
+
+The generated site was published as commit `2a6b451` and the live build-info endpoint reported `0.10.1-dashboard-containment`. A follow-up live Browser capture at approximately 1363×936 showed the required navigation wrapping into visible rows, no page-level horizontal overflow, separated dashboard metric/footer regions, and contained equipment-picker metadata. Computed page `scrollWidth` matched `clientWidth` in the live Hunter Level 30 check.
+
+GitHub Actions Verify Live run `34976424625`, attempt 3, passed after two transient CDP execution-context races. Its final job passed the live dashboard, Fighter/Hunter route, avatar/inventory parity, and same-tier Skill Tree stability steps. The human-visible Skill Tree blink remains an observation item; narrow-width, text-size, keyboard-only, and assistive-technology checks remain open.

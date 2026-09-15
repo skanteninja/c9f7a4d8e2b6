@@ -10,9 +10,9 @@ This is the authoritative unresolved-issues list for cross-chat continuity. Do n
 - **P2** — important UX/data-quality issue
 - **P3** — polish / lower-impact issue
 
-## Verification snapshot — 0.10.0 (2026-09-15)
+## Verification snapshot — 0.10.1 (2026-09-15)
 
-Source head a2ac9b9 and generated site checkpoint 6033028 are the current avatar-parity state. Build Static 34858100599, Visual/UI 34858100657, Maps/ETC 34858100699, and Verify Live 34858189737 passed. Real-input 34857418168 passed against the same generated app state. Verify Live included the dedicated avatar parity step and the live same-tier Skill Tree stability step.
+Source commit d793e2d and generated site commit 2a6b451 are the current deployed containment state. Build Static 34976326799, Visual/UI 34976326791, Maps/ETC 34976326839, Monster integrity 34976326812, and Real-input 34976326817 passed. Verify Live 34976424625 passed on attempt 3 after publication and included the dedicated avatar parity step and the live same-tier Skill Tree stability step.
 
 Verified in generated/live UI:
 - Fighter Build, Hunter Build, and I/L Wizard Build use isolated build data and exact required names.
@@ -22,11 +22,12 @@ Verified in generated/live UI:
 - All three live avatar PNGs decoded with nonzero dimensions; no legacy avatar icon box was present.
 - Fighter/Hunter filters contain no unrelated magician/weapon-branch gear, and Overall versus Top/Bottom remains exclusive.
 - Maps, Classic same-origin visual routes, and the public Builds tab checks passed.
+- The live 0.10.1 desktop containment check shows all required navigation labels visible, no page-level horizontal overflow, separated dashboard metric/footer regions, and wrapped equipment-picker metadata at the audited viewport.
 
 Additional live audit evidence on 2026-09-15:
 - Cloud Browser trusted input changed levels on I/L, Fighter, and Hunter; I/L passed 9→10 and 29→30, while Fighter and Hunter passed the 29→30 job transition with class-correct visible titles.
 - The formal repository real-input script was not executable in this workspace because websocket-client is missing and no local Chrome binary is available. This is an environment blocker, not a product pass.
-- The deployed build-info remains 0.10.0-classic-avatar-parity. The local 0.10.1 containment candidate is not verified live.
+- The deployed build-info reports 0.10.1-dashboard-containment. The local formal real-input script remains unavailable in this workspace, but the GitHub Actions real-input gate passed for the generated checkpoint.
 
 Resolved in this checkpoint:
 - P1 Fighter/Hunter avatar correctness.
@@ -37,7 +38,7 @@ Resolved in this checkpoint:
 Still open:
 - Human paint-level Skill Tree blink remains under observation; DOM identity, source, load-event, and child-list stability gates pass.
 - Independent Classic/beta research and deeper content audits remain open for Fighter axe mechanics, Hunter progression parity, AP/route/quest detail, and any disputed source claims.
-- Product Design audit follow-ups remain open for desktop navigation overflow, dashboard hierarchy/compact Skill Tree compression, equipment-picker overflow, missing route thumbnails, and Build Library density.
+- Product Design follow-ups remain open for narrow-width/accessibility coverage, missing route thumbnails, Build Library density, and the human-visible Skill Tree blink. The audited desktop navigation, dashboard containment, and picker overflow findings were addressed in 0.10.1.
 - The remaining items below are maintained as regression guards until their broader audits are complete.
 
 ## P1 — Fighter / Hunter completeness parity
@@ -100,15 +101,15 @@ Verify synchronization of:
 - dashboard copy
 - recommendations
 
-## P1 — Dashboard containment and desktop navigation overflow
+## P1 — Dashboard containment and desktop navigation overflow (resolved for audited desktop viewport in 0.10.1)
 
-Live Product Design audit on 2026-09-15 found required navigation labels extending past the desktop nav width, compact Skill Tree content competing with the level footer/metrics, and uneven dashboard hierarchy. The source candidate adds shared containment rules for these surfaces, but the deployed 0.10.0 site still needs a post-publish check.
+Live Product Design audit on 2026-09-15 found required navigation labels extending past the desktop nav width, compact Skill Tree content competing with the level footer/metrics, and uneven dashboard hierarchy. The shared containment rules are deployed in 0.10.1 and were checked in the generated/live UI at the audited desktop viewport.
 
 Acceptance criteria:
 - all required navigation labels are visible without a horizontal page scrollbar at the audited desktop width;
 - Training and Next SP cards do not intersect the level footer;
 - compact Skill Tree tabs and cards remain readable and do not cover adjacent metrics;
-- the fix holds on I/L, Fighter, and Hunter at levels 15, 29, 30, and 50;
+- the shared rules hold on the audited live dashboard routes and the tested level transitions; the full narrow-width/accessibility matrix remains under P2.2;
 - the human-visible Skill Tree blink remains a separate observation item.
 
 ## Regression guard — cross-class equipment leakage (resolved 0.10.0)
@@ -143,7 +144,7 @@ Required:
 
 Verify section visibility and SP calculations at boundary levels 9, 10, 29, 30 and later levels.
 
-## P2 — Fighter dashboard Skill Tree layout regression
+## P2 — Fighter dashboard Skill Tree layout regression (resolved for audited desktop viewport in 0.10.1)
 Historical regression: Fighter dashboard Skill Tree returned to an unintended vertical layout after a similar issue had already been solved elsewhere.
 
 Verify:
@@ -151,11 +152,11 @@ Verify:
 - responsive behavior remains usable on narrower widths
 - changing level does not cause layout jumping/remounting
 
-The 2026-09-15 live audit found the current compact tree is horizontally arranged but too compressed at the audited width. The 0.10.1 source candidate widens the tab layout and adds wrapping; keep this issue open until generated and live visual checks pass.
+The 2026-09-15 live audit found the current compact tree was horizontally arranged but too compressed at the audited width. The 0.10.1 shared CSS widens the tab layout and adds wrapping; generated/static checks and post-publish live visual checks pass. Narrow-width and text-size behavior remains under P2.2.
 
-## P2 — Equipment picker horizontal overflow
+## P2 — Equipment picker horizontal overflow (resolved for audited desktop viewport in 0.10.1)
 
-The 2026-09-15 live audit measured the picker modal and item cards wider than their visible containers, producing a horizontal scrollbar and clipped requirement/stat text. The 0.10.1 source candidate changes the option layout to wrap metadata below the image and constrains the modal/card widths.
+The 2026-09-15 live audit measured the picker modal and item cards wider than their visible containers, producing a horizontal scrollbar and clipped requirement/stat text. The 0.10.1 shared CSS changes the option layout to wrap metadata below the image and constrains the modal/card widths; the generated/live visual check passes at the audited desktop viewport.
 
 Acceptance criteria:
 - modal and option cards have no unintended horizontal overflow at the audited desktop width;
