@@ -1460,6 +1460,6 @@
   hydrateLauncherState();
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.10.0-classic-avatar-parity').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.10.1-dashboard-containment').catch(()=>{});
   }
 })();
