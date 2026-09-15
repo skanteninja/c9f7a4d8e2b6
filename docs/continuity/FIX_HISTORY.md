@@ -1,10 +1,34 @@
 # Historical Fix / Regression Log
 
-Last continuity baseline: 2026-09-14
+Last continuity baseline: 2026-09-15
 
 Purpose: preserve bugs that were already solved, partially solved, or observed as regressions so future chats do not repeat the same debugging from scratch.
 
 This is historical context, not the unresolved queue. Active unresolved work belongs in `KNOWN_BUGS.md`.
+
+## 2026-09-15 — 0.10.1 dashboard containment candidate
+
+Observed in the live 0.10.0 UI:
+- required desktop navigation labels extended beyond the visible nav width;
+- the compact dashboard Skill Tree was too compressed and its metrics/level footer spacing collided at the audited viewport;
+- the equipment picker and item cards exposed horizontal overflow, clipping requirement/stat text.
+
+Correction in source:
+- added shared progression-sync CSS for metric/footer separation, readable compact Skill Tree tabs, wrapped picker metadata, and desktop nav wrapping;
+- bumped the generated build token to 0.10.1-dashboard-containment;
+- created QUALITY_STANDARD.md, IMPLEMENTATION_BACKLOG.md, and the dated live audit record.
+
+Verification:
+- node build.cjs passed;
+- node audit/check-multibuild.cjs passed;
+- generated JavaScript syntax checks and git diff --check passed;
+- cloud Browser trusted-input checks passed on I/L, Fighter, and Hunter, including I/L 9→10 and 29→30 plus Fighter/Hunter 29→30;
+- the formal Python real-input script could not start because websocket-client is not installed in this workspace, and no local Chrome binary is available for the CI-style checks.
+
+Deployment status:
+- not deployed or claimed as deployed;
+- the live build-info endpoint still reports 0.10.0-classic-avatar-parity;
+- the CSS/layout corrections remain open until the generated artifact is published and live visual verification passes.
 
 ## 2026-09-14 — 0.10.0 inventory/avatar identity correction
 

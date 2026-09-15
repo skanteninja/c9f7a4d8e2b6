@@ -1,8 +1,23 @@
 # Durable Project Decisions
 
-Last continuity baseline: 2026-09-14
+Last continuity baseline: 2026-09-15
 
 Use this file for settled choices that future chats should preserve unless new evidence justifies changing them.
+
+## 2026-09-15 — Quality contract and audit evidence
+
+- QUALITY_STANDARD.md is the release contract; IMPLEMENTATION_BACKLOG.md is the ordered queue. A source edit or local build is not a deployment.
+- Product Design screenshots and cloud Browser QA are the primary visual/interaction evidence for the current audit. TinyFish is useful for live shell extraction. Mobbin remains optional comparative evidence because the connected search endpoint is paid-plan gated.
+- The live baseline remains 0.10.0-classic-avatar-parity. The dashboard-containment candidate is intentionally tracked as local until CI publishes it and the live URL reports the new checkpoint.
+
+## 2026-09-15 — Shared dashboard containment
+
+- Keep the containment fix in shared progression-sync CSS so I/L, Fighter, and Hunter receive the same navigation, metric/footer, compact Skill Tree, and picker overflow safeguards.
+- Prefer wrapping and min-width constraints over hiding required labels or redesigning the visual language during this release. Revisit broader hierarchy changes only after the narrow-width/accessibility audit.
+
+## 2026-09-15 — Research status boundary
+
+- Firecrawl research may update the evidence base, but it does not automatically change recommendations. Hunter references were cross-checked for core skills and first-job progression; Fighter axe-bleed behavior remains unconfirmed and must stay labeled for research.
 
 ## Scope / naming
 - The site is multi-build and multi-class.

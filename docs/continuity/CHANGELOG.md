@@ -2,6 +2,16 @@
 
 This log exists to make cross-chat handoff quick and reliable. Record meaningful changes, fixes, regressions, research conclusions, and continuity-system updates.
 
+## 2026-09-15 — Unreleased 0.10.1 dashboard containment
+
+- Added QUALITY_STANDARD.md and IMPLEMENTATION_BACKLOG.md.
+- Added the Product Design/browser audit record with measured desktop navigation, dashboard, picker, route-thumbnail, and Build Library findings.
+- Added shared source CSS for dashboard metric/footer spacing, compact Skill Tree wrapping, picker metadata wrapping, and desktop nav wrapping.
+- Cross-checked Hunter progression references with Firecrawl; Fighter axe-bleed behavior remains unconfirmed and was not promoted to settled data.
+- Built 0.10.1-dashboard-containment successfully and passed the static multi-build and generated JavaScript checks.
+- Cloud Browser trusted-input checks passed across I/L, Fighter, and Hunter. The formal Python real-input script was blocked by the workspace’s missing websocket-client dependency and unavailable local Chrome.
+- This candidate is not deployed. Live build-info remains 0.10.0-classic-avatar-parity pending publish and live verification.
+
 ## 2026-09-14 — 0.10.0 Classic avatar parity
 
 - Fixed the major inventory/avatar identity bug across I/L Wizard, Fighter, and Hunter.

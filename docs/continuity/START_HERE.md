@@ -8,6 +8,10 @@ If this project is being continued in a fresh ChatGPT conversation, read these f
 4. `FIX_HISTORY.md` — bugs/fixes/regressions already encountered so work is not repeated.
 5. `CHANGELOG.md` — dated project continuity log.
 
+6. QUALITY_STANDARD.md — release gates and evidence rules.
+7. IMPLEMENTATION_BACKLOG.md — prioritized implementation order.
+8. LIVE_UI_AUDIT_2026-09-15.md — latest live visual and interaction audit.
+
 ## Repository
 `skanteninja/c9f7a4d8e2b6`
 
@@ -42,3 +46,7 @@ After meaningful work:
 - update project state/decisions if architecture or product direction changed.
 
 The intended result is that the user should not have to retell the history of this project every time a conversation is restarted.
+
+## Latest audit note
+
+The 2026-09-15 audit used Product Design evidence, cloud Browser QA, TinyFish live extraction, and selective Firecrawl research. Mobbin is connected but its search endpoint is paid-plan gated in the current account, so it is a documented evidence limit rather than a source for this checkpoint.

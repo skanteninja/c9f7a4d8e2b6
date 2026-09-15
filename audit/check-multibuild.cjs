@@ -221,7 +221,7 @@ for (const token of [
   'classic-avatar-compositor',
   "root.dataset.avatarGearIds=gearSummary;",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.10.0-classic-avatar-parity')",
+  "navigator.serviceWorker.register('./sw.js?v=0.10.1-dashboard-containment')",
   'tcwFullSkillBuild',
   'data-plan-level',
   "list.querySelectorAll('.skill-row[data-plan-level]')",

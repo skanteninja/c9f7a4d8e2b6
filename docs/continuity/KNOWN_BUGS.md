@@ -1,6 +1,6 @@
 # Known Bugs / Incomplete Work
 
-Last continuity baseline: 2026-09-14
+Last continuity baseline: 2026-09-15
 
 This is the authoritative unresolved-issues list for cross-chat continuity. Do not mark an issue resolved merely because code was edited. Resolution requires verification in the generated/live UI or validated data output.
 
@@ -10,7 +10,7 @@ This is the authoritative unresolved-issues list for cross-chat continuity. Do n
 - **P2** — important UX/data-quality issue
 - **P3** — polish / lower-impact issue
 
-## Verification snapshot — 0.10.0 (2026-09-14)
+## Verification snapshot — 0.10.0 (2026-09-15)
 
 Source head a2ac9b9 and generated site checkpoint 6033028 are the current avatar-parity state. Build Static 34858100599, Visual/UI 34858100657, Maps/ETC 34858100699, and Verify Live 34858189737 passed. Real-input 34857418168 passed against the same generated app state. Verify Live included the dedicated avatar parity step and the live same-tier Skill Tree stability step.
 
@@ -23,6 +23,11 @@ Verified in generated/live UI:
 - Fighter/Hunter filters contain no unrelated magician/weapon-branch gear, and Overall versus Top/Bottom remains exclusive.
 - Maps, Classic same-origin visual routes, and the public Builds tab checks passed.
 
+Additional live audit evidence on 2026-09-15:
+- Cloud Browser trusted input changed levels on I/L, Fighter, and Hunter; I/L passed 9→10 and 29→30, while Fighter and Hunter passed the 29→30 job transition with class-correct visible titles.
+- The formal repository real-input script was not executable in this workspace because websocket-client is missing and no local Chrome binary is available. This is an environment blocker, not a product pass.
+- The deployed build-info remains 0.10.0-classic-avatar-parity. The local 0.10.1 containment candidate is not verified live.
+
 Resolved in this checkpoint:
 - P1 Fighter/Hunter avatar correctness.
 - P1 cross-class equipment/avatar leakage for the tested curated paths.
@@ -32,6 +37,7 @@ Resolved in this checkpoint:
 Still open:
 - Human paint-level Skill Tree blink remains under observation; DOM identity, source, load-event, and child-list stability gates pass.
 - Independent Classic/beta research and deeper content audits remain open for Fighter axe mechanics, Hunter progression parity, AP/route/quest detail, and any disputed source claims.
+- Product Design audit follow-ups remain open for desktop navigation overflow, dashboard hierarchy/compact Skill Tree compression, equipment-picker overflow, missing route thumbnails, and Build Library density.
 - The remaining items below are maintained as regression guards until their broader audits are complete.
 
 ## P1 — Fighter / Hunter completeness parity
@@ -94,6 +100,17 @@ Verify synchronization of:
 - dashboard copy
 - recommendations
 
+## P1 — Dashboard containment and desktop navigation overflow
+
+Live Product Design audit on 2026-09-15 found required navigation labels extending past the desktop nav width, compact Skill Tree content competing with the level footer/metrics, and uneven dashboard hierarchy. The source candidate adds shared containment rules for these surfaces, but the deployed 0.10.0 site still needs a post-publish check.
+
+Acceptance criteria:
+- all required navigation labels are visible without a horizontal page scrollbar at the audited desktop width;
+- Training and Next SP cards do not intersect the level footer;
+- compact Skill Tree tabs and cards remain readable and do not cover adjacent metrics;
+- the fix holds on I/L, Fighter, and Hunter at levels 15, 29, 30, and 50;
+- the human-visible Skill Tree blink remains a separate observation item.
+
 ## Regression guard — cross-class equipment leakage (resolved 0.10.0)
 
 The previous P1 issue is resolved for the supported curated paths. Fighter/Hunter item rows are class-filtered, canonicalized to Classic IDs, and the live Level-15 parity gate confirms their avatar IDs come from the same selected inventory rows.
@@ -134,6 +151,18 @@ Verify:
 - responsive behavior remains usable on narrower widths
 - changing level does not cause layout jumping/remounting
 
+The 2026-09-15 live audit found the current compact tree is horizontally arranged but too compressed at the audited width. The 0.10.1 source candidate widens the tab layout and adds wrapping; keep this issue open until generated and live visual checks pass.
+
+## P2 — Equipment picker horizontal overflow
+
+The 2026-09-15 live audit measured the picker modal and item cards wider than their visible containers, producing a horizontal scrollbar and clipped requirement/stat text. The 0.10.1 source candidate changes the option layout to wrap metadata below the image and constrains the modal/card widths.
+
+Acceptance criteria:
+- modal and option cards have no unintended horizontal overflow at the audited desktop width;
+- item name, level, class/job requirement and stat text remain readable;
+- future-level and “show all” controls remain visible and keyboard-operable;
+- the narrow single-column layout remains usable.
+
 ## P2 — “Show future-level items” inconsistency
 Historical issue: feature was missing or nonfunctional on Fighter/Hunter.
 
@@ -169,6 +198,10 @@ Investigate:
 
 The bleed claim is **not automatically accepted as fact**. Confirm against current Classic/beta evidence before encoding it into recommendations.
 
+Research note 2026-09-15:
+- Firecrawl surfaced a Classic Hunter overview and an independent Hunter leveling guide, but the search did not produce independent beta-era confirmation for the Fighter axe-bleed claim.
+- Keep the current axe-bleed wording in the research queue and do not treat it as settled game data.
+
 ## P2 — Hunter independent progression audit
 Hunter must be researched independently for:
 - AP/stat plan
@@ -180,6 +213,11 @@ Hunter must be researched independently for:
 - buffs/consumables
 
 Do not inherit Magician/Fighter assumptions.
+
+Research note 2026-09-15:
+- A structured Classic Hunter source lists Bow Mastery, Amazon’s Judgement, Final Attack: Bow, Bow Booster, Soul Arrow: Bow, and Arrow Bomb: Bow as the core second-job set.
+- An independent leveling guide cross-checks an Eye of Amazon → Arrow Blow → Critical Shot emphasis for first job and supplies level bands/routes.
+- These references improve the audit basis but do not by themselves close the full equipment, AP, quest, ETC, and route completeness review.
 
 ## P2 — I/L regression guard
 Shared-code fixes for Fighter/Hunter must not break established I/L behavior.

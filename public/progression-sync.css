@@ -30,3 +30,88 @@ html.tcw-ui-stability-ready .dashboard-v72 .tcw-hero-skill-tree .atlas-skill-car
 .dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card.unlearned,
 .dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card:not(.learned){filter:grayscale(1) saturate(.1)!important;opacity:.38!important;border-color:rgba(126,164,215,.10)!important;background:rgba(8,13,22,.74)!important}
 .dashboard-v72 .tcw-hero-skill-tree .atlas-skill-card.learned{filter:none!important;opacity:1!important;border-color:rgba(115,217,255,.28)!important;background:rgba(12,22,34,.86)!important}
+
+/* 2026-09-15 live-audit fixes: keep the dashboard rhythm and picker content contained. */
+@media(min-width:621px){
+  .dashboard-v72 .progression-avatar-level-controls{margin-top:18px!important}
+}
+
+/* The compact tree has four inline items: plan label plus three job tabs. Let long class labels wrap. */
+.dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-tabs{
+  display:grid!important;
+  grid-template-columns:minmax(108px,1.2fr) repeat(3,minmax(0,1fr))!important;
+  gap:4px!important;
+  align-items:stretch!important;
+}
+.dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-tabs .eyebrow{
+  min-width:0!important;
+  height:auto!important;
+  line-height:1.1!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+.dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-tabs .atlas-skill-tab{
+  min-width:0!important;
+  height:auto!important;
+  min-height:28px!important;
+  padding:4px 3px!important;
+  line-height:1.1!important;
+  text-align:center!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+.dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)) .atlas-skill-tabs .eyebrow{
+  height:auto!important;
+  line-height:1.1!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+.dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)) .atlas-skill-tabs .atlas-skill-tab{
+  height:auto!important;
+  min-height:28px!important;
+  line-height:1.1!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+
+/* Never let a long stat/requirement string widen the modal past its viewport. */
+.modal-card{overflow-x:hidden!important;overflow-y:auto!important}
+.gear-options{min-width:0!important}
+.gear-option{
+  grid-template-columns:64px minmax(0,1fr)!important;
+  grid-template-rows:auto auto!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.gear-option>div{min-width:0!important}
+.gear-option>div:first-child{grid-column:1!important;grid-row:1 / span 2!important}
+.gear-option .stats{
+  grid-column:2!important;
+  grid-row:2!important;
+  min-width:0!important;
+  text-align:left!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+.gear-option h4,.gear-option p{overflow-wrap:anywhere!important}
+
+/* At the audited desktop width all primary navigation labels should be visible, not hidden behind a scrollbar. */
+@media(min-width:901px) and (max-width:1600px){
+  .sidebar{
+    height:auto!important;
+    min-height:78px!important;
+    align-items:flex-start!important;
+    padding-top:4px!important;
+    padding-bottom:4px!important;
+    gap:12px!important;
+  }
+  .brand{align-self:center!important}
+  .sidebar nav,#nav{
+    flex-wrap:wrap!important;
+    overflow:visible!important;
+    align-content:center!important;
+    row-gap:2px!important;
+    max-height:70px!important;
+  }
+  .nav-btn{padding:6px 8px!important;line-height:1.15!important}
+}
