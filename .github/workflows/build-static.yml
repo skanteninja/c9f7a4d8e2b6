@@ -10,6 +10,7 @@ on:
       - 'public/**'
       - 'audit/check-multibuild.cjs'
       - 'build.cjs'
+      - 'patches/**'
       - 'worker.js'
       - 'wrangler.jsonc'
       - '.github/ci_static_proxy.py'

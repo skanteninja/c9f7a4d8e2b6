@@ -19,7 +19,7 @@ module.exports = function(app) {
   function sessionBuildName(){return activeBuild()?.name||'this build';}
   function sessionFlowSuppressed(){
     const params=new URLSearchParams(location.search);
-    return ['ci','qa','test','avatar-parity','skill-stability'].some(key=>params.has(key));
+    return ['ci','qa','test','avatar-parity','skill-stability','skill-regression'].some(key=>params.has(key));
   }
   function sessionModal(id){return document.getElementById(id);}
   function closeSessionModal(id){
