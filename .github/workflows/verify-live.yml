@@ -1,6 +1,6 @@
 name: Verify live site
 
-# Live gate v22: product, current-only visual atlas, same-origin Classic media, monster integrity, and zero-reload dashboard skill icons.
+# Live gate v23: product, current-only visual atlas, same-origin Classic media, monster integrity, and zero-reload dashboard skill icons.
 on:
   workflow_run:
     workflows: ["Build static site"]
