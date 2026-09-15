@@ -225,6 +225,8 @@ for (const token of [
   'session-reset-modal',
   'session-gender-modal',
   'genderGearItemAllowed',
+  'SESSION_FOCUSABLE_SELECTOR',
+  'trapSessionFocus',
   "root.dataset.avatarGender=gender;",
   'hairId:31000',
   'faceId:21000',

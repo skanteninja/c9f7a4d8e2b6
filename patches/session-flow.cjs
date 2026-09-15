@@ -16,6 +16,7 @@ module.exports = function(app) {
   let sessionEntryStarted=false;
   let sessionEntryReady=false;
   let sessionLastFocus=null;
+  const SESSION_FOCUSABLE_SELECTOR='button:not([disabled]),[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
   function sessionBuildName(){return activeBuild()?.name||'this build';}
   function sessionFlowSuppressed(){
     const params=new URLSearchParams(location.search);
@@ -38,6 +39,21 @@ module.exports = function(app) {
     const first=node.querySelector('button:not([disabled])');
     if(first)setTimeout(()=>first.focus(),0);
   }
+  function sessionFocusables(node){
+    return Array.from(node?.querySelectorAll(SESSION_FOCUSABLE_SELECTOR)||[]).filter(control=>control.getClientRects().length>0);
+  }
+  function trapSessionFocus(e){
+    if(e.key!=='Tab')return;
+    const node=document.querySelector('.session-modal.open');if(!node)return;
+    const controls=sessionFocusables(node);if(!controls.length)return;
+    const first=controls[0],last=controls[controls.length-1];
+    if(!node.contains(document.activeElement)){
+      e.preventDefault();first.focus();return;
+    }
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  }
+  document.addEventListener('keydown',trapSessionFocus,true);
   function showResumeDialog(){
     const name=sessionBuildName();
     const copy=document.getElementById('session-entry-copy');
