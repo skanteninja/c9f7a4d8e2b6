@@ -1585,6 +1585,6 @@
   hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.10.2-session-gender-flow').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.10.3-session-focus-trap').catch(()=>{});
   }
 })();
