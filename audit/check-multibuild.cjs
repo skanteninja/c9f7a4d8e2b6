@@ -32,6 +32,8 @@ function checkCanonicalInventory(guide, name) {
     if (!Number.isInteger(id) || id <= 0 || !canonical) throw new Error(`${name} has an unrecognized Classic item ID for ${row.Item}: ${row['Item ID']}`);
     if (canonical.name !== row.Item) throw new Error(`${name} item identity mismatch: ${row.Item} uses ${id}, canonical name is ${canonical.name}`);
     if (row['Icon URL'] !== `/game-media/icons/${id}`) throw new Error(`${name} ${row.Item} does not use its canonical icon route`);
+    const expectedGender = String(canonical.gender || '');
+    if (String(row.Gender || '') !== expectedGender) throw new Error(`${name} ${row.Item} gender mismatch: ${row.Gender || '(blank)'} != ${expectedGender || '(blank)'}`);
     if (slotMap[canonical.sub_category] && row.Slot !== slotMap[canonical.sub_category]) throw new Error(`${name} ${row.Item} has slot ${row.Slot}, canonical slot is ${slotMap[canonical.sub_category]}`);
     if (!ids.has(id)) ids.set(id, row.Item);
     else if (ids.get(id) !== row.Item) throw new Error(`${name} reuses item ID ${id} for multiple names`);
@@ -219,9 +221,16 @@ for (const token of [
   'classicAvatarGearSummary',
   'classic-avatar-preview-v1',
   'classic-avatar-compositor',
+  'session-entry-modal',
+  'session-reset-modal',
+  'session-gender-modal',
+  'genderGearItemAllowed',
+  "root.dataset.avatarGender=gender;",
+  'hairId:31000',
+  'faceId:21000',
   "root.dataset.avatarGearIds=gearSummary;",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.10.1-dashboard-containment')",
+  "navigator.serviceWorker.register('./sw.js?v=0.10.2-session-gender-flow')",
   'tcwFullSkillBuild',
   'data-plan-level',
   "list.querySelectorAll('.skill-row[data-plan-level]')",
@@ -264,8 +273,11 @@ if (!app.includes('classic-canonical-item-id') || !app.includes("String(item['Ic
   throw new Error('App still exposes legacy item visual fallbacks instead of canonical Classic IDs');
 }
 const indexHtml = fs.readFileSync(`${outputDir}/index.html`, 'utf8');
-for (const token of ['modal-filter-summary', 'modal-show-future', 'data-class-equipment-filters']) {
+for (const token of ['modal-filter-summary', 'modal-show-future', 'data-class-equipment-filters', 'session-entry-modal', 'session-reset-modal', 'session-gender-modal', 'modal-gender-label']) {
   if (!indexHtml.includes(token)) throw new Error(`Missing equipment filter contract: ${token}`);
+}
+if (!fs.existsSync(`${outputDir}/session-flow.css`) || !fs.statSync(`${outputDir}/session-flow.css`).size) {
+  throw new Error('Session flow stylesheet is missing');
 }
 
 const progressionSyncCss = fs.readFileSync(`${outputDir}/progression-sync.css`, 'utf8');

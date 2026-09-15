@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.10.1-dashboard-containment';
+const assetVersion = '0.10.2-session-gender-flow';
 const BRAND = 'Top Classic World Maplestory';
 
 // The OSMS export is the identity authority for the equipment picker.  The
@@ -101,6 +101,7 @@ function canonicalizeGuideInventory(data) {
       'Req LUK': Number(stats.reqLUK || 0),
       'Req Job': classEquipmentLabel(item),
       'Req Job ID': Number(stats.reqJob || 0),
+      Gender: item.gender || stats.gender || '',
       'Item Type': item.sub_category === 'Weapon' ? (item.weapon_type || 'Weapon') : (item.sub_category || 'Equipment'),
       'Evidence Class': 'CURRENT / VERIFY'
     };
@@ -620,7 +621,7 @@ function fighterVariant(base) {
   });
   let gear = [{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,'M.ATK':0,'WDEF':0,'MDEF':0,'Crit%':0,'Crit DMG':0,Speed:0,Jump:0,'Req Lv':0,'Req STR':0,'Req DEX':0,'Req LUK':0,Status:'CURRENT / VERIFY','Class Fit':'Any · Fighter','Job Family':'Any','Job Branch':'None','Req Job':'Any','Req Job ID':0,'Item Type':'Empty',Plan:'EMPTY',Priority:'—',Notes:'Empty slot','Highly Recommended':false,'Recommendation Reason':'','Evidence Class':'CURRENT / VERIFY'}, ...warriorItems.map(item => {
     const s = item.stats || {};
-    return {Item:item.name, Slot:equipmentSlot(item), 'Item ID':item.id, 'Icon URL':`/game-media/icons/${item.id}`, STR:s.incSTR||0, DEX:s.incDEX||0, INT:s.incINT||0, LUK:s.incLUK||0, 'W.ATK':s.incPAD||0, 'M.ATK':s.incMAD||0, 'WDEF':s.incPDD||0, 'MDEF':s.incMDD||0, 'Crit%':s.incCritRate||0, 'Crit DMG':s.incCritDamage||0, Speed:s.incSpeed||0, Jump:s.incJump||0, 'Req Lv':s.reqLevel||0, 'Req STR':s.reqSTR||0, 'Req DEX':s.reqDEX||0, 'Req LUK':s.reqLUK||0, Status:'CURRENT / VERIFY', 'Class Fit':classEquipmentFit(item,'Warrior','Fighter'), ...equipmentFields(item,'Warrior','Fighter'), Plan:'OPTIONAL', Priority:'Use at the relevant level or when it creates a real damage/accuracy breakpoint', Notes:item.weapon_type ? `${item.weapon_type} · ${item.attack_speed_label || ''}` : `${classEquipmentLabel(item)} Fighter equipment option`, 'Highly Recommended':false, 'Recommendation Reason':'', 'Evidence Class':'CURRENT / VERIFY'};
+    return {Item:item.name, Slot:equipmentSlot(item), 'Item ID':item.id, 'Icon URL':`/game-media/icons/${item.id}`, Gender:item.gender||s.gender||'', STR:s.incSTR||0, DEX:s.incDEX||0, INT:s.incINT||0, LUK:s.incLUK||0, 'W.ATK':s.incPAD||0, 'M.ATK':s.incMAD||0, 'WDEF':s.incPDD||0, 'MDEF':s.incMDD||0, 'Crit%':s.incCritRate||0, 'Crit DMG':s.incCritDamage||0, Speed:s.incSpeed||0, Jump:s.incJump||0, 'Req Lv':s.reqLevel||0, 'Req STR':s.reqSTR||0, 'Req DEX':s.reqDEX||0, 'Req LUK':s.reqLUK||0, Status:'CURRENT / VERIFY', 'Class Fit':classEquipmentFit(item,'Warrior','Fighter'), ...equipmentFields(item,'Warrior','Fighter'), Plan:'OPTIONAL', Priority:'Use at the relevant level or when it creates a real damage/accuracy breakpoint', Notes:item.weapon_type ? `${item.weapon_type} · ${item.attack_speed_label || ''}` : `${classEquipmentLabel(item)} Fighter equipment option`, 'Highly Recommended':false, 'Recommendation Reason':'', 'Evidence Class':'CURRENT / VERIFY'};
   })];
   gear.forEach(row => { if (Number(row['Item ID'] || 0) > 0) row['Icon URL'] = `/game-media/icons/${row['Item ID']}`; });
   const gearPlan = applyGearPlan(gear, [
@@ -762,7 +763,7 @@ function hunterVariant(base) {
     (i.sub_category==='Weapon' && i.weapon_type==='Bow' && /\bBowman\b/.test(classEquipmentLabel(i)))
     || (i.sub_category!=='Weapon' && /\bBowman\b/.test(classEquipmentLabel(i)) && !/\bMage\b/i.test(classEquipmentLabel(i)))
   ));
-  let gear=[{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,WDEF:0,MDEF:0,Speed:0,Jump:0,'Req Lv':0,Status:'CURRENT / VERIFY','Class Fit':'Any · Hunter','Job Family':'Any','Job Branch':'None','Req Job':'Any','Req Job ID':0,'Item Type':'Empty',Plan:'EMPTY','Priority':'—','Highly Recommended':false,'Recommendation Reason':'',Notes:'Empty slot'},...bows.map(i=>{const s=i.stats||{};return {Item:i.name,Slot:equipmentSlot(i),'Item ID':i.id,'Icon URL':`/game-media/items/primary/${i.id}`,STR:s.incSTR||0,DEX:s.incDEX||0,INT:s.incINT||0,LUK:s.incLUK||0,'W.ATK':s.incPAD||0,WDEF:s.incPDD||0,MDEF:s.incMDD||0,Speed:s.incSpeed||0,Jump:s.incJump||0,'Req Lv':s.reqLevel||0,'Req STR':s.reqSTR||0,'Req DEX':s.reqDEX||0,Status:'CURRENT / VERIFY','Class Fit':classEquipmentFit(i,'Bowman','Hunter'),...equipmentFields(i,'Bowman','Hunter'),Plan:'OPTIONAL',Priority:'Use at the relevant bow breakpoint', 'Highly Recommended':false,'Recommendation Reason':'',Notes:i.weapon_type?`${i.weapon_type} · ${i.attack_speed_label || ''}`:`${classEquipmentLabel(i)} Hunter equipment`};})];
+  let gear=[{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',Gender:'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,WDEF:0,MDEF:0,Speed:0,Jump:0,'Req Lv':0,Status:'CURRENT / VERIFY','Class Fit':'Any · Hunter','Job Family':'Any','Job Branch':'None','Req Job':'Any','Req Job ID':0,'Item Type':'Empty',Plan:'EMPTY','Priority':'—','Highly Recommended':false,'Recommendation Reason':'',Notes:'Empty slot'},...bows.map(i=>{const s=i.stats||{};return {Item:i.name,Slot:equipmentSlot(i),'Item ID':i.id,'Icon URL':`/game-media/items/primary/${i.id}`,Gender:i.gender||s.gender||'',STR:s.incSTR||0,DEX:s.incDEX||0,INT:s.incINT||0,LUK:s.incLUK||0,'W.ATK':s.incPAD||0,WDEF:s.incPDD||0,MDEF:s.incMDD||0,Speed:s.incSpeed||0,Jump:s.incJump||0,'Req Lv':s.reqLevel||0,'Req STR':s.reqSTR||0,'Req DEX':s.reqDEX||0,Status:'CURRENT / VERIFY','Class Fit':classEquipmentFit(i,'Bowman','Hunter'),...equipmentFields(i,'Bowman','Hunter'),Plan:'OPTIONAL',Priority:'Use at the relevant bow breakpoint', 'Highly Recommended':false,'Recommendation Reason':'',Notes:i.weapon_type?`${i.weapon_type} · ${i.attack_speed_label || ''}`:`${classEquipmentLabel(i)} Hunter equipment`};})];
   gear.forEach(row => { if (Number(row['Item ID'] || 0) > 0) row['Icon URL'] = `/game-media/icons/${row['Item ID']}`; });
   const gearPlan = applyGearPlan(gear, [
     {min:10, gear:{Weapon:'War Bow',Hat:'Brown Winter Hat',Top:'Brown Archer Top',Bottom:'Archer Pants',Shoes:'Brown Hard Leather Boots'}, reason:'First Bowman bow and starter armor checkpoint.'},
@@ -1047,7 +1048,10 @@ function patchApp(raw) {
     ['Top','top'],['Overall','overall'],['Bottom','bottom'],['Shoes','shoes'],
     ['Gloves','gloves'],['Cape','cape'],['Shield','shield'],['Weapon','weapon']
   ];
-  const CLASSIC_AVATAR_APPEARANCE=Object.freeze({skin:0,hairId:30000,faceId:20000});
+  const CLASSIC_AVATAR_APPEARANCE=Object.freeze({
+    male:{skin:0,hairId:30000,faceId:20000},
+    female:{skin:0,hairId:31000,faceId:21000}
+  });
   function classicAvatarItemId(slot){
     const item=getGear(state.gear?.[slot]);
     const id=Math.trunc(Number(item?.['Item ID']||0));
@@ -1072,30 +1076,37 @@ function patchApp(raw) {
     return CLASSIC_AVATAR_FIELDS.map(([,apiSlot])=>gear[apiSlot]?apiSlot+'='+gear[apiSlot]:'').filter(Boolean).join(';');
   }
   function classicAvatarRenderUrl(){
-    const params=new URLSearchParams({skin:String(CLASSIC_AVATAR_APPEARANCE.skin),hair:String(CLASSIC_AVATAR_APPEARANCE.hairId),face:String(CLASSIC_AVATAR_APPEARANCE.faceId),pose:'stand',direction:'right',frame:'0',expression:'default'});
+    const gender=state.gender==='female'?'female':'male';
+    const appearance=CLASSIC_AVATAR_APPEARANCE[gender];
+    const params=new URLSearchParams({skin:String(appearance.skin),hair:String(appearance.hairId),face:String(appearance.faceId),pose:'stand',direction:'right',frame:'0',expression:'default'});
     Object.entries(classicAvatarGear()).forEach(([slot,id])=>params.set(slot,String(id)));
     return '/game-media/characters/classic-preview?'+params.toString();
   }
   function renderAtlasAvatar(){
     const root=document.getElementById('atlas-avatar');if(!root)return;
+    const gender=state.gender==='female'?'female':'male';
     const buildId=String(activeBuild()?.id||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh');
     const label=activeBuild()?.name||'Equipped character';
     const src=classicAvatarRenderUrl();
     const gearSummary=classicAvatarGearSummary();
     root.dataset.buildId=buildId;
     root.dataset.avatarRenderer='classic-avatar-preview-v1';
+    root.dataset.avatarGender=gender;
     root.dataset.avatarGearIds=gearSummary;
     root.querySelectorAll('.avatar-equipped-icons').forEach(node=>node.remove());
     let img=root.querySelector('.avatar-character');
     let fallback=root.querySelector('.avatar-render-fallback');
     let badge=root.querySelector('.avatar-job-badge');
-    if(!img||!fallback||!badge){
-      root.innerHTML='<div class="avatar-aura"></div><img class="avatar-character" alt=""><div class="classic-avatar-placeholder avatar-render-fallback" hidden><span class="pixel-head">✦</span><b>LOADOUT PREVIEW</b><small>Classic preview unavailable — inventory remains exact</small></div><div class="avatar-job-badge"></div>';
+    let genderBadge=root.querySelector('.avatar-gender-badge');
+    if(!img||!fallback||!badge||!genderBadge){
+      root.innerHTML='<div class="avatar-aura"></div><img class="avatar-character" alt=""><div class="classic-avatar-placeholder avatar-render-fallback" hidden><span class="pixel-head">✦</span><b>LOADOUT PREVIEW</b><small>Classic preview unavailable — inventory remains exact</small></div><div class="avatar-job-badge"></div><div class="avatar-gender-badge"></div>';
       img=root.querySelector('.avatar-character');
       fallback=root.querySelector('.avatar-render-fallback');
       badge=root.querySelector('.avatar-job-badge');
+      genderBadge=root.querySelector('.avatar-gender-badge');
     }
     if(badge)badge.textContent=activeBuild()?.shortName||'I/L';
+    if(genderBadge){genderBadge.textContent=gender.toUpperCase();genderBadge.dataset.gender=gender;}
     if(img){
       img.alt=label;
       img.dataset.assetHooked='1';
@@ -1460,6 +1471,7 @@ function patchApp(raw) {
     "        <div class=\"stats\">${gearOptionStats(item,none)}</div>",
     "        <div class=\"stats\">${gearOptionStats(item,none)}${none?'':`<span class=\"gear-requirements\"><span>Requires</span> ${esc(gearOptionMeta(item,none))}</span>`}</div>"
   );
+  app = require('./patches/session-flow.cjs')(app);
   return require('./patches/equipment-branding.cjs')(app);
 }
 
@@ -1545,6 +1557,7 @@ const etcAuditData = fs.readFileSync(path.join(source, 'etc-audit-data.js'), 'ut
 const questAuditAdditions = fs.readFileSync(path.join(source, 'quest-audit-additions.js'), 'utf8');
 const etcAuditUiCss = fs.readFileSync(path.join(source, 'etc-audit-ui.css'), 'utf8');
 const etcAuditUi = fs.readFileSync(path.join(source, 'etc-audit-ui.js'), 'utf8');
+const sessionFlowCss = fs.readFileSync(path.join(source, 'session-flow.css'), 'utf8');
 
 JSON.parse(guideJson);
 if (!css.includes('.sidebar') || !app.includes('GUIDE_DATA')) throw new Error('Runtime verification failed');
@@ -1568,6 +1581,7 @@ html=html.replace('</body>', '<script src="navigation-history.js?v='+assetVersio
 for(const file of ['readability.css','job-search.js','navigation-history.js'])fs.copyFileSync(path.join(source,file),path.join(out,file));
 for(const file of ['map-layouts.json','map-audit.html','map-audit.js','map-audit.json','map-audit.csv'])fs.copyFileSync(path.join(source,file),path.join(out,file));
 html=html.replace('</head>', '<link rel="stylesheet" href="equipment-branding.css?v='+assetVersion+'"></head>');
+html=html.replace('</head>', '<link rel="stylesheet" href="session-flow.css?v='+assetVersion+'"></head>');
 fs.copyFileSync(path.join(source,'equipment-branding.css'),path.join(out,'equipment-branding.css'));
 html = html.replace(/\n[ \t]+\n/g, '\n\n');
 fs.writeFileSync(path.join(out, 'index.html'), html);
@@ -1586,6 +1600,7 @@ fs.writeFileSync(path.join(out, 'progression-gear-visual.css'), progressionGearV
 fs.writeFileSync(path.join(out, 'ownership-ui.css'), ownershipUiCss);
 fs.writeFileSync(path.join(out, 'maps-tab.css'), mapsTabCss);
 fs.writeFileSync(path.join(out, 'etc-audit-ui.css'), etcAuditUiCss);
+fs.writeFileSync(path.join(out, 'session-flow.css'), sessionFlowCss);
 fs.writeFileSync(path.join(out, 'guide-data.js'), `window.GUIDE_DATA = ${guideJson};\n`);
 fs.writeFileSync(path.join(out, 'etc-audit-data.js'), etcAuditData);
 fs.writeFileSync(path.join(out, 'quest-audit-additions.js'), questAuditAdditions);
@@ -1606,6 +1621,7 @@ fs.writeFileSync(path.join(out, 'etc-audit-ui.js'), etcAuditUi);
 fs.writeFileSync(path.join(out, 'build-info.txt'), `${BRAND} ${assetVersion}\n`);
 
 const sw = `const CACHE='top-classic-world-${assetVersion}';\nconst CORE=['./','./index.html','./styles.css?v=${assetVersion}','./visuals.css?v=${assetVersion}','./visuals-db.css?v=${assetVersion}','./visuals-npc.css?v=${assetVersion}','./visuals-skills.css?v=${assetVersion}','./visuals-portals.css?v=${assetVersion}','./dashboard-polish.css?v=${assetVersion}','./progression-sync.css?v=${assetVersion}','./progression-gear-visual.css?v=${assetVersion}','./ownership-ui.css?v=${assetVersion}','./guide-data.js?v=${assetVersion}','./app.js?v=${assetVersion}','./visuals.js?v=${assetVersion}','./visuals-db.js?v=${assetVersion}','./visuals-npc.js?v=${assetVersion}','./visuals-skills.js?v=${assetVersion}','./visuals-portals.js?v=${assetVersion}','./dashboard-polish.js?v=${assetVersion}','./progression-sync.js?v=${assetVersion}','./progression-level-hook.js?v=${assetVersion}','./progression-skill-state.js?v=${assetVersion}','./progression-gear-visual.js?v=${assetVersion}','./ownership-ui.js?v=${assetVersion}','./maps-tab.css?v=${assetVersion}','./maps-tab.js?v=${assetVersion}','./etc-audit-data.js?v=${assetVersion}','./quest-audit-additions.js?v=${assetVersion}','./etc-audit-ui.css?v=${assetVersion}','./etc-audit-ui.js?v=${assetVersion}','./manifest.webmanifest'];\nself.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).catch(()=>{}));});\nself.addEventListener('activate',e=>{e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('top-classic-world-')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]));});\nself.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin)return;e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy)).catch(()=>{});return r;}).catch(()=>caches.match(e.request).then(x=>x||caches.match('./index.html'))));});\n`;
-fs.writeFileSync(path.join(out, 'sw.js'), sw);
+const swWithSessionFlow = sw.replace(`'./styles.css?v=${assetVersion}',`, `'./styles.css?v=${assetVersion}','./session-flow.css?v=${assetVersion}',`);
+fs.writeFileSync(path.join(out, 'sw.js'), swWithSessionFlow);
 
 console.log(`Built ${assetVersion}: CSS ${css.length} bytes, guide ${guideJson.length} bytes, app ${app.length} bytes, visuals ${visuals.length} bytes, DB visuals ${visualDb.length} bytes, NPC visuals ${visualNpc.length} bytes, skill visuals ${visualSkill.length} bytes, portal visuals ${visualPortal.length} bytes, dashboard polish ${dashboardPolish.length} bytes, progression sync ${progressionSync.length} bytes, progression level hook ${progressionLevelHook.length} bytes, progression skill state ${progressionSkillState.length} bytes, progression gear visual ${progressionGearVisual.length} bytes, ownership UI ${ownershipUi.length} bytes.`);
