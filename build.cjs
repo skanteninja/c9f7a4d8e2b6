@@ -957,8 +957,71 @@ function sanitizePublicGuide(value, key = '') {
   return value;
 }
 
+const IL_GENDER_GEAR_PLAN = Object.freeze([
+  {min:10, gear:{Overall:'None', Top:'Black Armine', Bottom:'Black Armine Skirt'}},
+  {min:15, gear:{Overall:'None', Top:'Green Arianne', Bottom:'Green Arianne Skirt'}},
+  {min:20, gear:{Overall:'None', Top:'Purple Split', Bottom:'White Split Skirt'}},
+  {min:25, gear:{Overall:'None', Top:'Purple Split', Bottom:'White Split Skirt'}},
+  {min:30, gear:{Overall:'None', Top:'Blue Fairy Top', Bottom:'Blue Fairy Skirt'}},
+  {min:35, gear:{Overall:'None', Top:'Red Amoria Top', Bottom:'Red Amoria Skirt'}},
+  {min:40, gear:{Overall:'Blue Moonlight', Top:'None', Bottom:'None'}},
+  {min:50, gear:{Overall:'Blue Calaf', Top:'None', Bottom:'None'}},
+  {min:60, gear:{Overall:'Blue Anakarune', Top:'None', Bottom:'None'}},
+  {min:65, gear:{Overall:'Blue Anakarune', Top:'None', Bottom:'None'}},
+  {min:70, gear:{Overall:'Blue Requierre', Top:'None', Bottom:'None'}}
+]);
+
+function addILGenderEquipment(gear) {
+  const names = [...new Set(IL_GENDER_GEAR_PLAN.flatMap(stage => Object.values(stage.gear || {})).filter(name => name && name !== 'None'))];
+  const seed = names.map(name => {
+    const item = CLASSIC_EQUIPMENT_BY_NAME.get(name);
+    if (!item) throw new Error(`I/L gender plan references missing Classic item: ${name}`);
+    return {
+      Item: name,
+      'Item ID': item.id,
+      Status: 'CURRENT / VERIFY',
+      'Class Fit': 'Mage',
+      Plan: 'OPTIONAL',
+      Priority: 'Use on the female I/L route at the matching level when affordable',
+      Notes: `Female Mage/I/L equipment option at Lv${Number(item.stats?.reqLevel || 0)}.`,
+      'Highly Recommended': false,
+      'Recommendation Reason': ''
+    };
+  });
+  const normalized = canonicalizeGuideInventory({gear: seed}).gear;
+  const existingIds = new Set((gear || []).map(row => String(row['Item ID'] || '')));
+  return [...(gear || []), ...normalized.filter(row => !existingIds.has(String(row['Item ID'] || '')))];
+}
+
+function addILGenderPresets(presets) {
+  if (!presets || !Array.isArray(presets.levels)) return presets;
+  const levels = presets.levels.map(row => ({...row}));
+  for (const stage of IL_GENDER_GEAR_PLAN) {
+    let target = levels.find(row => Number(row.min) === Number(stage.min));
+    if (!target) {
+      target = {min: Number(stage.min), gear: {}};
+      levels.push(target);
+    }
+    target.genderGear = {
+      ...(target.genderGear || {}),
+      female: {
+        ...((target.genderGear || {}).female || {}),
+        ...stage.gear
+      }
+    };
+  }
+  return {
+    ...presets,
+    levels: levels.sort((a, b) => Number(a.min || 0) - Number(b.min || 0))
+  };
+}
+
 function publicGuide(raw) {
   const data = canonicalizeGuideSkills(canonicalizeGuideInventory(JSON.parse(raw)));
+  data.gear = addILGenderEquipment(data.gear);
+  if (data.gearPresets) {
+    for (const type of ['efficient', 'luk']) data.gearPresets[type] = addILGenderPresets(data.gearPresets[type]);
+  }
   const catalog = multiBuildCatalog(data.catalog);
   const fighter = fighterVariant(data);
   const hunter = hunterVariant(data);
