@@ -125,6 +125,33 @@ function effectivePreset(guide, level, gender) {
   return out;
 }
 
+
+const ilFemaleCheckpoints = {
+  10: ['Black Armine', 'Black Armine Skirt'],
+  15: ['Green Arianne', 'Green Arianne Skirt'],
+  20: ['Purple Split', 'White Split Skirt'],
+  25: ['Purple Split', 'White Split Skirt'],
+  30: ['Blue Fairy Top', 'Blue Fairy Skirt'],
+  35: ['Red Amoria Top', 'Red Amoria Skirt'],
+  40: ['Blue Moonlight'],
+  50: ['Blue Calaf'],
+  60: ['Blue Anakarune'],
+  65: ['Blue Anakarune'],
+  70: ['Blue Requierre']
+};
+for (const [levelText, expectedItems] of Object.entries(ilFemaleCheckpoints)) {
+  const level = Number(levelText);
+  const loadout = effectivePreset(root, level, 'female');
+  for (const item of expectedItems) {
+    if (!Object.values(loadout).includes(item)) throw new Error(`I/L female Lv${level} preset is missing ${item}`);
+    const row = gearRowForGender(root, item, 'female');
+    if (!row || row['Gender Class'] !== 'Female') throw new Error(`I/L female Lv${level} preset does not resolve female ${item}`);
+  }
+  if (loadout.Overall !== 'None' && (loadout.Top !== 'None' || loadout.Bottom !== 'None')) {
+    throw new Error(`I/L female Lv${level} preset contains Overall plus Top/Bottom`);
+  }
+}
+
 for (const [name, guide] of Object.entries(root.buildVariants)) {
   checkCanonicalInventory(guide, name);
   if (catalogShape(guide) !== sharedCatalog) throw new Error(`${name} has a divergent build catalog`);
