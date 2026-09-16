@@ -1,9 +1,9 @@
 # MapleStory Classic Builder — Project State
 
-Last continuity baseline: 2026-09-15
+Last continuity baseline: 2026-09-16
 
-Current deployed checkpoint: 0.10.3-session-focus-trap
-Current source checkpoint: 0.10.3-session-focus-trap
+Current deployed checkpoint: 0.10.4-session-entry-once
+Current source checkpoint: 0.10.4-session-entry-once
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:
@@ -84,15 +84,23 @@ These are regression guards. A future change must not silently break them.
 
 ## Current verified checkpoint
 
-- Source commit `0d916a29d6384e4d3b836997086799e8680817b0` contains the session resume/reset flow, gender selection, gender-aware equipment filtering, Classic avatar gender mapping, keyboard focus containment, and the 0.10.3 build-token update.
-- Generated site commit `3fd241a7b867d9557ac04aeeb07e40004856d06e` is deployed and reports `0.10.3-session-focus-trap`.
-- Build Static `34999140109`, Visual/UI `34999140175`, Monster `34999140162`, Maps/ETC `34999140053`, and Real Input `34999140243` passed for the generated app state. Verify Live `34999212897` passed after the generated site deployed and includes the live session-flow, avatar/inventory parity, and same-tier Skill Tree stability checks.
+- Source commit `b63fbb9532fd02c2f2db4c7b40d74267aec27219` contains the session resume/reset flow, gender selection, gender-aware equipment filtering, Classic avatar gender mapping, keyboard focus containment, once-per-build-entry session cadence, and the 0.10.4 build-token update.
+- Generated site commit `ea2aaf0e88508437afddd8db446f1b711103f077` is deployed and reports `0.10.4-session-entry-once`.
+- Build Static `35092591507`, Visual/UI `35092591496`, Monster `35092591472`, Maps/ETC `35092591550`, and Real Input `35092591504` passed for the generated app state. Verify Live `35092685632` passed after the generated site deployed and includes the live session-flow, avatar/inventory parity, and same-tier Skill Tree stability checks.
 - At live Level 15, I/L, Fighter, and Hunter inventory selections match the exact IDs sent to the avatar compositor, all three PNGs render, and no avatar icon strip is present.
 - The live desktop containment check shows the required navigation labels visible without page-level horizontal overflow, the metric/footer regions separated, and the equipment picker metadata wrapped inside its cards at the audited viewport.
 - Live Browser QA verified the saved-build entry prompt, the destructive reset confirmation list, reset-to-gender flow, persisted male/female avatar identity, and gender-filtered equipment options.
 - Live Browser QA verified Tab, Shift+Tab, and wraparound focus behavior in the saved-build, reset-confirmation, and gender dialogs. The live console contained no application-origin errors; visible application images loaded successfully. The only errors were emitted by the browser environment’s metadata extension.
+- Live Browser QA confirmed a completed Continue decision remains closed after refresh, a new tab shows the saved-build entry prompt, entering Hunter starts a new gender/entry flow, and returning to Fighter prompts again as a new build entry.
 - The I/L full-page renderer updates .skill-row[data-plan-level] state in place. Do not reintroduce a wrapper-dependent selector for I/L plan rows.
 - Full-page Fighter/Hunter row and tier state also update in place. Keep transient paint-level blink under observation even when node/source checks pass.
+
+## 2026-09-16 — 0.10.4 session-entry cadence
+
+- Replaced the startup-only session prompt behavior with a browser-tab session marker keyed to the current build. The marker distinguishes pending, gender-required, and completed states.
+- Refreshing a completed Fighter entry leaves the page uninterrupted. A new tab shows Continue/Reset for the saved Fighter, and switching to Hunter and back starts the appropriate new-build prompts.
+- The deployed build-info endpoint reports `0.10.4-session-entry-once`.
+- Source `b63fbb9532fd02c2f2db4c7b40d74267aec27219`, generated site `ea2aaf0e88508437afddd8db446f1b711103f077`, Build Static `35092591507`, Real Input `35092591504`, Visual/UI `35092591496`, Monster `35092591472`, Maps/ETC `35092591550`, and Verify Live `35092685632` passed.
 
 ## 2026-09-15 — 0.10.3 focus containment and cache refresh
 
