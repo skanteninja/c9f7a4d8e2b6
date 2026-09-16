@@ -1,7 +1,15 @@
 # MapleStory Classic Builder — Prioritized Implementation Backlog
 
-Last prioritized: 2026-09-15
+Last prioritized: 2026-09-16
 Ordering follows the quality contract in [QUALITY_STANDARD.md](QUALITY_STANDARD.md). “Implemented locally” never means “deployed” until the live gate passes.
+
+## 0.10.4 completed in the verified live checkpoint
+
+- Changed session entry tracking to browser-tab session state so completed Continue/Reset decisions stay quiet across refreshes.
+- Entering a different build starts a new entry decision; opening the site in a new browser tab starts a new session decision.
+- Pending gender selection remains required until Male/Female is chosen, including after reset.
+- Generated site `ea2aaf0e88508437afddd8db446f1b711103f077` reports `0.10.4-session-entry-once`.
+- Build Static `35092591507`, Visual/UI `35092591496`, Monster `35092591472`, Maps/ETC `35092591550`, Real Input `35092591504`, and Verify Live `35092685632` passed.
 
 ## 0.10.3 completed in the verified live checkpoint
 
@@ -84,7 +92,7 @@ Evidence: live Browser capture after generated site commit 2a6b451; Verify Live 
 
 ### P2.2 — Run a narrow-width and text-size accessibility pass
 
-Status: open; the 0.10.3 follow-up verified keyboard focus containment for all three session dialogs at the live desktop viewport, but narrow-width, text-size, and assistive-technology coverage remain outstanding.
+Status: open; the 0.10.3 follow-up verified keyboard focus containment for all three session dialogs at the live desktop viewport, but narrow-width, text-size, and assistive-technology coverage remain outstanding. The 0.10.4 follow-up also verified that completed entry state survives refresh while a different build starts a new prompt.
 
 Test nav, dashboard, picker, Skill Tree, tables/cards, focus order, Escape behavior, and text enlargement. Screenshots so far are desktop evidence only.
 
