@@ -2,6 +2,14 @@
 
 This log exists to make cross-chat handoff quick and reliable. Record meaningful changes, fixes, regressions, research conclusions, and continuity-system updates.
 
+## 2026-09-16 — 0.10.4 session-entry cadence
+
+- Session Continue/Reset now appears once per build entry in a browser tab instead of on every refresh.
+- Completed entry state survives refresh; a new tab or different build starts the appropriate new entry flow, and incomplete gender selection remains blocking.
+- Bumped the runtime/service-worker token to `0.10.4-session-entry-once`; generated site `ea2aaf0e88508437afddd8db446f1b711103f077` deployed.
+- Build Static `35092591507`, Visual/UI `35092591496`, Monster `35092591472`, Maps/ETC `35092591550`, Real Input `35092591504`, and Verify Live `35092685632` passed.
+- Live Browser QA verified refresh suppression, new-tab prompting, build switching, persisted male identity, zero visible image failures, and no application-origin console errors.
+
 ## 2026-09-15 — 0.10.3 session-dialog focus containment
 
 - Added keyboard focus containment to the Continue/Reset, reset-confirmation, and gender dialogs, including forward/reverse wraparound.
