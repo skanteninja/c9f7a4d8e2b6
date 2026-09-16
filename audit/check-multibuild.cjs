@@ -33,7 +33,8 @@ function gearRowForGender(guide, itemName, gender) {
 
 function checkPotionRecommendations(guide, name) {
   const catalog = guide.potionRecommendations;
-  if (!catalog?.items?.length || !catalog.builds?.[guide.id]) throw new Error(`${name} is missing its potion recommendation catalog`);
+  const buildId = guide.id || 'magician-il-fresh';
+  if (!catalog?.items?.length || !catalog.builds?.[buildId]) throw new Error(`${name} is missing its potion recommendation catalog`);
   const items = new Map(catalog.items.map(item => [String(item.id), item]));
   for (const item of catalog.items) {
     if (item.icon !== `/game-media/icons/${item.id}` || Number(item.shopPrice) <= 0 || Number(item.efficiency) <= 0) {
@@ -41,7 +42,7 @@ function checkPotionRecommendations(guide, name) {
     }
   }
   for (const kind of ['hp','mp']) {
-    const tiers = catalog.builds[guide.id]?.[kind] || [];
+    const tiers = catalog.builds[buildId]?.[kind] || [];
     if (!tiers.length) throw new Error(`${name} is missing ${kind.toUpperCase()} potion tiers`);
     for (const tier of tiers) {
       const item = items.get(String(tier.recommendedId));
