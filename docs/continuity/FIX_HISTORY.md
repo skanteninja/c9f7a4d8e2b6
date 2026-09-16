@@ -1,10 +1,25 @@
 # Historical Fix / Regression Log
 
-Last continuity baseline: 2026-09-15
+Last continuity baseline: 2026-09-16
 
 Purpose: preserve bugs that were already solved, partially solved, or observed as regressions so future chats do not repeat the same debugging from scratch.
 
 This is historical context, not the unresolved queue. Active unresolved work belongs in `KNOWN_BUGS.md`.
+
+## 2026-09-16 — 0.10.4 session-entry cadence
+
+Observed regression:
+- Completing Continue/Reset did not distinguish an ordinary refresh from a new build/site entry, so the prompt reopened on every reload.
+
+Correction:
+- Added a `sessionStorage` marker keyed to the active build with `pending`, `gender`, and `complete` stages.
+- Completed state survives refresh for the same build. New site tabs and different build entries receive a fresh decision; incomplete gender flow remains required.
+- Bumped the runtime/service-worker token to `0.10.4-session-entry-once`.
+
+Verification:
+- Generated site `ea2aaf0e88508437afddd8db446f1b711103f077` reports `0.10.4-session-entry-once`.
+- Build Static `35092591507`, Visual/UI `35092591496`, Monster `35092591472`, Maps/ETC `35092591550`, Real Input `35092591504`, and Verify Live `35092685632` passed.
+- Live Browser QA confirmed refresh suppression, new-tab prompting, different-build prompting, and site-origin console/assets clean.
 
 ## 2026-09-15 — 0.10.3 session-dialog focus containment
 
