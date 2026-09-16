@@ -1,6 +1,6 @@
 # Known Bugs / Incomplete Work
 
-Last continuity baseline: 2026-09-15
+Last continuity baseline: 2026-09-16
 
 This is the authoritative unresolved-issues list for cross-chat continuity. Do not mark an issue resolved merely because code was edited. Resolution requires verification in the generated/live UI or validated data output.
 
@@ -10,9 +10,9 @@ This is the authoritative unresolved-issues list for cross-chat continuity. Do n
 - **P2** — important UX/data-quality issue
 - **P3** — polish / lower-impact issue
 
-## Verification snapshot — 0.10.3 (2026-09-15)
+## Verification snapshot — 0.10.4 (2026-09-16)
 
-Source commit `0d916a29d6384e4d3b836997086799e8680817b0` and generated site commit `3fd241a7b867d9557ac04aeeb07e40004856d06e` are the current deployed session/gender/focus state. Build Static `34999140109`, Visual/UI `34999140175`, Monster `34999140162`, Maps/ETC `34999140053`, and Real-input `34999140243` passed. Verify Live `34999212897` passed and included the dedicated avatar parity step and the live same-tier Skill Tree stability step.
+Source commit `b63fbb9532fd02c2f2db4c7b40d74267aec27219` and generated site commit `ea2aaf0e88508437afddd8db446f1b711103f077` are the current deployed session/gender/focus/entry-cadence state. Build Static `35092591507`, Visual/UI `35092591496`, Monster `35092591472`, Maps/ETC `35092591550`, and Real-input `35092591504` passed. Verify Live `35092685632` passed and included the dedicated avatar parity step and the live same-tier Skill Tree stability step.
 
 Verified in generated/live UI:
 - Fighter Build, Hunter Build, and I/L Wizard Build use isolated build data and exact required names.
@@ -22,15 +22,16 @@ Verified in generated/live UI:
 - All three live avatar PNGs decoded with nonzero dimensions; no legacy avatar icon box was present.
 - Fighter/Hunter filters contain no unrelated magician/weapon-branch gear, and Overall versus Top/Bottom remains exclusive.
 - Maps, Classic same-origin visual routes, and the public Builds tab checks passed.
-- The live 0.10.3 desktop containment check shows all required navigation labels visible, no page-level horizontal overflow, separated dashboard metric/footer regions, and wrapped equipment-picker metadata at the audited viewport.
+- The live 0.10.4 desktop containment check shows all required navigation labels visible, no page-level horizontal overflow, separated dashboard metric/footer regions, and wrapped equipment-picker metadata at the audited viewport.
 - Returning to a saved Fighter build displayed Continue and Reset choices. Reset opened a second confirmation dialog listing the exact categories cleared and stating that other build saves remain untouched.
 - Confirmed reset cleared the active build and immediately required a new gender choice. Selecting Female produced a female avatar and female-only equipment options; selecting Male produced a male avatar and male-only equipment options.
-- Re-entering after the cache-token refresh served `0.10.3-session-focus-trap`. Tab and Shift+Tab stayed inside the Continue/Reset, reset-confirmation, and gender dialogs, with wraparound at both ends. The live gender dialog presented a focused Male card, and the confirmed selection produced `MALE` / `avatar=male`.
+- Re-entering after the cache-token refresh served `0.10.4-session-entry-once`. Tab and Shift+Tab stayed inside the Continue/Reset, reset-confirmation, and gender dialogs, with wraparound at both ends. The live gender dialog presented a focused Male card, and the confirmed selection produced `MALE` / `avatar=male`.
+- After completing the saved-build decision, refreshing the same Fighter URL showed no modal; a new tab showed Continue/Reset; switching to Hunter showed the new-build gender flow; returning to Fighter showed Continue/Reset again.
 
 Additional live audit evidence on 2026-09-15:
 - Cloud Browser trusted input changed levels on I/L, Fighter, and Hunter; I/L passed 9→10 and 29→30, while Fighter and Hunter passed the 29→30 job transition with class-correct visible titles.
 - The formal repository real-input script was not executable in this workspace because websocket-client is missing and no local Chrome binary is available. This is an environment blocker, not a product pass.
-- The deployed build-info reports `0.10.3-session-focus-trap`. The local formal real-input script remains unavailable in this workspace, but the GitHub Actions real-input gate passed for the generated checkpoint.
+- The deployed build-info reports `0.10.4-session-entry-once`. The local formal real-input script remains unavailable in this workspace, but the GitHub Actions real-input gate passed for the generated checkpoint.
 
 Resolved in this checkpoint:
 - P1 Fighter/Hunter avatar correctness.
@@ -38,12 +39,13 @@ Resolved in this checkpoint:
 - P1 equipment slot compatibility.
 - P1 session resume/reset scoping and gender-aware equipment/avatar identity for the tested builds.
 - Session-dialog keyboard focus containment and cache-visible runtime delivery.
+- Session-entry cadence: completed decisions stay quiet across refreshes while new tabs and different build entries receive a fresh prompt.
 - The earlier neutral-avatar-plus-icon-strip workaround was removed.
 
 Still open:
 - Human paint-level Skill Tree blink remains under observation; DOM identity, source, load-event, and child-list stability gates pass.
 - Independent Classic/beta research and deeper content audits remain open for Fighter axe mechanics, Hunter progression parity, AP/route/quest detail, and any disputed source claims.
-- Product Design follow-ups remain open for narrow-width/text-size/assistive-technology coverage, missing route thumbnails, Build Library density, and the human-visible Skill Tree blink. The audited desktop navigation, dashboard containment, and picker overflow findings were addressed in 0.10.1; session/gender flow was added in 0.10.2 and session-dialog focus containment was verified in 0.10.3.
+- Product Design follow-ups remain open for narrow-width/text-size/assistive-technology coverage, missing route thumbnails, Build Library density, and the human-visible Skill Tree blink. The audited desktop navigation, dashboard containment, and picker overflow findings were addressed in 0.10.1; session/gender flow was added in 0.10.2, session-dialog focus containment was verified in 0.10.3, and session-entry cadence was verified in 0.10.4.
 - The remaining items below are maintained as regression guards until their broader audits are complete.
 
 ## P1 — Fighter / Hunter completeness parity
