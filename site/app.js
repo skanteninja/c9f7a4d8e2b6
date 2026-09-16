@@ -31,6 +31,19 @@
   let sessionEntryReady=false;
   let sessionLastFocus=null;
   const SESSION_FOCUSABLE_SELECTOR='button:not([disabled]),[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  const SESSION_ENTRY_STATE_KEY='top-classic-world-session-entry-v1';
+  function sessionBuildId(){
+    return window.TCW_ACTIVE_BUILD_ID||state.activeBuildId||D.catalog?.activeBuildId||'magician-il-fresh';
+  }
+  function sessionEntryState(){
+    try{
+      const saved=JSON.parse(sessionStorage.getItem(SESSION_ENTRY_STATE_KEY)||'{}');
+      return saved.buildId===sessionBuildId()?String(saved.state||''):'';
+    }catch(e){return'';}
+  }
+  function setSessionEntryState(next){
+    try{sessionStorage.setItem(SESSION_ENTRY_STATE_KEY,JSON.stringify({buildId:sessionBuildId(),state:next}));}catch(e){}
+  }
   function sessionBuildName(){return activeBuild()?.name||'this build';}
   function sessionFlowSuppressed(){
     const params=new URLSearchParams(location.search);
@@ -90,6 +103,7 @@
     const buildId=window.TCW_ACTIVE_BUILD_ID||state.activeBuildId||D.catalog?.activeBuildId||'magician-il-fresh';
     localStorage.removeItem(KEY);localStorage.removeItem(STATE_UPDATED_KEY);
     state=normalizeState({level:1,page:'dashboard',activeBuildId:buildId,quests:{},skills:{},etcHeld:{},etcDone:{},levelChecks:{},skillTab:'auto',targetUpgrade:'auto',gear:{...defaultGear},gender:''});
+    setSessionEntryState('gender');
     save();renderAll();closeSessionModal('session-reset-modal');showGenderDialog();toast(sessionBuildName()+' reset · choose an avatar gender');
   }
   function chooseSessionGender(gender){
@@ -97,16 +111,25 @@
     const incompatible=Object.entries(state.gear||{}).filter(([slot,name])=>name&&name!=='None'&&!genderGearItemAllowed(getGear(name),gender)).map(([slot])=>slot);
     state.gender=gender;
     sanitizeGearState();
+    setSessionEntryState('complete');
     save();renderAll();closeSessionModal('session-gender-modal');
     toast((gender==='male'?'Male avatar selected':'Female avatar selected')+(incompatible.length?' · '+incompatible.length+' incompatible slot'+(incompatible.length===1?'':'s')+' cleared':''));
   }
   function continueSession(){
     closeSessionModal('session-entry-modal');
-    if(state.gender==='male'||state.gender==='female')return;
+    if(state.gender==='male'||state.gender==='female'){
+      setSessionEntryState('complete');
+      return;
+    }
+    setSessionEntryState('gender');
     showGenderDialog();
   }
   function startSessionFlow(){
     if(!sessionEntryReady||sessionFlowSuppressed()||document.querySelector('.session-modal.open'))return;
+    const entryState=sessionEntryState();
+    if(entryState==='complete')return;
+    if(entryState==='gender'){showGenderDialog();return;}
+    setSessionEntryState('pending');
     if(hasMeaningfulProgress(state))showResumeDialog();else showGenderDialog();
   }
   function startSessionEntry(){
@@ -1585,6 +1608,6 @@
   hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.10.3-session-focus-trap').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.10.4-session-entry-once').catch(()=>{});
   }
 })();

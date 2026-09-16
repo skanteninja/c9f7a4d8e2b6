@@ -7,19 +7,19 @@
   <meta name="theme-color" content="#090b13">
   <title>Top Classic World Maplestory</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=0.10.3-session-focus-trap">
-  <link rel="stylesheet" href="visuals.css?v=0.10.3-session-focus-trap">
-  <link rel="stylesheet" href="visuals-db.css?v=0.10.3-session-focus-trap">
-  <link rel="stylesheet" href="visuals-npc.css?v=0.10.3-session-focus-trap">
-  <link rel="stylesheet" href="visuals-skills.css?v=0.10.3-session-focus-trap">
-  <link rel="stylesheet" href="visuals-portals.css?v=0.10.3-session-focus-trap">
-  <link rel="stylesheet" href="dashboard-polish.css?v=0.10.3-session-focus-trap">
-  <link rel="stylesheet" href="progression-sync.css?v=0.10.3-session-focus-trap">
-  <link rel="stylesheet" href="progression-gear-visual.css?v=0.10.3-session-focus-trap">
-  <link rel="stylesheet" href="ownership-ui.css?v=0.10.3-session-focus-trap">
-  <link rel="stylesheet" href="maps-tab.css?v=0.10.3-session-focus-trap">
-  <link rel="stylesheet" href="etc-audit-ui.css?v=0.10.3-session-focus-trap">
-<link rel="stylesheet" href="readability.css?v=0.10.3-session-focus-trap"><link rel="stylesheet" href="equipment-branding.css?v=0.10.3-session-focus-trap"><link rel="stylesheet" href="session-flow.css?v=0.10.3-session-focus-trap"></head>
+  <link rel="stylesheet" href="styles.css?v=0.10.4-session-entry-once">
+  <link rel="stylesheet" href="visuals.css?v=0.10.4-session-entry-once">
+  <link rel="stylesheet" href="visuals-db.css?v=0.10.4-session-entry-once">
+  <link rel="stylesheet" href="visuals-npc.css?v=0.10.4-session-entry-once">
+  <link rel="stylesheet" href="visuals-skills.css?v=0.10.4-session-entry-once">
+  <link rel="stylesheet" href="visuals-portals.css?v=0.10.4-session-entry-once">
+  <link rel="stylesheet" href="dashboard-polish.css?v=0.10.4-session-entry-once">
+  <link rel="stylesheet" href="progression-sync.css?v=0.10.4-session-entry-once">
+  <link rel="stylesheet" href="progression-gear-visual.css?v=0.10.4-session-entry-once">
+  <link rel="stylesheet" href="ownership-ui.css?v=0.10.4-session-entry-once">
+  <link rel="stylesheet" href="maps-tab.css?v=0.10.4-session-entry-once">
+  <link rel="stylesheet" href="etc-audit-ui.css?v=0.10.4-session-entry-once">
+<link rel="stylesheet" href="readability.css?v=0.10.4-session-entry-once"><link rel="stylesheet" href="equipment-branding.css?v=0.10.4-session-entry-once"><link rel="stylesheet" href="session-flow.css?v=0.10.4-session-entry-once"></head>
 <body>
   <div id="app">
     <aside class="sidebar">
@@ -113,24 +113,24 @@
   <div id="session-gender-modal" class="modal session-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="session-gender-title"><div class="modal-backdrop"></div><div class="modal-card session-card"><div class="modal-head"><div><span class="eyebrow">CHARACTER SETUP</span><h2 id="session-gender-title">Choose your character</h2></div></div><p id="session-gender-copy" class="session-copy">Choose a character body for this build.</p><p class="session-note">This controls gender-locked equipment and the avatar preview.</p><div class="gender-choice-grid"><button class="gender-choice" data-session-gender="male" type="button"><span class="gender-choice-icon" aria-hidden="true">♂</span><b>Male</b><small>Show male-compatible gear and avatar.</small></button><button class="gender-choice" data-session-gender="female" type="button"><span class="gender-choice-icon" aria-hidden="true">♀</span><b>Female</b><small>Show female-compatible gear and avatar.</small></button></div></div></div>
   <div id="gear-modal" class="modal" aria-hidden="true"><div class="modal-backdrop" data-close-modal></div><div class="modal-card"><div class="modal-head"><div><span class="eyebrow">EQUIPMENT SLOT</span><h2 id="modal-title">Choose item</h2></div><button class="close-btn" data-close-modal>×</button></div><div class="modal-filter-row" data-class-equipment-filters><label class="toggle"><input id="modal-show-future" type="checkbox"><span id="modal-future-label">Show future-level items</span></label><label class="toggle"><input id="modal-show-optional" type="checkbox" checked><span id="modal-optional-label">Show all curated class options</span></label><span id="modal-gender-label" class="gender-filter-badge" aria-live="polite"></span></div><div id="modal-filter-summary" class="modal-filter-summary" aria-live="polite"></div><div id="gear-options" class="gear-options"></div></div></div>
   <div id="toast" class="toast"></div>
-  <script src="guide-data.js?v=0.10.3-session-focus-trap"></script>
+  <script src="guide-data.js?v=0.10.4-session-entry-once"></script>
   <script>(()=>{const root=window.GUIDE_DATA;if(!root)return;try{const saved=JSON.parse(localStorage.getItem('ultimateILGuideState.v1')||'{}');let id=new URLSearchParams(location.search).get('build')||saved.activeBuildId||root.catalog?.activeBuildId||'magician-il-fresh';const active=new Set((root.catalog?.builds||[]).filter(x=>x.status==='active').map(x=>x.id));if(!active.has(id))id=root.catalog?.activeBuildId||'magician-il-fresh';const map={'warrior-fighter':'fighter','archer-hunter':'hunter'};if(map[id]&&root.buildVariants?.[map[id]])window.GUIDE_DATA=root.buildVariants[map[id]];window.TCW_ACTIVE_BUILD_ID=id;}catch(e){window.TCW_ACTIVE_BUILD_ID='magician-il-fresh';}})();</script>
-  <script src="etc-audit-data.js?v=0.10.3-session-focus-trap"></script>
-  <script src="quest-audit-additions.js?v=0.10.3-session-focus-trap"></script>
-<script src="job-search.js?v=0.10.3-session-focus-trap"></script>
-  <script src="app.js?v=0.10.3-session-focus-trap"></script>
-  <script src="visuals.js?v=0.10.3-session-focus-trap"></script>
-  <script src="visuals-db.js?v=0.10.3-session-focus-trap"></script>
-  <script src="visuals-npc.js?v=0.10.3-session-focus-trap"></script>
-  <script src="visuals-skills.js?v=0.10.3-session-focus-trap"></script>
-  <script src="visuals-portals.js?v=0.10.3-session-focus-trap"></script>
-  <script src="dashboard-polish.js?v=0.10.3-session-focus-trap"></script>
-  <script src="progression-sync.js?v=0.10.3-session-focus-trap"></script>
-  <script src="progression-level-hook.js?v=0.10.3-session-focus-trap"></script>
-  <script src="progression-skill-state.js?v=0.10.3-session-focus-trap"></script>
-  <script src="progression-gear-visual.js?v=0.10.3-session-focus-trap"></script>
-  <script src="ownership-ui.js?v=0.10.3-session-focus-trap"></script>
-  <script src="maps-tab.js?v=0.10.3-session-focus-trap"></script>
-  <script src="etc-audit-ui.js?v=0.10.3-session-focus-trap"></script>
-<script src="navigation-history.js?v=0.10.3-session-focus-trap"></script></body>
+  <script src="etc-audit-data.js?v=0.10.4-session-entry-once"></script>
+  <script src="quest-audit-additions.js?v=0.10.4-session-entry-once"></script>
+<script src="job-search.js?v=0.10.4-session-entry-once"></script>
+  <script src="app.js?v=0.10.4-session-entry-once"></script>
+  <script src="visuals.js?v=0.10.4-session-entry-once"></script>
+  <script src="visuals-db.js?v=0.10.4-session-entry-once"></script>
+  <script src="visuals-npc.js?v=0.10.4-session-entry-once"></script>
+  <script src="visuals-skills.js?v=0.10.4-session-entry-once"></script>
+  <script src="visuals-portals.js?v=0.10.4-session-entry-once"></script>
+  <script src="dashboard-polish.js?v=0.10.4-session-entry-once"></script>
+  <script src="progression-sync.js?v=0.10.4-session-entry-once"></script>
+  <script src="progression-level-hook.js?v=0.10.4-session-entry-once"></script>
+  <script src="progression-skill-state.js?v=0.10.4-session-entry-once"></script>
+  <script src="progression-gear-visual.js?v=0.10.4-session-entry-once"></script>
+  <script src="ownership-ui.js?v=0.10.4-session-entry-once"></script>
+  <script src="maps-tab.js?v=0.10.4-session-entry-once"></script>
+  <script src="etc-audit-ui.js?v=0.10.4-session-entry-once"></script>
+<script src="navigation-history.js?v=0.10.4-session-entry-once"></script></body>
 </html>
