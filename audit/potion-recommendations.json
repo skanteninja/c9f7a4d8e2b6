@@ -1,0 +1,244 @@
+{
+  "version": "0.10.5-potions-gender-audit",
+  "shopPriceBasis": "Current NPC shop price",
+  "items": [
+    {
+      "id": 2000000,
+      "name": "Red Potion",
+      "kind": "hp",
+      "category": "Potion",
+      "hp": 100,
+      "shopPrice": 50,
+      "efficiency": 2,
+      "restoreLabel": "+100 HP",
+      "notes": "Best raw HP per meso among the standard small HP choices."
+    },
+    {
+      "id": 2000001,
+      "name": "Orange Potion",
+      "kind": "hp",
+      "category": "Potion",
+      "hp": 250,
+      "shopPrice": 150,
+      "efficiency": 1.667,
+      "restoreLabel": "+250 HP",
+      "notes": "A larger refill that cuts down on presses as the HP pool grows."
+    },
+    {
+      "id": 2000002,
+      "name": "White Potion",
+      "kind": "hp",
+      "category": "Potion",
+      "hp": 500,
+      "shopPrice": 350,
+      "efficiency": 1.429,
+      "restoreLabel": "+500 HP",
+      "notes": "The practical high-level HP refill; fewer uses matter more than perfect raw efficiency."
+    },
+    {
+      "id": 2010003,
+      "name": "Meat",
+      "kind": "hp",
+      "category": "Food",
+      "hp": 160,
+      "shopPrice": 80,
+      "efficiency": 2,
+      "restoreLabel": "+160 HP",
+      "notes": "Matches Red Potion on raw HP per meso; availability depends on the town shop."
+    },
+    {
+      "id": 2020001,
+      "name": "Fried Chicken",
+      "kind": "hp",
+      "category": "Food",
+      "hp": 120,
+      "shopPrice": 60,
+      "efficiency": 2,
+      "restoreLabel": "+120 HP",
+      "notes": "Matches Red Potion on raw HP per meso with a slightly larger single-use refill."
+    },
+    {
+      "id": 2020004,
+      "name": "Hamburger",
+      "kind": "hp",
+      "category": "Food",
+      "hp": 500,
+      "shopPrice": 350,
+      "efficiency": 1.429,
+      "restoreLabel": "+500 HP",
+      "notes": "Food alternative to White Potion when the shop carries it."
+    },
+    {
+      "id": 2010004,
+      "name": "Orange",
+      "kind": "mp",
+      "category": "Food",
+      "mp": 50,
+      "shopPrice": 50,
+      "efficiency": 1,
+      "restoreLabel": "+50 MP",
+      "notes": "Best raw MP per meso; keep it for small pools or maximum savings."
+    },
+    {
+      "id": 2010005,
+      "name": "Lemon",
+      "kind": "mp",
+      "category": "Food",
+      "mp": 150,
+      "shopPrice": 150,
+      "efficiency": 1,
+      "restoreLabel": "+150 MP",
+      "notes": "Best raw MP per meso with fewer presses than Orange."
+    },
+    {
+      "id": 2000003,
+      "name": "Blue Potion",
+      "kind": "mp",
+      "category": "Potion",
+      "mp": 200,
+      "shopPrice": 220,
+      "efficiency": 0.909,
+      "restoreLabel": "+200 MP",
+      "notes": "The standard midgame MP refill; a sensible click-saving tradeoff."
+    },
+    {
+      "id": 2022000,
+      "name": "Pure Water",
+      "kind": "mp",
+      "category": "Food",
+      "mp": 800,
+      "shopPrice": 1120,
+      "efficiency": 0.714,
+      "restoreLabel": "+800 MP",
+      "notes": "Large refill for high-MP grinding sessions; not the raw-efficiency winner."
+    }
+  ],
+  "builds": {
+    "warrior-fighter": {
+      "hp": [
+        {
+          "min": 1,
+          "max": 19,
+          "recommendedId": 2000000,
+          "reason": "Small early HP pools make Red Potion the cheapest practical refill."
+        },
+        {
+          "min": 20,
+          "max": 39,
+          "recommendedId": 2000001,
+          "reason": "Orange Potion cuts the number of uses once Warrior HP starts to widen."
+        },
+        {
+          "min": 40,
+          "max": 70,
+          "recommendedId": 2000002,
+          "reason": "White Potion keeps high-level Fighter top-offs manageable without spamming tiny pots."
+        }
+      ],
+      "mp": [
+        {
+          "min": 1,
+          "max": 29,
+          "recommendedId": 2010004,
+          "reason": "Fighter MP stays small early, so Orange wins on raw MP per meso."
+        },
+        {
+          "min": 30,
+          "max": 49,
+          "recommendedId": 2000003,
+          "reason": "Blue Potion saves enough presses after Fighter advancement to justify its small efficiency loss."
+        },
+        {
+          "min": 50,
+          "max": 70,
+          "recommendedId": 2022000,
+          "reason": "Pure Water avoids a backpack full of tiny MP refills during late grinding."
+        }
+      ]
+    },
+    "archer-hunter": {
+      "hp": [
+        {
+          "min": 1,
+          "max": 19,
+          "recommendedId": 2000000,
+          "reason": "Small early HP pools make Red Potion the cheapest practical refill."
+        },
+        {
+          "min": 20,
+          "max": 39,
+          "recommendedId": 2000001,
+          "reason": "Orange Potion cuts the number of uses once Bowman HP starts to widen."
+        },
+        {
+          "min": 40,
+          "max": 70,
+          "recommendedId": 2000002,
+          "reason": "White Potion keeps high-level Hunter top-offs manageable without spamming tiny pots."
+        }
+      ],
+      "mp": [
+        {
+          "min": 1,
+          "max": 29,
+          "recommendedId": 2010004,
+          "reason": "Hunter MP stays small early, so Orange wins on raw MP per meso."
+        },
+        {
+          "min": 30,
+          "max": 49,
+          "recommendedId": 2000003,
+          "reason": "Blue Potion is the practical click-saving tradeoff once Arrow Bomb and buffs are active."
+        },
+        {
+          "min": 50,
+          "max": 70,
+          "recommendedId": 2022000,
+          "reason": "Pure Water avoids a backpack full of tiny MP refills during late grinding."
+        }
+      ]
+    },
+    "magician-il-fresh": {
+      "hp": [
+        {
+          "min": 1,
+          "max": 19,
+          "recommendedId": 2000000,
+          "reason": "Mages have a small HP pool early; Red Potion keeps emergency healing cheap."
+        },
+        {
+          "min": 20,
+          "max": 39,
+          "recommendedId": 2000001,
+          "reason": "Orange Potion is a practical middle tier once travel and monster damage increase."
+        },
+        {
+          "min": 40,
+          "max": 70,
+          "recommendedId": 2000002,
+          "reason": "White Potion makes high-level emergency top-offs manageable while Magic Guard is active."
+        }
+      ],
+      "mp": [
+        {
+          "min": 1,
+          "max": 19,
+          "recommendedId": 2010005,
+          "reason": "Lemon keeps the best raw MP per meso while avoiding Orange-sized click spam."
+        },
+        {
+          "min": 20,
+          "max": 39,
+          "recommendedId": 2000003,
+          "reason": "Blue Potion is the balanced midgame choice as spell costs and MP pools rise."
+        },
+        {
+          "min": 40,
+          "max": 70,
+          "recommendedId": 2022000,
+          "reason": "Pure Water keeps high-MP grinding sessions from turning into constant refill presses."
+        }
+      ]
+    }
+  }
+}
