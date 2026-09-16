@@ -110,7 +110,7 @@ const catalogShape = guide => JSON.stringify({
 });
 
 const sharedCatalog = catalogShape(root);
-function effectivePreset(guide, level, gender)
+function effectivePreset(guide, level, gender) {
   const out = {Overall: 'None', Top: 'None', Bottom: 'None'};
   const stages = guide.gearPresets?.efficient?.levels || [];
   stages.filter(row => Number(row.min) <= level).sort((a, b) => Number(a.min) - Number(b.min)).forEach(row => {
