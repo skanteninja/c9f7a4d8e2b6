@@ -1,8 +1,14 @@
 # Durable Project Decisions
 
-Last continuity baseline: 2026-09-15
+Last continuity baseline: 2026-09-16
 
 Use this file for settled choices that future chats should preserve unless new evidence justifies changing them.
+
+## 2026-09-16 — Session-entry cadence
+
+- The Continue/Reset choice is a per-browser-tab entry decision, not a per-refresh decision.
+- Store the last active build and its session-flow stage in `sessionStorage`: a completed stage suppresses the prompt on refresh, a different build begins a new decision, and a new tab has no prior stage.
+- Keep `pending` and `gender` states blocking until the user completes the required action; reset must return to gender selection without allowing an incomplete flow to be silently bypassed.
 
 ## 2026-09-15 — Session-dialog focus and cache invalidation
 
@@ -23,7 +29,7 @@ Use this file for settled choices that future chats should preserve unless new e
 
 - QUALITY_STANDARD.md is the release contract; IMPLEMENTATION_BACKLOG.md is the ordered queue. A source edit or local build is not a deployment.
 - Product Design screenshots and cloud Browser QA are the primary visual/interaction evidence for the current audit. TinyFish is useful for live shell extraction. Mobbin remains optional comparative evidence because the connected search endpoint is paid-plan gated.
-- The earlier live baseline was 0.10.2-session-gender-flow. The current live checkpoint is 0.10.3-session-focus-trap, generated site commit 3fd241a7b867d9557ac04aeeb07e40004856d06e, with Verify Live run 34999212897 passed after the asset-token refresh.
+- The earlier live baseline was 0.10.3-session-focus-trap. The current live checkpoint is 0.10.4-session-entry-once, generated site commit ea2aaf0e88508437afddd8db446f1b711103f077, with Verify Live run 35092685632 passed after the asset-token refresh.
 
 ## 2026-09-15 — Shared dashboard containment
 
