@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.10.4-session-entry-once';
+const assetVersion = '0.10.5-potions-gender-audit';
 const BRAND = 'Top Classic World Maplestory';
 
 // The OSMS export is the identity authority for the equipment picker.  The
@@ -27,8 +27,26 @@ function classicEquipmentIndex() {
 }
 
 const CLASSIC_EQUIPMENT_BY_NAME = classicEquipmentIndex();
+const CLASSIC_EQUIPMENT_BY_ID = new Map(
+  (JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-items.json'), 'utf8')).items || [])
+    .filter(item => item.category === 'Equipment' && item.id)
+    .map(item => [Number(item.id), item])
+);
+const CLASSIC_EQUIPMENT_NAME_COUNTS = new Map();
+for (const item of CLASSIC_EQUIPMENT_BY_ID.values()) {
+  CLASSIC_EQUIPMENT_NAME_COUNTS.set(item.name, (CLASSIC_EQUIPMENT_NAME_COUNTS.get(item.name) || 0) + 1);
+}
 const GEAR_NAME_ALIASES = {
   "Beginner's Wooden Wand / job wand": 'Wooden Wand'
+};
+
+const POTION_RECOMMENDATIONS = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'potion-recommendations.json'), 'utf8'));
+const potionRecommendations = {
+  ...POTION_RECOMMENDATIONS,
+  items: (POTION_RECOMMENDATIONS.items || []).map(item => ({
+    ...item,
+    icon: `/game-media/icons/${item.id}`
+  }))
 };
 
 // The legacy I/L payload carried several stale or ambiguous skill IDs.  Keep
@@ -75,7 +93,11 @@ function canonicalizeGuideInventory(data) {
   const canonicalRow = row => {
     if (!row || row.Item === 'None' || !row.Item) return row;
     const requestedName = GEAR_NAME_ALIASES[row.Item] || row.Item;
-    const item = CLASSIC_EQUIPMENT_BY_NAME.get(requestedName);
+    const itemId = Number(row['Item ID'] || 0);
+    const named = CLASSIC_EQUIPMENT_BY_NAME.get(requestedName);
+    const item = named && (Number(CLASSIC_EQUIPMENT_NAME_COUNTS.get(requestedName) || 0) === 1 || Number(named.id) === itemId)
+      ? named
+      : CLASSIC_EQUIPMENT_BY_ID.get(itemId) || named;
     if (!item) {
       // Keep non-equipment utility entries (pets/mounts) visible, but never
       // let an unverified record inherit a misleading legacy sprite.
@@ -102,6 +124,7 @@ function canonicalizeGuideInventory(data) {
       'Req Job': classEquipmentLabel(item),
       'Req Job ID': Number(stats.reqJob || 0),
       Gender: item.gender || stats.gender || '',
+      'Gender Class': equipmentGenderClass(item),
       'Item Type': item.sub_category === 'Weapon' ? (item.weapon_type || 'Weapon') : (item.sub_category || 'Equipment'),
       'Evidence Class': 'CURRENT / VERIFY'
     };
@@ -420,7 +443,20 @@ function applyGearPlan(gear, stages, buildName) {
       }
       selected.set(itemName, {min: Number(stage.min) || 1, reason: stage.reason || `${buildName} checkpoint at Lv${stage.min}.`});
     }
-    return {min: Number(stage.min) || 1, gear: clean};
+    for (const variantGear of Object.values(stage.genderGear || {})) {
+      for (const itemName of Object.values(variantGear || {})) {
+        if (!available.has(itemName)) continue;
+        selected.set(itemName, {
+          min: Number(stage.min) || 1,
+          reason: stage.reason || buildName + ' checkpoint at Lv' + stage.min + '.'
+        });
+      }
+    }
+    return {
+      min: Number(stage.min) || 1,
+      gear: clean,
+      ...(stage.genderGear ? {genderGear: stage.genderGear} : {})
+    };
   });
   const planned = gear.map(row => {
     const rec = selected.get(row.Item);
@@ -480,6 +516,16 @@ function equipmentSlot(item) {
   })[item?.sub_category] || 'Any';
 }
 
+function equipmentGenderClass(item) {
+  const raw = String(item?.gender || item?.stats?.gender || '').trim().toLowerCase();
+  if (/female|^f$/.test(raw)) return 'Female';
+  if (/male|^m$/.test(raw)) return 'Male';
+  if (/unisex/.test(raw)) return 'Unisex';
+  return ['Top', 'Coat', 'Longcoat', 'Overall', 'Bottom', 'Pants'].includes(item?.sub_category)
+    ? 'Unisex'
+    : 'Genderless';
+}
+
 function equipmentFields(item, family, branch) {
   const stats = item.stats || {};
   const label = classEquipmentLabel(item);
@@ -532,6 +578,23 @@ function buildWeaponUpgradeRows(gear, levels, buildName, branch, skillFamily) {
 
 function familyLabelForUpgrade(branch) {
   return branch === 'Fighter' ? 'Warrior' : branch === 'Hunter' ? 'Bowman' : 'Any';
+}
+
+function hasMeaningfulEquipmentStats(item) {
+  const stats = item?.stats || {};
+  return [
+    'incSTR','incDEX','incINT','incLUK','incPAD','incMAD','incPDD','incMDD',
+    'incACC','incAvoid','incSpeed','incJump','incHP','incMP','incMHP','incMMP',
+    'incCRT','incCRD','reqLevel','reqSTR','reqDEX','reqINT','reqLUK'
+  ].some(key => Number(stats[key] || 0) !== 0);
+}
+
+function sharedClassEquipmentAllowed(item, {shield = false} = {}) {
+  if (classEquipmentLabel(item) !== 'All') return false;
+  const slot = item?.sub_category;
+  if (slot === 'Shield') return shield;
+  if (!['Hat','Cape','Top','Overall','Bottom','Glove','Shoes','Earring'].includes(slot)) return false;
+  return hasMeaningfulEquipmentStats(item) || slot === 'Earring' || slot === 'Cape';
 }
 
 function fighterVariant(base) {
@@ -617,25 +680,26 @@ function fighterVariant(base) {
     // Do not treat a mixed Warrior/Mage record as Fighter equipment. The
     // source export uses bit flags, so checking only reqJob let magician
     // crossover items leak into this build.
-    return /\bWarrior\b/.test(classEquipmentLabel(item)) && !/\bMage\b/i.test(classEquipmentLabel(item));
+    return sharedClassEquipmentAllowed(item, {shield:true})
+      || (/\bWarrior\b/.test(classEquipmentLabel(item)) && !/\bMage\b/i.test(classEquipmentLabel(item)));
   });
-  let gear = [{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,'M.ATK':0,'WDEF':0,'MDEF':0,'Crit%':0,'Crit DMG':0,Speed:0,Jump:0,'Req Lv':0,'Req STR':0,'Req DEX':0,'Req LUK':0,Status:'CURRENT / VERIFY','Class Fit':'Any · Fighter','Job Family':'Any','Job Branch':'None','Req Job':'Any','Req Job ID':0,'Item Type':'Empty',Plan:'EMPTY',Priority:'—',Notes:'Empty slot','Highly Recommended':false,'Recommendation Reason':'','Evidence Class':'CURRENT / VERIFY'}, ...warriorItems.map(item => {
+  let gear = [{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,'M.ATK':0,'WDEF':0,'MDEF':0,'Crit%':0,'Crit DMG':0,Speed:0,Jump:0,'Req Lv':0,'Req STR':0,'Req DEX':0,'Req LUK':0,Status:'CURRENT / VERIFY','Class Fit':'Any · Fighter','Gender Class':'—','Job Family':'Any','Job Branch':'None','Req Job':'Any','Req Job ID':0,'Item Type':'Empty',Plan:'EMPTY',Priority:'—',Notes:'Empty slot','Highly Recommended':false,'Recommendation Reason':'','Evidence Class':'CURRENT / VERIFY'}, ...warriorItems.map(item => {
     const s = item.stats || {};
-    return {Item:item.name, Slot:equipmentSlot(item), 'Item ID':item.id, 'Icon URL':`/game-media/icons/${item.id}`, Gender:item.gender||s.gender||'', STR:s.incSTR||0, DEX:s.incDEX||0, INT:s.incINT||0, LUK:s.incLUK||0, 'W.ATK':s.incPAD||0, 'M.ATK':s.incMAD||0, 'WDEF':s.incPDD||0, 'MDEF':s.incMDD||0, 'Crit%':s.incCritRate||0, 'Crit DMG':s.incCritDamage||0, Speed:s.incSpeed||0, Jump:s.incJump||0, 'Req Lv':s.reqLevel||0, 'Req STR':s.reqSTR||0, 'Req DEX':s.reqDEX||0, 'Req LUK':s.reqLUK||0, Status:'CURRENT / VERIFY', 'Class Fit':classEquipmentFit(item,'Warrior','Fighter'), ...equipmentFields(item,'Warrior','Fighter'), Plan:'OPTIONAL', Priority:'Use at the relevant level or when it creates a real damage/accuracy breakpoint', Notes:item.weapon_type ? `${item.weapon_type} · ${item.attack_speed_label || ''}` : `${classEquipmentLabel(item)} Fighter equipment option`, 'Highly Recommended':false, 'Recommendation Reason':'', 'Evidence Class':'CURRENT / VERIFY'};
+    return {Item:item.name, Slot:equipmentSlot(item), 'Item ID':item.id, 'Icon URL':`/game-media/icons/${item.id}`, Gender:item.gender||s.gender||'','Gender Class':equipmentGenderClass(item), STR:s.incSTR||0, DEX:s.incDEX||0, INT:s.incINT||0, LUK:s.incLUK||0, 'W.ATK':s.incPAD||0, 'M.ATK':s.incMAD||0, 'WDEF':s.incPDD||0, 'MDEF':s.incMDD||0, 'Crit%':s.incCritRate||0, 'Crit DMG':s.incCritDamage||0, Speed:s.incSpeed||0, Jump:s.incJump||0, 'Req Lv':s.reqLevel||0, 'Req STR':s.reqSTR||0, 'Req DEX':s.reqDEX||0, 'Req LUK':s.reqLUK||0, Status:'CURRENT / VERIFY', 'Class Fit':classEquipmentFit(item,'Warrior','Fighter'), ...equipmentFields(item,'Warrior','Fighter'), Plan:'OPTIONAL', Priority:'Use at the relevant level or when it creates a real damage/accuracy breakpoint', Notes:item.weapon_type ? `${item.weapon_type} · ${item.attack_speed_label || ''}` : `${classEquipmentLabel(item)} Fighter equipment option`, 'Highly Recommended':false, 'Recommendation Reason':'', 'Evidence Class':'CURRENT / VERIFY'};
   })];
   gear.forEach(row => { if (Number(row['Item ID'] || 0) > 0) row['Icon URL'] = `/game-media/icons/${row['Item ID']}`; });
   const gearPlan = applyGearPlan(gear, [
     {min:1, gear:{Weapon:'Hand Axe'}, reason:'Maple Island starter; the axe family is selected before weapon-specific Fighter SP.'},
-    {min:10, gear:{Weapon:'Metal Axe',Hat:'Metal Koif',Top:'Brown Lolico Armor',Bottom:'Brown Lolico Pants',Shoes:'Bronze Grieves',Gloves:'Juno'}, reason:'First Warrior axe checkpoint. Keep the early route cheap and reserve mesos for potions.'},
-    {min:15, gear:{Weapon:'Battle Axe',Hat:'Steel Full Helm',Overall:'Steel Fitted Mail',Shoes:'Steel Grieves',Gloves:'Steel Fingerless Gloves'}, reason:'Level-15 axe-family checkpoint; use the shop axe instead of switching to a sword.'},
-    {min:20, gear:{Weapon:'Iron Axe',Overall:'Blue Kendo Robe'}, reason:'Level-20 two-handed axe checkpoint; preserve the family path and hit-rate budget.'},
+    {min:10, gear:{Weapon:'Metal Axe',Hat:'Metal Koif',Top:'Brown Lolico Armor',Bottom:'Brown Lolico Pants',Shoes:'Bronze Grieves',Gloves:'Juno'}, genderGear:{female:{Top:'Orange Lolica Armor',Bottom:'Rookie Pants'}}, reason:'First Warrior axe checkpoint. Keep the early route cheap and reserve mesos for potions.'},
+    {min:15, gear:{Weapon:'Battle Axe',Hat:'Steel Full Helm',Overall:'Steel Fitted Mail',Shoes:'Steel Grieves',Gloves:'Steel Fingerless Gloves'}, genderGear:{male:{Overall:'None',Top:'Steel Corporal',Bottom:'Steel Corporal Pants'}}, reason:'Level-15 axe-family checkpoint; use the shop axe instead of switching to a sword.'},
+    {min:20, gear:{Weapon:'Iron Axe',Overall:'Blue Kendo Robe'}, genderGear:{female:{Overall:'None',Top:'Green Lamelle',Bottom:'Green Ramel Skirt'}}, reason:'Level-20 two-handed axe checkpoint; preserve the family path and hit-rate budget.'},
     {min:25, gear:{Weapon:'Two-Handed Axe'}, reason:'Level-25 raw-W.ATK checkpoint before Fighter advancement.'},
-    {min:30, gear:{Weapon:'Blue Axe',Overall:'Red Engrit'}, reason:'Level-30 Fighter handoff. Blue Axe is the researched two-handed damage default; Fireman\'s Axe + shield is the defensive alternative.'},
-    {min:35, gear:{Weapon:'Niam',Overall:'Blood Fitted Mail'}, reason:'Level-35 axe breakpoint; keep Axe Mastery, Booster, and Final Attack on the same family.'},
+    {min:30, gear:{Weapon:'Blue Axe',Overall:'Red Engrit'}, genderGear:{male:{Overall:'Black Dragon Robe'}}, reason:'Level-30 Fighter handoff. Blue Axe is the researched two-handed damage default; Fireman\'s Axe + shield is the defensive alternative.'},
+    {min:35, gear:{Weapon:'Niam',Overall:'Blood Fitted Mail'}, genderGear:{male:{Overall:'Dark Crusader Chainmail'}}, reason:'Level-35 axe breakpoint; keep Axe Mastery, Booster, and Final Attack on the same family.'},
     {min:40, gear:{Weapon:'Sabretooth'}, reason:'Level-40 two-handed axe checkpoint; use a one-handed Blue Counter only when Guard is worth the W.ATK trade.'},
-    {min:50, gear:{Weapon:'The Rising',Top:'Umber Shouldermail',Bottom:'Umber Shouldermail Pants',Shoes:'Mithril Hildon Boots'}, reason:'Level-50 two-handed axe and armor breakpoint. Weapon Attack takes priority over small armor gains.'},
-    {min:60, gear:{Weapon:'The Shining',Top:'Blue Orientican',Bottom:'Blue Orientican Pants',Shoes:'Sapphire Camel Boots'}, reason:'Level-60 two-handed axe checkpoint; verify the 60 DEX target against your actual gear.'},
-    {min:70, gear:{Weapon:'Chrono',Top:'Bronze Platine',Bottom:'Bronze Platine Pants',Shoes:'Purple Carzen Boots'}, reason:'Level-70 axe capstone. Chrono is the two-handed damage endpoint; Mikhail + shield is the Guard alternative.'}
+    {min:50, gear:{Weapon:'The Rising',Top:'Umber Shouldermail',Bottom:'Umber Shouldermail Pants',Shoes:'Mithril Hildon Boots'}, genderGear:{female:{Top:'Red Shouldermail',Bottom:'Red Shouldermail Pants'}}, reason:'Level-50 two-handed axe and armor breakpoint. Weapon Attack takes priority over small armor gains.'},
+    {min:60, gear:{Weapon:'The Shining',Top:'Blue Orientican',Bottom:'Blue Orientican Pants',Shoes:'Sapphire Camel Boots'}, genderGear:{female:{Top:'Blue Ice Queen',Bottom:'Blue Ice Queen Skirt'}}, reason:'Level-60 two-handed axe checkpoint; verify the 60 DEX target against your actual gear.'},
+    {min:70, gear:{Weapon:'Chrono',Top:'Bronze Platine',Bottom:'Bronze Platine Pants',Shoes:'Purple Carzen Boots'}, genderGear:{female:{Top:'Bloody Platina',Bottom:'Blood Platina Pants'}}, reason:'Level-70 axe capstone. Chrono is the two-handed damage endpoint; Mikhail + shield is the Guard alternative.'}
   ], 'Fighter');
   gear = gearPlan.gear;
   const fighterCoreWeapons = new Set(['Hand Axe','Metal Axe','Battle Axe','Iron Axe','Two-Handed Axe','Blue Axe','Niam','Sabretooth','The Rising','The Shining','Chrono']);
@@ -761,21 +825,24 @@ function hunterVariant(base) {
   // this build must expose the Hunter bow branch only.
   const bows=(items.items||[]).filter(i=>i.category==='Equipment' && (
     (i.sub_category==='Weapon' && i.weapon_type==='Bow' && /\bBowman\b/.test(classEquipmentLabel(i)))
-    || (i.sub_category!=='Weapon' && /\bBowman\b/.test(classEquipmentLabel(i)) && !/\bMage\b/i.test(classEquipmentLabel(i)))
+    || (i.sub_category!=='Weapon' && (
+      sharedClassEquipmentAllowed(i, {shield:false})
+      || (/\bBowman\b/.test(classEquipmentLabel(i)) && !/\bMage\b/i.test(classEquipmentLabel(i)))
+    ))
   ));
-  let gear=[{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',Gender:'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,WDEF:0,MDEF:0,Speed:0,Jump:0,'Req Lv':0,Status:'CURRENT / VERIFY','Class Fit':'Any · Hunter','Job Family':'Any','Job Branch':'None','Req Job':'Any','Req Job ID':0,'Item Type':'Empty',Plan:'EMPTY','Priority':'—','Highly Recommended':false,'Recommendation Reason':'',Notes:'Empty slot'},...bows.map(i=>{const s=i.stats||{};return {Item:i.name,Slot:equipmentSlot(i),'Item ID':i.id,'Icon URL':`/game-media/items/primary/${i.id}`,Gender:i.gender||s.gender||'',STR:s.incSTR||0,DEX:s.incDEX||0,INT:s.incINT||0,LUK:s.incLUK||0,'W.ATK':s.incPAD||0,WDEF:s.incPDD||0,MDEF:s.incMDD||0,Speed:s.incSpeed||0,Jump:s.incJump||0,'Req Lv':s.reqLevel||0,'Req STR':s.reqSTR||0,'Req DEX':s.reqDEX||0,Status:'CURRENT / VERIFY','Class Fit':classEquipmentFit(i,'Bowman','Hunter'),...equipmentFields(i,'Bowman','Hunter'),Plan:'OPTIONAL',Priority:'Use at the relevant bow breakpoint', 'Highly Recommended':false,'Recommendation Reason':'',Notes:i.weapon_type?`${i.weapon_type} · ${i.attack_speed_label || ''}`:`${classEquipmentLabel(i)} Hunter equipment`};})];
+  let gear=[{Item:'None',Slot:'Any','Item ID':0,'Icon URL':'',Gender:'',STR:0,DEX:0,INT:0,LUK:0,'W.ATK':0,WDEF:0,MDEF:0,Speed:0,Jump:0,'Req Lv':0,Status:'CURRENT / VERIFY','Class Fit':'Any · Hunter','Gender Class':'—','Job Family':'Any','Job Branch':'None','Req Job':'Any','Req Job ID':0,'Item Type':'Empty',Plan:'EMPTY','Priority':'—','Highly Recommended':false,'Recommendation Reason':'',Notes:'Empty slot'},...bows.map(i=>{const s=i.stats||{};return {Item:i.name,Slot:equipmentSlot(i),'Item ID':i.id,'Icon URL':`/game-media/items/primary/${i.id}`,Gender:i.gender||s.gender||'','Gender Class':equipmentGenderClass(i),STR:s.incSTR||0,DEX:s.incDEX||0,INT:s.incINT||0,LUK:s.incLUK||0,'W.ATK':s.incPAD||0,WDEF:s.incPDD||0,MDEF:s.incMDD||0,Speed:s.incSpeed||0,Jump:s.incJump||0,'Req Lv':s.reqLevel||0,'Req STR':s.reqSTR||0,'Req DEX':s.reqDEX||0,Status:'CURRENT / VERIFY','Class Fit':classEquipmentFit(i,'Bowman','Hunter'),...equipmentFields(i,'Bowman','Hunter'),Plan:'OPTIONAL',Priority:'Use at the relevant bow breakpoint', 'Highly Recommended':false,'Recommendation Reason':'',Notes:i.weapon_type?`${i.weapon_type} · ${i.attack_speed_label || ''}`:`${classEquipmentLabel(i)} Hunter equipment`};})];
   gear.forEach(row => { if (Number(row['Item ID'] || 0) > 0) row['Icon URL'] = `/game-media/icons/${row['Item ID']}`; });
   const gearPlan = applyGearPlan(gear, [
-    {min:10, gear:{Weapon:'War Bow',Hat:'Brown Winter Hat',Top:'Brown Archer Top',Bottom:'Archer Pants',Shoes:'Brown Hard Leather Boots'}, reason:'First Bowman bow and starter armor checkpoint.'},
-    {min:15, gear:{Weapon:'Composite Bow',Hat:'Green Feather Hat',Top:'Green Able Armor',Bottom:'Green Able Armor Skirt',Shoes:'Green Woodsman Boots',Gloves:'Basic Archer Gloves'}, reason:'Level-15 bow and first complete Bowman gear checkpoint.'},
-    {min:20, gear:{Weapon:"Hunter's Bow",Hat:'Green Robin Hat',Top:'Brown Hard Leather Top',Bottom:'Brown Hard Leather Pants',Shoes:'Deer Huntertop',Gloves:'Green Diros'}, reason:'Level-20 Hunter bow and armor breakpoint.'},
+    {min:10, gear:{Weapon:'War Bow',Hat:'Brown Winter Hat',Top:'Brown Archer Top',Bottom:'Archer Pants',Shoes:'Brown Hard Leather Boots'}, genderGear:{female:{Top:'Yellow Avelin',Bottom:'Yellow Avelin Skirt'}}, reason:'First Bowman bow and starter armor checkpoint.'},
+    {min:15, gear:{Weapon:'Composite Bow',Hat:'Green Feather Hat',Top:'Green Able Armor',Bottom:'Green Able Armor Skirt',Shoes:'Green Woodsman Boots',Gloves:'Basic Archer Gloves'}, genderGear:{male:{Top:'Green Leather Hoodwear',Bottom:'Archer Pants'}}, reason:'Level-15 bow and first complete Bowman gear checkpoint.'},
+    {min:20, gear:{Weapon:"Hunter's Bow",Hat:'Green Robin Hat',Top:'Brown Hard Leather Top',Bottom:'Brown Hard Leather Pants',Shoes:'Deer Huntertop',Gloves:'Green Diros'}, genderGear:{female:{Top:'Green Shivermail',Bottom:'Green Shivermail Skirt'}}, reason:'Level-20 Hunter bow and armor breakpoint.'},
     {min:25, gear:{Weapon:'Battle Bow',Hat:'Green Hunter',Top:'Green Bennis Chainmail',Bottom:'Bennis Chain Pants',Shoes:'Green Jack Boots',Gloves:'Blue Savata'}, reason:'Level-25 bow and armor checkpoint before advancement.'},
-    {min:30, gear:{Weapon:'Ryden',Hat:'Green Hawkeye',Top:"Green Hunter's Armor",Bottom:"Green Hunter's Pants",Shoes:'Green Snowshoes',Gloves:'Green Marker'}, reason:'Level-30 Hunter advancement and full class armor checkpoint.'},
-    {min:35, gear:{Weapon:'Red Viper',Hat:'Green Pole-Feather Hat',Top:'Green Legolier',Bottom:'Green Legolier Pants',Shoes:'Green Silky Boots',Gloves:'Mithril Scaler'}, reason:'Level-35 bow and armor checkpoint.'},
-    {min:40, gear:{Weapon:'Vaulter 2000',Hat:'Green Distinction',Top:'Brown Piette',Bottom:'Brown Piette Pants',Shoes:'Brown Pierre Shoes',Gloves:'Aqua Brace'}, reason:'Level-40 bow and DEX armor breakpoint.'},
-    {min:50, gear:{Weapon:'Olympus',Hat:'Green Maro',Overall:'Blue Lumati',Shoes:'Blue Steel-Tip Boots',Gloves:'Blue Willow'}, reason:'Level-50 bow and overall checkpoint.'},
-    {min:60, gear:{Weapon:'Asianic Bow',Hat:'Brown Polyfeather Hat',Overall:'Blue Choro',Shoes:'Blue Gore Boots',Gloves:'Oaker Garner'}, reason:'Level-60 bow and high-DEX overall checkpoint.'},
-    {min:70, gear:{Weapon:'Golden Hinkel',Hat:'Blue Patriot',Overall:'Blue Linnex',Shoes:'Blue Elf Shoes',Gloves:'Blue Eyes'}, reason:'Level-70 Hunter capstone equipment checkpoint.'}
+    {min:30, gear:{Weapon:'Ryden',Hat:'Green Hawkeye',Top:"Green Hunter's Armor",Bottom:"Green Hunter's Pants",Shoes:'Green Snowshoes',Gloves:'Green Marker'}, genderGear:{female:{Top:'Green Huntress Armor',Bottom:'Green Huntress Pants'}}, reason:'Level-30 Hunter advancement and full class armor checkpoint.'},
+    {min:35, gear:{Weapon:'Red Viper',Hat:'Green Pole-Feather Hat',Top:'Green Legolier',Bottom:'Green Legolier Pants',Shoes:'Green Silky Boots',Gloves:'Mithril Scaler'}, genderGear:{female:{Top:'Green Legolia',Bottom:'Green Legolia Pants'}}, reason:'Level-35 bow and armor checkpoint.'},
+    {min:40, gear:{Weapon:'Vaulter 2000',Hat:'Green Distinction',Top:'Brown Piette',Bottom:'Brown Piette Pants',Shoes:'Brown Pierre Shoes',Gloves:'Aqua Brace'}, genderGear:{female:{Top:'Brown Piettra',Bottom:'Brown Piettra Skirt'}}, reason:'Level-40 bow and DEX armor breakpoint.'},
+    {min:50, gear:{Weapon:'Olympus',Hat:'Green Maro',Overall:'Blue Lumati',Shoes:'Blue Steel-Tip Boots',Gloves:'Blue Willow'}, genderGear:{male:{Overall:'Blue-Lined Kismet'}}, reason:'Level-50 bow and overall checkpoint.'},
+    {min:60, gear:{Weapon:'Asianic Bow',Hat:'Brown Polyfeather Hat',Overall:'Blue Choro',Shoes:'Blue Gore Boots',Gloves:'Oaker Garner'}, genderGear:{male:{Overall:'Blue Tai'}}, reason:'Level-60 bow and high-DEX overall checkpoint.'},
+    {min:70, gear:{Weapon:'Golden Hinkel',Hat:'Blue Patriot',Overall:'Blue Linnex',Shoes:'Blue Elf Shoes',Gloves:'Blue Eyes'}, genderGear:{female:{Overall:'Blue Lineros'}}, reason:'Level-70 Hunter capstone equipment checkpoint.'}
   ], 'Hunter');
   gear = gearPlan.gear;
   const routes=[
@@ -900,6 +967,9 @@ function publicGuide(raw) {
   data.catalog = catalog;
   fighter.catalog = catalog;
   hunter.catalog = catalog;
+  data.potionRecommendations = potionRecommendations;
+  fighter.potionRecommendations = potionRecommendations;
+  hunter.potionRecommendations = potionRecommendations;
   data.buildVariants = {fighter, hunter};
   if (data.meta) {
     data.meta = {
@@ -1472,6 +1542,7 @@ function patchApp(raw) {
     "        <div class=\"stats\">${gearOptionStats(item,none)}${none?'':`<span class=\"gear-requirements\"><span>Requires</span> ${esc(gearOptionMeta(item,none))}</span>`}</div>"
   );
   app = require('./patches/session-flow.cjs')(app);
+  app = require('./patches/potion-recommendations.cjs')(app);
   return require('./patches/equipment-branding.cjs')(app);
 }
 
@@ -1558,6 +1629,7 @@ const questAuditAdditions = fs.readFileSync(path.join(source, 'quest-audit-addit
 const etcAuditUiCss = fs.readFileSync(path.join(source, 'etc-audit-ui.css'), 'utf8');
 const etcAuditUi = fs.readFileSync(path.join(source, 'etc-audit-ui.js'), 'utf8');
 const sessionFlowCss = fs.readFileSync(path.join(source, 'session-flow.css'), 'utf8');
+const potionsCss = fs.readFileSync(path.join(source, 'potions.css'), 'utf8');
 
 JSON.parse(guideJson);
 if (!css.includes('.sidebar') || !app.includes('GUIDE_DATA')) throw new Error('Runtime verification failed');
@@ -1582,7 +1654,9 @@ for(const file of ['readability.css','job-search.js','navigation-history.js'])fs
 for(const file of ['map-layouts.json','map-audit.html','map-audit.js','map-audit.json','map-audit.csv'])fs.copyFileSync(path.join(source,file),path.join(out,file));
 html=html.replace('</head>', '<link rel="stylesheet" href="equipment-branding.css?v='+assetVersion+'"></head>');
 html=html.replace('</head>', '<link rel="stylesheet" href="session-flow.css?v='+assetVersion+'"></head>');
+html=html.replace('</head>', '<link rel="stylesheet" href="potions.css?v='+assetVersion+'"></head>');
 fs.copyFileSync(path.join(source,'equipment-branding.css'),path.join(out,'equipment-branding.css'));
+fs.copyFileSync(path.join(source,'potions.css'),path.join(out,'potions.css'));
 html = html.replace(/\n[ \t]+\n/g, '\n\n');
 fs.writeFileSync(path.join(out, 'index.html'), html);
 const atlasAssets = path.join(source, 'assets', 'map-atlas');
@@ -1601,6 +1675,7 @@ fs.writeFileSync(path.join(out, 'ownership-ui.css'), ownershipUiCss);
 fs.writeFileSync(path.join(out, 'maps-tab.css'), mapsTabCss);
 fs.writeFileSync(path.join(out, 'etc-audit-ui.css'), etcAuditUiCss);
 fs.writeFileSync(path.join(out, 'session-flow.css'), sessionFlowCss);
+fs.writeFileSync(path.join(out, 'potions.css'), potionsCss);
 fs.writeFileSync(path.join(out, 'guide-data.js'), `window.GUIDE_DATA = ${guideJson};\n`);
 fs.writeFileSync(path.join(out, 'etc-audit-data.js'), etcAuditData);
 fs.writeFileSync(path.join(out, 'quest-audit-additions.js'), questAuditAdditions);
@@ -1621,7 +1696,7 @@ fs.writeFileSync(path.join(out, 'etc-audit-ui.js'), etcAuditUi);
 fs.writeFileSync(path.join(out, 'build-info.txt'), `${BRAND} ${assetVersion}\n`);
 
 const sw = `const CACHE='top-classic-world-${assetVersion}';\nconst CORE=['./','./index.html','./styles.css?v=${assetVersion}','./visuals.css?v=${assetVersion}','./visuals-db.css?v=${assetVersion}','./visuals-npc.css?v=${assetVersion}','./visuals-skills.css?v=${assetVersion}','./visuals-portals.css?v=${assetVersion}','./dashboard-polish.css?v=${assetVersion}','./progression-sync.css?v=${assetVersion}','./progression-gear-visual.css?v=${assetVersion}','./ownership-ui.css?v=${assetVersion}','./guide-data.js?v=${assetVersion}','./app.js?v=${assetVersion}','./visuals.js?v=${assetVersion}','./visuals-db.js?v=${assetVersion}','./visuals-npc.js?v=${assetVersion}','./visuals-skills.js?v=${assetVersion}','./visuals-portals.js?v=${assetVersion}','./dashboard-polish.js?v=${assetVersion}','./progression-sync.js?v=${assetVersion}','./progression-level-hook.js?v=${assetVersion}','./progression-skill-state.js?v=${assetVersion}','./progression-gear-visual.js?v=${assetVersion}','./ownership-ui.js?v=${assetVersion}','./maps-tab.css?v=${assetVersion}','./maps-tab.js?v=${assetVersion}','./etc-audit-data.js?v=${assetVersion}','./quest-audit-additions.js?v=${assetVersion}','./etc-audit-ui.css?v=${assetVersion}','./etc-audit-ui.js?v=${assetVersion}','./manifest.webmanifest'];\nself.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).catch(()=>{}));});\nself.addEventListener('activate',e=>{e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('top-classic-world-')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]));});\nself.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin)return;e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy)).catch(()=>{});return r;}).catch(()=>caches.match(e.request).then(x=>x||caches.match('./index.html'))));});\n`;
-const swWithSessionFlow = sw.replace(`'./styles.css?v=${assetVersion}',`, `'./styles.css?v=${assetVersion}','./session-flow.css?v=${assetVersion}',`);
+const swWithSessionFlow = sw.replace(`'./styles.css?v=${assetVersion}',`, `'./styles.css?v=${assetVersion}','./session-flow.css?v=${assetVersion}','./potions.css?v=${assetVersion}',`);
 fs.writeFileSync(path.join(out, 'sw.js'), swWithSessionFlow);
 
 console.log(`Built ${assetVersion}: CSS ${css.length} bytes, guide ${guideJson.length} bytes, app ${app.length} bytes, visuals ${visuals.length} bytes, DB visuals ${visualDb.length} bytes, NPC visuals ${visualNpc.length} bytes, skill visuals ${visualSkill.length} bytes, portal visuals ${visualPortal.length} bytes, dashboard polish ${dashboardPolish.length} bytes, progression sync ${progressionSync.length} bytes, progression level hook ${progressionLevelHook.length} bytes, progression skill state ${progressionSkillState.length} bytes, progression gear visual ${progressionGearVisual.length} bytes, ownership UI ${ownershipUi.length} bytes.`);

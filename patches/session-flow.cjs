@@ -142,20 +142,21 @@ module.exports = function(app) {
 
   const genderNeedle = "  function classGearItemAllowed(item){\n    const evidence=String(item&& (item['Evidence Class']||item.Status) || 'CURRENT');\n    if(item&&item.Item!=='None'&&!/CURRENT/i.test(evidence))return false;\n    if(!item||item.Item==='None')return true;";
   const genderReplacement = `  function itemGender(item){
-    const raw=item?.Gender??item?.gender??item?.['Req Gender']??'';
+    const raw=item?.['Gender Class']??item?.Gender??item?.gender??item?.['Req Gender']??'';
     const value=String(raw).trim().toLowerCase();
     if(/female|^f$/.test(value))return'female';
     if(/male|^m$/.test(value))return'male';
-    return'unisex';
+    if(/unisex/.test(value))return'unisex';
+    return'genderless';
   }
   function itemGenderLabel(item){
     const gender=itemGender(item);
-    return gender==='female'?'Female only':gender==='male'?'Male only':'';
+    return gender==='female'?'Female only':gender==='male'?'Male only':gender==='unisex'?'Unisex':'Genderless';
   }
   function genderGearItemAllowed(item,selectedGender=state.gender){
     if(!item||item.Item==='None')return true;
     const gender=itemGender(item);
-    return !selectedGender||gender==='unisex'||gender===selectedGender;
+    return !selectedGender||gender==='unisex'||gender==='genderless'||gender===selectedGender;
   }
   function classGearItemAllowed(item){
     const evidence=String(item&& (item['Evidence Class']||item.Status) || 'CURRENT');
@@ -186,6 +187,20 @@ module.exports = function(app) {
   app = app.replace(filterNeedle, filterReplacement);
 
   const hydrationNeedle = '  hydrateLauncherState();';
+  const gearLookupNeedle = "  function getGear(name){ return D.gear.find(g=>g.Item===name); }";
+  const gearLookupReplacement = `  function getGear(name){
+    const matches=D.gear.filter(g=>g.Item===name);
+    if(matches.length<2||!state.gender)return matches[0];
+    return matches.find(g=>itemGender(g)===state.gender)||matches[0];
+  }`;
+  if (!app.includes(gearLookupNeedle)) throw new Error('gender-aware gear lookup target missing');
+  app = app.replace(gearLookupNeedle, gearLookupReplacement);
+
+  const presetNeedle = "    (p.levels||[]).filter(x=>Number(x.min)<=state.level).sort((a,b)=>Number(a.min)-Number(b.min)).forEach(x=>{\n      Object.entries(x.gear||{}).forEach(([slot,item])=>{";
+  const presetReplacement = "    (p.levels||[]).filter(x=>Number(x.min)<=state.level).sort((a,b)=>Number(a.min)-Number(b.min)).forEach(x=>{\n      const stageGear={...(x.gear||{}),...((state.gender&&x.genderGear?.[state.gender])||{})};\n      Object.entries(stageGear).forEach(([slot,item])=>{";
+  if (!app.includes(presetNeedle)) throw new Error('gender-aware preset target missing');
+  app = app.replace(presetNeedle, presetReplacement);
+
   if (!app.includes(hydrationNeedle)) throw new Error('session hydration target missing');
   app = app.replace(hydrationNeedle, "  window.TCW_SESSION_ENTRY?.start();\n  hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());");
 

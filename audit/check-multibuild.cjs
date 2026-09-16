@@ -19,6 +19,41 @@ const slotMap = {
   Earrings: 'Earrings', Accessory: 'Earrings'
 };
 
+function expectedGenderClass(item) {
+  const raw = String(item?.gender || item?.stats?.gender || '').trim().toLowerCase();
+  if (/female|^f$/.test(raw)) return 'Female';
+  if (/male|^m$/.test(raw)) return 'Male';
+  if (/unisex/.test(raw)) return 'Unisex';
+  return ['Top','Coat','Longcoat','Overall','Bottom','Pants'].includes(item?.sub_category) ? 'Unisex' : 'Genderless';
+}
+
+function gearRowForGender(guide, itemName, gender) {
+  return (guide.gear || []).find(row => row.Item === itemName && ['Genderless','Unisex',gender === 'female' ? 'Female' : 'Male'].includes(String(row['Gender Class'] || '')));
+}
+
+function checkPotionRecommendations(guide, name) {
+  const catalog = guide.potionRecommendations;
+  if (!catalog?.items?.length || !catalog.builds?.[guide.id]) throw new Error(`${name} is missing its potion recommendation catalog`);
+  const items = new Map(catalog.items.map(item => [String(item.id), item]));
+  for (const item of catalog.items) {
+    if (item.icon !== `/game-media/icons/${item.id}` || Number(item.shopPrice) <= 0 || Number(item.efficiency) <= 0) {
+      throw new Error(`${name} has an invalid potion catalog row: ${item.name}`);
+    }
+  }
+  for (const kind of ['hp','mp']) {
+    const tiers = catalog.builds[guide.id]?.[kind] || [];
+    if (!tiers.length) throw new Error(`${name} is missing ${kind.toUpperCase()} potion tiers`);
+    for (const tier of tiers) {
+      const item = items.get(String(tier.recommendedId));
+      if (!item || Number(item[kind] || 0) <= 0 || Number(tier.min) > Number(tier.max)) {
+        throw new Error(`${name} has an invalid ${kind.toUpperCase()} potion tier at Lv${tier.min}`);
+      }
+    }
+  }
+}
+
+
+
 function checkCanonicalInventory(guide, name) {
   const ids = new Map();
   for (const row of (guide.gear || []).filter(row => row.Item !== 'None')) {
@@ -34,6 +69,8 @@ function checkCanonicalInventory(guide, name) {
     if (row['Icon URL'] !== `/game-media/icons/${id}`) throw new Error(`${name} ${row.Item} does not use its canonical icon route`);
     const expectedGender = String(canonical.gender || '');
     if (String(row.Gender || '') !== expectedGender) throw new Error(`${name} ${row.Item} gender mismatch: ${row.Gender || '(blank)'} != ${expectedGender || '(blank)'}`);
+    const expectedClass = expectedGenderClass(canonical);
+    if (String(row['Gender Class'] || '') !== expectedClass) throw new Error(`${name} ${row.Item} gender class mismatch: ${row['Gender Class'] || '(blank)'} != ${expectedClass}`);
     if (slotMap[canonical.sub_category] && row.Slot !== slotMap[canonical.sub_category]) throw new Error(`${name} ${row.Item} has slot ${row.Slot}, canonical slot is ${slotMap[canonical.sub_category]}`);
     if (!ids.has(id)) ids.set(id, row.Item);
     else if (ids.get(id) !== row.Item) throw new Error(`${name} reuses item ID ${id} for multiple names`);
@@ -41,6 +78,7 @@ function checkCanonicalInventory(guide, name) {
 }
 
 checkCanonicalInventory(root, 'I/L');
+checkPotionRecommendations(root, 'I/L');
 
 const expectedClassicIlSkillIds = {
   'Improved MP Recovery': 2000000,
@@ -72,11 +110,12 @@ const catalogShape = guide => JSON.stringify({
 });
 
 const sharedCatalog = catalogShape(root);
-function effectivePreset(guide, level) {
+function effectivePreset(guide, level, gender) {
   const out = {Overall: 'None', Top: 'None', Bottom: 'None'};
   const stages = guide.gearPresets?.efficient?.levels || [];
   stages.filter(row => Number(row.min) <= level).sort((a, b) => Number(a.min) - Number(b.min)).forEach(row => {
-    Object.entries(row.gear || {}).forEach(([slot, item]) => {
+    const stageGear = {...(row.gear || {}), ...((gender && row.genderGear?.[gender]) || {})};
+    Object.entries(stageGear).forEach(([slot, item]) => {
       out[slot] = item;
       if (item !== 'None' && slot === 'Overall') { out.Top = 'None'; out.Bottom = 'None'; }
       if (item !== 'None' && (slot === 'Top' || slot === 'Bottom')) out.Overall = 'None';
@@ -100,7 +139,7 @@ for (const [name, guide] of Object.entries(root.buildVariants)) {
   if (!guide.gearPresets?.efficient?.levels?.length || !guide.gear.some(row => row['Highly Recommended'] === true)) {
     throw new Error(`${name} is missing curated equipment checkpoints`);
   }
-  if (guide.gear.some(row => row['Req Lv'] === undefined || row['Class Fit'] === undefined || row['Job Family'] === undefined || row['Job Branch'] === undefined || row['Req Job'] === undefined || row['Item Type'] === undefined)) {
+  if (guide.gear.some(row => row['Req Lv'] === undefined || row['Class Fit'] === undefined || row['Job Family'] === undefined || row['Job Branch'] === undefined || row['Req Job'] === undefined || row['Item Type'] === undefined || row['Gender Class'] === undefined)) {
     throw new Error(`${name} contains an item without job, branch, type, or level metadata`);
   }
   const gearNames = new Set(guide.gear.map(row => row.Item));
@@ -108,11 +147,35 @@ for (const [name, guide] of Object.entries(root.buildVariants)) {
     for (const [slot, item] of Object.entries(checkpoint.gear || {})) {
       if (!gearNames.has(item)) throw new Error(`${name} checkpoint ${checkpoint.min} references missing ${slot}: ${item}`);
     }
+    for (const [gender, variant] of Object.entries(checkpoint.genderGear || {})) {
+      for (const [slot, item] of Object.entries(variant || {})) {
+        if (!gearNames.has(item)) throw new Error(`${name} checkpoint ${checkpoint.min} references missing ${gender} ${slot}: ${item}`);
+      }
+    }
   }
+  const sharedEarrings = guide.gear.some(row => row.Slot === 'Earrings' && ['Unisex','Genderless'].includes(String(row['Gender Class'] || '')));
+  const sharedCapes = guide.gear.some(row => row.Slot === 'Cape' && ['Unisex','Genderless'].includes(String(row['Gender Class'] || '')));
+  if (!sharedEarrings || !sharedCapes) throw new Error(`${name} is missing shared earrings or cape equipment`);
+  if (name === 'fighter' && !guide.gear.some(row => row.Slot === 'Shield' && ['Unisex','Genderless'].includes(String(row['Gender Class'] || '')))) {
+    throw new Error('Fighter is missing shared shield equipment');
+  }
+  for (const slot of ['Top','Bottom','Overall']) {
+    const hasMale = guide.gear.some(row => row.Slot === slot && row['Gender Class'] === 'Male');
+    const hasFemale = guide.gear.some(row => row.Slot === slot && row['Gender Class'] === 'Female');
+    if (!hasMale || !hasFemale) throw new Error(`${name} is missing a ${slot} gender counterpart`);
+  }
+  checkPotionRecommendations(guide, name);
   for (const level of [1, 10, 15, 30, 50, 60, 70]) {
-    const loadout = effectivePreset(guide, level);
-    if (loadout.Overall !== 'None' && (loadout.Top !== 'None' || loadout.Bottom !== 'None')) {
-      throw new Error(`${name} effective Lv${level} preset contains Overall plus Top/Bottom`);
+    for (const gender of ['male','female']) {
+      const loadout = effectivePreset(guide, level, gender);
+      if (loadout.Overall !== 'None' && (loadout.Top !== 'None' || loadout.Bottom !== 'None')) {
+        throw new Error(`${name} ${gender} effective Lv${level} preset contains Overall plus Top/Bottom`);
+      }
+      for (const [slot, item] of Object.entries(loadout)) {
+        if (!item || item === 'None') continue;
+        const row = gearRowForGender(guide, item, gender);
+        if (!row) throw new Error(`${name} ${gender} effective Lv${level} preset cannot resolve ${slot}: ${item}`);
+      }
     }
   }
   if (guide.quests.some(row => !row.Quest || !row.Region || !row.Priority || !row['Why Do It'] || row.Lv === undefined || row.Lv === null)) {
@@ -235,7 +298,7 @@ for (const token of [
   'faceId:21000',
   "root.dataset.avatarGearIds=gearSummary;",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.10.4-session-entry-once')",
+  "navigator.serviceWorker.register('./sw.js?v=0.10.5-potions-gender-audit')",
   'tcwFullSkillBuild',
   'data-plan-level',
   "list.querySelectorAll('.skill-row[data-plan-level]')",
@@ -245,6 +308,17 @@ for (const token of [
   'profile?.subtitle||\'Current route\')+\' · Level \'+'
 ]) {
   if (!app.includes(token)) throw new Error(`Missing class-specific renderer contract: ${token}`);
+}
+for (const token of [
+  'recommended-pots',
+  'potion-modal',
+  'potion-recommendation-card',
+  'function potionTier',
+  'renderPotionOptions',
+  'potion-modal-close',
+  'renderRecommendedPotions'
+]) {
+  if (!app.includes(token)) throw new Error(`Missing recommended-potion renderer contract: ${token}`);
 }
 if (app.includes('state.level=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));\n    save();\n    renderAll();')) {
   throw new Error('The old full-render level handler is still active');
@@ -281,8 +355,14 @@ const indexHtml = fs.readFileSync(`${outputDir}/index.html`, 'utf8');
 for (const token of ['modal-filter-summary', 'modal-show-future', 'data-class-equipment-filters', 'session-entry-modal', 'session-reset-modal', 'session-gender-modal', 'modal-gender-label']) {
   if (!indexHtml.includes(token)) throw new Error(`Missing equipment filter contract: ${token}`);
 }
+for (const token of ['recommended-pots', 'potion-modal', 'potion-modal-close']) {
+  if (!indexHtml.includes(token)) throw new Error(`Missing recommended-potion markup contract: ${token}`);
+}
 if (!fs.existsSync(`${outputDir}/session-flow.css`) || !fs.statSync(`${outputDir}/session-flow.css`).size) {
   throw new Error('Session flow stylesheet is missing');
+}
+if (!fs.existsSync(`${outputDir}/potions.css`) || !fs.statSync(`${outputDir}/potions.css`).size) {
+  throw new Error('Recommended potion stylesheet is missing');
 }
 
 const progressionSyncCss = fs.readFileSync(`${outputDir}/progression-sync.css`, 'utf8');
