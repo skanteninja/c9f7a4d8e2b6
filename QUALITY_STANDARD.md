@@ -1,7 +1,7 @@
 # MapleStory Classic Builder — Quality Standard
 
 Status: working release contract, established 2026-09-15
-Current live checkpoint: `0.10.3-session-focus-trap`
+Current live checkpoint: `0.10.4-session-entry-once`
 
 This document defines what “ready” means for the public MapleStory Classic Builder. It is intentionally stricter than “the page loads”: the builder is a data product, a planner, and a visual interface at the same time.
 
@@ -28,6 +28,7 @@ The supported build names are exact and stable:
 7. **Public-source boundary.** The public UI does not expose internal provider, provenance, or maintenance language that is not useful to a player.
 8. **Session safety and character identity.** Returning to a saved build offers Continue or Reset; Reset requires explicit confirmation with a loss summary; fresh/reset sessions require a gender choice that persists, filters locked equipment, and drives the avatar body.
 9. **Modal focus containment.** While a session dialog is open, keyboard focus stays inside that dialog and cycles through its visible controls; publishing a runtime session-flow change also invalidates the prior service-worker asset token.
+10. **Session-entry cadence.** Continue/Reset appears once per build entry in a browser tab: normal refresh preserves the completed decision, while a new site tab or different build starts a new decision; incomplete gender/reset flow remains required.
 
 ## Quality dimensions
 
@@ -45,6 +46,7 @@ The supported build names are exact and stable:
 - Re-entering a saved build exposes Continue and Reset choices; destructive reset is separately confirmed and scoped to the active build.
 - Male/female selection is required for fresh/reset sessions and is reflected in the avatar and equipment compatibility labels.
 - Session dialogs keep keyboard focus contained, restore focus to the initiating control after dismissal, and remain usable with Tab, Shift+Tab, and Escape behavior.
+- Once the session decision is completed, ordinary browser refreshes do not reopen it; entering a different build or opening a new site tab starts the appropriate entry flow.
 - Visible controls have useful names, focus styles, keyboard behavior, and state announcements where state changes matter.
 - Browser history/back navigation returns to the expected page and build.
 
