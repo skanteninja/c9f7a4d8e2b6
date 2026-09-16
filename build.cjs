@@ -32,6 +32,10 @@ const CLASSIC_EQUIPMENT_BY_ID = new Map(
     .filter(item => item.category === 'Equipment' && item.id)
     .map(item => [Number(item.id), item])
 );
+const CLASSIC_EQUIPMENT_NAME_COUNTS = new Map();
+for (const item of CLASSIC_EQUIPMENT_BY_ID.values()) {
+  CLASSIC_EQUIPMENT_NAME_COUNTS.set(item.name, (CLASSIC_EQUIPMENT_NAME_COUNTS.get(item.name) || 0) + 1);
+}
 const GEAR_NAME_ALIASES = {
   "Beginner's Wooden Wand / job wand": 'Wooden Wand'
 };
@@ -90,7 +94,10 @@ function canonicalizeGuideInventory(data) {
     if (!row || row.Item === 'None' || !row.Item) return row;
     const requestedName = GEAR_NAME_ALIASES[row.Item] || row.Item;
     const itemId = Number(row['Item ID'] || 0);
-    const item = CLASSIC_EQUIPMENT_BY_ID.get(itemId) || CLASSIC_EQUIPMENT_BY_NAME.get(requestedName);
+    const named = CLASSIC_EQUIPMENT_BY_NAME.get(requestedName);
+    const item = named && (Number(CLASSIC_EQUIPMENT_NAME_COUNTS.get(requestedName) || 0) === 1 || Number(named.id) === itemId)
+      ? named
+      : CLASSIC_EQUIPMENT_BY_ID.get(itemId) || named;
     if (!item) {
       // Keep non-equipment utility entries (pets/mounts) visible, but never
       // let an unverified record inherit a misleading legacy sprite.
