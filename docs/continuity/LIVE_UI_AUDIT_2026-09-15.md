@@ -3,7 +3,7 @@
 URL: `https://maplestory-classic.ofri505.workers.dev`
 Initial observed checkpoint: `0.10.0-classic-avatar-parity`
 Post-publish checkpoint: `0.10.1-dashboard-containment`
-Current follow-up checkpoint: `0.10.3-session-focus-trap`
+Current follow-up checkpoint: `0.10.4-session-entry-once`
 Viewport: approximately 1363×936 browser content area
 
 ## Scope and evidence
@@ -102,3 +102,15 @@ Observed live interaction results:
 - The live app reported 22 visible images, zero failed/incomplete visible images, and no application-origin console errors. The repeated errors were from the browser metadata extension at `chrome-extension://kcdongibgcplmaagnmgpjhpjgmmaaaaa/...`.
 
 This is a targeted keyboard/modal check at the audited desktop viewport, not closure of the broader P2.2 narrow-width, text-size, or assistive-technology audit. The human-visible Skill Tree blink and the independent Fighter/Hunter content audit remain open.
+
+## 0.10.4 session-entry cadence follow-up — 2026-09-16
+
+The startup prompt was changed to track a browser-tab session state keyed to the active build. Completed state is not reopened on a normal refresh, while a new site tab and a different build begin a new entry flow.
+
+Observed live results:
+- After selecting Male and completing the Fighter entry flow, refreshing the same live URL left all session modals closed and preserved `MALE` / `avatar=male`.
+- Opening the same Fighter URL in a new browser tab displayed “Continue this build?”.
+- Navigating the original tab to Hunter displayed “Choose your character”; navigating back to Fighter displayed “Continue this build?” again.
+- After choosing Continue on Fighter, another refresh kept every session modal closed.
+- Live build-info reports `0.10.4-session-entry-once`; Verify Live `35092685632` passed.
+- Site-origin console errors were absent; 23 visible images had no failed or incomplete image.
