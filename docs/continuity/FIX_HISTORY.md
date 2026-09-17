@@ -19,7 +19,9 @@ Correction:
 
 Verification:
 - Local build, generated JavaScript syntax, multi-build audit, asset copy, and `git diff --check` passed.
-- Browser-rendered visual QA is required after the new deployment; the evidence and comparison history are recorded in the project-root `design-qa.md`.
+- Source `0b69ee5b96f20c2f996238e9d082b7f8ed15682f` produced generated site `71a81fe402167779602e0580fbe89342336c8dd9`; the live stylesheet serves `0.10.11-royal-card-parity`.
+- Browser-rendered visual QA passed: the equipment card visibly shows the class-town layer, maple ornaments, bright double frames, readable slots, 20 gear slots, and 2 potion slots across the supported routes. Hat replacement and HP potion dialogs opened with their option cards and closed successfully.
+- Build Static `35233212472`, Visual/UI `35233212242`, Maps/ETC `35233212285`, Monster `35233212367`, Real Input `35233212383`, and Verify Live `35233212343` passed; Verify Live required one rerun after a transient CDP execution-context race. The evidence and comparison history are recorded in the project-root `design-qa.md`.
 
 ## 2026-09-17 — 0.10.9 Royal Maple dashboard cards
 

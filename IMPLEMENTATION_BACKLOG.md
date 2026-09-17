@@ -3,11 +3,12 @@
 Last prioritized: 2026-09-17
 Ordering follows the quality contract in [QUALITY_STANDARD.md](QUALITY_STANDARD.md). “Implemented locally” never means “deployed” until the live gate passes.
 
-## 0.10.11 in-progress reference-fidelity correction
+## 0.10.11 completed — verified reference-fidelity correction
 
 - Correct the dashboard card treatment against the supplied Royal Maple reference rather than accepting the earlier subtle theme pass.
 - Keep the existing dashboard layout while adding visible town art to the Equipment Inventory card, stronger antique-gold double frames, real maple-leaf ornaments, and matching slot/control styling.
-- Release token: `0.10.11-royal-card-parity`; close this entry only after live browser visual QA passes.
+- Release token: `0.10.11-royal-card-parity`.
+- Source `0b69ee5b96f20c2f996238e9d082b7f8ed15682f` generated site `71a81fe402167779602e0580fbe89342336c8dd9`; live browser visual QA and all release gates passed, including Verify Live `35233212343` after rerunning its transient CDP failure.
 
 ## 0.10.9 completed in the verified live checkpoint
 

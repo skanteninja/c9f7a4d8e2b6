@@ -4,9 +4,18 @@ Last continuity baseline: 2026-09-17
 
 This is the authoritative unresolved-issues list for cross-chat continuity. Do not mark an issue resolved merely because code was edited. Resolution requires verification in the generated/live UI or validated data output.
 
-## Verification snapshot — 0.10.11 Royal Maple card parity (pending live release checks)
+## Verification snapshot — 0.10.11 Royal Maple card parity (verified 2026-09-17)
 
-The 0.10.11 source pass corrects the visual mismatch identified in the supplied reference comparison. It is not considered fully resolved until the generated deployment serves the new cache token and the live browser screenshot confirms the equipment card’s visible town layer, maple ornaments, double frames, and readable slots. See `design-qa.md` for the comparison record.
+The 0.10.11 source pass corrects the visual mismatch identified in the supplied reference comparison. Source `0b69ee5b96f20c2f996238e9d082b7f8ed15682f` produced generated site commit `71a81fe402167779602e0580fbe89342336c8dd9`; the live stylesheet serves `0.10.11-royal-card-parity`.
+
+Verified in the live browser:
+- Equipment Inventory visibly uses the Royal Maple double frame, plum/parchment surfaces, maple-leaf slot ornaments, brighter gold borders, and class-town artwork behind the inventory stage.
+- Fighter, Hunter, and I/L Wizard routes map to Perion, Henesys, and Ellinia respectively; each renders 20 gear slots and 2 potion slots.
+- Equipment replacement and potion recommendation dialogs open with their option cards and close successfully.
+- No site-origin console errors were present; browser metadata-extension noise was excluded from application evidence.
+- Build Static `35233212472`, Visual/UI `35233212242`, Maps/ETC `35233212285`, Monster `35233212367`, Real Input `35233212383`, and Verify Live `35233212343` passed. Verify Live passed after rerunning its transient CDP execution-context race.
+
+See `design-qa.md` for the comparison record.
 
 ## Verification snapshot — 0.10.9 (2026-09-17)
 

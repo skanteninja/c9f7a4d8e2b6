@@ -21,6 +21,7 @@ Also read QUALITY_STANDARD.md, IMPLEMENTATION_BACKLOG.md, and docs/continuity/LI
 - The previous 0.10.9 pass changed the dashboard card selectors but remained visibly too subtle and hid the town scene inside the Equipment Inventory card.
 - The 0.10.11 pass is the source of truth for the approved reference treatment: visible class-town art in the equipment card, antique-gold double framing, maple-leaf ornaments, stronger slot borders, and matching potion/control surfaces.
 - Existing dashboard geometry and interaction behavior remain unchanged.
+- Source `0b69ee5b96f20c2f996238e9d082b7f8ed15682f` generated site `71a81fe402167779602e0580fbe89342336c8dd9`; live browser QA and the full release gate set passed. See `design-qa.md` for the evidence.
 
 ## Repository / Deployment
 - Repository: `skanteninja/c9f7a4d8e2b6`

@@ -3,7 +3,7 @@
 source visual truth path: `/workspace/scratch/e694a5abc1c2/upload/add2d38a-d0d6-4bd6-bbb5-ed7f807b8ea8.png`
 secondary supplied implementation reference path: `/workspace/scratch/e694a5abc1c2/upload/13e19894-6f0b-4046-9cc7-7b36ce7b3e0a.png`
 implementation screenshot path: `/tmp/royal-dashboard-after-0.10.11.png` (cloud-browser capture)
-viewport: cloud browser dashboard viewport; source visual 1491 × 1055 px; supplied compact reference 554 × 611 px; implementation capture uses the live dashboard viewport and preserves the existing responsive layout.
+viewport: cloud browser inner viewport 1363 × 936 CSS px at device pixel ratio 1; source visual 1491 × 1055 px; supplied compact reference 554 × 611 px; implementation capture uses the live dashboard viewport and preserves the existing responsive layout.
 state: I/L Wizard dashboard, dashboard page open, Equipment Inventory visible, HP/MP slots visible, level-aware default loadout.
 
 ## Comparison history
@@ -21,10 +21,13 @@ Fixes made:
 
 ### Pass 2 — after 0.10.11
 
-Post-fix evidence to record after the live deployment:
-- The dashboard card visibly uses the Royal Maple frame system rather than the former understated generic panel.
-- The Equipment Inventory card exposes the class-town art behind a dark readability layer, with maple ornaments and gold-framed slots.
-- The existing grid, item icons, HP/MP slots, and controls remain present and in their established positions.
+Post-fix evidence from the live deployment:
+- The live stylesheet token is `0.10.11-royal-card-parity`.
+- The dashboard card visibly uses the Royal Maple frame system rather than the former understated generic panel: antique-gold double framing, plum/parchment surfaces, real maple ornaments, and brighter slot/control borders.
+- The Equipment Inventory card exposes the I/L Wizard's Ellinia art behind a dark readability layer; the live route checks map Fighter → Perion, Hunter → Henesys, and I/L Wizard → Ellinia.
+- The existing grid, item icons, HP/MP slots, and controls remain present in their established positions; every live class route rendered 20 gear slots and 2 potion slots.
+- Clicking the live Hat slot opened the replacement modal with 6 choices. Clicking HP opened the potion modal with 6 potion cards, including the recommended feature card and alternate options. Both dialogs closed successfully.
+- The live console contained no application-origin errors. The recorded errors were browser metadata-extension noise from `chrome-extension://...`, not site runtime failures.
 
 ## Required fidelity surfaces
 
@@ -37,7 +40,7 @@ Post-fix evidence to record after the live deployment:
 ## Browser QA
 
 - Primary interaction tested: dashboard load with Equipment Inventory and HP/MP slots visible.
-- Additional interaction to test after release: click an equipment slot and click HP/MP slots; confirm the existing replacement and potion option modals still open.
-- Console errors: check the live tab and record only application-origin errors; browser metadata-extension noise is not an application failure.
+- Additional interaction tested after release: equipment replacement and HP potion dialogs opened and closed successfully; the potion dialog rendered its recommended and alternate cards.
+- Console errors: application-origin errors none; browser metadata-extension noise was isolated from application evidence.
 
-final result: blocked
+final result: passed

@@ -7,7 +7,9 @@ This log exists to make cross-chat handoff quick and reliable. Record meaningful
 - Corrected the dashboard implementation after visual comparison showed that the compact equipment card still looked like the legacy UI rather than the approved Royal Maple reference.
 - Applied the final visual layer to the rendered dashboard cards: visible town art in the equipment card, brighter antique-gold double frames, parchment/plum surfaces, maple-leaf ornaments, matched slot framing, and reference-style controls.
 - Preserved the existing dashboard grid, slot positions, level-aware equipment/potion behavior, and class mapping; the change is visual and cache-versioned.
-- Local design QA compared the supplied reference against the deployed dashboard at the same compact layout state; the implementation screenshot is recorded in `design-qa.md` after deployment.
+- Source `0b69ee5b96f20c2f996238e9d082b7f8ed15682f` produced generated site `71a81fe402167779602e0580fbe89342336c8dd9`; live `0.10.11-royal-card-parity` is deployed.
+- Live design QA passed at a 1363 × 936 CSS px viewport: class-town art, maple ornaments, double frames, 20 gear slots, and 2 potion slots are visible; Hat replacement and HP potion dialogs open with options and close successfully.
+- Build Static `35233212472`, Visual/UI `35233212242`, Maps/ETC `35233212285`, Monster `35233212367`, Real Input `35233212383`, and Verify Live `35233212343` passed. Verify Live passed on rerun after a transient CDP execution-context race. The implementation screenshot and comparison record are in `design-qa.md`.
 
 ## 2026-09-17 — 0.10.9 Royal Maple dashboard cards
 
