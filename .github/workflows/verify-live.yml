@@ -24,7 +24,12 @@ jobs:
           for i in {1..60}; do
             build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0; visuals_ok=0; integrity_ok=0; stability_ok=0
             build_info="$(curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" || true)"
-            [[ "$build_info" == *"Top Classic World Maplestory 0.10.6-dashboard-pot-slots"* ]] && build_ok=1 || true
+            [[ "$build_info" == *"Top Classic World Maplestory 0.10.7-royal-town-themes"* ]] && build_ok=1 || true
+
+            theme_css="$(curl -fsSL --max-time 15 "$BASE_URL/royal-maple-theme.css?ci=$GITHUB_RUN_ID" || true)"
+            theme_js="$(curl -fsSL --max-time 15 "$BASE_URL/class-theme.js?ci=$GITHUB_RUN_ID" || true)"
+            theme_ok=0
+            if [[ "$theme_css" == *"assets/class-themes/perion.webp"* ]] && [[ "$theme_css" == *"royal-maple-theme"* ]] && [[ "$theme_js" == *"warrior-fighter"* ]] && [[ "$theme_js" == *"archer-hunter"* ]] && [[ "$theme_js" == *"magician-il-fresh"* ]]; then theme_ok=1; fi
 
             maps_js="$(curl -fsSL --max-time 15 "$BASE_URL/maps-tab.js?ci=$GITHUB_RUN_ID" || true)"
             if [[ "$maps_js" == *"maps-world-ready"* ]] && [[ "$maps_js" == *"maps-explorer-ready"* ]] && [[ "$maps_js" == *"maps-atlas-visual-ready"* ]] && [[ "$maps_js" == *"maps-current-only-ready"* ]] && [[ "$maps_js" == *"ATLAS_CURRENT_NAME_ALIASES"* ]] && [[ "$maps_js" == *"100000000':'henesys"* ]] && [[ "$maps_js" == *"LEGACY_INDEX"* ]] && [[ "$maps_js" == *"legacyFetch=Promise.resolve([])"* ]]; then maps_ok=1; fi
@@ -50,8 +55,8 @@ jobs:
             sync_css="$(curl -fsSL --max-time 15 "$BASE_URL/progression-sync.css?ci=$GITHUB_RUN_ID" || true)"
             if [[ "$level_hook" == *"tcw-skill-images-connected-ready"* ]] && [[ "$level_hook" != *"node.remove()"* ]] && [[ "$sync_css" == *"Dashboard skill artwork never fades"* ]] && [[ "$sync_css" == *"filter:none!important;opacity:1!important"* ]]; then stability_ok=1; fi
 
-            echo "live-check[$i] build=$build_ok maps=$maps_ok legacy=$legacy_ok atlas=$atlas_ok visuals=$visuals_ok integrity=$integrity_ok stability=$stability_ok world_bytes=${world_bytes:-0} monster_bytes=${monster_bytes:-0}"
-            if [ "$build_ok" -eq 1 ] && [ "$maps_ok" -eq 1 ] && [ "$legacy_ok" -eq 1 ] && [ "$atlas_ok" -eq 1 ] && [ "$visuals_ok" -eq 1 ] && [ "$integrity_ok" -eq 1 ] && [ "$stability_ok" -eq 1 ]; then ready=1; break; fi
+            echo "live-check[$i] build=$build_ok theme=$theme_ok maps=$maps_ok legacy=$legacy_ok atlas=$atlas_ok visuals=$visuals_ok integrity=$integrity_ok stability=$stability_ok world_bytes=${world_bytes:-0} monster_bytes=${monster_bytes:-0}"
+            if [ "$build_ok" -eq 1 ] && [ "$theme_ok" -eq 1 ] && [ "$maps_ok" -eq 1 ] && [ "$legacy_ok" -eq 1 ] && [ "$atlas_ok" -eq 1 ] && [ "$visuals_ok" -eq 1 ] && [ "$integrity_ok" -eq 1 ] && [ "$stability_ok" -eq 1 ]; then ready=1; break; fi
             sleep 5
           done
           test "$ready" -eq 1
@@ -74,10 +79,11 @@ jobs:
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-live-${viewport//,/-}.html"
             "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=36000 --dump-dom "$BASE_URL/?ci=$GITHUB_RUN_ID&viewport=$viewport" >"$file"
-            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready maps-nav-ready maps-data-ready maps-tab-ready maps-world-ready maps-current-only-ready maps-atlas-visual-ready etc-lifetime-data-ready quest-catalog-audit-ready etc-lifetime-audit-ready monster-drop-evidence-ready tcw-skill-images-connected-ready; do
+            for marker in dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified dashboard-action-layout-ok dashboard-page-layout-ok top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready maps-nav-ready maps-data-ready maps-tab-ready maps-world-ready maps-current-only-ready maps-atlas-visual-ready etc-lifetime-data-ready quest-catalog-audit-ready etc-lifetime-audit-ready monster-drop-evidence-ready tcw-skill-images-connected-ready royal-theme-ready; do
               grep -q "$marker" "$file"
             done
             grep -q '<title>Top Classic World Maplestory</title>' "$file"
+            grep -q 'data-maple-town="ellinia"' "$file"
             grep -q 'data-page="maps" class="nav-btn' "$file"
             grep -q 'id="maps-world"' "$file"
             grep -q 'id="maps-open-explorer"' "$file"
@@ -116,8 +122,8 @@ jobs:
         run: |
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
           test -n "$chrome"
-          for spec in 'warrior-fighter|Fighter Build|Power Strike' 'archer-hunter|Hunter Build|Arrow Blow'; do
-            IFS='|' read -r build title skill <<<"$spec"
+          for spec in 'warrior-fighter|Fighter Build|Power Strike|perion' 'archer-hunter|Hunter Build|Arrow Blow|henesys'; do
+            IFS='|' read -r build title skill town <<<"$spec"
             file="/tmp/maplestory-live-${build}.html"
             "$chrome" --headless --no-sandbox --disable-gpu --window-size=1365,900 --virtual-time-budget=36000 --dump-dom "$BASE_URL/?build=${build}&ci=$GITHUB_RUN_ID&multibuild=1" >"$file"
             grep -q "$title" "$file"
@@ -128,6 +134,7 @@ jobs:
             grep -q 'class="progression-avatar-level-controls' "$file"
             grep -q 'id="level-range"' "$file"
             grep -q "data-build-id=\"$build\"" "$file"
+            grep -q "data-maple-town=\"$town\"" "$file"
             grep -q 'data-avatar-renderer="classic-avatar-preview-v1"' "$file"
             grep -q 'data-avatar-gear-ids=' "$file"
             ! grep -q 'class="avatar-equipped-icons' "$file"

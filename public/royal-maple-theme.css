@@ -1,0 +1,642 @@
+/* Royal Maple theme — additive visual layer. Layout and data behavior stay in the existing app. */
+
+html.royal-maple-theme {
+  color-scheme: dark;
+  --bg: #100910;
+  --bg2: #170d16;
+  --panel: #1a101a;
+  --panel2: #241520;
+  --line: rgba(203, 155, 76, .24);
+  --text: #f5ead7;
+  --muted: #c2aa8f;
+  --ice: #d3ad63;
+  --lightning: #f2d28c;
+  --violet: #b893ae;
+  --red: #d95b48;
+  --orange: #d89a54;
+  --green: #9cbd82;
+  --amber: #e2b765;
+  --blue: #9dbbc4;
+  --royal-surface: rgba(25, 14, 23, .95);
+  --royal-surface-2: rgba(35, 19, 29, .97);
+  --royal-surface-3: rgba(15, 9, 16, .9);
+  --royal-line: rgba(218, 170, 86, .54);
+  --royal-line-soft: rgba(218, 170, 86, .25);
+  --royal-gold: #d9a653;
+  --royal-gold-bright: #f2d18a;
+  --royal-red: #d95a47;
+  --royal-ivory: #f7ead3;
+  --royal-muted: #c3aa8c;
+  --royal-shadow: 0 18px 46px rgba(5, 2, 7, .42);
+  --town-bg: none;
+  --town-accent: #d95a47;
+  --town-accent-rgb: 217, 90, 71;
+}
+
+html.royal-maple-theme[data-maple-town="perion"] {
+  --town-bg: url("assets/class-themes/perion.webp");
+  --town-accent: #d76548;
+  --town-accent-rgb: 215, 101, 72;
+}
+
+html.royal-maple-theme[data-maple-town="henesys"] {
+  --town-bg: url("assets/class-themes/henesys.webp");
+  --town-accent: #a9bd69;
+  --town-accent-rgb: 169, 189, 105;
+}
+
+html.royal-maple-theme[data-maple-town="ellinia"] {
+  --town-bg: url("assets/class-themes/ellinia.webp");
+  --town-accent: #79b59a;
+  --town-accent-rgb: 121, 181, 154;
+}
+
+body.royal-maple-theme {
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+  color: var(--royal-ivory);
+  background: #140a13;
+}
+
+body.royal-maple-theme::before,
+body.royal-maple-theme::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+body.royal-maple-theme::before {
+  z-index: -2;
+  background-image: var(--town-bg);
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  filter: saturate(.78) contrast(.92) brightness(.68);
+  opacity: .58;
+}
+
+body.royal-maple-theme::after {
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(13, 6, 12, .9), rgba(23, 11, 20, .62) 23%, rgba(18, 9, 17, .69) 54%, rgba(11, 5, 11, .9)),
+    linear-gradient(180deg, rgba(13, 6, 12, .72), rgba(19, 9, 17, .34) 42%, rgba(9, 4, 9, .84));
+}
+
+body.royal-maple-theme main,
+body.royal-maple-theme .sidebar,
+body.royal-maple-theme .topbar {
+  position: relative;
+}
+
+body.royal-maple-theme h1,
+body.royal-maple-theme h2,
+body.royal-maple-theme h3,
+body.royal-maple-theme h4 {
+  color: var(--royal-ivory);
+  font-family: Georgia, "Times New Roman", serif;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .5);
+}
+
+body.royal-maple-theme p,
+body.royal-maple-theme small,
+body.royal-maple-theme label,
+body.royal-maple-theme .muted {
+  color: var(--royal-muted);
+}
+
+body.royal-maple-theme .eyebrow,
+body.royal-maple-theme .v5-kicker-row,
+body.royal-maple-theme .v5-level-caption,
+body.royal-maple-theme .potion-options-heading .eyebrow {
+  color: var(--royal-gold-bright);
+}
+
+body.royal-maple-theme .sidebar {
+  background: linear-gradient(180deg, rgba(20, 10, 19, .97), rgba(13, 7, 13, .95));
+  border-color: var(--royal-line-soft);
+  box-shadow: 0 10px 34px rgba(5, 2, 7, .32);
+}
+
+body.royal-maple-theme .brand-mark {
+  color: var(--royal-red);
+  text-shadow: 0 0 18px rgba(var(--town-accent-rgb), .45);
+}
+
+body.royal-maple-theme .brand-title,
+body.royal-maple-theme .brand-sub,
+body.royal-maple-theme .sidebar-footer b {
+  color: var(--royal-gold-bright);
+}
+
+body.royal-maple-theme .sidebar-footer small {
+  color: var(--royal-muted);
+}
+
+body.royal-maple-theme .sync-dot {
+  background: var(--town-accent);
+  box-shadow: 0 0 12px rgba(var(--town-accent-rgb), .6);
+}
+
+body.royal-maple-theme .topbar {
+  background: rgba(17, 8, 16, .66);
+  border-color: var(--royal-line-soft);
+  box-shadow: 0 8px 26px rgba(5, 2, 7, .16);
+  backdrop-filter: blur(14px);
+}
+
+body.royal-maple-theme .topbar h1 {
+  color: var(--royal-ivory);
+}
+
+body.royal-maple-theme .topbar p,
+body.royal-maple-theme .level-control label {
+  color: var(--royal-muted);
+}
+
+body.royal-maple-theme .nav-btn {
+  color: #c2aa90;
+}
+
+body.royal-maple-theme .nav-btn span {
+  color: var(--town-accent);
+}
+
+body.royal-maple-theme .nav-btn:hover {
+  color: var(--royal-ivory);
+  background: rgba(var(--town-accent-rgb), .1);
+  border-color: rgba(var(--town-accent-rgb), .24);
+}
+
+body.royal-maple-theme .nav-btn.active {
+  color: var(--royal-gold-bright);
+  background: linear-gradient(90deg, rgba(218, 166, 83, .2), rgba(112, 50, 47, .14));
+  border-color: var(--royal-line);
+  box-shadow: inset 0 0 0 1px rgba(242, 209, 138, .08), 0 5px 18px rgba(6, 2, 7, .2);
+}
+
+body.royal-maple-theme .panel,
+body.royal-maple-theme .metric,
+body.royal-maple-theme .db-card,
+body.royal-maple-theme .build-card,
+body.royal-maple-theme .route-card,
+body.royal-maple-theme .cash-card,
+body.royal-maple-theme .beauty-card,
+body.royal-maple-theme .recipe-card,
+body.royal-maple-theme .formula-card,
+body.royal-maple-theme .formula-result,
+body.royal-maple-theme .formula-notes,
+body.royal-maple-theme .agent-card,
+body.royal-maple-theme .source-row,
+body.royal-maple-theme .decision-card,
+body.royal-maple-theme .class-build-group {
+  background: linear-gradient(150deg, var(--royal-surface-2), var(--royal-surface) 62%, rgba(12, 7, 13, .96));
+  border-color: var(--royal-line-soft);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px rgba(246, 211, 139, .045), var(--royal-shadow);
+}
+
+body.royal-maple-theme .panel:hover,
+body.royal-maple-theme .db-card:hover,
+body.royal-maple-theme .build-card:hover,
+body.royal-maple-theme .route-card:hover {
+  border-color: rgba(242, 209, 138, .42);
+}
+
+body.royal-maple-theme .v5-buildbar,
+body.royal-maple-theme .build-library-hero,
+body.royal-maple-theme .db-hero {
+  background: linear-gradient(110deg, rgba(28, 14, 25, .96), rgba(17, 9, 17, .9) 70%, rgba(var(--town-accent-rgb), .1));
+  border: 1px solid var(--royal-line-soft);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px rgba(246, 211, 139, .04), var(--royal-shadow);
+}
+
+body.royal-maple-theme .v5-buildbar {
+  border-left: 3px solid var(--town-accent);
+}
+
+body.royal-maple-theme .v5-buildbar h2,
+body.royal-maple-theme .build-library-hero h2,
+body.royal-maple-theme .db-hero h2 {
+  color: var(--royal-ivory);
+}
+
+body.royal-maple-theme .class-pill,
+body.royal-maple-theme .job-pill,
+body.royal-maple-theme .status-tag,
+body.royal-maple-theme .beta-tag {
+  border-color: var(--royal-line-soft);
+  color: var(--royal-gold-bright);
+  background: rgba(var(--town-accent-rgb), .12);
+}
+
+body.royal-maple-theme .primary-btn,
+body.royal-maple-theme .ghost-btn,
+body.royal-maple-theme .mini-btn,
+body.royal-maple-theme .text-btn,
+body.royal-maple-theme .danger-btn {
+  border-radius: 7px;
+  font-family: inherit;
+  transition: border-color .17s ease, background .17s ease, color .17s ease, transform .17s ease, box-shadow .17s ease;
+}
+
+body.royal-maple-theme .primary-btn {
+  color: #24130e;
+  background: linear-gradient(180deg, #f0c875, #b96f38);
+  border: 1px solid #f6d891;
+  box-shadow: 0 8px 24px rgba(104, 45, 24, .28), inset 0 0 0 1px rgba(255, 244, 198, .26);
+}
+
+body.royal-maple-theme .primary-btn:hover,
+body.royal-maple-theme .primary-btn:focus-visible {
+  background: linear-gradient(180deg, #f7d88b, #c57a40);
+  box-shadow: 0 10px 28px rgba(104, 45, 24, .38), inset 0 0 0 1px rgba(255, 244, 198, .4);
+}
+
+body.royal-maple-theme .ghost-btn,
+body.royal-maple-theme .mini-btn,
+body.royal-maple-theme .text-btn {
+  color: var(--royal-ivory);
+  background: rgba(23, 12, 21, .86);
+  border: 1px solid var(--royal-line-soft);
+  box-shadow: inset 0 0 0 1px rgba(246, 211, 139, .035);
+}
+
+body.royal-maple-theme .ghost-btn:hover,
+body.royal-maple-theme .ghost-btn:focus-visible,
+body.royal-maple-theme .mini-btn:hover,
+body.royal-maple-theme .mini-btn:focus-visible,
+body.royal-maple-theme .text-btn:hover,
+body.royal-maple-theme .text-btn:focus-visible {
+  color: var(--royal-gold-bright);
+  background: rgba(var(--town-accent-rgb), .14);
+  border-color: var(--royal-line);
+}
+
+body.royal-maple-theme .danger-btn {
+  color: #ffe8dc;
+  background: rgba(114, 28, 35, .74);
+  border: 1px solid rgba(217, 90, 71, .56);
+}
+
+body.royal-maple-theme .danger-btn:hover,
+body.royal-maple-theme .danger-btn:focus-visible {
+  background: rgba(149, 39, 41, .88);
+  border-color: #ef9273;
+}
+
+body.royal-maple-theme input,
+body.royal-maple-theme select,
+body.royal-maple-theme textarea {
+  color: var(--royal-ivory);
+  background: rgba(16, 8, 15, .88);
+  border-color: var(--royal-line-soft);
+}
+
+body.royal-maple-theme input:focus,
+body.royal-maple-theme select:focus,
+body.royal-maple-theme textarea:focus {
+  border-color: var(--royal-gold);
+  outline-color: rgba(242, 209, 138, .24);
+  box-shadow: 0 0 0 2px rgba(242, 209, 138, .1);
+}
+
+body.royal-maple-theme ::placeholder {
+  color: #8d7668;
+}
+
+body.royal-maple-theme input[type="checkbox"],
+body.royal-maple-theme input[type="radio"] {
+  accent-color: var(--royal-gold);
+}
+
+body.royal-maple-theme .v5-equipment-hero,
+body.royal-maple-theme .v5-character-hero,
+body.royal-maple-theme .v5-level-hero,
+body.royal-maple-theme .v72-command-grid > .panel,
+body.royal-maple-theme .v72-secondary-content > .panel,
+body.royal-maple-theme .v6-tertiary-grid > .panel,
+body.royal-maple-theme .v72-bottom-grid > .panel {
+  border-color: rgba(218, 170, 86, .34);
+}
+
+body.royal-maple-theme .v5-character-hero {
+  background: radial-gradient(circle at 50% 24%, rgba(var(--town-accent-rgb), .14), transparent 44%), linear-gradient(150deg, rgba(36, 19, 29, .98), rgba(16, 8, 15, .96));
+}
+
+body.royal-maple-theme .v5-level-hero {
+  background: radial-gradient(circle at 50% 14%, rgba(242, 209, 138, .11), transparent 38%), linear-gradient(180deg, rgba(37, 20, 29, .98), rgba(15, 8, 15, .96));
+}
+
+body.royal-maple-theme .v5-level-number strong,
+body.royal-maple-theme .v5-level-number span,
+body.royal-maple-theme .v5-job-line {
+  color: var(--royal-gold-bright);
+}
+
+body.royal-maple-theme .v5-quick-metrics button,
+body.royal-maple-theme .atlas-action-row,
+body.royal-maple-theme .atlas-queue-row,
+body.royal-maple-theme .quest-row,
+body.royal-maple-theme .skill-row,
+body.royal-maple-theme .etc-row,
+body.royal-maple-theme .gear-option,
+body.royal-maple-theme .v72-etc-chip,
+body.royal-maple-theme .atlas-skill-card,
+body.royal-maple-theme .db-facts span {
+  background: rgba(17, 9, 16, .78);
+  border-color: var(--royal-line-soft);
+}
+
+body.royal-maple-theme .v5-quick-metrics button:hover,
+body.royal-maple-theme .atlas-action-row:hover,
+body.royal-maple-theme .atlas-queue-row:hover,
+body.royal-maple-theme .quest-row:hover,
+body.royal-maple-theme .gear-option:hover,
+body.royal-maple-theme .v72-etc-chip:hover,
+body.royal-maple-theme .atlas-skill-card:hover {
+  background: rgba(var(--town-accent-rgb), .12);
+  border-color: rgba(242, 209, 138, .48);
+}
+
+body.royal-maple-theme .v5-quick-metrics button small,
+body.royal-maple-theme .atlas-stat-row span,
+body.royal-maple-theme .db-facts small,
+body.royal-maple-theme .potion-category {
+  color: #a98d76;
+}
+
+body.royal-maple-theme .v5-quick-metrics button b,
+body.royal-maple-theme .atlas-stat-row b,
+body.royal-maple-theme .db-facts b,
+body.royal-maple-theme .v72-etc-chip > b {
+  color: var(--royal-ivory);
+}
+
+/* The paper-doll keeps its existing grid and slot positions; only the frame treatment changes. */
+body.royal-maple-theme .equipment-window {
+  background: linear-gradient(145deg, rgba(25, 13, 22, .96), rgba(10, 6, 11, .94));
+  border-color: var(--royal-line);
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px rgba(246, 211, 139, .06), 0 14px 34px rgba(5, 2, 7, .3);
+}
+
+body.royal-maple-theme .dashboard-v72 .v5-equipment-window {
+  padding: 9px !important;
+  background: linear-gradient(145deg, rgba(25, 13, 22, .96), rgba(10, 6, 11, .94)) !important;
+  border: 1px solid var(--royal-line) !important;
+  border-radius: 10px !important;
+  box-shadow: inset 0 0 0 1px rgba(246, 211, 139, .06), 0 14px 34px rgba(5, 2, 7, .3) !important;
+}
+
+body.royal-maple-theme .slot-grid {
+  background: rgba(10, 6, 11, .78);
+  border-color: var(--royal-line-soft);
+  border-radius: 8px;
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, .36);
+}
+
+body.royal-maple-theme .dashboard-v72 .v5-equipment-window .slot-grid {
+  padding: 7px !important;
+  background: rgba(10, 6, 11, .78) !important;
+  border: 1px solid var(--royal-line-soft) !important;
+  border-radius: 8px !important;
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, .36) !important;
+}
+
+body.royal-maple-theme .gear-slot {
+  color: #a98e77;
+  background: linear-gradient(145deg, rgba(18, 9, 17, .98), rgba(34, 18, 28, .96));
+  border-color: rgba(218, 170, 86, .32);
+  box-shadow: inset 0 0 0 1px rgba(246, 211, 139, .055), inset 0 0 12px rgba(0, 0, 0, .42);
+}
+
+body.royal-maple-theme .dashboard-v72 .v5-equipment-window .gear-slot {
+  background: linear-gradient(145deg, rgba(18, 9, 17, .98), rgba(34, 18, 28, .96)) !important;
+  border-color: rgba(218, 170, 86, .32) !important;
+  box-shadow: inset 0 0 0 1px rgba(246, 211, 139, .055), inset 0 0 12px rgba(0, 0, 0, .42) !important;
+}
+
+body.royal-maple-theme .gear-slot:hover,
+body.royal-maple-theme .gear-slot:focus-visible {
+  background: linear-gradient(145deg, rgba(var(--town-accent-rgb), .17), rgba(35, 18, 28, .98));
+  border-color: var(--royal-gold-bright);
+  box-shadow: inset 0 0 0 1px rgba(246, 211, 139, .1), 0 0 16px rgba(218, 170, 86, .16);
+  outline: none;
+}
+
+body.royal-maple-theme .gear-slot.selected,
+body.royal-maple-theme .gear-slot.progression-new-equipped {
+  background: linear-gradient(145deg, rgba(211, 157, 72, .2), rgba(37, 18, 25, .98));
+  border-color: var(--royal-gold-bright);
+  box-shadow: inset 0 0 0 1px rgba(246, 211, 139, .16), 0 0 18px rgba(218, 170, 86, .18);
+}
+
+body.royal-maple-theme .gear-slot .slot-name,
+body.royal-maple-theme .equipment-pot-slot .slot-name {
+  color: #bb9b7c;
+  text-shadow: 0 1px #080407;
+}
+
+body.royal-maple-theme .core-orb {
+  color: var(--royal-gold-bright);
+  background: radial-gradient(circle at 50% 30%, rgba(var(--town-accent-rgb), .16), rgba(22, 11, 20, .96) 62%, rgba(10, 6, 11, .98) 78%);
+  border-color: var(--royal-line);
+}
+
+body.royal-maple-theme .class-emblem {
+  color: var(--town-accent);
+  background: rgba(var(--town-accent-rgb), .12);
+  border-color: var(--royal-line);
+}
+
+body.royal-maple-theme .progression-slot-marker,
+body.royal-maple-theme .highly-recommended-badge {
+  color: #27150c;
+  background: linear-gradient(180deg, #f3cc79, #b86a36);
+  border-color: #f3d28e;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .24);
+}
+
+body.royal-maple-theme .gear-slot.progression-new-equipped .progression-slot-marker {
+  color: #ffe9dc;
+  background: linear-gradient(180deg, #d9664f, #8d302e);
+  border-color: #f29b7d;
+}
+
+body.royal-maple-theme .equipment-pot-slots {
+  border-top: 1px solid rgba(218, 170, 86, .18);
+  padding-top: 6px;
+}
+
+body.royal-maple-theme .equipment-pot-slot {
+  background: linear-gradient(145deg, rgba(23, 11, 20, .98), rgba(38, 19, 29, .96));
+  border-color: rgba(218, 170, 86, .38);
+}
+
+body.royal-maple-theme .equipment-pot-slot:hover,
+body.royal-maple-theme .equipment-pot-slot:focus-visible {
+  background: linear-gradient(145deg, rgba(var(--town-accent-rgb), .18), rgba(38, 19, 29, .98));
+  border-color: var(--royal-gold-bright);
+}
+
+body.royal-maple-theme .equipment-pot-slot-hp {
+  border-color: rgba(217, 90, 71, .64);
+  box-shadow: inset 0 0 0 1px rgba(242, 150, 116, .08), 0 0 12px rgba(217, 90, 71, .08);
+}
+
+body.royal-maple-theme .equipment-pot-slot-mp {
+  border-color: rgba(125, 178, 190, .62);
+  box-shadow: inset 0 0 0 1px rgba(169, 218, 224, .08), 0 0 12px rgba(125, 178, 190, .08);
+}
+
+body.royal-maple-theme .potion-modal-card,
+body.royal-maple-theme .modal-card {
+  background: linear-gradient(150deg, rgba(37, 19, 30, .99), rgba(16, 8, 15, .99));
+  border-color: var(--royal-line);
+  border-radius: 12px;
+  box-shadow: 0 28px 90px rgba(5, 2, 7, .62), inset 0 0 0 1px rgba(246, 211, 139, .06);
+}
+
+body.royal-maple-theme .modal-backdrop {
+  background: rgba(7, 3, 8, .8);
+  backdrop-filter: blur(7px) saturate(.8);
+}
+
+body.royal-maple-theme .close-btn {
+  color: var(--royal-ivory);
+  background: rgba(18, 8, 16, .88);
+  border: 1px solid var(--royal-line-soft);
+}
+
+body.royal-maple-theme .close-btn:hover,
+body.royal-maple-theme .close-btn:focus-visible {
+  color: var(--royal-gold-bright);
+  border-color: var(--royal-gold);
+}
+
+body.royal-maple-theme .gear-option {
+  background: linear-gradient(145deg, rgba(28, 14, 25, .98), rgba(13, 7, 13, .98));
+  border-color: var(--royal-line-soft);
+}
+
+body.royal-maple-theme .gear-option:hover {
+  background: linear-gradient(145deg, rgba(var(--town-accent-rgb), .14), rgba(18, 9, 17, .98));
+  border-color: var(--royal-gold);
+}
+
+body.royal-maple-theme .gear-option h4,
+body.royal-maple-theme .potion-option-top strong {
+  color: var(--royal-ivory);
+}
+
+body.royal-maple-theme .gear-option p,
+body.royal-maple-theme .potion-option-copy p,
+body.royal-maple-theme .potion-option-copy small,
+body.royal-maple-theme .potion-modal-card .modal-head p {
+  color: var(--royal-muted);
+}
+
+body.royal-maple-theme .potion-option-card {
+  background: linear-gradient(145deg, rgba(27, 14, 25, .98), rgba(13, 7, 13, .98));
+  border-color: var(--royal-line-soft);
+}
+
+body.royal-maple-theme .potion-option-card.recommended {
+  background: linear-gradient(135deg, rgba(123, 72, 37, .34), rgba(31, 16, 24, .98) 65%);
+  border-color: var(--royal-gold-bright);
+  box-shadow: inset 0 0 0 1px rgba(246, 211, 139, .1), 0 10px 28px rgba(5, 2, 7, .24);
+}
+
+body.royal-maple-theme .potion-option-icon {
+  background: radial-gradient(circle, rgba(var(--town-accent-rgb), .2), rgba(11, 6, 12, .96));
+  border-color: rgba(218, 170, 86, .42);
+  box-shadow: inset 0 0 0 3px rgba(11, 6, 12, .72);
+}
+
+body.royal-maple-theme .potion-reason {
+  color: var(--royal-gold-bright) !important;
+}
+
+body.royal-maple-theme .potion-empty,
+body.royal-maple-theme .modal-filter-summary,
+body.royal-maple-theme .decision-callout,
+body.royal-maple-theme .etc-guidance {
+  background: rgba(var(--town-accent-rgb), .08);
+  border-color: var(--royal-line-soft);
+  color: var(--royal-muted);
+}
+
+body.royal-maple-theme .atlas-stat-row {
+  border-color: rgba(218, 170, 86, .14);
+}
+
+body.royal-maple-theme .atlas-panel-head,
+body.royal-maple-theme .v5-panel-heading,
+body.royal-maple-theme .section-head {
+  border-color: rgba(218, 170, 86, .18);
+}
+
+body.royal-maple-theme .atlas-panel-head h3,
+body.royal-maple-theme .v5-panel-heading h3,
+body.royal-maple-theme .section-head h2 {
+  color: var(--royal-ivory);
+}
+
+body.royal-maple-theme .atlas-panel-head small,
+body.royal-maple-theme .v5-panel-heading small {
+  color: var(--royal-muted);
+}
+
+body.royal-maple-theme .route-card.current,
+body.royal-maple-theme .build-card.active-build,
+body.royal-maple-theme .atlas-skill-card.learned,
+body.royal-maple-theme .etc-row.etc-fixed-target.is-done {
+  border-color: rgba(var(--town-accent-rgb), .64);
+  box-shadow: inset 0 0 0 1px rgba(var(--town-accent-rgb), .1), var(--royal-shadow);
+}
+
+body.royal-maple-theme .route-card.current::before,
+body.royal-maple-theme .build-card.active-build::before {
+  background: var(--town-accent);
+}
+
+body.royal-maple-theme .toast {
+  background: rgba(31, 15, 25, .98);
+  border-color: var(--royal-line);
+  color: var(--royal-ivory);
+  box-shadow: var(--royal-shadow);
+}
+
+body.royal-maple-theme ::selection {
+  color: #24130e;
+  background: var(--royal-gold-bright);
+}
+
+@media (max-width: 760px) {
+  body.royal-maple-theme::before {
+    background-position: center top;
+    background-attachment: scroll;
+    opacity: .4;
+  }
+
+  body.royal-maple-theme .panel,
+  body.royal-maple-theme .db-card,
+  body.royal-maple-theme .build-card,
+  body.royal-maple-theme .route-card {
+    border-radius: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.royal-maple-theme *,
+  body.royal-maple-theme *::before,
+  body.royal-maple-theme *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

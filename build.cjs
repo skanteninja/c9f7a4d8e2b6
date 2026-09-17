@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.10.6-dashboard-pot-slots';
+const assetVersion = '0.10.7-royal-town-themes';
 const BRAND = 'Top Classic World Maplestory';
 
 // The OSMS export is the identity authority for the equipment picker.  The
@@ -1688,6 +1688,8 @@ const etcAuditUiCss = fs.readFileSync(path.join(source, 'etc-audit-ui.css'), 'ut
 const etcAuditUi = fs.readFileSync(path.join(source, 'etc-audit-ui.js'), 'utf8');
 const sessionFlowCss = fs.readFileSync(path.join(source, 'session-flow.css'), 'utf8');
 const potionsCss = fs.readFileSync(path.join(source, 'potions.css'), 'utf8');
+const royalMapleThemeCss = fs.readFileSync(path.join(source, 'royal-maple-theme.css'), 'utf8');
+const classThemeJs = fs.readFileSync(path.join(source, 'class-theme.js'), 'utf8');
 
 JSON.parse(guideJson);
 if (!css.includes('.sidebar') || !app.includes('GUIDE_DATA')) throw new Error('Runtime verification failed');
@@ -1707,18 +1709,22 @@ html = html.replace('</body>', `  <script src="visuals.js?v=${assetVersion}"></s
 
 html=html.replace('</head>', '<link rel="stylesheet" href="readability.css?v='+assetVersion+'"></head>');
 // job-search.js is part of the selected-guide boot sequence above, before app.js.
-html=html.replace('</body>', '<script src="navigation-history.js?v='+assetVersion+'"></script></body>');
+html=html.replace('</body>', '<script src="navigation-history.js?v='+assetVersion+'"></script>\n<script src="class-theme.js?v='+assetVersion+'"></script></body>');
 for(const file of ['readability.css','job-search.js','navigation-history.js'])fs.copyFileSync(path.join(source,file),path.join(out,file));
 for(const file of ['map-layouts.json','map-audit.html','map-audit.js','map-audit.json','map-audit.csv'])fs.copyFileSync(path.join(source,file),path.join(out,file));
 html=html.replace('</head>', '<link rel="stylesheet" href="equipment-branding.css?v='+assetVersion+'"></head>');
 html=html.replace('</head>', '<link rel="stylesheet" href="session-flow.css?v='+assetVersion+'"></head>');
 html=html.replace('</head>', '<link rel="stylesheet" href="potions.css?v='+assetVersion+'"></head>');
+html=html.replace('</head>', '<link rel="stylesheet" href="royal-maple-theme.css?v='+assetVersion+'"></head>');
 fs.copyFileSync(path.join(source,'equipment-branding.css'),path.join(out,'equipment-branding.css'));
 fs.copyFileSync(path.join(source,'potions.css'),path.join(out,'potions.css'));
+fs.copyFileSync(path.join(source,'royal-maple-theme.css'),path.join(out,'royal-maple-theme.css'));
 html = html.replace(/\n[ \t]+\n/g, '\n\n');
 fs.writeFileSync(path.join(out, 'index.html'), html);
 const atlasAssets = path.join(source, 'assets', 'map-atlas');
 if (fs.existsSync(atlasAssets)) fs.cpSync(atlasAssets, path.join(out, 'assets', 'map-atlas'), { recursive: true });
+const classThemeAssets = path.join(source, 'assets', 'class-themes');
+if (fs.existsSync(classThemeAssets)) fs.cpSync(classThemeAssets, path.join(out, 'assets', 'class-themes'), { recursive: true });
 fs.copyFileSync(path.join(source, 'manifest.webmanifest'), path.join(out, 'manifest.webmanifest'));
 fs.writeFileSync(path.join(out, 'styles.css'), css);
 fs.writeFileSync(path.join(out, 'visuals.css'), visualCss);
@@ -1751,10 +1757,13 @@ fs.writeFileSync(path.join(out, 'progression-gear-visual.js'), progressionGearVi
 fs.writeFileSync(path.join(out, 'ownership-ui.js'), ownershipUi);
 fs.writeFileSync(path.join(out, 'maps-tab.js'), mapsTab);
 fs.writeFileSync(path.join(out, 'etc-audit-ui.js'), etcAuditUi);
+fs.writeFileSync(path.join(out, 'class-theme.js'), classThemeJs);
 fs.writeFileSync(path.join(out, 'build-info.txt'), `${BRAND} ${assetVersion}\n`);
 
 const sw = `const CACHE='top-classic-world-${assetVersion}';\nconst CORE=['./','./index.html','./styles.css?v=${assetVersion}','./visuals.css?v=${assetVersion}','./visuals-db.css?v=${assetVersion}','./visuals-npc.css?v=${assetVersion}','./visuals-skills.css?v=${assetVersion}','./visuals-portals.css?v=${assetVersion}','./dashboard-polish.css?v=${assetVersion}','./progression-sync.css?v=${assetVersion}','./progression-gear-visual.css?v=${assetVersion}','./ownership-ui.css?v=${assetVersion}','./guide-data.js?v=${assetVersion}','./app.js?v=${assetVersion}','./visuals.js?v=${assetVersion}','./visuals-db.js?v=${assetVersion}','./visuals-npc.js?v=${assetVersion}','./visuals-skills.js?v=${assetVersion}','./visuals-portals.js?v=${assetVersion}','./dashboard-polish.js?v=${assetVersion}','./progression-sync.js?v=${assetVersion}','./progression-level-hook.js?v=${assetVersion}','./progression-skill-state.js?v=${assetVersion}','./progression-gear-visual.js?v=${assetVersion}','./ownership-ui.js?v=${assetVersion}','./maps-tab.css?v=${assetVersion}','./maps-tab.js?v=${assetVersion}','./etc-audit-data.js?v=${assetVersion}','./quest-audit-additions.js?v=${assetVersion}','./etc-audit-ui.css?v=${assetVersion}','./etc-audit-ui.js?v=${assetVersion}','./manifest.webmanifest'];\nself.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).catch(()=>{}));});\nself.addEventListener('activate',e=>{e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('top-classic-world-')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]));});\nself.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin)return;e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy)).catch(()=>{});return r;}).catch(()=>caches.match(e.request).then(x=>x||caches.match('./index.html'))));});\n`;
-const swWithSessionFlow = sw.replace(`'./styles.css?v=${assetVersion}',`, `'./styles.css?v=${assetVersion}','./session-flow.css?v=${assetVersion}','./potions.css?v=${assetVersion}',`);
+const swWithSessionFlow = sw
+  .replace(`'./styles.css?v=${assetVersion}',`, `'./styles.css?v=${assetVersion}','./session-flow.css?v=${assetVersion}','./potions.css?v=${assetVersion}',`)
+  .replace(`'./manifest.webmanifest'];`, `'./royal-maple-theme.css?v=${assetVersion}','./class-theme.js?v=${assetVersion}','./assets/class-themes/perion.webp','./assets/class-themes/henesys.webp','./assets/class-themes/ellinia.webp','./manifest.webmanifest'];`);
 fs.writeFileSync(path.join(out, 'sw.js'), swWithSessionFlow);
 
 console.log(`Built ${assetVersion}: CSS ${css.length} bytes, guide ${guideJson.length} bytes, app ${app.length} bytes, visuals ${visuals.length} bytes, DB visuals ${visualDb.length} bytes, NPC visuals ${visualNpc.length} bytes, skill visuals ${visualSkill.length} bytes, portal visuals ${visualPortal.length} bytes, dashboard polish ${dashboardPolish.length} bytes, progression sync ${progressionSync.length} bytes, progression level hook ${progressionLevelHook.length} bytes, progression skill state ${progressionSkillState.length} bytes, progression gear visual ${progressionGearVisual.length} bytes, ownership UI ${ownershipUi.length} bytes.`);

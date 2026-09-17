@@ -321,7 +321,7 @@ for (const token of [
   'faceId:21000',
   "root.dataset.avatarGearIds=gearSummary;",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.10.6-dashboard-pot-slots')",
+  "navigator.serviceWorker.register('./sw.js?v=0.10.7-royal-town-themes')",
   'tcwFullSkillBuild',
   'data-plan-level',
   "list.querySelectorAll('.skill-row[data-plan-level]')",
@@ -342,6 +342,17 @@ for (const token of [
   'renderRecommendedPotions'
 ]) {
   if (!app.includes(token)) throw new Error(`Missing recommended-potion renderer contract: ${token}`);
+}
+const themeCss = fs.readFileSync(`${outputDir}/royal-maple-theme.css`, 'utf8');
+const themeJs = fs.readFileSync(`${outputDir}/class-theme.js`, 'utf8');
+for (const token of ['assets/class-themes/perion.webp', 'assets/class-themes/henesys.webp', 'assets/class-themes/ellinia.webp', 'body.royal-maple-theme', 'var(--town-bg)']) {
+  if (!themeCss.includes(token)) throw new Error(`Missing Royal Maple theme contract: ${token}`);
+}
+for (const token of ['warrior-fighter', 'archer-hunter', 'magician-il-fresh', 'royal-theme-ready', 'mapleTown']) {
+  if (!themeJs.includes(token)) throw new Error(`Missing class-town theme contract: ${token}`);
+}
+for (const asset of ['perion.webp', 'henesys.webp', 'ellinia.webp']) {
+  if (!fs.existsSync(`${outputDir}/assets/class-themes/${asset}`)) throw new Error(`Missing class-town background asset: ${asset}`);
 }
 if (app.includes('state.level=Math.max(1,Math.min(Number(D.meta.maxLevel)||70,Number(level)||1));\n    save();\n    renderAll();')) {
   throw new Error('The old full-render level handler is still active');
