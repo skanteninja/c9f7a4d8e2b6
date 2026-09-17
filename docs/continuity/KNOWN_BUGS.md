@@ -4,9 +4,9 @@ Last continuity baseline: 2026-09-17
 
 This is the authoritative unresolved-issues list for cross-chat continuity. Do not mark an issue resolved merely because code was edited. Resolution requires verification in the generated/live UI or validated data output.
 
-## Verification snapshot — 0.10.10 Royal Maple reference fidelity (pending live release checks)
+## Verification snapshot — 0.10.11 Royal Maple card parity (pending live release checks)
 
-The 0.10.10 source pass corrects the visual mismatch identified in the supplied reference comparison. It is not considered fully resolved until the generated deployment serves the new cache token and the live browser screenshot confirms the equipment card’s visible town layer, maple ornaments, double frames, and readable slots. See `design-qa.md` for the comparison record.
+The 0.10.11 source pass corrects the visual mismatch identified in the supplied reference comparison. It is not considered fully resolved until the generated deployment serves the new cache token and the live browser screenshot confirms the equipment card’s visible town layer, maple ornaments, double frames, and readable slots. See `design-qa.md` for the comparison record.
 
 ## Verification snapshot — 0.10.9 (2026-09-17)
 

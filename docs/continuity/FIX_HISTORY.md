@@ -6,7 +6,7 @@ Purpose: preserve bugs that were already solved, partially solved, or observed a
 
 This is historical context, not the unresolved queue. Active unresolved work belongs in `KNOWN_BUGS.md`.
 
-## 2026-09-17 — 0.10.10 dashboard card reference-fidelity correction
+## 2026-09-17 — 0.10.11 dashboard card reference-fidelity correction
 
 Observed problem:
 - The live dashboard technically loaded `royal-maple-theme.css`, but the compact `progression-gear-visual.css` layout and the opaque Equipment Inventory surface made the rendered card visibly unlike the approved Royal Maple reference. The town art was not visible inside the card, slot borders were too dim, and the corner marks were generic rather than maple ornaments.
@@ -15,7 +15,7 @@ Correction:
 - Added a final, cache-versioned Royal Maple reference pass after all earlier dashboard overrides.
 - Kept the existing grid and slot dimensions, while restoring a controlled town-art layer to the Equipment Inventory card and using a transparent central stage so the scene remains visible around the paper-doll.
 - Added the extracted red maple-leaf image asset for the card and inventory slot ornaments, stronger antique-gold double framing, brighter slot labels, and framed Progression/LUK/Clear/potion controls.
-- Bumped the runtime/service-worker token to `0.10.10-royal-reference-fidelity`.
+- Bumped the runtime/service-worker token to `0.10.11-royal-card-parity`.
 
 Verification:
 - Local build, generated JavaScript syntax, multi-build audit, asset copy, and `git diff --check` passed.

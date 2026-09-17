@@ -2,8 +2,8 @@
 
 Last continuity baseline: 2026-09-17
 
-Current deployed checkpoint: 0.10.10-royal-reference-fidelity
-Current source checkpoint: 0.10.10-royal-reference-fidelity
+Current deployed checkpoint: 0.10.11-royal-card-parity
+Current source checkpoint: 0.10.11-royal-card-parity
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:
@@ -19,7 +19,7 @@ Also read QUALITY_STANDARD.md, IMPLEMENTATION_BACKLOG.md, and docs/continuity/LI
 ## 2026-09-17 — Royal Maple reference-fidelity correction
 
 - The previous 0.10.9 pass changed the dashboard card selectors but remained visibly too subtle and hid the town scene inside the Equipment Inventory card.
-- The 0.10.10 pass is the source of truth for the approved reference treatment: visible class-town art in the equipment card, antique-gold double framing, maple-leaf ornaments, stronger slot borders, and matching potion/control surfaces.
+- The 0.10.11 pass is the source of truth for the approved reference treatment: visible class-town art in the equipment card, antique-gold double framing, maple-leaf ornaments, stronger slot borders, and matching potion/control surfaces.
 - Existing dashboard geometry and interaction behavior remain unchanged.
 
 ## Repository / Deployment

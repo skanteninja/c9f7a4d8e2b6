@@ -2,7 +2,7 @@
 
 This log exists to make cross-chat handoff quick and reliable. Record meaningful changes, fixes, regressions, research conclusions, and continuity-system updates.
 
-## 2026-09-17 — 0.10.10 Royal Maple reference fidelity
+## 2026-09-17 — 0.10.11 Royal Maple card parity
 
 - Corrected the dashboard implementation after visual comparison showed that the compact equipment card still looked like the legacy UI rather than the approved Royal Maple reference.
 - Applied the final visual layer to the rendered dashboard cards: visible town art in the equipment card, brighter antique-gold double frames, parchment/plum surfaces, maple-leaf ornaments, matched slot framing, and reference-style controls.
