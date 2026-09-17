@@ -56,7 +56,9 @@ body.royal-maple-theme {
   min-height: 100vh;
   isolation: isolate;
   color: var(--royal-ivory);
-  background: #140a13;
+  /* Keep the fixed town art above the document canvas; the opaque body fill
+     otherwise paints over the negative-z background pseudo-elements. */
+  background: transparent;
 }
 
 body.royal-maple-theme::before,
@@ -73,15 +75,15 @@ body.royal-maple-theme::before {
   background-position: center top;
   background-repeat: no-repeat;
   background-size: cover;
-  filter: saturate(.78) contrast(.92) brightness(.68);
-  opacity: .58;
+  filter: saturate(.86) contrast(.94) brightness(.78);
+  opacity: .72;
 }
 
 body.royal-maple-theme::after {
   z-index: -1;
   background:
-    linear-gradient(90deg, rgba(13, 6, 12, .9), rgba(23, 11, 20, .62) 23%, rgba(18, 9, 17, .69) 54%, rgba(11, 5, 11, .9)),
-    linear-gradient(180deg, rgba(13, 6, 12, .72), rgba(19, 9, 17, .34) 42%, rgba(9, 4, 9, .84));
+    linear-gradient(90deg, rgba(13, 6, 12, .7), rgba(23, 11, 20, .4) 23%, rgba(18, 9, 17, .46) 54%, rgba(11, 5, 11, .72)),
+    linear-gradient(180deg, rgba(13, 6, 12, .56), rgba(19, 9, 17, .2) 42%, rgba(9, 4, 9, .68));
 }
 
 body.royal-maple-theme main,
