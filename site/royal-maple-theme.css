@@ -731,10 +731,10 @@ body.royal-maple-theme .dashboard-v72 .v5-equipment-window .gear-slot {
   border-radius: 3px !important;
   background-image:
     url("assets/class-themes/royal-maple-leaf.png"),
-    linear-gradient(145deg, rgba(29, 15, 25, .78), rgba(10, 5, 12, .84));
-  background-position: 3px 3px, center;
-  background-size: 13px 16px, auto;
-  background-repeat: no-repeat, no-repeat;
+    linear-gradient(145deg, rgba(29, 15, 25, .78), rgba(10, 5, 12, .84)) !important;
+  background-position: 3px 3px, center !important;
+  background-size: 13px 16px, auto !important;
+  background-repeat: no-repeat, no-repeat !important;
   box-shadow:
     0 0 0 1px rgba(92, 51, 38, .78),
     inset 0 0 0 1px rgba(255, 224, 153, .12),
@@ -746,7 +746,10 @@ body.royal-maple-theme .dashboard-v72 .v5-equipment-window .gear-slot:focus-visi
   border-color: #fff0bb !important;
   background-image:
     url("assets/class-themes/royal-maple-leaf.png"),
-    linear-gradient(145deg, rgba(var(--town-accent-rgb), .3), rgba(28, 14, 24, .88));
+    linear-gradient(145deg, rgba(var(--town-accent-rgb), .3), rgba(28, 14, 24, .88)) !important;
+  background-position: 3px 3px, center !important;
+  background-size: 13px 16px, auto !important;
+  background-repeat: no-repeat, no-repeat !important;
   box-shadow:
     0 0 0 1px rgba(92, 51, 38, .9),
     inset 0 0 0 1px rgba(255, 239, 187, .2),

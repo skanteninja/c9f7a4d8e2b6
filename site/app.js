@@ -1677,6 +1677,6 @@
   hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.10.10-royal-reference-fidelity').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.10.11-royal-card-parity').catch(()=>{});
   }
 })();
