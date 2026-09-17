@@ -4,6 +4,13 @@ Last continuity baseline: 2026-09-17
 
 Use this file for settled choices that future chats should preserve unless new evidence justifies changing them.
 
+## 2026-09-17 — Royal Maple town themes
+
+- Keep the current page layout and interaction model while applying the Royal Maple treatment to shared cards and controls.
+- Use recognizable Classic town imagery as the page background, selected from the active build rather than a global theme toggle: Perion for Fighter/Warrior, Henesys for Hunter/Bowman, and Ellinia for I/L Wizard/Mage.
+- Keep the town art behind a readability overlay and use responsive, reduced-motion-safe background behavior so text and equipment remain primary.
+- Version the CSS, theme mapper, service-worker cache entries, and town assets together; the visual release is incomplete until the live cache serves the same checkpoint.
+
 ## 2026-09-17 — Recommended Pots belong to Equipment Inventory
 
 - Keep HP and MP recommendations inside each Equipment Inventory window rather than adding a separate dashboard/page card.

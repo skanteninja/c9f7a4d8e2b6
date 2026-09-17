@@ -2,6 +2,14 @@
 
 This log exists to make cross-chat handoff quick and reliable. Record meaningful changes, fixes, regressions, research conclusions, and continuity-system updates.
 
+## 2026-09-17 — 0.10.7 Royal Maple town themes
+
+- Applied the approved Royal Maple visual treatment to the existing cards, equipment inventory, navigation, buttons, and modal surfaces without changing the page layout.
+- Added lore-accurate class-home backgrounds: Perion for Fighter/Warrior, Henesys for Hunter/Bowman, and Ellinia for I/L Wizard/Mage.
+- Bumped the runtime/service-worker token and added same-origin WebP town assets for all three supported builds.
+- Source `be1ba951fb884bfd5b5ec21d2166d59e0416e836` produced generated site `6582c6423f63365e49943def742721aad83f677a`; live `build-info.txt` reports `0.10.7-royal-town-themes`.
+- Build Static `35225947369`, Visual/UI `35225947312`, Monster `35225947311`, Maps/ETC `35225947325`, Real Input `35225947370` attempt 2, and Verify Live `35225947619` passed.
+
 ## 2026-09-17 — 0.10.6 integrated recommended pot slots
 
 - Moved Recommended Pots into the Equipment Inventory window on the dashboard and Equipment page as compact HP and MP icon slots.

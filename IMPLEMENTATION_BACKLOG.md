@@ -3,6 +3,13 @@
 Last prioritized: 2026-09-17
 Ordering follows the quality contract in [QUALITY_STANDARD.md](QUALITY_STANDARD.md). “Implemented locally” never means “deployed” until the live gate passes.
 
+## 0.10.7 completed in the verified live checkpoint
+
+- Applied the approved Royal Maple visual system to the existing page cards and controls.
+- Added lore-accurate page backgrounds mapped to the active class home town: Perion/Fighter, Henesys/Hunter, and Ellinia/I/L Wizard.
+- Added optimized town assets plus cache/version guards and verified the live Cloudflare deployment.
+- Generated site `6582c6423f63365e49943def742721aad83f677a` reports `0.10.7-royal-town-themes`; all release gates passed, with Real Input passing on attempt 2 after a transient live-readiness failure.
+
 ## 0.10.6 completed in the verified live checkpoint
 
 - Integrated HP and MP Recommended Pots into both Equipment Inventory windows as compact icon slots; removed the standalone potion card.

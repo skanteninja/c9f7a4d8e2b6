@@ -2,8 +2,8 @@
 
 Last continuity baseline: 2026-09-17
 
-Current deployed checkpoint: 0.10.6-dashboard-pot-slots
-Current source checkpoint: 0.10.6-dashboard-pot-slots
+Current deployed checkpoint: 0.10.7-royal-town-themes
+Current source checkpoint: 0.10.7-royal-town-themes
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:
@@ -29,6 +29,13 @@ Also read QUALITY_STANDARD.md, IMPLEMENTATION_BACKLOG.md, and docs/continuity/LI
 - I/L Wizard Build
 
 Never use “Luna’s” in build names.
+
+## 2026-09-17 — Royal Maple town themes
+- The existing page layout now uses the approved Royal Maple visual system: dark plum surfaces, antique-gold borders, ivory type, and maple-red accents.
+- Class-home page backgrounds map to the active build: Perion for Fighter/Warrior, Henesys for Hunter/Bowman, and Ellinia for I/L Wizard/Mage.
+- The treatment is additive and responsive; it does not replace the equipment inventory, HP/MP slots, gender filtering, potion modal, or saved progress behavior.
+- Source commit `be1ba951fb884bfd5b5ec21d2166d59e0416e836` produced generated site commit `6582c6423f63365e49943def742721aad83f677a`; live `build-info.txt` reports `0.10.7-royal-town-themes`.
+- Build Static `35225947369`, Visual/UI `35225947312`, Monster `35225947311`, Maps/ETC `35225947325`, Real Input `35225947370` attempt 2, and Verify Live `35225947619` passed.
 
 ## 2026-09-17 — integrated recommended pot slots
 - The Equipment Inventory now owns two compact, icon-first HP/MP recommendation slots on both the dashboard and Equipment page; the old standalone potion card is removed.

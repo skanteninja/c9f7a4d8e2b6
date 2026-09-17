@@ -4,6 +4,16 @@ Last continuity baseline: 2026-09-17
 
 This is the authoritative unresolved-issues list for cross-chat continuity. Do not mark an issue resolved merely because code was edited. Resolution requires verification in the generated/live UI or validated data output.
 
+## Verification snapshot — 0.10.7 (2026-09-17)
+
+Source commit `be1ba951fb884bfd5b5ec21d2166d59e0416e836` and generated site commit `6582c6423f63365e49943def742721aad83f677a` are deployed. The live build-info endpoint reports `0.10.7-royal-town-themes`.
+
+Verified in generated/live UI and release gates:
+- The approved Royal Maple styling is applied to the shared cards and controls while the existing page layout remains intact.
+- Fighter resolves to the Perion page background, Hunter to Henesys, and I/L Wizard to Ellinia.
+- Existing dashboard/equipment HP and MP slots, click-open potion options, gender-aware equipment filtering, unisex/genderless gear, and saved progress remain covered by the release checks.
+- Build Static `35225947369`, Visual/UI `35225947312`, Monster `35225947311`, Maps/ETC `35225947325`, Verify Live `35225947619`, and Real Input `35225947370` attempt 2 passed. The first Real Input attempt was a transient live skill-image readiness failure and was not used as release evidence.
+
 ## Severity legend
 - **P0** — breaks core use or corrupts project-wide state
 - **P1** — major build correctness/parity issue

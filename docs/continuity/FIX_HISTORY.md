@@ -6,6 +6,21 @@ Purpose: preserve bugs that were already solved, partially solved, or observed a
 
 This is historical context, not the unresolved queue. Active unresolved work belongs in `KNOWN_BUGS.md`.
 
+## 2026-09-17 — 0.10.7 Royal Maple town themes
+
+Observed request:
+- The selected Royal Maple card direction needed to be applied to the live website, with page backgrounds that visibly represent the Classic home town of each build while preserving the existing layout.
+
+Correction:
+- Added a shared Royal Maple theme layer for panels, cards, navigation, buttons, equipment/potion slots, and modal surfaces.
+- Added an active-build theme mapper that assigns Perion to Fighter, Henesys to Hunter, and Ellinia to I/L Wizard, including responsive readability overlays and reduced-motion handling.
+- Added optimized same-origin WebP town assets and aligned build/service-worker/runtime version guards to `0.10.7-royal-town-themes`.
+
+Verification:
+- Local build, JavaScript syntax, multi-build audit, static theme gates, and `git diff --check` passed.
+- Source `be1ba951fb884bfd5b5ec21d2166d59e0416e836` generated site `6582c6423f63365e49943def742721aad83f677a`.
+- Build Static `35225947369`, Visual/UI `35225947312`, Monster `35225947311`, Maps/ETC `35225947325`, Verify Live `35225947619`, and Real Input `35225947370` attempt 2 passed. Live `build-info.txt` reports `0.10.7-royal-town-themes`.
+
 ## 2026-09-17 — 0.10.6 integrated pot slots and complete shared gear inventory
 
 Observed problems:
