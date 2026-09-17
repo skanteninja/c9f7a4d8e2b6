@@ -965,11 +965,26 @@ body.royal-maple-theme .dashboard-v72 .v72-command-grid > .panel,
 body.royal-maple-theme .dashboard-v72 .v72-secondary-content > .panel,
 body.royal-maple-theme .dashboard-v72 .v6-tertiary-grid > .panel,
 body.royal-maple-theme .dashboard-v72 .v72-bottom-grid > .panel {
-  padding: 24px 24px 16px !important;
+  padding: 16px 16px 13px !important;
 }
 
 body.royal-maple-theme .dashboard-v72 .five-level-panel {
-  padding: 24px 26px !important;
+  padding: 20px 22px !important;
+}
+
+/* Queue cards have tighter fixed heights; their 14–16px rail still leaves
+   every action row and footer inside the visible frame. */
+body.royal-maple-theme .dashboard-v72 .v72-command-grid > .panel::before,
+body.royal-maple-theme .dashboard-v72 .v72-secondary-content > .panel::before,
+body.royal-maple-theme .dashboard-v72 .v6-tertiary-grid > .panel::before,
+body.royal-maple-theme .dashboard-v72 .v72-bottom-grid > .panel::before {
+  border-width: 14px !important;
+  border-image-width: 14px !important;
+}
+
+body.royal-maple-theme .dashboard-v72 .five-level-panel::before {
+  border-width: 16px !important;
+  border-image-width: 16px !important;
 }
 
 /* Major panels own the full frame inset; the compact skill card keeps a
@@ -1004,6 +1019,14 @@ body.royal-maple-theme .dashboard-v72 .v6-skills-panel::before {
   }
   body.royal-maple-theme .dashboard-v72 .five-level-panel {
     padding: 18px 20px !important;
+  }
+  body.royal-maple-theme .dashboard-v72 .v72-command-grid > .panel::before,
+  body.royal-maple-theme .dashboard-v72 .v72-secondary-content > .panel::before,
+  body.royal-maple-theme .dashboard-v72 .v6-tertiary-grid > .panel::before,
+  body.royal-maple-theme .dashboard-v72 .v72-bottom-grid > .panel::before,
+  body.royal-maple-theme .dashboard-v72 .five-level-panel::before {
+    border-width: 14px !important;
+    border-image-width: 14px !important;
   }
   body.royal-maple-theme .dashboard-v72 .v5-buildbar::before {
     border-width: 12px !important;
