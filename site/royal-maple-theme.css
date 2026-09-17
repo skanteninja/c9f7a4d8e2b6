@@ -562,6 +562,111 @@ body.royal-maple-theme .potion-reason {
   color: var(--royal-gold-bright) !important;
 }
 
+/* The approved Royal Maple treatment for dashboard cards: a square antique-gold
+   frame, dark plum/parchment surface, and a restrained corner ornament. */
+body.royal-maple-theme .dashboard-v72 .v5-buildbar,
+body.royal-maple-theme .dashboard-v72 .panel {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(242, 209, 138, .72);
+  border-radius: 5px;
+  background-color: #171019;
+  background-image:
+    radial-gradient(circle at 9% 9%, rgba(var(--town-accent-rgb), .13), transparent 22%),
+    radial-gradient(circle at 92% 88%, rgba(222, 170, 88, .08), transparent 24%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, .012) 0 1px, transparent 1px 5px),
+    linear-gradient(145deg, rgba(43, 24, 35, .98), rgba(18, 10, 18, .99) 68%, rgba(9, 5, 10, .99));
+  box-shadow:
+    0 0 0 1px rgba(92, 51, 38, .76),
+    inset 0 0 0 1px rgba(255, 224, 153, .13),
+    inset 0 0 0 4px rgba(8, 4, 9, .25),
+    0 14px 34px rgba(5, 2, 7, .34);
+}
+
+body.royal-maple-theme .dashboard-v72 .v5-buildbar::before,
+body.royal-maple-theme .dashboard-v72 .panel::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: 0;
+  pointer-events: none;
+  border: 1px solid rgba(242, 209, 138, .28);
+  box-shadow: inset 0 0 0 1px rgba(8, 4, 9, .48);
+}
+
+body.royal-maple-theme .dashboard-v72 .v5-buildbar::after,
+body.royal-maple-theme .dashboard-v72 .panel::after {
+  content: "✤";
+  position: absolute;
+  top: 4px;
+  left: 7px;
+  z-index: 3;
+  pointer-events: none;
+  color: var(--town-accent);
+  font: 700 13px/1 Georgia, "Times New Roman", serif;
+  text-shadow: 0 0 8px rgba(var(--town-accent-rgb), .42), 0 1px 0 #170a12;
+}
+
+body.royal-maple-theme .dashboard-v72 .v5-buildbar > *,
+body.royal-maple-theme .dashboard-v72 .panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+body.royal-maple-theme .dashboard-v72 .v5-buildbar h2,
+body.royal-maple-theme .dashboard-v72 .panel h2,
+body.royal-maple-theme .dashboard-v72 .panel h3 {
+  color: var(--royal-ivory);
+  font-family: Georgia, "Times New Roman", serif;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .66);
+}
+
+body.royal-maple-theme .dashboard-v72 .v5-buildbar,
+body.royal-maple-theme .dashboard-v72 .v5-equipment-hero,
+body.royal-maple-theme .dashboard-v72 .v5-character-hero,
+body.royal-maple-theme .dashboard-v72 .v6-skills-panel,
+body.royal-maple-theme .dashboard-v72 .v5-quick-metrics button,
+body.royal-maple-theme .dashboard-v72 .atlas-action-row,
+body.royal-maple-theme .dashboard-v72 .atlas-queue-row,
+body.royal-maple-theme .dashboard-v72 .v72-etc-chip,
+body.royal-maple-theme .dashboard-v72 .atlas-skill-card,
+body.royal-maple-theme .dashboard-v72 .gear-slot,
+body.royal-maple-theme .dashboard-v72 .equipment-pot-slot {
+  border-radius: 4px;
+}
+
+body.royal-maple-theme .dashboard-v72 .v5-quick-metrics button,
+body.royal-maple-theme .dashboard-v72 .atlas-action-row,
+body.royal-maple-theme .dashboard-v72 .atlas-queue-row,
+body.royal-maple-theme .dashboard-v72 .v72-etc-chip,
+body.royal-maple-theme .dashboard-v72 .atlas-skill-card,
+body.royal-maple-theme .dashboard-v72 .gear-slot,
+body.royal-maple-theme .dashboard-v72 .equipment-pot-slot {
+  background-image:
+    linear-gradient(135deg, rgba(45, 25, 35, .96), rgba(13, 7, 14, .97)),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, .012) 0 1px, transparent 1px 5px);
+  border-color: rgba(218, 170, 86, .42);
+  box-shadow: inset 0 0 0 1px rgba(246, 211, 139, .075), inset 0 0 12px rgba(0, 0, 0, .34);
+}
+
+body.royal-maple-theme .dashboard-v72 .v5-quick-metrics button:hover,
+body.royal-maple-theme .dashboard-v72 .atlas-action-row:hover,
+body.royal-maple-theme .dashboard-v72 .atlas-queue-row:hover,
+body.royal-maple-theme .dashboard-v72 .v72-etc-chip:hover,
+body.royal-maple-theme .dashboard-v72 .atlas-skill-card:hover,
+body.royal-maple-theme .dashboard-v72 .gear-slot:hover,
+body.royal-maple-theme .dashboard-v72 .gear-slot:focus-visible,
+body.royal-maple-theme .dashboard-v72 .equipment-pot-slot:hover,
+body.royal-maple-theme .dashboard-v72 .equipment-pot-slot:focus-visible {
+  border-color: var(--royal-gold-bright);
+  box-shadow: inset 0 0 0 1px rgba(246, 211, 139, .13), 0 0 15px rgba(218, 170, 86, .14);
+}
+
+body.royal-maple-theme .dashboard-v72 .atlas-panel-head,
+body.royal-maple-theme .dashboard-v72 .v5-panel-heading {
+  border-color: rgba(218, 170, 86, .32);
+}
+
 body.royal-maple-theme .potion-empty,
 body.royal-maple-theme .modal-filter-summary,
 body.royal-maple-theme .decision-callout,

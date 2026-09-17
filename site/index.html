@@ -7,19 +7,19 @@
   <meta name="theme-color" content="#170d16">
   <title>Top Classic World Maplestory</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=0.10.8-royal-town-visibility">
-  <link rel="stylesheet" href="visuals.css?v=0.10.8-royal-town-visibility">
-  <link rel="stylesheet" href="visuals-db.css?v=0.10.8-royal-town-visibility">
-  <link rel="stylesheet" href="visuals-npc.css?v=0.10.8-royal-town-visibility">
-  <link rel="stylesheet" href="visuals-skills.css?v=0.10.8-royal-town-visibility">
-  <link rel="stylesheet" href="visuals-portals.css?v=0.10.8-royal-town-visibility">
-  <link rel="stylesheet" href="dashboard-polish.css?v=0.10.8-royal-town-visibility">
-  <link rel="stylesheet" href="progression-sync.css?v=0.10.8-royal-town-visibility">
-  <link rel="stylesheet" href="progression-gear-visual.css?v=0.10.8-royal-town-visibility">
-  <link rel="stylesheet" href="ownership-ui.css?v=0.10.8-royal-town-visibility">
-  <link rel="stylesheet" href="maps-tab.css?v=0.10.8-royal-town-visibility">
-  <link rel="stylesheet" href="etc-audit-ui.css?v=0.10.8-royal-town-visibility">
-<link rel="stylesheet" href="readability.css?v=0.10.8-royal-town-visibility"><link rel="stylesheet" href="equipment-branding.css?v=0.10.8-royal-town-visibility"><link rel="stylesheet" href="session-flow.css?v=0.10.8-royal-town-visibility"><link rel="stylesheet" href="potions.css?v=0.10.8-royal-town-visibility"><link rel="stylesheet" href="royal-maple-theme.css?v=0.10.8-royal-town-visibility"></head>
+  <link rel="stylesheet" href="styles.css?v=0.10.9-royal-dashboard-cards">
+  <link rel="stylesheet" href="visuals.css?v=0.10.9-royal-dashboard-cards">
+  <link rel="stylesheet" href="visuals-db.css?v=0.10.9-royal-dashboard-cards">
+  <link rel="stylesheet" href="visuals-npc.css?v=0.10.9-royal-dashboard-cards">
+  <link rel="stylesheet" href="visuals-skills.css?v=0.10.9-royal-dashboard-cards">
+  <link rel="stylesheet" href="visuals-portals.css?v=0.10.9-royal-dashboard-cards">
+  <link rel="stylesheet" href="dashboard-polish.css?v=0.10.9-royal-dashboard-cards">
+  <link rel="stylesheet" href="progression-sync.css?v=0.10.9-royal-dashboard-cards">
+  <link rel="stylesheet" href="progression-gear-visual.css?v=0.10.9-royal-dashboard-cards">
+  <link rel="stylesheet" href="ownership-ui.css?v=0.10.9-royal-dashboard-cards">
+  <link rel="stylesheet" href="maps-tab.css?v=0.10.9-royal-dashboard-cards">
+  <link rel="stylesheet" href="etc-audit-ui.css?v=0.10.9-royal-dashboard-cards">
+<link rel="stylesheet" href="readability.css?v=0.10.9-royal-dashboard-cards"><link rel="stylesheet" href="equipment-branding.css?v=0.10.9-royal-dashboard-cards"><link rel="stylesheet" href="session-flow.css?v=0.10.9-royal-dashboard-cards"><link rel="stylesheet" href="potions.css?v=0.10.9-royal-dashboard-cards"><link rel="stylesheet" href="royal-maple-theme.css?v=0.10.9-royal-dashboard-cards"></head>
 <body>
   <div id="app">
     <aside class="sidebar">
@@ -114,25 +114,25 @@
   <div id="gear-modal" class="modal" aria-hidden="true"><div class="modal-backdrop" data-close-modal></div><div class="modal-card"><div class="modal-head"><div><span class="eyebrow">EQUIPMENT SLOT</span><h2 id="modal-title">Choose item</h2></div><button class="close-btn" data-close-modal>×</button></div><div class="modal-filter-row" data-class-equipment-filters><label class="toggle"><input id="modal-show-future" type="checkbox"><span id="modal-future-label">Show future-level items</span></label><label class="toggle"><input id="modal-show-optional" type="checkbox" checked><span id="modal-optional-label">Show all curated class options</span></label><span id="modal-gender-label" class="gender-filter-badge" aria-live="polite"></span></div><div id="modal-filter-summary" class="modal-filter-summary" aria-live="polite"></div><div id="gear-options" class="gear-options"></div></div></div>
   <div id="potion-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="potion-modal-title"><div class="modal-backdrop" data-close-potion></div><div class="modal-card potion-modal-card"><div class="modal-head"><div><span class="eyebrow">CONSUMABLE PLAN</span><h2 id="potion-modal-title">Recommended Pots</h2><p id="potion-modal-copy"></p></div><button id="potion-modal-close" class="close-btn" type="button">×</button></div><div id="potion-modal-feature" class="potion-feature"></div><div class="potion-options-heading"><span class="eyebrow">OTHER OPTIONS</span><h3>Other shop options</h3></div><div id="potion-options" class="potion-options"></div></div></div>
   <div id="toast" class="toast"></div>
-  <script src="guide-data.js?v=0.10.8-royal-town-visibility"></script>
+  <script src="guide-data.js?v=0.10.9-royal-dashboard-cards"></script>
   <script>(()=>{const root=window.GUIDE_DATA;if(!root)return;try{const saved=JSON.parse(localStorage.getItem('ultimateILGuideState.v1')||'{}');let id=new URLSearchParams(location.search).get('build')||saved.activeBuildId||root.catalog?.activeBuildId||'magician-il-fresh';const active=new Set((root.catalog?.builds||[]).filter(x=>x.status==='active').map(x=>x.id));if(!active.has(id))id=root.catalog?.activeBuildId||'magician-il-fresh';const map={'warrior-fighter':'fighter','archer-hunter':'hunter'};if(map[id]&&root.buildVariants?.[map[id]])window.GUIDE_DATA=root.buildVariants[map[id]];window.TCW_ACTIVE_BUILD_ID=id;}catch(e){window.TCW_ACTIVE_BUILD_ID='magician-il-fresh';}})();</script>
-  <script src="etc-audit-data.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="quest-audit-additions.js?v=0.10.8-royal-town-visibility"></script>
-<script src="job-search.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="app.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="visuals.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="visuals-db.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="visuals-npc.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="visuals-skills.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="visuals-portals.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="dashboard-polish.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="progression-sync.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="progression-level-hook.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="progression-skill-state.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="progression-gear-visual.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="ownership-ui.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="maps-tab.js?v=0.10.8-royal-town-visibility"></script>
-  <script src="etc-audit-ui.js?v=0.10.8-royal-town-visibility"></script>
-<script src="navigation-history.js?v=0.10.8-royal-town-visibility"></script>
-<script src="class-theme.js?v=0.10.8-royal-town-visibility"></script></body>
+  <script src="etc-audit-data.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="quest-audit-additions.js?v=0.10.9-royal-dashboard-cards"></script>
+<script src="job-search.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="app.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="visuals.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="visuals-db.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="visuals-npc.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="visuals-skills.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="visuals-portals.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="dashboard-polish.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="progression-sync.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="progression-level-hook.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="progression-skill-state.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="progression-gear-visual.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="ownership-ui.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="maps-tab.js?v=0.10.9-royal-dashboard-cards"></script>
+  <script src="etc-audit-ui.js?v=0.10.9-royal-dashboard-cards"></script>
+<script src="navigation-history.js?v=0.10.9-royal-dashboard-cards"></script>
+<script src="class-theme.js?v=0.10.9-royal-dashboard-cards"></script></body>
 </html>
