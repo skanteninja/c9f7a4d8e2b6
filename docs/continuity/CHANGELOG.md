@@ -1,5 +1,22 @@
 # Continuity Changelog
 
+## 2026-09-17 — 0.10.12 Variant B beveled card frames
+
+- Applied the selected Variant B visual direction to dashboard cards without changing the existing layout.
+- Added heavy stepped/multi-line gold border lines, square corners, opaque card interiors, and matching equipment/potion slot surfaces.
+- Kept Perion, Henesys, and Ellinia as page-level class-town backgrounds so they frame the dashboard without bleeding through card content.
+- Source commit: 58961938c1e8477481a91e2271584fbb238ab289.
+- Generated site commit: 92ffaf4dcb30be618dc3c459f067029dd8c8e3d4.
+- Live browser URL: https://maplestory-classic.ofri505.workers.dev/?build=magician-il-fresh&page=dashboard.
+- The page serves 0.10.12-royal-beveled-cards, with 20 gear slots and 2 potion slots.
+- Variant B uses heavy beveled/stepped multi-line gold borders, opaque near-black/plum card interiors, and no hometown artwork inside dashboard cards; Perion, Henesys, and Ellinia remain page-level class backgrounds.
+- The live browser verified Fighter → Perion, Hunter → Henesys, and I/L Wizard → Ellinia; the Hat equipment modal and HP potion recommendation modal opened with six choices and closed successfully.
+- Build Static 35263049569, Visual/UI 35263049492, Maps/ETC 35263049531, Monster 35263049676, and Real Input 35263049589 passed.
+- Verify Live 35263049644 passed its propagation/data checks but failed in the headless browser assertion step on attempts 1 and 2; manual live browser QA is clean, so this remains an automation follow-up.
+- Manual browser QA confirmed the live card treatment plus Hat replacement and HP potion recommendation modals.
+- Verify Live 35263049644 remains the only release check not green because its headless assertion fails on attempts 1 and 2; track this before treating the automated release set as fully green.
+
+
 This log exists to make cross-chat handoff quick and reliable. Record meaningful changes, fixes, regressions, research conclusions, and continuity-system updates.
 
 ## 2026-09-17 — 0.10.11 Royal Maple card parity

@@ -1,5 +1,29 @@
 # Historical Fix / Regression Log
 
+## 2026-09-17 — 0.10.12 Variant B beveled card correction
+
+Observed problem:
+- The prior Royal Maple card pass put hometown artwork into the Equipment Inventory card, while the requested design called for clean readable card interiors and the hometown art behind the page.
+
+Correction:
+- Added a final cache-versioned Variant B CSS layer after the existing dashboard overrides.
+- Preserved the current dashboard layout, equipment grid, item/potion icons, class mapping, and modal behavior.
+- Replaced card-level imagery with opaque near-black/plum surfaces and added stepped/angled multi-line antique-gold frame borders to dashboard panels and card surfaces.
+- Bumped the runtime/service-worker token to 0.10.12-royal-beveled-cards.
+
+Verification:
+- Local build, generated JavaScript syntax, multi-build audit, asset checks, and git diff check passed before the source commit.
+- Source commit: 58961938c1e8477481a91e2271584fbb238ab289.
+- Generated site commit: 92ffaf4dcb30be618dc3c459f067029dd8c8e3d4.
+- Live browser URL: https://maplestory-classic.ofri505.workers.dev/?build=magician-il-fresh&page=dashboard.
+- The page serves 0.10.12-royal-beveled-cards, with 20 gear slots and 2 potion slots.
+- Variant B uses heavy beveled/stepped multi-line gold borders, opaque near-black/plum card interiors, and no hometown artwork inside dashboard cards; Perion, Henesys, and Ellinia remain page-level class backgrounds.
+- The live browser verified Fighter → Perion, Hunter → Henesys, and I/L Wizard → Ellinia; the Hat equipment modal and HP potion recommendation modal opened with six choices and closed successfully.
+- Build Static 35263049569, Visual/UI 35263049492, Maps/ETC 35263049531, Monster 35263049676, and Real Input 35263049589 passed.
+- Verify Live 35263049644 passed its propagation/data checks but failed in the headless browser assertion step on attempts 1 and 2; manual live browser QA is clean, so this remains an automation follow-up.
+- Verify Live still fails in the headless browser assertion step on attempts 1 and 2 after all deployment/data checks pass; manual live browser QA is clean.
+
+
 Last continuity baseline: 2026-09-17
 
 Purpose: preserve bugs that were already solved, partially solved, or observed as regressions so future chats do not repeat the same debugging from scratch.

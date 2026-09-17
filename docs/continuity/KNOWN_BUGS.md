@@ -1,5 +1,24 @@
 # Known Bugs / Incomplete Work
 
+## Verification snapshot — 0.10.12 Variant B (live UI verified; automated browser gate pending)
+
+The selected card direction is deployed and visible at https://maplestory-classic.ofri505.workers.dev/?build=magician-il-fresh&page=dashboard.
+
+- Source commit: 58961938c1e8477481a91e2271584fbb238ab289.
+- Generated site commit: 92ffaf4dcb30be618dc3c459f067029dd8c8e3d4.
+- Live browser URL: https://maplestory-classic.ofri505.workers.dev/?build=magician-il-fresh&page=dashboard.
+- The page serves 0.10.12-royal-beveled-cards, with 20 gear slots and 2 potion slots.
+- Variant B uses heavy beveled/stepped multi-line gold borders, opaque near-black/plum card interiors, and no hometown artwork inside dashboard cards; Perion, Henesys, and Ellinia remain page-level class backgrounds.
+- The live browser verified Fighter → Perion, Hunter → Henesys, and I/L Wizard → Ellinia; the Hat equipment modal and HP potion recommendation modal opened with six choices and closed successfully.
+- Build Static 35263049569, Visual/UI 35263049492, Maps/ETC 35263049531, Monster 35263049676, and Real Input 35263049589 passed.
+- Verify Live 35263049644 passed its propagation/data checks but failed in the headless browser assertion step on attempts 1 and 2; manual live browser QA is clean, so this remains an automation follow-up.
+- No site-origin console errors were observed during the live browser pass; browser extension metadata noise was excluded.
+- Current unresolved verification item: Verify Live 35263049644 fails in the headless browser assertion step on attempts 1 and 2. The propagation/data checks and the manual browser UI checks pass.
+
+See design-qa.md for the visual comparison record.
+
+
+
 Last continuity baseline: 2026-09-17
 
 This is the authoritative unresolved-issues list for cross-chat continuity. Do not mark an issue resolved merely because code was edited. Resolution requires verification in the generated/live UI or validated data output.
