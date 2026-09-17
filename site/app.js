@@ -977,16 +977,25 @@
     if(!item)return '';
     return '<article class="potion-option-card '+(recommended?'recommended':'')+'"><div class="potion-option-icon">'+potionImage(item)+'</div><div class="potion-option-copy"><div class="potion-option-top"><strong>'+esc(item.name)+'</strong><span class="potion-category">'+esc(item.category||'Consumable')+'</span></div><p>'+esc(item.restoreLabel||potionEffect(item,kind))+'</p><small>'+esc(potionMeta(item,kind))+'</small>'+(reason?'<p class="potion-reason">'+esc(reason)+'</p>':'')+'</div>'+(recommended?'<span class="highly-recommended-badge">HIGHLY RECOMMENDED</span>':'')+'</article>';
   }
-  function renderRecommendedPotions(){
-    const root=document.getElementById('recommended-pots');if(!root)return;
+  function renderRecommendedPotions(root){
+    if(!root)return;
+    const grid=root.querySelector('.slot-grid');if(!grid)return;
+    let slots=root.querySelector('.equipment-pot-slots');
+    if(!slots){
+      slots=document.createElement('div');
+      slots.className='equipment-pot-slots';
+      slots.setAttribute('aria-label','Recommended pots');
+      grid.insertAdjacentElement('afterend',slots);
+    }
     const kinds=['hp','mp'];
-    root.innerHTML=kinds.map(kind=>{
+    slots.innerHTML=kinds.map(kind=>{
       const tier=potionTier(kind),item=potionItem(tier.recommendedId),label=kind.toUpperCase();
-      if(!item)return '<div class="potion-empty">No '+label+' recommendation is available for this build yet.</div>';
-      return '<button class="potion-recommendation-card" type="button" data-potion-type="'+kind+'" aria-label="Open '+label+' potion recommendations"><div class="potion-card-head"><span class="potion-kind">'+label+'</span><span class="potion-level">LEVEL '+Number(state.level||1)+'</span></div><div class="potion-card-body"><span class="potion-icon-frame">'+potionImage(item)+'</span><span class="potion-card-copy"><strong>'+esc(item.name)+'</strong><span>'+esc(item.category||'Consumable')+' · '+esc(item.restoreLabel||potionEffect(item,kind))+'</span><small>'+esc(Number(item.shopPrice||0)+' mesos · '+potionEfficiency(item,kind))+'</small></span></div><span class="potion-card-reason">'+esc(tier.reason||item.notes||'Level-aware recommendation')+'</span><span class="potion-card-cta">Click for other options →</span></button>';
+      if(!item)return '<button class="gear-slot equipment-pot-slot equipment-pot-slot-'+kind+'" type="button" disabled aria-label="No '+label+' potion recommendation available"><span class="slot-name">'+label+'</span></button>';
+      const detail=(item.restoreLabel||potionEffect(item,kind))+' · '+Number(item.shopPrice||0).toLocaleString()+' mesos · '+potionEfficiency(item,kind);
+      return '<button class="gear-slot equipment-pot-slot equipment-pot-slot-'+kind+'" type="button" data-potion-type="'+kind+'" aria-label="Open '+label+' potion recommendations. Recommended '+esc(item.name)+'. '+esc(detail)+'" title="'+esc(label+' · '+item.name+' · '+detail)+'">'+potionImage(item)+'<span class="slot-name">'+label+'</span></button>';
     }).join('');
-    root.querySelectorAll('[data-potion-type]').forEach(button=>button.addEventListener('click',()=>openPotionModal(button.dataset.potionType)));
-    hookImageFallback(root);
+    slots.querySelectorAll('[data-potion-type]').forEach(button=>button.addEventListener('click',()=>openPotionModal(button.dataset.potionType)));
+    hookImageFallback(slots);
   }
   function renderPotionOptions(kind){
     const modal=document.getElementById('potion-modal'),feature=document.getElementById('potion-modal-feature'),optionsRoot=document.getElementById('potion-options');
@@ -1026,7 +1035,7 @@
     const cls=classForBuild();const core=classEmblem(cls);
     root.innerHTML=`<div class="slot-grid">${slots}<div class="core-orb skill-img-wrap">${core}<span>${esc(activeBuild()?.id==='magician-il-fresh'?'ICE / LIGHTNING':cls?.name||'Beginner')}</span></div></div>`;
     root.querySelectorAll('[data-slot]').forEach(b=>b.addEventListener('click',()=>openGearModal(b.dataset.slot)));
-    hookImageFallback(root);renderBuildSummary(summaryId);renderRecommendedPotions();
+    hookImageFallback(root);renderBuildSummary(summaryId);renderRecommendedPotions(root);
   }
 
   function renderBuildSummary(id){
@@ -1668,6 +1677,6 @@
   hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.10.5-potions-gender-audit').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.10.6-dashboard-pot-slots').catch(()=>{});
   }
 })();

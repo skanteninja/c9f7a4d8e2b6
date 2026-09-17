@@ -1,24 +1,14 @@
-.recommended-pots-panel{margin-top:14px;padding:14px;border:1px solid rgba(126,153,194,.25);border-radius:12px;background:linear-gradient(145deg,rgba(20,28,44,.96),rgba(12,17,29,.96));box-shadow:0 12px 30px rgba(0,0,0,.16)}
-.recommended-pots-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}
-.recommended-pots-head h3{margin:3px 0 4px;font-size:1rem}
-.recommended-pots-head p{margin:0;color:#8e9bb2;font-size:.78rem;max-width:620px;line-height:1.45}
-.potion-click-hint{align-self:center;color:#8fa9d5;font-size:.68rem;letter-spacing:.12em;white-space:nowrap}
-.recommended-pots-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.potion-recommendation-card{position:relative;display:block;width:100%;padding:12px;text-align:left;color:inherit;border:1px solid rgba(122,151,194,.26);border-radius:10px;background:rgba(19,27,43,.9);cursor:pointer;transition:border-color .18s ease,transform .18s ease,background .18s ease}
-.potion-recommendation-card:hover,.potion-recommendation-card:focus-visible{border-color:#8bb8ff;background:rgba(28,40,63,.96);transform:translateY(-1px);outline:none}
-.potion-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.potion-kind{color:#a6c7ff;font-size:.68rem;font-weight:800;letter-spacing:.16em}
-.potion-level{color:#71819a;font-size:.65rem;letter-spacing:.08em}
-.potion-card-body{display:grid;grid-template-columns:58px minmax(0,1fr);gap:10px;align-items:center}
-.potion-icon-frame,.potion-option-icon{display:grid;place-items:center;width:56px;height:56px;border:1px solid rgba(122,151,194,.32);border-radius:8px;background:radial-gradient(circle,rgba(72,99,143,.26),rgba(9,14,24,.9));box-shadow:inset 0 0 0 3px rgba(11,17,28,.7)}
-.potion-icon-frame img,.potion-option-icon img{max-width:42px;max-height:42px;image-rendering:auto}
+.equipment-pot-slots{display:flex;align-items:center;justify-content:flex-start;gap:5px;width:100%;max-width:254px;margin:6px auto 0;padding:0 1px;box-sizing:border-box}
+.equipment-pot-slot{flex:0 0 46px;width:46px;height:46px;padding:4px;color:#7d879b;border-color:rgba(126,164,215,.16);background:linear-gradient(145deg,#0d111a,#171d29);transition:border-color .18s ease,transform .18s ease,background .18s ease}
+.equipment-pot-slot:hover,.equipment-pot-slot:focus-visible{border-color:#80b6db;outline:none;transform:translateY(-1px);background:#111a2a}
+.equipment-pot-slot img{max-width:31px;max-height:31px;object-fit:contain;image-rendering:pixelated}
+.equipment-pot-slot .slot-name{font-size:6px;color:#7f899c;letter-spacing:.08em}
+.equipment-pot-slot-hp{border-color:rgba(255,115,126,.32);background:linear-gradient(145deg,rgba(75,25,35,.42),rgba(15,17,25,.95))}
+.equipment-pot-slot-mp{border-color:rgba(115,184,255,.32);background:linear-gradient(145deg,rgba(24,47,79,.46),rgba(15,17,25,.95))}
+.equipment-pot-slot:disabled{cursor:default;opacity:.55}
+.potion-option-icon{display:grid;place-items:center;width:56px;height:56px;border:1px solid rgba(122,151,194,.32);border-radius:8px;background:radial-gradient(circle,rgba(72,99,143,.26),rgba(9,14,24,.9));box-shadow:inset 0 0 0 3px rgba(11,17,28,.7)}
+.potion-option-icon img{max-width:42px;max-height:42px;image-rendering:pixelated}
 .potion-icon-fallback{color:#7d8ba0;font-weight:800}
-.potion-card-copy{display:grid;gap:3px;min-width:0}
-.potion-card-copy strong{font-size:.9rem;color:#f1f5ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.potion-card-copy span,.potion-card-copy small{color:#9aa9c2;font-size:.72rem}
-.potion-card-copy small{color:#c3d5f2}
-.potion-card-reason{display:block;margin-top:10px;color:#c3ccdc;font-size:.73rem;line-height:1.4}
-.potion-card-cta{display:block;margin-top:10px;color:#8eb5f5;font-size:.66rem;letter-spacing:.04em}
 .potion-empty{padding:12px;color:#8997ae;font-size:.78rem;border:1px dashed rgba(122,151,194,.28);border-radius:8px}
 .potion-modal-card{width:min(780px,calc(100vw - 28px));max-height:min(760px,calc(100vh - 28px));overflow:auto}
 .potion-modal-card h3{margin:4px 0 0;font-size:.95rem}
@@ -38,4 +28,4 @@
 .potion-reason{color:#98afd0!important}
 .potion-option-card .highly-recommended-badge{grid-column:1/-1;justify-self:start;margin-top:2px}
 .potion-modal-card .modal-head{align-items:flex-start}
-@media(max-width:620px){.recommended-pots-head{display:block}.potion-click-hint{display:block;margin-top:8px}.recommended-pots-grid,.potion-options{grid-template-columns:1fr}.potion-option-card.recommended{grid-template-columns:56px minmax(0,1fr)}}
+@media(max-width:620px){.equipment-pot-slots{max-width:254px;margin-top:5px;gap:4px}.equipment-pot-slot{flex-basis:44px;width:44px;height:44px;padding:3px}.equipment-pot-slot img{max-width:29px;max-height:29px}.potion-options{grid-template-columns:1fr}.potion-option-card.recommended{grid-template-columns:56px minmax(0,1fr)}}
