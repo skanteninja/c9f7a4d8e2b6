@@ -995,8 +995,10 @@ body.royal-maple-theme .dashboard-v72 .v5-buildbar::before {
 }
 
 body.royal-maple-theme .dashboard-v72 .v6-skills-panel::before {
-  border-width: 16px !important;
-  border-image-width: 16px !important;
+  /* The compact skill card has a smaller content well; keep its labels
+     clear of the lower rail without changing the dashboard geometry. */
+  border-width: 10px !important;
+  border-image-width: 10px !important;
 }
 
 /* The responsive dashboard keeps the action-row width contract at 800px. */
@@ -1037,8 +1039,8 @@ body.royal-maple-theme .dashboard-v72 .v6-skills-panel::before {
     border-image-width: 14px !important;
   }
   body.royal-maple-theme .dashboard-v72 .v6-skills-panel::before {
-    border-width: 12px !important;
-    border-image-width: 12px !important;
+    border-width: 9px !important;
+    border-image-width: 9px !important;
   }
 }
 
