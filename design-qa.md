@@ -2,9 +2,11 @@
 
 source visual truth path: `/workspace/scratch/e694a5abc1c2/upload/add2d38a-d0d6-4bd6-bbb5-ed7f807b8ea8.png`
 secondary supplied implementation reference path: `/workspace/scratch/e694a5abc1c2/upload/13e19894-6f0b-4046-9cc7-7b36ce7b3e0a.png`
-implementation evidence: live cloud-browser capture for the 0.10.12 release; visual QA was performed against the deployed dashboard
+implementation evidence: live cloud-browser capture for the 0.10.13 release; visual QA was performed against the deployed dashboard
 viewport: cloud browser inner viewport 1363 × 936 CSS px at device pixel ratio 1; source visual 1491 × 1055 px; supplied compact reference 554 × 611 px; implementation capture uses the live dashboard viewport and preserves the existing responsive layout.
 state: I/L Wizard dashboard, dashboard page open, Equipment Inventory visible, HP/MP slots visible, level-aware default loadout.
+Figma frame reference: https://www.figma.com/design/vM5lzAtSpIEki4NVXftrkg
+release: 0.10.13-royal-corner-frames; source f9b4970bb21aa5c256b4758695765709536af45a; generated site 5af82c97dbbd00a003c5b2eac506b4eb9bdac84f.
 
 ## Comparison history
 

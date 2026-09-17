@@ -1,5 +1,16 @@
 # Continuity Changelog
 
+## 2026-09-17 — 0.10.13 Figma-measured corner frames — Figma-measured corner frames
+
+- Replaced the CSS border approximation with the exact three-line stepped/chamfered frame measured from the connected Figma component.
+- Added the committed frame asset at `public/assets/variant-b-card-frame.svg`; the build copies it into the deployed static asset set and the service worker core.
+- Kept card interiors opaque and readable, with the existing dashboard layout, class-town page backgrounds, 20 gear slots, 2 potion slots, and modal behavior intact.
+- Figma reference: https://www.figma.com/design/vM5lzAtSpIEki4NVXftrkg
+- Release token: 0.10.13-royal-corner-frames.
+- Source commit: f9b4970bb21aa5c256b4758695765709536af45a.
+- Generated site commit: 5af82c97dbbd00a003c5b2eac506b4eb9bdac84f.
+- All six GitHub release checks passed, including Build static site, Visual/UI, Maps/ETC, Monster, Real input, and Verify live.
+- Live browser QA confirmed the frame asset is active, the old rectangular border is gone, and Hat plus HP potion modals still open and close correctly.
 ## 2026-09-17 — 0.10.12 Variant B beveled card frames
 
 - Applied the selected Variant B visual direction to dashboard cards without changing the existing layout.

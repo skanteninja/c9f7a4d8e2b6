@@ -1,5 +1,20 @@
 # Known Bugs / Incomplete Work
 
+## Verification snapshot — 0.10.13 Figma-measured corner frames
+
+The selected card direction is deployed at https://maplestory-classic.ofri505.workers.dev/?build=magician-il-fresh&page=dashboard.
+
+- Source commit: f9b4970bb21aa5c256b4758695765709536af45a.
+- Generated site commit: 5af82c97dbbd00a003c5b2eac506b4eb9bdac84f.
+- Release token: 0.10.13-royal-corner-frames.
+- The live card frame uses the committed Figma-measured SVG with three visible edge lines and diagonal stepped corners.
+- Card surfaces are opaque and readable; page-level Perion, Henesys, and Ellinia backgrounds remain outside the dashboard cards.
+- All six GitHub release checks passed.
+- Manual browser QA confirmed the frame asset is active, the old rectangular border is absent, and Hat plus HP potion modals still work.
+- The earlier 0.10.12 Verify Live failure is historical; the 0.10.13 Verify Live run passed.
+
+See design-qa.md for the visual comparison record.
+
 ## Verification snapshot — 0.10.12 Variant B (live UI verified; automated browser gate pending)
 
 The selected card direction is deployed and visible at https://maplestory-classic.ofri505.workers.dev/?build=magician-il-fresh&page=dashboard.

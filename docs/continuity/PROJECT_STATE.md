@@ -2,8 +2,8 @@
 
 Last continuity baseline: 2026-09-17
 
-Current deployed checkpoint: 0.10.12-royal-beveled-cards (live browser verified; automated Verify Live gate pending)
-Current source checkpoint: 0.10.12-royal-beveled-cards
+Current deployed checkpoint: 0.10.13-royal-corner-frames (live browser verified; all six release checks passed)
+Current source checkpoint: 0.10.13-royal-corner-frames
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:

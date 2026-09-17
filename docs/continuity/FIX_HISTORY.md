@@ -1,5 +1,22 @@
 # Historical Fix / Regression Log
 
+## 2026-09-17 — 0.10.13 Figma-measured frame correction
+
+Observed problem:
+- The prior dashboard border pass still read as flat rectangular outlines instead of the pronounced stepped/chamfered edge treatment shown in the selected reference.
+
+Correction:
+- Created a Figma component with three measured antique-gold vector paths: heavy outer bevel, bright inner keyline, and deep bevel line.
+- Committed those paths as `public/assets/variant-b-card-frame.svg` and applied the asset as the dashboard card frame.
+- Removed the old rectangular border and CSS clip-path approximation while preserving opaque card surfaces and the existing layout.
+- Bumped the runtime/service-worker token to `0.10.13-royal-corner-frames`.
+
+Verification:
+- Source commit: f9b4970bb21aa5c256b4758695765709536af45a.
+- Generated site commit: 5af82c97dbbd00a003c5b2eac506b4eb9bdac84f.
+- All six GitHub release checks passed.
+- Manual live browser QA confirmed pronounced corner lines, 20 gear slots, 2 potion slots, Hat replacement modal behavior, and HP potion modal behavior.
+
 ## 2026-09-17 — 0.10.12 Variant B beveled card correction
 
 Observed problem:
