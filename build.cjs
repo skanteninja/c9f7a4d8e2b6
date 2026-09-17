@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.10.5-potions-gender-audit';
+const assetVersion = '0.10.6-dashboard-pot-slots';
 const BRAND = 'Top Classic World Maplestory';
 
 // The OSMS export is the identity authority for the equipment picker.  The
@@ -36,6 +36,7 @@ const CLASSIC_EQUIPMENT_NAME_COUNTS = new Map();
 for (const item of CLASSIC_EQUIPMENT_BY_ID.values()) {
   CLASSIC_EQUIPMENT_NAME_COUNTS.set(item.name, (CLASSIC_EQUIPMENT_NAME_COUNTS.get(item.name) || 0) + 1);
 }
+const CLASSIC_EQUIPMENT_ITEMS = [...CLASSIC_EQUIPMENT_BY_ID.values()];
 const GEAR_NAME_ALIASES = {
   "Beginner's Wooden Wand / job wand": 'Wooden Wand'
 };
@@ -139,6 +140,25 @@ function canonicalizeGuideInventory(data) {
 
   const out = {...data};
   if (Array.isArray(out.gear)) out.gear = out.gear.map(canonicalRow);
+  if (Array.isArray(out.gear)) {
+    // The I/L guide started with only its curated checkpoints.  The picker is
+    // also the inventory, so keep every current Mage/All wearable discoverable
+    // there as well, including every genderless earring and both body variants.
+    const existingIds = new Set(out.gear.map(row => Number(row['Item ID'] || 0)).filter(id => id > 0));
+    const expanded = CLASSIC_EQUIPMENT_ITEMS.filter(item => {
+      const label = classEquipmentLabel(item);
+      if (item.sub_category === 'Weapon') {
+        return ['Wand', 'Staff'].includes(item.weapon_type) && ['All', 'Mage'].includes(label);
+      }
+      return ['Hat','Cape','Top','Overall','Bottom','Glove','Shoes','Shield','Earring'].includes(item.sub_category)
+        && ['All', 'Mage'].includes(label);
+    });
+    for (const item of expanded) {
+      if (existingIds.has(Number(item.id))) continue;
+      out.gear.push(classicEquipmentRow(item, 'Mage', 'I/L Wizard'));
+      existingIds.add(Number(item.id));
+    }
+  }
   if (out.gearPresets) out.gearPresets = rename(out.gearPresets);
   return out;
 }
@@ -535,6 +555,44 @@ function equipmentFields(item, family, branch) {
     'Req Job': label === 'All' ? 'Any' : label,
     'Req Job ID': Number(stats.reqJob || 0),
     'Item Type': item.sub_category === 'Weapon' ? (item.weapon_type || 'Weapon') : (item.sub_category || 'Equipment')
+  };
+}
+
+function classicEquipmentRow(item, family, branch) {
+  const stats = item.stats || {};
+  return {
+    Item: item.name,
+    Slot: equipmentSlot(item),
+    'Item ID': item.id,
+    'Icon URL': `/game-media/icons/${item.id}`,
+    Gender: item.gender || stats.gender || '',
+    'Gender Class': equipmentGenderClass(item),
+    STR: Number(stats.incSTR || 0),
+    DEX: Number(stats.incDEX || 0),
+    INT: Number(stats.incINT || 0),
+    LUK: Number(stats.incLUK || 0),
+    'W.ATK': Number(stats.incPAD || 0),
+    'M.ATK': Number(stats.incMAD || 0),
+    WDEF: Number(stats.incPDD || 0),
+    MDEF: Number(stats.incMDD || 0),
+    'Crit%': Number(stats.incCritRate || 0),
+    'Crit DMG': Number(stats.incCritDamage || 0),
+    Speed: Number(stats.incSpeed || 0),
+    Jump: Number(stats.incJump || 0),
+    'Req Lv': Number(stats.reqLevel || 0),
+    'Req STR': Number(stats.reqSTR || 0),
+    'Req DEX': Number(stats.reqDEX || 0),
+    'Req INT': Number(stats.reqINT || 0),
+    'Req LUK': Number(stats.reqLUK || 0),
+    Status: 'CURRENT / VERIFY',
+    'Class Fit': classEquipmentFit(item, family, branch),
+    ...equipmentFields(item, family, branch),
+    Plan: 'OPTIONAL',
+    Priority: 'Use at the relevant level or when it creates a real breakpoint',
+    Notes: item.weapon_type ? `${item.weapon_type} · ${item.attack_speed_label || ''}` : `${classEquipmentLabel(item)} ${branch} equipment option`,
+    'Highly Recommended': false,
+    'Recommendation Reason': '',
+    'Evidence Class': 'CURRENT / VERIFY'
   };
 }
 

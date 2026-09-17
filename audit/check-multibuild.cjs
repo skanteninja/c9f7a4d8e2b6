@@ -53,6 +53,26 @@ function checkPotionRecommendations(guide, name) {
   }
 }
 
+function checkCompleteGenderInventory(guide, name) {
+  const expectedEarrings = new Set(classicItems
+    .filter(item => item.category === 'Equipment' && item.sub_category === 'Earring')
+    .map(item => String(item.id)));
+  const actualEarrings = new Set((guide.gear || [])
+    .filter(row => row.Slot === 'Earrings' && row.Item !== 'None')
+    .map(row => String(row['Item ID'])));
+  if (actualEarrings.size !== expectedEarrings.size || [...expectedEarrings].some(id => !actualEarrings.has(id))) {
+    throw new Error(`${name} is missing one or more current genderless earrings`);
+  }
+  for (const slot of ['Top','Bottom','Overall']) {
+    if (!(guide.gear || []).some(row => row.Slot === slot && row['Gender Class'] === 'Male')) {
+      throw new Error(`${name} is missing a Male ${slot} option`);
+    }
+    if (!(guide.gear || []).some(row => row.Slot === slot && row['Gender Class'] === 'Female')) {
+      throw new Error(`${name} is missing a Female ${slot} option`);
+    }
+  }
+}
+
 
 
 function checkCanonicalInventory(guide, name) {
@@ -80,6 +100,7 @@ function checkCanonicalInventory(guide, name) {
 
 checkCanonicalInventory(root, 'I/L');
 checkPotionRecommendations(root, 'I/L');
+checkCompleteGenderInventory(root, 'I/L');
 
 const expectedClassicIlSkillIds = {
   'Improved MP Recovery': 2000000,
@@ -166,6 +187,7 @@ for (const [name, guide] of Object.entries(root.buildVariants)) {
     if (!hasMale || !hasFemale) throw new Error(`${name} is missing a ${slot} gender counterpart`);
   }
   checkPotionRecommendations(guide, name);
+  checkCompleteGenderInventory(guide, name);
   for (const level of [1, 10, 15, 30, 50, 60, 70]) {
     for (const gender of ['male','female']) {
       const loadout = effectivePreset(guide, level, gender);
@@ -299,7 +321,7 @@ for (const token of [
   'faceId:21000',
   "root.dataset.avatarGearIds=gearSummary;",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.10.5-potions-gender-audit')",
+  "navigator.serviceWorker.register('./sw.js?v=0.10.6-dashboard-pot-slots')",
   'tcwFullSkillBuild',
   'data-plan-level',
   "list.querySelectorAll('.skill-row[data-plan-level]')",
@@ -311,9 +333,9 @@ for (const token of [
   if (!app.includes(token)) throw new Error(`Missing class-specific renderer contract: ${token}`);
 }
 for (const token of [
-  'recommended-pots',
+  'equipment-pot-slots',
+  'equipment-pot-slot',
   'potion-modal',
-  'potion-recommendation-card',
   'function potionTier',
   'renderPotionOptions',
   'potion-modal-close',
@@ -356,8 +378,11 @@ const indexHtml = fs.readFileSync(`${outputDir}/index.html`, 'utf8');
 for (const token of ['modal-filter-summary', 'modal-show-future', 'data-class-equipment-filters', 'session-entry-modal', 'session-reset-modal', 'session-gender-modal', 'modal-gender-label']) {
   if (!indexHtml.includes(token)) throw new Error(`Missing equipment filter contract: ${token}`);
 }
-for (const token of ['recommended-pots', 'potion-modal', 'potion-modal-close']) {
+for (const token of ['equipment-window', 'equipment-window-page', 'potion-modal', 'potion-modal-close']) {
   if (!indexHtml.includes(token)) throw new Error(`Missing recommended-potion markup contract: ${token}`);
+}
+if (indexHtml.includes('recommended-pots-panel') || indexHtml.includes('id="recommended-pots"')) {
+  throw new Error('Recommended Pots returned as a standalone card');
 }
 if (!fs.existsSync(`${outputDir}/session-flow.css`) || !fs.statSync(`${outputDir}/session-flow.css`).size) {
   throw new Error('Session flow stylesheet is missing');
