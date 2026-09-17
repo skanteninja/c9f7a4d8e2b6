@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="480" viewBox="0 0 760 480" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="mapleGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe09a"/>
+      <stop offset=".48" stop-color="#f0be63"/>
+      <stop offset="1" stop-color="#a86632"/>
+    </linearGradient>
+  </defs>
+
+  <!-- layered rails measured for the selected Royal Maple direction -->
+  <path d="M28 2H732L758 28V452L732 478H28L2 452V28Z" fill="none" stroke="#3b231e" stroke-width="10" stroke-linejoin="miter"/>
+  <path d="M28 7H732L753 28V452L732 473H28L7 452V28Z" fill="none" stroke="#93552b" stroke-width="8" stroke-linejoin="miter"/>
+  <path d="M32 11H728L749 32V448L728 469H32L11 448V32Z" fill="none" stroke="#c7883b" stroke-width="5" stroke-linejoin="miter"/>
+  <path d="M41 18H719L742 41V439L719 462H41L18 439V41Z" fill="none" stroke="#f0be63" stroke-width="2.5" stroke-linejoin="miter"/>
+  <path d="M47 27H713L733 47V433L713 453H47L27 433V47Z" fill="none" stroke="#5d382a" stroke-width="5" stroke-linejoin="miter"/>
+  <path d="M54 34H706L726 54V426L706 446H54L34 426V54Z" fill="none" stroke="#b47636" stroke-width="2" stroke-linejoin="miter"/>
+
+  <!-- Royal Maple corner medallion; mirrored into all four corners -->
+  <g id="corner-medallion">
+    <path d="M6 30L30 6" fill="none" stroke="#f0be63" stroke-width="3" stroke-linecap="square"/>
+    <circle cx="30" cy="30" r="16" fill="#24151b" stroke="#c7883b" stroke-width="4"/>
+    <circle cx="30" cy="30" r="11" fill="none" stroke="#5d382a" stroke-width="2"/>
+    <path d="M30 14L34 22L43 20L37 29L44 34L35 36L36 46L30 41L24 46L25 36L16 34L23 29L17 20L26 22Z" fill="url(#mapleGold)" stroke="#5d382a" stroke-width="1.5" stroke-linejoin="miter"/>
+    <path d="M30 40V48" fill="none" stroke="#c7883b" stroke-width="2" stroke-linecap="square"/>
+  </g>
+  <use href="#corner-medallion"/>
+  <use href="#corner-medallion" transform="translate(760 0) scale(-1 1)"/>
+  <use href="#corner-medallion" transform="translate(0 480) scale(1 -1)"/>
+  <use href="#corner-medallion" transform="translate(760 480) scale(-1 -1)"/>
+</svg>
