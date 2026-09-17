@@ -958,7 +958,8 @@ body.royal-maple-theme .dashboard-v72 .v72-command-grid > .panel,
 body.royal-maple-theme .dashboard-v72 .v72-secondary-content > .panel,
 body.royal-maple-theme .dashboard-v72 .v6-tertiary-grid > .panel,
 body.royal-maple-theme .dashboard-v72 .v72-bottom-grid > .panel {
-  padding: 17px 19px 16px !important;
+  /* Compact queue cards keep the existing row width contract. */
+  padding: 13px 14px !important;
 }
 
 body.royal-maple-theme .dashboard-v72 .five-level-panel {
