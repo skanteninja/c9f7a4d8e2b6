@@ -6,6 +6,20 @@ Purpose: preserve bugs that were already solved, partially solved, or observed a
 
 This is historical context, not the unresolved queue. Active unresolved work belongs in `KNOWN_BUGS.md`.
 
+## 2026-09-17 — 0.10.8 restored visible town-art backgrounds
+
+Observed problem:
+- The Royal Maple CSS and class-specific town image were present in the live DOM, but the page screenshot showed almost no town art because the opaque body background covered the negative-z-index pseudo-elements.
+
+Correction:
+- Made the themed body canvas transparent so the fixed town layer can paint above the document background, kept the content panels opaque, and softened the overlay/filter values so the town remains recognizable.
+- Bumped the runtime/service-worker token to `0.10.8-royal-town-visibility` to make the correction cache-visible.
+
+Verification:
+- Live Browser screenshot shows Ellinia behind the I/L dashboard with the Royal Maple cards still readable.
+- Source `cc9f2221d6105f2afde98e72d31de703a3c70aac` generated site `05c707004b3bebbdb605358d82f6a71f159316d4`.
+- Build Static `35227409213`, Visual/UI `35227409212`, Monster `35227409116`, Maps/ETC `35227409094`, Verify Live `35227408993` attempt 2, and Real Input `35227409065` passed.
+
 ## 2026-09-17 — 0.10.7 Royal Maple town themes
 
 Observed request:

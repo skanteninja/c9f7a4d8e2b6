@@ -4,6 +4,12 @@ Last continuity baseline: 2026-09-17
 
 Use this file for settled choices that future chats should preserve unless new evidence justifies changing them.
 
+## 2026-09-17 — Town art must remain visibly present
+
+- Keep the town background on the page canvas, not on individual content cards; content cards retain the Royal Maple surface treatment and readable contrast.
+- A page-level background implementation must be checked in a rendered screenshot, not only by confirming that the CSS URL and image request exist.
+- Keep the town image layer above the document canvas but below page content, and bump the cache token whenever its stacking or visibility changes.
+
 ## 2026-09-17 — Royal Maple town themes
 
 - Keep the current page layout and interaction model while applying the Royal Maple treatment to shared cards and controls.

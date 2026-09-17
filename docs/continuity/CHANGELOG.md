@@ -2,6 +2,13 @@
 
 This log exists to make cross-chat handoff quick and reliable. Record meaningful changes, fixes, regressions, research conclusions, and continuity-system updates.
 
+## 2026-09-17 — 0.10.8 restored visible town-art backgrounds
+
+- Fixed the Royal Maple town art being hidden behind the opaque body canvas even though the theme mapper and asset requests were working.
+- Increased background visibility while keeping the town imagery behind readable, opaque content cards; bumped the runtime/service-worker token to `0.10.8-royal-town-visibility`.
+- Source `cc9f2221d6105f2afde98e72d31de703a3c70aac` produced generated site `05c707004b3bebbdb605358d82f6a71f159316d4`; live `build-info.txt` reports `0.10.8-royal-town-visibility`.
+- Build Static `35227409213`, Visual/UI `35227409212`, Monster `35227409116`, Maps/ETC `35227409094`, Real Input `35227409065`, and Verify Live `35227408993` attempt 2 passed.
+
 ## 2026-09-17 — 0.10.7 Royal Maple town themes
 
 - Applied the approved Royal Maple visual treatment to the existing cards, equipment inventory, navigation, buttons, and modal surfaces without changing the page layout.

@@ -3,6 +3,12 @@
 Last prioritized: 2026-09-17
 Ordering follows the quality contract in [QUALITY_STANDARD.md](QUALITY_STANDARD.md). “Implemented locally” never means “deployed” until the live gate passes.
 
+## 0.10.8 completed in the verified live checkpoint
+
+- Fixed the page-level stacking issue that hid the class town backgrounds behind the opaque body canvas.
+- Increased town-art visibility while preserving readable Royal Maple content cards.
+- Generated site `05c707004b3bebbdb605358d82f6a71f159316d4` reports `0.10.8-royal-town-visibility`; all release gates passed.
+
 ## 0.10.7 completed in the verified live checkpoint
 
 - Applied the approved Royal Maple visual system to the existing page cards and controls.

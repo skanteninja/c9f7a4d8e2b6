@@ -2,8 +2,8 @@
 
 Last continuity baseline: 2026-09-17
 
-Current deployed checkpoint: 0.10.7-royal-town-themes
-Current source checkpoint: 0.10.7-royal-town-themes
+Current deployed checkpoint: 0.10.8-royal-town-visibility
+Current source checkpoint: 0.10.8-royal-town-visibility
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:
@@ -29,6 +29,12 @@ Also read QUALITY_STANDARD.md, IMPLEMENTATION_BACKLOG.md, and docs/continuity/LI
 - I/L Wizard Build
 
 Never use “Luna’s” in build names.
+
+## 2026-09-17 — Royal Maple town-art visibility
+- Corrected the stacking issue that hid the fixed town background beneath the body canvas.
+- The live page now visibly shows the active town art while the Royal Maple cards remain readable and opaque: Perion/Fighter, Henesys/Hunter, Ellinia/I/L Wizard.
+- Source commit `cc9f2221d6105f2afde98e72d31de703a3c70aac` produced generated site commit `05c707004b3bebbdb605358d82f6a71f159316d4`; live `build-info.txt` reports `0.10.8-royal-town-visibility`.
+- Build Static `35227409213`, Visual/UI `35227409212`, Monster `35227409116`, Maps/ETC `35227409094`, Real Input `35227409065`, and Verify Live `35227408993` attempt 2 passed.
 
 ## 2026-09-17 — Royal Maple town themes
 - The existing page layout now uses the approved Royal Maple visual system: dark plum surfaces, antique-gold borders, ivory type, and maple-red accents.

@@ -4,6 +4,15 @@ Last continuity baseline: 2026-09-17
 
 This is the authoritative unresolved-issues list for cross-chat continuity. Do not mark an issue resolved merely because code was edited. Resolution requires verification in the generated/live UI or validated data output.
 
+## Verification snapshot — 0.10.8 (2026-09-17)
+
+Source commit `cc9f2221d6105f2afde98e72d31de703a3c70aac` and generated site commit `05c707004b3bebbdb605358d82f6a71f159316d4` are deployed. The live build-info endpoint reports `0.10.8-royal-town-visibility`.
+
+Verified in generated/live UI and release gates:
+- The class-specific town art is visibly rendered behind the page canvas: Perion for Fighter, Henesys for Hunter, and Ellinia for I/L Wizard.
+- The Royal Maple content cards remain readable and visually distinct from the page background.
+- Build Static `35227409213`, Visual/UI `35227409212`, Monster `35227409116`, Maps/ETC `35227409094`, Verify Live `35227408993` attempt 2, and Real Input `35227409065` passed.
+
 ## Verification snapshot — 0.10.7 (2026-09-17)
 
 Source commit `be1ba951fb884bfd5b5ec21d2166d59e0416e836` and generated site commit `6582c6423f63365e49943def742721aad83f677a` are deployed. The live build-info endpoint reports `0.10.7-royal-town-themes`.
