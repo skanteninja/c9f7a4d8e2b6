@@ -1,8 +1,15 @@
 # Durable Project Decisions
 
-Last continuity baseline: 2026-09-16
+Last continuity baseline: 2026-09-17
 
 Use this file for settled choices that future chats should preserve unless new evidence justifies changing them.
+
+## 2026-09-17 — Recommended Pots belong to Equipment Inventory
+
+- Keep HP and MP recommendations inside each Equipment Inventory window rather than adding a separate dashboard/page card.
+- Render only compact HP and MP icon slots in the inventory surface; keep the explanatory comparison list in the click-open modal so the paper-doll layout remains intact.
+- Recompute the displayed recommendation from the active build and level. Rank fixed-recovery shop items by meso per restored point, then apply the practical refill-use limit so high-level characters are not forced into excessive button presses.
+- Keep all 23 current genderless earrings and all applicable Unisex/Genderless gear in every relevant build; gender-locked armor remains filtered against the selected avatar body.
 
 ## 2026-09-16 — Session-entry cadence
 

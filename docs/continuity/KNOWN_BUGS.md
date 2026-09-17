@@ -1,6 +1,6 @@
 # Known Bugs / Incomplete Work
 
-Last continuity baseline: 2026-09-16
+Last continuity baseline: 2026-09-17
 
 This is the authoritative unresolved-issues list for cross-chat continuity. Do not mark an issue resolved merely because code was edited. Resolution requires verification in the generated/live UI or validated data output.
 
@@ -9,6 +9,16 @@ This is the authoritative unresolved-issues list for cross-chat continuity. Do n
 - **P1** — major build correctness/parity issue
 - **P2** — important UX/data-quality issue
 - **P3** — polish / lower-impact issue
+
+## Verification snapshot — 0.10.6 (2026-09-17)
+
+Source commit `dac47493faa44d723b5449ae65d97d267ee964a1` and generated site commit `bc945ba01b02b9422c9a1bd6a64270acc1b30d96` are deployed. The live build-info endpoint reports `0.10.6-dashboard-pot-slots`.
+
+Verified in generated/live UI and release gates:
+- The dashboard and Equipment page render HP and MP as two compact equipment-style slots inside the Equipment Inventory window; no standalone Recommended Pots card remains.
+- Each slot uses the current level’s recommendation and opens the highly recommended option plus alternate shop options with icons, recovery, price, meso-per-point, and practical refill-limit details.
+- I/L Wizard, Fighter, and Hunter each carry all 23 current genderless earrings and both Male/Female Top, Bottom, and Overall options; shared Unisex/Genderless equipment remains available to both avatar genders.
+- Build Static `35214983471`, Visual/UI `35214983487`, Monster `35214983464`, Maps/ETC `35214983520`, Real Input `35214983463`, and Verify Live `35214983474` passed.
 
 ## Verification snapshot — 0.10.4 (2026-09-16)
 

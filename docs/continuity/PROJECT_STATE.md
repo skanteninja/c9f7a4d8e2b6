@@ -1,9 +1,9 @@
 # MapleStory Classic Builder — Project State
 
-Last continuity baseline: 2026-09-16
+Last continuity baseline: 2026-09-17
 
-Current deployed checkpoint: 0.10.4-session-entry-once
-Current source checkpoint: 0.10.4-session-entry-once
+Current deployed checkpoint: 0.10.6-dashboard-pot-slots
+Current source checkpoint: 0.10.6-dashboard-pot-slots
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:
@@ -29,6 +29,13 @@ Also read QUALITY_STANDARD.md, IMPLEMENTATION_BACKLOG.md, and docs/continuity/LI
 - I/L Wizard Build
 
 Never use “Luna’s” in build names.
+
+## 2026-09-17 — integrated recommended pot slots
+- The Equipment Inventory now owns two compact, icon-first HP/MP recommendation slots on both the dashboard and Equipment page; the old standalone potion card is removed.
+- Clicking either slot opens the level-aware highly recommended potion plus the other shop options, with recovery amount, shop price, meso-per-point, and refill-limit context.
+- The I/L, Fighter, and Hunter inventories each include all 23 current genderless earrings plus Male and Female Top/Bottom/Overall counterparts. Gender-locked choices remain filtered by the selected avatar; Unisex and Genderless items remain available.
+- Source commit `dac47493faa44d723b5449ae65d97d267ee964a1` produced generated site commit `bc945ba01b02b9422c9a1bd6a64270acc1b30d96`; live `build-info.txt` reports `0.10.6-dashboard-pot-slots`.
+- Build Static `35214983471`, Visual/UI `35214983487`, Monster `35214983464`, Maps/ETC `35214983520`, Real Input `35214983463`, and Verify Live `35214983474` passed.
 
 ## Product goal
 The site should feel like a polished, period-correct MapleStory Classic builder and guide rather than three loosely related pages. Every supported build should have equivalent depth and quality while remaining class-specific.

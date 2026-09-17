@@ -1,7 +1,14 @@
 # MapleStory Classic Builder — Prioritized Implementation Backlog
 
-Last prioritized: 2026-09-16
+Last prioritized: 2026-09-17
 Ordering follows the quality contract in [QUALITY_STANDARD.md](QUALITY_STANDARD.md). “Implemented locally” never means “deployed” until the live gate passes.
+
+## 0.10.6 completed in the verified live checkpoint
+
+- Integrated HP and MP Recommended Pots into both Equipment Inventory windows as compact icon slots; removed the standalone potion card.
+- Preserved click-open alternate options and the level-aware shop-efficiency/refill-limit logic.
+- Completed the current shared-equipment inventory contract: all 23 genderless earrings plus Male/Female armor counterparts are present in I/L, Fighter, and Hunter.
+- Generated site `bc945ba01b02b9422c9a1bd6a64270acc1b30d96` reports `0.10.6-dashboard-pot-slots`; all six release gates passed.
 
 ## 0.10.4 completed in the verified live checkpoint
 

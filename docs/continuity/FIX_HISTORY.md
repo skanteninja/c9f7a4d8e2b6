@@ -1,10 +1,27 @@
 # Historical Fix / Regression Log
 
-Last continuity baseline: 2026-09-16
+Last continuity baseline: 2026-09-17
 
 Purpose: preserve bugs that were already solved, partially solved, or observed as regressions so future chats do not repeat the same debugging from scratch.
 
 This is historical context, not the unresolved queue. Active unresolved work belongs in `KNOWN_BUGS.md`.
+
+## 2026-09-17 — 0.10.6 integrated pot slots and complete shared gear inventory
+
+Observed problems:
+- Recommended Pots existed as a separate card instead of being part of the Equipment Inventory shown on the dashboard.
+- The I/L inventory exposed only a small subset of the current genderless earrings and lacked complete Male/Female armor coverage.
+
+Correction:
+- Reused the existing level-aware potion catalog and modal, but rendered only two compact HP/MP equipment-style slots directly below the paper-doll grid in both inventory windows.
+- Removed the standalone Recommended Pots page section and added a shop-comparison modal with the highly recommended option and alternatives.
+- Expanded I/L to every applicable Mage/All current wearable, including all 23 earrings, and added an explicit generated-inventory guard for shared earrings and gender counterparts in all builds.
+- Bumped the asset/service-worker token to `0.10.6-dashboard-pot-slots`.
+
+Verification:
+- Local build, generated JavaScript syntax, complete multi-build gender/equipment audit, and `git diff --check` passed.
+- Source `dac47493faa44d723b5449ae65d97d267ee964a1` generated site `bc945ba01b02b9422c9a1bd6a64270acc1b30d96`.
+- Build Static `35214983471`, Visual/UI `35214983487`, Monster `35214983464`, Maps/ETC `35214983520`, Real Input `35214983463`, and Verify Live `35214983474` passed; live build-info reports `0.10.6-dashboard-pot-slots`.
 
 ## 2026-09-16 — 0.10.4 session-entry cadence
 

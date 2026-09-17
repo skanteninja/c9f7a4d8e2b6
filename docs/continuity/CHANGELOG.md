@@ -2,6 +2,14 @@
 
 This log exists to make cross-chat handoff quick and reliable. Record meaningful changes, fixes, regressions, research conclusions, and continuity-system updates.
 
+## 2026-09-17 — 0.10.6 integrated recommended pot slots
+
+- Moved Recommended Pots into the Equipment Inventory window on the dashboard and Equipment page as compact HP and MP icon slots.
+- Clicking a slot opens the level-aware highly recommended potion and all alternate shop options, including icons, recovery, price, meso-per-point, and practical refill-limit details.
+- Expanded the I/L inventory to include all 23 current genderless earrings and Male/Female armor counterparts; the existing gender filter keeps incompatible choices out while preserving shared gear.
+- Bumped the runtime/service-worker token to `0.10.6-dashboard-pot-slots`; live `build-info.txt` reports the new checkpoint.
+- Source `dac47493faa44d723b5449ae65d97d267ee964a1` and generated site `bc945ba01b02b9422c9a1bd6a64270acc1b30d96` are deployed. Build Static `35214983471`, Visual/UI `35214983487`, Monster `35214983464`, Maps/ETC `35214983520`, Real Input `35214983463`, and Verify Live `35214983474` passed.
+
 ## 2026-09-16 — 0.10.4 session-entry cadence
 
 - Session Continue/Reset now appears once per build entry in a browser tab instead of on every refresh.
