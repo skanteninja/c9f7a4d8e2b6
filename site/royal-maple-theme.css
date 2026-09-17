@@ -913,8 +913,15 @@ body.royal-maple-theme .dashboard-v72 .panel::before {
   inset: 0 !important;
   z-index: 0 !important;
   pointer-events: none !important;
-  background: url("assets/royal-maple-card-frame.svg?v=0.10.14-royal-maple-medallion-frames") center / 100% 100% no-repeat !important;
-  border: 0 !important;
+  /* Use the SVG as a nine-slice border so rails stay at a fixed inset
+     instead of stretching deep into wide cards. */
+  background: transparent !important;
+  border: 22px solid transparent !important;
+  border-image-source: url("assets/royal-maple-card-frame.svg?v=0.10.14-royal-maple-medallion-frames") !important;
+  border-image-slice: 54 fill !important;
+  border-image-width: 22px !important;
+  border-image-outset: 0 !important;
+  border-image-repeat: stretch !important;
   border-radius: 0 !important;
   clip-path: none !important;
   box-shadow: none !important;
@@ -939,31 +946,77 @@ body.royal-maple-theme .dashboard-v72 .panel > * {
 /* Safe text zones: the frame remains visible around every heading, control,
    slot group, queue row, and footer without changing the dashboard grid. */
 body.royal-maple-theme .dashboard-v72 .v5-buildbar {
-  padding: 16px 24px 15px !important;
+  padding: 16px 26px 15px !important;
 }
 
 body.royal-maple-theme .dashboard-v72 .v5-equipment-hero {
-  padding: 22px 22px 15px !important;
+  padding: 24px 26px 15px !important;
 }
 
 body.royal-maple-theme .dashboard-v72 .v5-character-hero {
-  padding: 17px 20px 15px !important;
+  padding: 24px 26px 15px !important;
 }
 
 body.royal-maple-theme .dashboard-v72 .v6-skills-panel {
-  padding: 12px 15px 11px !important;
+  padding: 18px 18px 10px !important;
 }
 
 body.royal-maple-theme .dashboard-v72 .v72-command-grid > .panel,
 body.royal-maple-theme .dashboard-v72 .v72-secondary-content > .panel,
 body.royal-maple-theme .dashboard-v72 .v6-tertiary-grid > .panel,
 body.royal-maple-theme .dashboard-v72 .v72-bottom-grid > .panel {
-  /* Compact queue cards keep the existing row width contract. */
-  padding: 13px 14px !important;
+  padding: 24px 24px 16px !important;
 }
 
 body.royal-maple-theme .dashboard-v72 .five-level-panel {
-  padding: 18px 20px !important;
+  padding: 24px 26px !important;
+}
+
+/* Major panels own the full frame inset; the compact skill card keeps a
+   slightly lighter inset so its tab row and six cards remain readable. */
+body.royal-maple-theme .dashboard-v72 .v5-buildbar::before {
+  border-width: 14px !important;
+  border-image-width: 14px !important;
+}
+
+body.royal-maple-theme .dashboard-v72 .v6-skills-panel::before {
+  border-width: 16px !important;
+  border-image-width: 16px !important;
+}
+
+/* The responsive dashboard keeps the action-row width contract at 800px. */
+@media (max-width: 900px) {
+  body.royal-maple-theme .dashboard-v72 .v5-buildbar {
+    padding: 13px 18px 12px !important;
+  }
+  body.royal-maple-theme .dashboard-v72 .v5-equipment-hero,
+  body.royal-maple-theme .dashboard-v72 .v5-character-hero {
+    padding: 18px 20px 12px !important;
+  }
+  body.royal-maple-theme .dashboard-v72 .v6-skills-panel {
+    padding: 14px 15px 9px !important;
+  }
+  body.royal-maple-theme .dashboard-v72 .v72-command-grid > .panel,
+  body.royal-maple-theme .dashboard-v72 .v72-secondary-content > .panel,
+  body.royal-maple-theme .dashboard-v72 .v6-tertiary-grid > .panel,
+  body.royal-maple-theme .dashboard-v72 .v72-bottom-grid > .panel {
+    padding: 15px !important;
+  }
+  body.royal-maple-theme .dashboard-v72 .five-level-panel {
+    padding: 18px 20px !important;
+  }
+  body.royal-maple-theme .dashboard-v72 .v5-buildbar::before {
+    border-width: 12px !important;
+    border-image-width: 12px !important;
+  }
+  body.royal-maple-theme .dashboard-v72 .panel::before {
+    border-width: 14px !important;
+    border-image-width: 14px !important;
+  }
+  body.royal-maple-theme .dashboard-v72 .v6-skills-panel::before {
+    border-width: 12px !important;
+    border-image-width: 12px !important;
+  }
 }
 
 /* Keep the inventory stage and its readable slot surfaces clean. */
