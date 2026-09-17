@@ -64,6 +64,7 @@ jobs:
 
       - name: Browser boot dashboard and progression regression gate
         run: |
+          set -x
           cat > site/ci-progression-test.html <<'HTML'
           <!doctype html><meta charset="utf-8"><body><iframe id="app" src="/"></iframe><div id="ci-result">pending</div><script>
           const delay=ms=>new Promise(r=>setTimeout(r,ms));
@@ -209,10 +210,20 @@ jobs:
           python3 .github/ci_static_proxy.py --directory site --port 4173 >/tmp/maplestory-static-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          server_ready=false
           for i in {1..30}; do
-            curl -fsS http://127.0.0.1:4173/ >/dev/null && break
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then
+              server_ready=true
+              break
+            fi
             sleep 0.25
           done
+          if [ "$server_ready" != true ]; then
+            echo 'CI static proxy did not become ready'
+            cat /tmp/maplestory-static-http.log || true
+            ps -ef || true
+            exit 1
+          fi
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
           test -n "$chrome"
 
