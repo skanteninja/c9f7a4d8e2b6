@@ -890,46 +890,44 @@ body.royal-maple-theme ::selection {
 }
 
 
-/* Variant B — heavy beveled gold frames with clean, opaque card interiors.
-   The page keeps its class-town background; dashboard cards deliberately do not. */
+/* 0.10.14 — selected Royal Maple frame.
+   This is the production frame for the approved visual reference:
+   opaque card faces, layered gold rails, and four maple medallions. */
 body.royal-maple-theme .dashboard-v72 .v5-buildbar,
 body.royal-maple-theme .dashboard-v72 .panel {
+  position: relative !important;
+  isolation: isolate;
   box-sizing: border-box;
   overflow: hidden !important;
-  border: 2px solid #c7883b !important;
+  border: 0 !important;
   border-radius: 0 !important;
   background: #160d16 !important;
   background-image: none !important;
-  box-shadow:
-    0 0 0 1px rgba(63, 34, 28, .98),
-    0 0 0 3px rgba(147, 84, 40, .78),
-    inset 0 0 0 1px rgba(255, 229, 165, .92),
-    inset 0 0 0 3px rgba(42, 22, 27, .98),
-    inset 0 0 0 5px rgba(125, 70, 37, .72),
-    0 14px 32px rgba(5, 2, 7, .46) !important;
+  box-shadow: 0 14px 32px rgba(5, 2, 7, .46) !important;
 }
 
 body.royal-maple-theme .dashboard-v72 .v5-buildbar::before,
 body.royal-maple-theme .dashboard-v72 .panel::before {
   content: "" !important;
   position: absolute !important;
-  inset: 6px !important;
+  inset: 0 !important;
   z-index: 0 !important;
   pointer-events: none !important;
-  border: 1px solid rgba(240, 190, 99, .9) !important;
-  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px)) !important;
-  box-shadow: 0 0 0 1px rgba(48, 25, 26, .96), inset 0 0 0 1px rgba(255, 242, 195, .3) !important;
+  background: url("assets/royal-maple-card-frame.svg?v=0.10.14-royal-maple-medallion-frames") center / 100% 100% no-repeat !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  clip-path: none !important;
+  box-shadow: none !important;
 }
 
 body.royal-maple-theme .dashboard-v72 .v5-buildbar::after,
 body.royal-maple-theme .dashboard-v72 .panel::after {
-  content: "" !important;
-  position: absolute !important;
-  inset: 10px !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  border: 1px solid rgba(169, 103, 50, .72) !important;
-  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px)) !important;
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  border: 0 !important;
+  clip-path: none !important;
+  box-shadow: none !important;
 }
 
 body.royal-maple-theme .dashboard-v72 .v5-buildbar > *,
@@ -938,16 +936,38 @@ body.royal-maple-theme .dashboard-v72 .panel > * {
   z-index: 1;
 }
 
-body.royal-maple-theme .dashboard-v72 .v5-buildbar,
-body.royal-maple-theme .dashboard-v72 .v5-equipment-hero,
-body.royal-maple-theme .dashboard-v72 .v5-character-hero,
-body.royal-maple-theme .dashboard-v72 .v6-skills-panel {
-  background-color: #160d16 !important;
-  background-image: none !important;
+/* Safe text zones: the frame remains visible around every heading, control,
+   slot group, queue row, and footer without changing the dashboard grid. */
+body.royal-maple-theme .dashboard-v72 .v5-buildbar {
+  padding: 16px 24px 15px !important;
 }
 
+body.royal-maple-theme .dashboard-v72 .v5-equipment-hero {
+  padding: 22px 22px 15px !important;
+}
+
+body.royal-maple-theme .dashboard-v72 .v5-character-hero {
+  padding: 17px 20px 15px !important;
+}
+
+body.royal-maple-theme .dashboard-v72 .v6-skills-panel {
+  padding: 12px 15px 11px !important;
+}
+
+body.royal-maple-theme .dashboard-v72 .v72-command-grid > .panel,
+body.royal-maple-theme .dashboard-v72 .v72-secondary-content > .panel,
+body.royal-maple-theme .dashboard-v72 .v6-tertiary-grid > .panel,
+body.royal-maple-theme .dashboard-v72 .v72-bottom-grid > .panel {
+  padding: 17px 19px 16px !important;
+}
+
+body.royal-maple-theme .dashboard-v72 .five-level-panel {
+  padding: 18px 20px !important;
+}
+
+/* Keep the inventory stage and its readable slot surfaces clean. */
 body.royal-maple-theme .dashboard-v72 .v5-equipment-window {
-  background: #160d16 !important;
+  background: transparent !important;
   border: 0 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
@@ -971,17 +991,6 @@ body.royal-maple-theme .dashboard-v72 .v5-equipment-window .gear-slot {
     inset 0 0 0 2px rgba(42, 22, 27, .96) !important;
 }
 
-body.royal-maple-theme .dashboard-v72 .v5-equipment-window .gear-slot:hover,
-body.royal-maple-theme .dashboard-v72 .v5-equipment-window .gear-slot:focus-visible {
-  border-color: #fff0b5 !important;
-  background: #26141e !important;
-  background-image: none !important;
-  box-shadow:
-    0 0 0 1px rgba(111, 61, 35, .98),
-    inset 0 0 0 1px rgba(255, 242, 195, .38),
-    0 0 15px rgba(240, 190, 99, .2) !important;
-}
-
 body.royal-maple-theme .dashboard-v72 .equipment-pot-slot {
   border: 1px solid rgba(229, 173, 86, .9) !important;
   border-radius: 0 !important;
@@ -999,64 +1008,4 @@ body.royal-maple-theme .dashboard-v72 .equipment-pot-slot-hp {
 
 body.royal-maple-theme .dashboard-v72 .equipment-pot-slot-mp {
   border-color: #67b9ee !important;
-}
-
-body.royal-maple-theme .dashboard-v72 .v5-quick-metrics button,
-body.royal-maple-theme .dashboard-v72 .atlas-action-row,
-body.royal-maple-theme .dashboard-v72 .atlas-queue-row,
-body.royal-maple-theme .dashboard-v72 .v72-etc-chip,
-body.royal-maple-theme .dashboard-v72 .atlas-skill-card {
-  border-radius: 0 !important;
-  background: #130b13 !important;
-  background-image: none !important;
-  border-color: rgba(192, 132, 61, .66) !important;
-  box-shadow: inset 0 0 0 1px rgba(255, 224, 153, .1) !important;
-}
-
-
-/* Variant B — Figma-measured stepped three-line frame.
-   The card surface is intentionally opaque; hometown art stays at page level. */
-body.royal-maple-theme .dashboard-v72 .v5-buildbar,
-body.royal-maple-theme .dashboard-v72 .panel {
-  position: relative !important;
-  box-sizing: border-box;
-  overflow: hidden !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: #160d16 !important;
-  background-image: none !important;
-  box-shadow: 0 14px 32px rgba(5, 2, 7, .46) !important;
-}
-
-body.royal-maple-theme .dashboard-v72 .v5-buildbar::before,
-body.royal-maple-theme .dashboard-v72 .panel::before {
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  background-image: url("assets/variant-b-card-frame.svg?v=0.10.13-royal-corner-frames") !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-  background-size: 100% 100% !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  clip-path: none !important;
-  box-shadow: none !important;
-}
-
-body.royal-maple-theme .dashboard-v72 .v5-buildbar::after,
-body.royal-maple-theme .dashboard-v72 .panel::after {
-  content: none !important;
-  display: none !important;
-  border: 0 !important;
-  clip-path: none !important;
-  box-shadow: none !important;
-  background: none !important;
-}
-
-body.royal-maple-theme .dashboard-v72 .v5-buildbar > *,
-body.royal-maple-theme .dashboard-v72 .panel > * {
-  position: relative;
-  z-index: 1;
 }
