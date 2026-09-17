@@ -1677,6 +1677,6 @@
   hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.10.6-dashboard-pot-slots').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.10.7-royal-town-themes').catch(()=>{});
   }
 })();
