@@ -321,7 +321,7 @@ for (const token of [
   'faceId:21000',
   "root.dataset.avatarGearIds=gearSummary;",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.10.12-royal-beveled-cards')",
+  "navigator.serviceWorker.register('./sw.js?v=0.10.13-royal-corner-frames')",
   'tcwFullSkillBuild',
   'data-plan-level',
   "list.querySelectorAll('.skill-row[data-plan-level]')",

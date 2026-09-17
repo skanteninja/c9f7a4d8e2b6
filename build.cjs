@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.10.12-royal-beveled-cards';
+const assetVersion = '0.10.13-royal-corner-frames';
 const BRAND = 'Top Classic World Maplestory';
 
 // The OSMS export is the identity authority for the equipment picker.  The
@@ -1725,6 +1725,11 @@ const atlasAssets = path.join(source, 'assets', 'map-atlas');
 if (fs.existsSync(atlasAssets)) fs.cpSync(atlasAssets, path.join(out, 'assets', 'map-atlas'), { recursive: true });
 const classThemeAssets = path.join(source, 'assets', 'class-themes');
 if (fs.existsSync(classThemeAssets)) fs.cpSync(classThemeAssets, path.join(out, 'assets', 'class-themes'), { recursive: true });
+const borderAsset = path.join(source, 'assets', 'variant-b-card-frame.svg');
+if (fs.existsSync(borderAsset)) {
+  fs.mkdirSync(path.join(out, 'assets'), { recursive: true });
+  fs.copyFileSync(borderAsset, path.join(out, 'assets', 'variant-b-card-frame.svg'));
+}
 fs.copyFileSync(path.join(source, 'manifest.webmanifest'), path.join(out, 'manifest.webmanifest'));
 fs.writeFileSync(path.join(out, 'styles.css'), css);
 fs.writeFileSync(path.join(out, 'visuals.css'), visualCss);
@@ -1763,7 +1768,7 @@ fs.writeFileSync(path.join(out, 'build-info.txt'), `${BRAND} ${assetVersion}\n`)
 const sw = `const CACHE='top-classic-world-${assetVersion}';\nconst CORE=['./','./index.html','./styles.css?v=${assetVersion}','./visuals.css?v=${assetVersion}','./visuals-db.css?v=${assetVersion}','./visuals-npc.css?v=${assetVersion}','./visuals-skills.css?v=${assetVersion}','./visuals-portals.css?v=${assetVersion}','./dashboard-polish.css?v=${assetVersion}','./progression-sync.css?v=${assetVersion}','./progression-gear-visual.css?v=${assetVersion}','./ownership-ui.css?v=${assetVersion}','./guide-data.js?v=${assetVersion}','./app.js?v=${assetVersion}','./visuals.js?v=${assetVersion}','./visuals-db.js?v=${assetVersion}','./visuals-npc.js?v=${assetVersion}','./visuals-skills.js?v=${assetVersion}','./visuals-portals.js?v=${assetVersion}','./dashboard-polish.js?v=${assetVersion}','./progression-sync.js?v=${assetVersion}','./progression-level-hook.js?v=${assetVersion}','./progression-skill-state.js?v=${assetVersion}','./progression-gear-visual.js?v=${assetVersion}','./ownership-ui.js?v=${assetVersion}','./maps-tab.css?v=${assetVersion}','./maps-tab.js?v=${assetVersion}','./etc-audit-data.js?v=${assetVersion}','./quest-audit-additions.js?v=${assetVersion}','./etc-audit-ui.css?v=${assetVersion}','./etc-audit-ui.js?v=${assetVersion}','./manifest.webmanifest'];\nself.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).catch(()=>{}));});\nself.addEventListener('activate',e=>{e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('top-classic-world-')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]));});\nself.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin)return;e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy)).catch(()=>{});return r;}).catch(()=>caches.match(e.request).then(x=>x||caches.match('./index.html'))));});\n`;
 const swWithSessionFlow = sw
   .replace(`'./styles.css?v=${assetVersion}',`, `'./styles.css?v=${assetVersion}','./session-flow.css?v=${assetVersion}','./potions.css?v=${assetVersion}',`)
-  .replace(`'./manifest.webmanifest'];`, `'./royal-maple-theme.css?v=${assetVersion}','./class-theme.js?v=${assetVersion}','./assets/class-themes/perion.webp','./assets/class-themes/henesys.webp','./assets/class-themes/ellinia.webp','./assets/class-themes/royal-maple-leaf.png','./manifest.webmanifest'];`);
+  .replace(`'./manifest.webmanifest'];`, `'./royal-maple-theme.css?v=${assetVersion}','./class-theme.js?v=${assetVersion}','./assets/class-themes/perion.webp','./assets/class-themes/henesys.webp','./assets/class-themes/ellinia.webp','./assets/class-themes/royal-maple-leaf.png','./assets/variant-b-card-frame.svg','./manifest.webmanifest'];`);
 fs.writeFileSync(path.join(out, 'sw.js'), swWithSessionFlow);
 
 console.log(`Built ${assetVersion}: CSS ${css.length} bytes, guide ${guideJson.length} bytes, app ${app.length} bytes, visuals ${visuals.length} bytes, DB visuals ${visualDb.length} bytes, NPC visuals ${visualNpc.length} bytes, skill visuals ${visualSkill.length} bytes, portal visuals ${visualPortal.length} bytes, dashboard polish ${dashboardPolish.length} bytes, progression sync ${progressionSync.length} bytes, progression level hook ${progressionLevelHook.length} bytes, progression skill state ${progressionSkillState.length} bytes, progression gear visual ${progressionGearVisual.length} bytes, ownership UI ${ownershipUi.length} bytes.`);
