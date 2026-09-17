@@ -24,7 +24,7 @@ jobs:
           for i in {1..60}; do
             build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0; visuals_ok=0; integrity_ok=0; stability_ok=0
             build_info="$(curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" || true)"
-            [[ "$build_info" == *"Top Classic World Maplestory 0.10.9-royal-dashboard-cards"* ]] && build_ok=1 || true
+            [[ "$build_info" == *"Top Classic World Maplestory 0.10.10-royal-reference-fidelity"* ]] && build_ok=1 || true
 
             theme_css="$(curl -fsSL --max-time 15 "$BASE_URL/royal-maple-theme.css?ci=$GITHUB_RUN_ID" || true)"
             theme_js="$(curl -fsSL --max-time 15 "$BASE_URL/class-theme.js?ci=$GITHUB_RUN_ID" || true)"
