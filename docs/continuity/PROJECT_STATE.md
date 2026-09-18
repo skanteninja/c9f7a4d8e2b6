@@ -2,8 +2,8 @@
 
 Last continuity baseline: 2026-09-18
 
-Current deployed checkpoint: 0.10.16-royal-maple-single-hero-card (live verified)
-Current source checkpoint: 0.10.16-royal-maple-single-hero-card
+Current deployed checkpoint: 0.10.18-stable-readable-hero (live verified)
+Current source checkpoint: 0.10.18-stable-readable-hero
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:
@@ -15,6 +15,17 @@ This file is the persistent handoff for the MapleStory Classic Builder. Before c
 Do not rely on chat memory alone. Repository continuity files are the project source of truth.
 
 Also read QUALITY_STANDARD.md, IMPLEMENTATION_BACKLOG.md, and docs/continuity/LIVE_UI_AUDIT_2026-09-15.md before the next implementation pass.
+
+## 2026-09-18 — readable merged Active Build layout
+
+- Fixed the continuation screenshot defect where Training/Next SP/Quests/ETC, Level Progression, and Skill Tree visually collided inside the merged Royal Maple card.
+- Removed the dashboard's effective absolute-overlay behavior for quick metrics and the compact Skill Tree; the Skill Tree now flows full-width beneath Level Progression inside the same outer card.
+- Reserved stable heights for dynamic metric copy and the compact skill detail so adjacent same-tier level changes do not change the hero card height.
+- Release token: `0.10.18-stable-readable-hero`.
+- Source commits: `f6b490934cb1a0e72d42917c3b5ef6a483b340d8` and `830e078873852dd24a9d1572902616a638379bcc`.
+- Generated site commit: `d80b48d4749aa3c5b66ffef04c180b126098a614`.
+- Build Static `35334457740`, Maps/ETC `35334457805`, Visual/UI `35334457800`, Monster `35334457746`, Real Input `35334457822` attempt 2, and Verify Live `35334524948` attempt 2 passed.
+- Independent TinyFish live QA passed all six requested checks at compact desktop behavior: no metric/progression overlap, no slider-bubble collision, full-width Skill Tree, readable tabs/cards, no outer-frame overflow, and stable Lv16→17 height.
 
 ## 2026-09-18 — merged Active Build / Skill Tree hero card
 

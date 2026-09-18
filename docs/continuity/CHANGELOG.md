@@ -1,5 +1,14 @@
 # Continuity Changelog
 
+## 2026-09-18 — 0.10.18 stable readable merged hero
+
+- Reworked the merged Active Build card so its dynamic sections use normal layout flow instead of overlapping absolute placement.
+- Training / Next SP / Quests / ETC now sit cleanly above Level Progression; the slider bubble remains inside its own band.
+- Skill Tree now uses the full card width, with readable tabs/cards and no nested outer frame.
+- Stabilized dynamic metric/detail heights so same-tier level changes do not shift the card.
+- Source `830e078873852dd24a9d1572902616a638379bcc`; generated site `d80b48d4749aa3c5b66ffef04c180b126098a614`; release token `0.10.18-stable-readable-hero`.
+- All release gates passed after deployment propagation: Build Static `35334457740`, Maps/ETC `35334457805`, Visual/UI `35334457800`, Monster `35334457746`, Real Input `35334457822` attempt 2, Verify Live `35334524948` attempt 2.
+
 ## 2026-09-18 — 0.10.16 single Active Build hero card
 
 - Fixed the broken Active Build / Skill Tree composition from the continuation screenshot by making the Royal Maple frame cover the complete merged hero region and removing the nested Skill Tree outer frame.

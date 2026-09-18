@@ -1,5 +1,22 @@
 # Historical Fix / Regression Log
 
+## 2026-09-18 — 0.10.18 merged hero readability/stability
+
+Observed problem:
+- The outer frame had been merged, but the content still behaved like the old absolute layout: metric cards, the Level Progression track/value bubble, and Skill Tree competed for the same space; the Skill Tree remained too narrow.
+- Moving the content into normal flow initially exposed a same-tier height jump because dynamic metric/skill-detail copy changed height between adjacent levels.
+
+Correction:
+- Made quick metrics and the compact Skill Tree participate in normal flow inside the merged hero card.
+- Made Skill Tree span the full card width below Level Progression and kept its own outer frame suppressed.
+- Increased safe rail spacing and responsive containment.
+- Reserved stable vertical space for dynamic metric text and compact skill detail, preventing Lv16→17 hero-height changes while keeping the detail readable via its internal scroll when needed.
+
+Verification:
+- Generated-site real-input stability passed locally and then live on rerun.
+- TinyFish live browser QA passed 6/6 visual checks at compact desktop size.
+- Full Verify Live attempt 2 passed all browser, Fighter/Hunter, avatar/inventory, and skill-icon stability steps.
+
 ## 2026-09-18 — 0.10.16 merged hero-card containment and blocked deployment
 
 Observed problem:

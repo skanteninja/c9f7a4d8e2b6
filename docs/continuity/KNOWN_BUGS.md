@@ -1,5 +1,18 @@
 # Known Bugs / Incomplete Work
 
+## Verification snapshot — 0.10.18 readable merged hero (verified 2026-09-18)
+
+The overlap/readability defect from the continuation screenshot is resolved on the live site.
+
+- Training / Next SP / Quests / ETC stay above Level Progression with clear separation.
+- The level slider value bubble no longer intrudes into the metric cards.
+- Skill Tree is full-width within the same Royal Maple outer card instead of being squeezed into a narrow column.
+- Skill tabs/cards remain readable and contained; nothing crosses the outer frame.
+- Same-tier level changes, including Lv16→17, keep the merged hero height stable.
+- Release token: `0.10.18-stable-readable-hero`.
+- Source: `830e078873852dd24a9d1572902616a638379bcc`; generated site: `d80b48d4749aa3c5b66ffef04c180b126098a614`.
+- Release gates passed: Build Static `35334457740`, Maps/ETC `35334457805`, Visual/UI `35334457800`, Monster `35334457746`, Real Input `35334457822` attempt 2, Verify Live `35334524948` attempt 2.
+
 ## Verification snapshot — 0.10.16 merged hero card (verified 2026-09-18)
 
 The continuation screenshot's split/broken Active Build card is resolved on the live site.
