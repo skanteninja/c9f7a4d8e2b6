@@ -321,7 +321,7 @@ for (const token of [
   'faceId:21000',
   "root.dataset.avatarGearIds=gearSummary;",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.10.15-royal-maple-safe-rails')",
+  "navigator.serviceWorker.register('./sw.js?v=0.10.16-royal-maple-single-hero-card')",
   'tcwFullSkillBuild',
   'data-plan-level',
   "list.querySelectorAll('.skill-row[data-plan-level]')",
