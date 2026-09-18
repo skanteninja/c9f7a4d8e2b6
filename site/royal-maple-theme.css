@@ -917,7 +917,7 @@ body.royal-maple-theme .dashboard-v72 .panel::before {
      instead of stretching deep into wide cards. */
   background: transparent !important;
   border: 22px solid transparent !important;
-  border-image-source: url("assets/royal-maple-card-frame.svg?v=0.10.17-readable-hero-layout") !important;
+  border-image-source: url("assets/royal-maple-card-frame.svg?v=0.10.18-stable-readable-hero") !important;
   border-image-slice: 54 fill !important;
   border-image-width: 22px !important;
   border-image-outset: 0 !important;
@@ -1251,5 +1251,34 @@ body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .a
   body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-grid,
   body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)) .atlas-skill-grid{
     grid-template-columns:1fr!important;
+  }
+}
+
+
+/* 0.10.18 — stable readable hero dimensions.
+   Keep dynamic text from changing the card height on adjacent levels. */
+body.royal-maple-theme .dashboard-v72 .v5-character-hero .v5-quick-metrics button{
+  height:64px!important;
+  min-height:64px!important;
+  max-height:64px!important;
+  overflow:hidden!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-detail{
+  height:118px!important;
+  min-height:118px!important;
+  max-height:118px!important;
+  overflow:auto!important;
+}
+@media(max-width:620px){
+  body.royal-maple-theme .dashboard-v72 .v5-character-hero .v5-quick-metrics button{
+    height:auto!important;
+    min-height:56px!important;
+    max-height:none!important;
+  }
+  body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-detail{
+    height:auto!important;
+    min-height:96px!important;
+    max-height:none!important;
+    overflow:visible!important;
   }
 }

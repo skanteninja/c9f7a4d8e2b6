@@ -203,3 +203,40 @@ html.tcw-ui-stability-ready .dashboard-v72 .tcw-hero-skill-tree .atlas-skill-car
     grid-template-columns:1fr!important;
   }
 }
+
+
+/* 0.10.18 — keep same-tier level changes dimensionally stable.
+   Metric copy and the selected skill description can change between adjacent
+   levels. Reserve enough space so the merged card does not jump or collide. */
+.dashboard-v72 .v5-character-hero .v5-quick-metrics button{
+  height:64px!important;
+  min-height:64px!important;
+  max-height:64px!important;
+  overflow:hidden!important;
+}
+.dashboard-v72 .v5-character-hero .v5-quick-metrics b{
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical!important;
+  -webkit-line-clamp:3!important;
+  overflow:hidden!important;
+}
+.dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-detail{
+  height:118px!important;
+  min-height:118px!important;
+  max-height:118px!important;
+  overflow:auto!important;
+  scrollbar-width:thin!important;
+}
+@media(max-width:620px){
+  .dashboard-v72 .v5-character-hero .v5-quick-metrics button{
+    height:auto!important;
+    min-height:56px!important;
+    max-height:none!important;
+  }
+  .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-detail{
+    height:auto!important;
+    min-height:96px!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+}
