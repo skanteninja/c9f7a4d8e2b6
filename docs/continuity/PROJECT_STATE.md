@@ -1,9 +1,9 @@
 # MapleStory Classic Builder — Project State
 
-Last continuity baseline: 2026-09-17
+Last continuity baseline: 2026-09-18
 
-Current deployed checkpoint: 0.10.13-royal-corner-frames (live browser verified; all six release checks passed)
-Current source checkpoint: 0.10.13-royal-corner-frames
+Current deployed checkpoint: 0.10.16-royal-maple-single-hero-card (live verified)
+Current source checkpoint: 0.10.16-royal-maple-single-hero-card
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:
@@ -15,6 +15,13 @@ This file is the persistent handoff for the MapleStory Classic Builder. Before c
 Do not rely on chat memory alone. Repository continuity files are the project source of truth.
 
 Also read QUALITY_STANDARD.md, IMPLEMENTATION_BACKLOG.md, and docs/continuity/LIVE_UI_AUDIT_2026-09-15.md before the next implementation pass.
+
+## 2026-09-18 — merged Active Build / Skill Tree hero card
+
+- The broken dashboard composition shown in the continuation screenshot is resolved in live `0.10.16-royal-maple-single-hero-card`: Active Build, Skill Tree, quick metrics, and Level Progression now sit inside one continuous Royal Maple frame.
+- The root visual conflict was `progression-gear-visual.css` using `.v5-character-hero::before` as a fixed 250×250 decorative layer while the Royal Maple theme reuses the same pseudo-element as the card frame. The final Royal Maple layer now restores the pseudo-element to the full hero bounds and suppresses the child Skill Tree outer frame.
+- The first 0.10.16 source push did not deploy because `audit/check-multibuild.cjs` still asserted the 0.10.15 service-worker token. Commit `aec7bde00f45a47de57d905e17bc318b40de2c5d` aligned that gate; generated site commit `1647bbb0464285b336db72585ede783be10e9702` deployed successfully.
+- Build Static run `35327750166` and Verify Live run `35327827399` passed. Independent TinyFish live browser QA also passed card containment, no second Skill Tree outer frame, no border crossings, and no clipping/overlap.
 
 ## 2026-09-17 — Royal Maple reference-fidelity correction
 

@@ -1,5 +1,17 @@
 # Known Bugs / Incomplete Work
 
+## Verification snapshot — 0.10.16 merged hero card (verified 2026-09-18)
+
+The continuation screenshot's split/broken Active Build card is resolved on the live site.
+
+- Release token: `0.10.16-royal-maple-single-hero-card`.
+- Source frame fix: `48ca8c0815db92f3431925189d11e15fbf8129f8`.
+- CI gate correction: `aec7bde00f45a47de57d905e17bc318b40de2c5d`.
+- Generated site: `1647bbb0464285b336db72585ede783be10e9702`.
+- Build Static `35327750166` and Verify Live `35327827399` passed.
+- Live browser QA confirms Active Build, Skill Tree, quick metrics, and Level Progression are contained by one continuous Royal Maple outer frame; the Skill Tree has no second outer frame; content does not cross the border; no clipping/overlap was observed.
+- The failed 0.10.16 Build Static run `35274585178` was a stale audit-token failure, not a UI failure; the gate is now aligned with the release token.
+
 ## Verification snapshot — 0.10.13 Figma-measured corner frames
 
 The selected card direction is deployed at https://maplestory-classic.ofri505.workers.dev/?build=magician-il-fresh&page=dashboard.

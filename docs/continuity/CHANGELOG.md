@@ -1,5 +1,12 @@
 # Continuity Changelog
 
+## 2026-09-18 — 0.10.16 single Active Build hero card
+
+- Fixed the broken Active Build / Skill Tree composition from the continuation screenshot by making the Royal Maple frame cover the complete merged hero region and removing the nested Skill Tree outer frame.
+- Resolved the blocked deployment by updating the stale multibuild audit service-worker token from 0.10.15 to `0.10.16-royal-maple-single-hero-card`.
+- Source frame fix `48ca8c0815db92f3431925189d11e15fbf8129f8`; CI gate fix `aec7bde00f45a47de57d905e17bc318b40de2c5d`; generated site `1647bbb0464285b336db72585ede783be10e9702`.
+- Build Static `35327750166` and Verify Live `35327827399` passed. Independent live browser QA found one continuous card, no second Skill Tree outer frame, and no clipping/overflow across the card border.
+
 ## 2026-09-17 — 0.10.13 Figma-measured corner frames — Figma-measured corner frames
 
 - Replaced the CSS border approximation with the exact three-line stepped/chamfered frame measured from the connected Figma component.

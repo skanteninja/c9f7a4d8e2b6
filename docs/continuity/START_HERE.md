@@ -47,6 +47,10 @@ After meaningful work:
 
 The intended result is that the user should not have to retell the history of this project every time a conversation is restarted.
 
+## Current live checkpoint — 2026-09-18
+
+`0.10.16-royal-maple-single-hero-card` is live and verified. The Active Build area, compact Skill Tree, quick metrics, and Level Progression are one continuous Royal Maple card with no nested Skill Tree outer frame or visible content crossing the card border. Source frame fix: `48ca8c0815db92f3431925189d11e15fbf8129f8`; deployment-gate fix: `aec7bde00f45a47de57d905e17bc318b40de2c5d`; generated site: `1647bbb0464285b336db72585ede783be10e9702`. Build Static `35327750166` and Verify Live `35327827399` passed.
+
 ## Latest audit note
 
 The 2026-09-15 audit used Product Design evidence, cloud Browser QA, TinyFish live extraction, and selective Firecrawl research. Mobbin is connected but its search endpoint is paid-plan gated in the current account, so it is a documented evidence limit rather than a source for this checkpoint.

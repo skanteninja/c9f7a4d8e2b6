@@ -1,5 +1,23 @@
 # Historical Fix / Regression Log
 
+## 2026-09-18 — 0.10.16 merged hero-card containment and blocked deployment
+
+Observed problem:
+- The Active Build region rendered with the Royal Maple frame limited to the avatar-side portion while title/metrics/level controls spilled outside it, and Skill Tree still looked like a separate card.
+- The first source fix existed at HEAD but never reached live because the multibuild audit still required the previous 0.10.15 service-worker token.
+
+Correction:
+- Restored the Royal Maple `.v5-character-hero::before` frame pseudo-element to the complete hero bounds, overriding the older 250×250 decorative pseudo-element contract from `progression-gear-visual.css`.
+- Removed the child Skill Tree panel's own outer frame when it is merged into Active Build, leaving one parent frame.
+- Updated the multibuild audit's service-worker version assertion to `0.10.16-royal-maple-single-hero-card` so the verified static build can deploy.
+
+Verification:
+- Frame source commit: `48ca8c0815db92f3431925189d11e15fbf8129f8`.
+- Gate-fix commit: `aec7bde00f45a47de57d905e17bc318b40de2c5d`.
+- Generated site commit: `1647bbb0464285b336db72585ede783be10e9702`.
+- Build Static run `35327750166` passed; Verify Live run `35327827399` passed.
+- TinyFish browser QA passed the exact visual contract: one continuous frame, no second Skill Tree frame, no border crossings, and no obvious overlap/clipping.
+
 ## 2026-09-17 — 0.10.13 Figma-measured frame correction
 
 Observed problem:
