@@ -917,7 +917,7 @@ body.royal-maple-theme .dashboard-v72 .panel::before {
      instead of stretching deep into wide cards. */
   background: transparent !important;
   border: 22px solid transparent !important;
-  border-image-source: url("assets/royal-maple-card-frame.svg?v=0.10.16-royal-maple-single-hero-card") !important;
+  border-image-source: url("assets/royal-maple-card-frame.svg?v=0.10.17-readable-hero-layout") !important;
   border-image-slice: 54 fill !important;
   border-image-width: 22px !important;
   border-image-outset: 0 !important;
@@ -1115,4 +1115,141 @@ body.royal-maple-theme .dashboard-v72 .v5-character-hero > .v6-skills-panel::aft
   background: none !important;
   border: 0 !important;
   box-shadow: none !important;
+}
+
+
+/* 0.10.17 — final merged-card readability pass.
+   This stylesheet loads after the compact dashboard layers, so it owns the
+   final geometry needed to keep every label/control inside the Royal Maple rail. */
+body.royal-maple-theme .dashboard-v72 .v5-character-hero{
+  display:grid!important;
+  grid-template-columns:176px minmax(0,1fr)!important;
+  grid-template-rows:auto auto auto!important;
+  align-items:start!important;
+  column-gap:20px!important;
+  row-gap:14px!important;
+  min-height:0!important;
+  height:auto!important;
+  padding:26px 28px 26px!important;
+  overflow:hidden!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero .v5-avatar{
+  align-self:start!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero .v5-character-copy{
+  align-self:start!important;
+  padding-right:0!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero .v5-quick-metrics{
+  position:static!important;
+  top:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  left:auto!important;
+  margin:12px 0 0!important;
+}
+body.royal-maple-theme .dashboard-v72 .progression-avatar-level-controls{
+  grid-column:1/-1!important;
+  grid-row:2!important;
+  margin:0!important;
+  padding:16px 2px 4px!important;
+  min-width:0!important;
+  border-top:1px solid rgba(218,170,86,.16)!important;
+}
+body.royal-maple-theme .dashboard-v72 .progression-level-track{
+  min-width:0!important;
+  padding:24px 0 24px!important;
+}
+body.royal-maple-theme .dashboard-v72 .progression-level-slider-value{
+  top:1px!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree,
+body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)){
+  position:static!important;
+  inset:auto!important;
+  grid-column:1/-1!important;
+  grid-row:3!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:4px 0 0!important;
+  padding:20px 4px 4px!important;
+  border:0!important;
+  border-top:1px solid rgba(218,170,86,.18)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree::before,
+body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree::after{
+  content:none!important;
+  display:none!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-panel-head{
+  margin-bottom:12px!important;
+  padding-bottom:10px!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-tabs{
+  width:100%!important;
+  margin-bottom:12px!important;
+  padding-bottom:10px!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-grid,
+body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)) .atlas-skill-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-card{
+  min-height:82px!important;
+  padding:10px 8px!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-detail{
+  min-height:0!important;
+  margin-top:12px!important;
+}
+@media(max-width:760px){
+  body.royal-maple-theme .dashboard-v72 .v5-character-hero{
+    grid-template-columns:150px minmax(0,1fr)!important;
+    column-gap:14px!important;
+    padding:22px 22px 24px!important;
+  }
+  body.royal-maple-theme .dashboard-v72 .progression-avatar-level-controls{
+    grid-template-columns:108px 166px minmax(0,1fr)!important;
+    column-gap:10px!important;
+  }
+  body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-grid,
+  body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)) .atlas-skill-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+@media(max-width:620px){
+  body.royal-maple-theme .dashboard-v72 .v5-character-hero{
+    grid-template-columns:1fr!important;
+    grid-template-rows:auto auto auto auto!important;
+    text-align:left!important;
+  }
+  body.royal-maple-theme .dashboard-v72 .v5-avatar{
+    grid-column:1!important;
+    grid-row:1!important;
+  }
+  body.royal-maple-theme .dashboard-v72 .v5-character-copy{
+    grid-column:1!important;
+    grid-row:2!important;
+  }
+  body.royal-maple-theme .dashboard-v72 .progression-avatar-level-controls{
+    grid-column:1!important;
+    grid-row:3!important;
+    grid-template-columns:1fr!important;
+    grid-template-areas:"head" "stepper" "track"!important;
+    gap:10px!important;
+  }
+  body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree{
+    grid-column:1!important;
+    grid-row:4!important;
+  }
+  body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree .atlas-skill-grid,
+  body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)) .atlas-skill-grid{
+    grid-template-columns:1fr!important;
+  }
 }
