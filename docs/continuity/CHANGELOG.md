@@ -1,5 +1,14 @@
 # Continuity Changelog
 
+## 2026-09-23 — 0.10.20 compact top-right skills + Lv1–70 AP targets
+
+- Restored the compact dashboard Skill Tree to the top-right of the Active Build card.
+- Added a Base AP Target block to the same card for I/L Wizard, Fighter, and Hunter; it updates at every selected level and excludes gear bonuses.
+- Extended I/L AP planning through Lv70 so the dashboard can show exact totals throughout the supported range, including 65 base LUK at Lv70 for Angel Wings.
+- Final live examples: I/L Lv50 INT 232/LUK 30; Fighter Lv30 STR 135/DEX 27; Hunter Lv70 DEX 292/STR 70; I/L Lv70 INT 297/LUK 65.
+- Source `37d6c2bd1c5eba5bffa4a3534f04cc95b61df18e`; generated site `83c313e7f92c221be775917e912c186d94c86923`; release token `0.10.20-compact-skill-ap-70`.
+- Final Build Static, Visual/UI, Maps/ETC, Monster Integrity, Real Input Skill Stability, and Verify Live checks passed.
+
 ## 2026-09-18 — 0.10.18 stable readable merged hero
 
 - Reworked the merged Active Build card so its dynamic sections use normal layout flow instead of overlapping absolute placement.

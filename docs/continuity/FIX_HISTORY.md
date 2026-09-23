@@ -1,5 +1,23 @@
 # Historical Fix / Regression Log
 
+## 2026-09-23 — 0.10.20 compact Skill Tree + AP allocation
+
+Observed request:
+- Move the dashboard Skill Tree back to the top-right and make it compact again, while keeping the merged-card readability fix.
+- Show exact total/base AP targets on the same card for every build and every selected level.
+
+Correction:
+- Switched the hero to a three-column desktop composition: avatar left, build/AP/metrics center, compact Skill Tree right; Level Progression remains the full-width footer.
+- Hid the detailed Skill Tree description inside the compact preview and kept Full Tree as the detailed view.
+- Added a build-aware AP target renderer tied to the level controls. It shows the two relevant stats prominently, the two fixed/off stats, and the AP action for the selected level.
+- Fixed a self-triggered MutationObserver loop in the AP renderer that initially interfered with progression/gear visual timing.
+- Extended I/L AP planning through Lv70 based on the selected Lv60/Lv70 gear requirements and Angel Wings 65 LUK requirement.
+
+Verification:
+- Release token `0.10.20-compact-skill-ap-70` is live.
+- All release gates passed on the final source/generated pair.
+- Live QA verified I/L Lv70 at INT 297 / LUK 65 / STR 4 / DEX 4, compact Skill Tree top-right, progression footer intact, and no overlap.
+
 ## 2026-09-18 — 0.10.18 merged hero readability/stability
 
 Observed problem:

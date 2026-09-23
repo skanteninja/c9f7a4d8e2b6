@@ -2,8 +2,8 @@
 
 Last continuity baseline: 2026-09-18
 
-Current deployed checkpoint: 0.10.18-stable-readable-hero (live verified)
-Current source checkpoint: 0.10.18-stable-readable-hero
+Current deployed checkpoint: 0.10.20-compact-skill-ap-70 (live verified)
+Current source checkpoint: 0.10.20-compact-skill-ap-70
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:
@@ -15,6 +15,16 @@ This file is the persistent handoff for the MapleStory Classic Builder. Before c
 Do not rely on chat memory alone. Repository continuity files are the project source of truth.
 
 Also read QUALITY_STANDARD.md, IMPLEMENTATION_BACKLOG.md, and docs/continuity/LIVE_UI_AUDIT_2026-09-15.md before the next implementation pass.
+
+## 2026-09-23 — compact top-right Skill Tree + exact AP targets
+
+- Restored the compact Skill Tree preview to the top-right of the merged Active Build card and kept it small, with Full Tree remaining the detailed destination.
+- Added a live Base AP Target block to the same card for every active build; it updates with the selected level and explicitly excludes gear bonuses.
+- Fighter AP targets follow the current axe/accuracy schedule; Hunter targets follow the current minimum-STR bow schedule; I/L targets now cover Lv1–70 instead of stopping at Lv50.
+- I/L late-game AP extension: Lv51–60 +3 INT / +2 LUK per level to reach 50 base LUK, Lv61–65 all INT at 50 LUK, Lv66–70 +2 INT / +3 LUK per level to reach 65 base LUK for Angel Wings.
+- Verified examples: I/L Lv50 = INT 232 / LUK 30 / STR 4 / DEX 4; Fighter Lv30 = STR 135 / DEX 27 / INT 4 / LUK 4; Hunter Lv70 = DEX 292 / STR 70 / INT 4 / LUK 4; I/L Lv70 = INT 297 / LUK 65 / STR 4 / DEX 4.
+- Release token: `0.10.20-compact-skill-ap-70`. Source commit `37d6c2bd1c5eba5bffa4a3534f04cc95b61df18e`; generated site `83c313e7f92c221be775917e912c186d94c86923`.
+- Build Static, Visual/UI, Maps/ETC, Monster Integrity, Real Input Skill Stability, and Verify Live all passed. Independent live QA confirmed the Lv70 I/L compact Skill Tree position, exact AP totals, footer progression, and no frame overlap.
 
 ## 2026-09-18 — readable merged Active Build layout
 
