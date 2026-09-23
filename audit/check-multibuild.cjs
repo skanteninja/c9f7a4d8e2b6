@@ -322,8 +322,6 @@ for (const token of [
   "root.dataset.avatarGearIds=gearSummary;",
   'Show future-level',
   "navigator.serviceWorker.register('./sw.js?v=0.10.19-compact-skill-ap-targets')",
-  'tcw-ap-target-ready',
-  'tcw-ap-allocation',
   'tcwFullSkillBuild',
   'data-plan-level',
   "list.querySelectorAll('.skill-row[data-plan-level]')",
@@ -410,6 +408,11 @@ const ownershipCss = fs.readFileSync(`${outputDir}/ownership-ui.css`, 'utf8');
 const visualsSkillsJs = fs.readFileSync(`${outputDir}/visuals-skills.js`, 'utf8');
 const readabilityCss = fs.readFileSync(`${outputDir}/readability.css`, 'utf8');
 const levelHookJs = fs.readFileSync(`${outputDir}/progression-level-hook.js`, 'utf8');
+const progressionLevelHook = fs.readFileSync(`${outputDir}/progression-level-hook.js`, 'utf8');
+for (const token of ['tcw-ap-target-ready','tcw-ap-allocation','BASE AP TARGET']) {
+  if (!progressionLevelHook.includes(token)) throw new Error(`Missing AP target renderer contract: ${token}`);
+}
+
 if (!progressionSyncCss.includes('.tcw-hero-skill-tree .atlas-skill-grid') || !progressionSyncCss.includes('grid-template-columns:repeat(6,minmax(0,1fr))')) {
   throw new Error('Dashboard skill-tree horizontal layout contract is missing');
 }
