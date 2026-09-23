@@ -104,6 +104,102 @@
   document.documentElement.classList.add('progression-level-hook-ready');
 })();
 
+/* Exact base-AP targets for every active build.
+   These schedules mirror GUIDE_DATA.apPlan. Gear bonuses are intentionally
+   excluded: this is the permanent/base AP the character should have at the
+   selected level. */
+(() => {
+  const clamp = value => Math.max(1, Math.min(70, Number(value) || 1));
+  const totalBase = level => 25 + (clamp(level) - 1) * 5;
+
+  function ilTarget(level) {
+    const lv=clamp(level);
+    const luk=lv>=36?30:lv>=31?25:lv>=26?20:lv>=21?15:lv>=15?10:5;
+    const stats={STR:4,DEX:4,INT:0,LUK:luk};
+    stats.INT=totalBase(lv)-stats.STR-stats.DEX-stats.LUK;
+    const action=lv===15||lv===21||lv===26||lv===31||lv===36?'+5 LUK':'+5 INT';
+    return {stats,primary:'INT',secondary:'LUK',action};
+  }
+
+  function fighterTarget(level) {
+    const lv=clamp(level);
+    const stats={STR:12,DEX:5,INT:4,LUK:4};
+    let action='+5 STR';
+    for(let n=2;n<=lv;n++){
+      let str=5,dex=0;
+      if(n>=11&&n<=12){str=4;dex=1;}
+      else if(n>=13&&n<=14){str=3;dex=2;}
+      else if(n===15){str=4;dex=1;}
+      else if(n>=16&&n<=19){str=4;dex=1;}
+      else if(n===20){str=3;dex=2;}
+      else if(n>=21&&n<=25){str=4;dex=1;}
+      else if(n>=26&&n<=29){str=4;dex=1;}
+      else if(n===30){str=5;dex=0;}
+      else if(n>=31&&n<=36){str=3;dex=2;}
+      else if(n>=37&&n<=57){str=4;dex=1;}
+      else if(n>=58){str=5;dex=0;}
+      stats.STR+=str; stats.DEX+=dex;
+      if(n===lv) action=dex?+`+${str} STR / +${dex} DEX`:'+5 STR';
+    }
+    return {stats,primary:'STR',secondary:'DEX',action};
+  }
+
+  function hunterTarget(level) {
+    const lv=clamp(level);
+    const stats={STR:5,DEX:12,INT:4,LUK:4};
+    let action='+5 DEX';
+    for(let n=2;n<=lv;n++){
+      let str=0,dex=5;
+      if(n>=11&&n<=15){str=2;dex=3;}
+      else if(n>=16){str=1;dex=4;}
+      stats.STR+=str; stats.DEX+=dex;
+      if(n===lv) action=str?+`+${str} STR / +${dex} DEX`:'+5 DEX';
+    }
+    return {stats,primary:'DEX',secondary:'STR',action};
+  }
+
+  function target(level) {
+    const id=window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh';
+    if(id==='warrior-fighter') return fighterTarget(level);
+    if(id==='archer-hunter') return hunterTarget(level);
+    return ilTarget(level);
+  }
+
+  function selectedLevel() {
+    return clamp(document.getElementById('level-select')?.value || document.getElementById('hero-level')?.textContent || 1);
+  }
+
+  function render() {
+    const copy=document.querySelector('.dashboard-v72 .v5-character-hero .v5-character-copy');
+    if(!copy) return;
+    let box=copy.querySelector('.tcw-ap-allocation');
+    if(!box){
+      box=document.createElement('section');
+      box.className='tcw-ap-allocation';
+      box.setAttribute('aria-label','Base AP allocation target');
+      const metrics=copy.querySelector('.v5-quick-metrics');
+      metrics ? copy.insertBefore(box,metrics) : copy.appendChild(box);
+    }
+    const lv=selectedLevel(), plan=target(lv), s=plan.stats;
+    const secondary=[...['STR','DEX','INT','LUK']].filter(k=>k!==plan.primary&&k!==plan.secondary);
+    box.dataset.apLevel=String(lv);
+    box.dataset.apBuild=window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh';
+    box.innerHTML=
+      `<div class="tcw-ap-head"><span>BASE AP TARGET · LV${lv}</span><small>gear bonuses excluded</small></div>`+
+      `<div class="tcw-ap-main"><b><em>${plan.primary}</em> ${s[plan.primary]}</b><b><em>${plan.secondary}</em> ${s[plan.secondary]}</b></div>`+
+      `<div class="tcw-ap-sub"><span>${secondary[0]} ${s[secondary[0]]}</span><span>${secondary[1]} ${s[secondary[1]]}</span><strong>This level: ${plan.action}</strong></div>`;
+    document.documentElement.classList.add('tcw-ap-target-ready');
+  }
+
+  let timer;
+  const queue=()=>{clearTimeout(timer);timer=setTimeout(render,30);};
+  new MutationObserver(queue).observe(document.body,{childList:true,subtree:true});
+  document.addEventListener('change',queue,true);
+  document.addEventListener('input',queue,true);
+  document.addEventListener('click',queue,true);
+  render();
+})();
+
 /* Dashboard composition: keep the existing compact Skill Tree intact, but place it inside Active Build. */
 (() => {
   let timer = null;
