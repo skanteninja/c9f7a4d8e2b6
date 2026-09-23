@@ -193,7 +193,9 @@
 
   let timer;
   const queue=()=>{clearTimeout(timer);timer=setTimeout(render,30);};
-  new MutationObserver(queue).observe(document.body,{childList:true,subtree:true});
+  new MutationObserver(records=>{
+    if(records.some(record=>!record.target?.closest?.('.tcw-ap-allocation'))) queue();
+  }).observe(document.body,{childList:true,subtree:true});
   document.addEventListener('change',queue,true);
   document.addEventListener('input',queue,true);
   document.addEventListener('click',queue,true);
