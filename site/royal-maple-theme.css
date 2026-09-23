@@ -917,7 +917,7 @@ body.royal-maple-theme .dashboard-v72 .panel::before {
      instead of stretching deep into wide cards. */
   background: transparent !important;
   border: 22px solid transparent !important;
-  border-image-source: url("assets/royal-maple-card-frame.svg?v=0.10.19-compact-skill-ap-targets") !important;
+  border-image-source: url("assets/royal-maple-card-frame.svg?v=0.10.20-compact-skill-ap-70") !important;
   border-image-slice: 54 fill !important;
   border-image-width: 22px !important;
   border-image-outset: 0 !important;
