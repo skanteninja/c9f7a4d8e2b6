@@ -321,7 +321,7 @@ for (const token of [
   'faceId:21000',
   "root.dataset.avatarGearIds=gearSummary;",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.10.19-compact-skill-ap-targets')",
+  "navigator.serviceWorker.register('./sw.js?v=0.10.20-compact-skill-ap-70')",
   'tcwFullSkillBuild',
   'data-plan-level',
   "list.querySelectorAll('.skill-row[data-plan-level]')",

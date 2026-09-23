@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.10.19-compact-skill-ap-targets';
+const assetVersion = '0.10.20-compact-skill-ap-70';
 const BRAND = 'Top Classic World Maplestory';
 
 // The OSMS export is the identity authority for the equipment picker.  The
@@ -1017,6 +1017,46 @@ function sanitizePublicGuide(value, key = '') {
 
 function publicGuide(raw) {
   const data = canonicalizeGuideSkills(canonicalizeGuideInventory(JSON.parse(raw)));
+  if (Array.isArray(data.apPlan) && !data.apPlan.some(row => String(row['Level Range']||'').includes('51'))) {
+    data.apPlan.push(
+      {
+        'Level Range':'51–60',
+        'AP Action':'+3 INT / +2 LUK each level',
+        'Base LUK Target':50,
+        'Weapon Target':'Lv60 mage gear / Evil Tale if chosen',
+        'Weapon LUK Req':55,
+        'Gear LUK We Expect':'Use the current Lv50 set while building permanent LUK for the Lv60 requirement bracket.',
+        'Effective LUK Plan':'Reach 50 base LUK by Lv60; all remaining AP goes to INT.',
+        'Scroll Plan':'Do not rely on low-rate LUK scrolls for the core requirement.',
+        'Why':'The selected Lv60 mage armor requires 50 LUK. Build the requirement gradually without abandoning INT.',
+        'Status':'current plan / VERIFY LIVE'
+      },
+      {
+        'Level Range':'61–65',
+        'AP Action':'ONLY INT — keep BASE LUK at 50',
+        'Base LUK Target':50,
+        'Weapon Target':'Cromi / Lv60 mage set',
+        'Weapon LUK Req':50,
+        'Gear LUK We Expect':'No new permanent LUK is required in this bracket for the selected progression.',
+        'Effective LUK Plan':'Hold 50 base LUK and put all AP into INT.',
+        'Scroll Plan':'INT / Wand M.ATK first.',
+        'Why':'No selected Lv61–65 core breakpoint requires more than 50 base LUK.',
+        'Status':'current plan / VERIFY LIVE'
+      },
+      {
+        'Level Range':'66–70',
+        'AP Action':'+2 INT / +3 LUK each level',
+        'Base LUK Target':65,
+        'Weapon Target':'Angel Wings',
+        'Weapon LUK Req':65,
+        'Gear LUK We Expect':'Lv70 armor needs 60 LUK; Angel Wings needs 65.',
+        'Effective LUK Plan':'Reach 65 base LUK at Lv70, then spend every remaining point on INT.',
+        'Scroll Plan':'Do not make the core requirement depend on risky LUK scrolls.',
+        'Why':'This arrives at the selected Lv70 Angel Wings requirement exactly at the breakpoint.',
+        'Status':'current plan / VERIFY LIVE'
+      }
+    );
+  }
   const catalog = multiBuildCatalog(data.catalog);
   const fighter = fighterVariant(data);
   const hunter = hunterVariant(data);
