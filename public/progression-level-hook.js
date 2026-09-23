@@ -139,7 +139,7 @@
       else if(n>=37&&n<=57){str=4;dex=1;}
       else if(n>=58){str=5;dex=0;}
       stats.STR+=str; stats.DEX+=dex;
-      if(n===lv) action=dex?+`+${str} STR / +${dex} DEX`:'+5 STR';
+      if(n===lv) action=dex?`+${str} STR / +${dex} DEX`:'+5 STR';
     }
     return {stats,primary:'STR',secondary:'DEX',action};
   }
@@ -153,7 +153,7 @@
       if(n>=11&&n<=15){str=2;dex=3;}
       else if(n>=16){str=1;dex=4;}
       stats.STR+=str; stats.DEX+=dex;
-      if(n===lv) action=str?+`+${str} STR / +${dex} DEX`:'+5 DEX';
+      if(n===lv) action=str?`+${str} STR / +${dex} DEX`:'+5 DEX';
     }
     return {stats,primary:'DEX',secondary:'STR',action};
   }
