@@ -2,8 +2,8 @@
 
 Last continuity baseline: 2026-09-18
 
-Current deployed checkpoint: 0.10.20-compact-skill-ap-70 (live verified)
-Current source checkpoint: 0.10.20-compact-skill-ap-70
+Current deployed checkpoint: 0.10.21-meowdb-ap-layout (live verified)
+Current source checkpoint: 0.10.21-meowdb-ap-layout
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:
@@ -15,6 +15,16 @@ This file is the persistent handoff for the MapleStory Classic Builder. Before c
 Do not rely on chat memory alone. Repository continuity files are the project source of truth.
 
 Also read QUALITY_STANDARD.md, IMPLEMENTATION_BACKLOG.md, and docs/continuity/LIVE_UI_AUDIT_2026-09-15.md before the next implementation pass.
+
+## 2026-09-24 — multi-row Skill Tree fix + MeowDB/OSMS AP correction
+
+- Fixed the Lv18 compact dashboard collapse shown in the continuation screenshot. The actual trigger was an old high-specificity selector, `.v5-character-hero:has(...nth-child(4)) .v5-character-copy`, which reintroduced `padding-right: clamp(390px,52%,430px)!important` whenever the Skill Tree had 4+ cards. Magician renders six first-job skills, so the center column was crushed when the tree became two rows.
+- The conflicting rule is removed/neutralized and final anti-collapse rules now force the center copy, AP block, and quick metrics to use the available center column width. Quick metrics remain a 2-column grid.
+- Rebased the I/L AP plan on MeowDB/NiaMeowDB for build planning, with OSMS Data Explorer as the item requirement authority.
+- Corrected standard low-LUK I/L checkpoints: Lv15 INT 82/LUK 5, Lv20 102/10, Lv25 122/15, Lv30 142/20, Lv50 222/40, Lv70 299/63 base. The Lv70 selected footwear contributes +2 LUK, producing 65 effective LUK for Angel Wings.
+- OSMS verifies Cromi and the selected Lv50 Mage set require 40 LUK; Angel Wings requires 65 LUK. The old Lv50 base-LUK-30 target was therefore invalid for the standard selected Lv50 gear route.
+- Release token: `0.10.21-meowdb-ap-layout`. Source commit `c0924dcaa2c74a1ed281dcd66fcb47a412d61d71`; generated site `01de9cea3a8a8e9b4119cc2f2f9b35009dab1f08`.
+- Build Static, Visual/UI, Maps/ETC, Monster Integrity, Real Input Skill Stability, and Verify Live all passed. Live QA at compact desktop size verified Lv18 six-skill/two-row layout, Lv50 AP 222/40, and Lv70 AP 299/63 with no overlap.
 
 ## 2026-09-23 — compact top-right Skill Tree + exact AP targets
 

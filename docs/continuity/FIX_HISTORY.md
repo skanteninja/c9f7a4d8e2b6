@@ -1,5 +1,25 @@
 # Historical Fix / Regression Log
 
+## 2026-09-24 — 0.10.21 multi-row Skill Tree collapse + AP source correction
+
+Observed problems:
+- At Lv18, when the Magician compact Skill Tree exposed six first-job skills over two rows, the AP/quick-metric center area collapsed into thin vertical strips.
+- The displayed I/L Lv50 target used only 30 base LUK, which disagreed with current MeowDB standard builds and the selected OSMS-verified Lv50 Mage equipment requirements.
+
+Root causes:
+- A legacy `:has(.atlas-skill-card:nth-child(4))` selector retained higher specificity than the newer compact-card rules and applied 390–430px of right padding to the center column as soon as the Skill Tree had 4+ cards.
+- The earlier AP model optimized too aggressively around assumed gear LUK. That was invalid for the selected Lv50 set because Blue Goldwind Shoes themselves require 40 LUK; their +2 LUK cannot be used to satisfy their own equip requirement.
+
+Corrections:
+- Removed the legacy 390–430px reserved padding and added final center-column width/2-column metric guards in both progression and last-loaded Royal Maple CSS.
+- Changed I/L planning to MeowDB/NiaMeowDB low-LUK progression and used OSMS for equipment requirements.
+- Standard Lv50 target is now 4 STR / 4 DEX / 222 INT / 40 LUK. Standard Lv70 target is 4 STR / 4 DEX / 299 INT / 63 base LUK; +2 from the selected Lv70 shoes reaches 65 effective LUK for Angel Wings.
+
+Verification:
+- Release `0.10.21-meowdb-ap-layout` is live.
+- All six automated release/regression workflows passed.
+- Independent live browser QA passed Lv18, Lv50, and Lv70 with no overlap or frame overflow.
+
 ## 2026-09-23 — 0.10.20 compact Skill Tree + AP allocation
 
 Observed request:

@@ -1,5 +1,14 @@
 # Continuity Changelog
 
+## 2026-09-24 — 0.10.21 MeowDB AP + multi-row layout fix
+
+- Fixed the compact Skill Tree two-row regression that crushed the center of the Active Build card at Lv18.
+- Removed the stale 390–430px high-specificity right-padding rule that activated at 4+ skill cards.
+- Recalibrated I/L AP targets around MeowDB/NiaMeowDB standard low-LUK builds and OSMS equipment requirements.
+- Corrected key base targets: Lv18 INT 94/LUK 8, Lv50 INT 222/LUK 40, Lv70 INT 299/LUK 63. At Lv70 the selected +2 LUK shoes bring effective LUK to 65 for Angel Wings.
+- Source `c0924dcaa2c74a1ed281dcd66fcb47a412d61d71`; generated site `01de9cea3a8a8e9b4119cc2f2f9b35009dab1f08`; release token `0.10.21-meowdb-ap-layout`.
+- Build Static, Visual/UI, Maps/ETC, Monster Integrity, Real Input Skill Stability, Verify Live, and compact live QA all passed.
+
 ## 2026-09-23 — 0.10.20 compact top-right skills + Lv1–70 AP targets
 
 - Restored the compact dashboard Skill Tree to the top-right of the Active Build card.
