@@ -1677,6 +1677,6 @@
   hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.10.20-compact-skill-ap-70').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.10.21-meowdb-ap-layout').catch(()=>{});
   }
 })();

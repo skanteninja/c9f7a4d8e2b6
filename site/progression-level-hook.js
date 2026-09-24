@@ -114,17 +114,16 @@
 
   function ilTarget(level) {
     const lv=clamp(level);
-    let luk;
-    if(lv<=50) luk=lv>=36?30:lv>=31?25:lv>=26?20:lv>=21?15:lv>=15?10:5;
-    else if(lv<=60) luk=30+(lv-50)*2;
-    else if(lv<=65) luk=50;
-    else luk=50+(lv-65)*3;
-    const stats={STR:4,DEX:4,INT:0,LUK:luk};
-    stats.INT=totalBase(lv)-stats.STR-stats.DEX-stats.LUK;
-    let action='+5 INT';
-    if(lv===15||lv===21||lv===26||lv===31||lv===36) action='+5 LUK';
-    else if(lv>=51&&lv<=60) action='+3 INT / +2 LUK';
-    else if(lv>=66) action='+2 INT / +3 LUK';
+    const stats={STR:4,DEX:4,INT:12,LUK:5};
+    let action='Starting stats';
+    for(let n=2;n<=lv;n++){
+      let int=5,luk=0;
+      if(n>=16&&n<=65){int=4;luk=1;}
+      else if(n>=66&&n<=68){int=3;luk=2;}
+      else if(n>=69){int=4;luk=1;}
+      stats.INT+=int; stats.LUK+=luk;
+      if(n===lv) action=luk?`+${int} INT / +${luk} LUK`:'+5 INT';
+    }
     return {stats,primary:'INT',secondary:'LUK',action};
   }
 
