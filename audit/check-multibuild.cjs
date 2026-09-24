@@ -321,7 +321,7 @@ for (const token of [
   'faceId:21000',
   "root.dataset.avatarGearIds=gearSummary;",
   'Show future-level',
-  "navigator.serviceWorker.register('./sw.js?v=0.10.20-compact-skill-ap-70')",
+  "navigator.serviceWorker.register('./sw.js?v=0.10.21-meowdb-ap-layout')",
   'tcwFullSkillBuild',
   'data-plan-level',
   "list.querySelectorAll('.skill-row[data-plan-level]')",
@@ -413,8 +413,16 @@ for (const token of ['tcw-ap-target-ready','tcw-ap-allocation','BASE AP TARGET']
   if (!progressionLevelHook.includes(token)) throw new Error(`Missing AP target renderer contract: ${token}`);
 }
 
-if (!progressionSyncCss.includes('.tcw-hero-skill-tree .atlas-skill-grid') || !progressionSyncCss.includes('grid-template-columns:repeat(6,minmax(0,1fr))')) {
-  throw new Error('Dashboard skill-tree horizontal layout contract is missing');
+if (!progressionSyncCss.includes('.tcw-hero-skill-tree .atlas-skill-grid') || !progressionSyncCss.includes('grid-template-columns:repeat(3,minmax(0,1fr))')) {
+  throw new Error('Dashboard compact skill-tree 3-column layout contract is missing');
+}
+if (progressionSyncCss.includes('padding-right:clamp(390px,52%,430px)')) {
+  throw new Error('Legacy multi-row skill padding can still crush the hero center column');
+}
+const il50 = root.apPlan.find(row => row['Level Range']==='41–50');
+const il70 = root.apPlan.find(row => row['Level Range']==='69–70');
+if (Number(il50?.['Base LUK Target'])!==40 || Number(il70?.['Base LUK Target'])!==63) {
+  throw new Error('I/L AP plan is not aligned to MeowDB/OSMS Lv50/Lv70 targets');
 }
 for (const [name, source] of [['progression-gear-visual.css', progressionGearCss], ['ownership-ui.css', ownershipCss]]) {
   if (source.includes('.dashboard-v72 .v6-skills-panel .atlas-skill-grid{grid-template-columns:repeat(3')) {

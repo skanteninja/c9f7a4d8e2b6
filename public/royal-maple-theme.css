@@ -917,7 +917,7 @@ body.royal-maple-theme .dashboard-v72 .panel::before {
      instead of stretching deep into wide cards. */
   background: transparent !important;
   border: 22px solid transparent !important;
-  border-image-source: url("assets/royal-maple-card-frame.svg?v=0.10.20-compact-skill-ap-70") !important;
+  border-image-source: url("assets/royal-maple-card-frame.svg?v=0.10.21-meowdb-ap-layout") !important;
   border-image-slice: 54 fill !important;
   border-image-width: 22px !important;
   border-image-outset: 0 !important;
@@ -1365,4 +1365,26 @@ body.royal-maple-theme .dashboard-v72 .tcw-ap-allocation{
   body.royal-maple-theme .dashboard-v72 .v5-character-copy{grid-column:1!important;grid-row:2!important}
   body.royal-maple-theme .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree{grid-column:1!important;grid-row:3!important}
   body.royal-maple-theme .dashboard-v72 .progression-avatar-level-controls{grid-column:1!important;grid-row:4!important}
+}
+
+
+/* 0.10.21 — final anti-collapse authority for multi-row skills. */
+body.royal-maple-theme .dashboard-v72 .v5-character-hero:has(>.tcw-hero-skill-tree .atlas-skill-grid>.atlas-skill-card:nth-child(4)) .v5-character-copy{
+  padding-right:0!important;
+  width:100%!important;
+  max-width:none!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero .tcw-ap-allocation,
+body.royal-maple-theme .dashboard-v72 .v5-character-hero .v5-quick-metrics{
+  width:100%!important;
+  max-width:none!important;
+  box-sizing:border-box!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero .v5-quick-metrics{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+body.royal-maple-theme .dashboard-v72 .v5-character-hero .v5-quick-metrics button{
+  width:100%!important;
+  min-width:0!important;
 }

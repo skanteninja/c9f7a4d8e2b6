@@ -20,7 +20,7 @@ html.auto-gear-synced .equipment-window{box-shadow:inset 0 0 0 1px rgba(98,212,1
 .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)) .atlas-skill-tabs .eyebrow{height:18px!important;line-height:18px!important;white-space:nowrap!important}
 .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)) .atlas-skill-tabs .atlas-skill-tab{display:flex!important;align-items:center!important;height:22px!important;min-height:22px!important;line-height:12px!important;white-space:nowrap!important}
 .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree:has(.atlas-skill-grid>.atlas-skill-card:nth-child(4)) .atlas-skill-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important;grid-auto-flow:row!important}
-.dashboard-v72 .v5-character-hero:has(>.tcw-hero-skill-tree .atlas-skill-grid>.atlas-skill-card:nth-child(4)) .v5-character-copy{padding-right:clamp(390px,52%,430px)!important}
+.dashboard-v72 .v5-character-hero:has(>.tcw-hero-skill-tree .atlas-skill-grid>.atlas-skill-card:nth-child(4)) .v5-character-copy{padding-right:0!important}
 .dashboard-v72 .v72-secondary-content.tcw-secondary-vacated{display:none!important}
 html.dashboard-skill-in-hero-ready .dashboard-v72 .v5-character-hero{min-height:286px!important}
 
@@ -449,4 +449,31 @@ html.tcw-ui-stability-ready .dashboard-v72 .tcw-hero-skill-tree .atlas-skill-car
   .dashboard-v72 .v5-character-copy{grid-column:1!important;grid-row:2!important}
   .dashboard-v72 .v5-character-hero>.tcw-hero-skill-tree{grid-column:1!important;grid-row:3!important}
   .dashboard-v72 .progression-avatar-level-controls{grid-column:1!important;grid-row:4!important}
+}
+
+
+/* 0.10.21 — two-row compact Skill Tree containment.
+   The old :has(4th skill) rule reserved 390–430px inside the center column.
+   Once Magician rendered six skills at Lv18 that high-specificity padding won
+   over the newer layout and crushed AP/metrics. Keep the center column real. */
+.dashboard-v72 .v5-character-hero:has(>.tcw-hero-skill-tree .atlas-skill-grid>.atlas-skill-card:nth-child(4)) .v5-character-copy{
+  padding-right:0!important;
+  width:100%!important;
+  max-width:none!important;
+}
+.dashboard-v72 .v5-character-hero .v5-character-copy,
+.dashboard-v72 .v5-character-hero .tcw-ap-allocation,
+.dashboard-v72 .v5-character-hero .v5-quick-metrics{
+  width:100%!important;
+  max-width:none!important;
+  box-sizing:border-box!important;
+}
+.dashboard-v72 .v5-character-hero .v5-quick-metrics{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:stretch!important;
+}
+.dashboard-v72 .v5-character-hero .v5-quick-metrics button{
+  width:100%!important;
+  min-width:0!important;
 }

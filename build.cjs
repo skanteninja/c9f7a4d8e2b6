@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.10.20-compact-skill-ap-70';
+const assetVersion = '0.10.21-meowdb-ap-layout';
 const BRAND = 'Top Classic World Maplestory';
 
 // The OSMS export is the identity authority for the equipment picker.  The
@@ -1017,46 +1017,102 @@ function sanitizePublicGuide(value, key = '') {
 
 function publicGuide(raw) {
   const data = canonicalizeGuideSkills(canonicalizeGuideInventory(JSON.parse(raw)));
-  if (Array.isArray(data.apPlan) && !data.apPlan.some(row => String(row['Level Range']||'').includes('51'))) {
-    data.apPlan.push(
-      {
-        'Level Range':'51–60',
-        'AP Action':'+3 INT / +2 LUK each level',
-        'Base LUK Target':50,
-        'Weapon Target':'Lv60 mage gear / Evil Tale if chosen',
-        'Weapon LUK Req':55,
-        'Gear LUK We Expect':'Use the current Lv50 set while building permanent LUK for the Lv60 requirement bracket.',
-        'Effective LUK Plan':'Reach 50 base LUK by Lv60; all remaining AP goes to INT.',
-        'Scroll Plan':'Do not rely on low-rate LUK scrolls for the core requirement.',
-        'Why':'The selected Lv60 mage armor requires 50 LUK. Build the requirement gradually without abandoning INT.',
-        'Status':'current plan / VERIFY LIVE'
-      },
-      {
-        'Level Range':'61–65',
-        'AP Action':'ONLY INT — keep BASE LUK at 50',
-        'Base LUK Target':50,
-        'Weapon Target':'Cromi / Lv60 mage set',
-        'Weapon LUK Req':50,
-        'Gear LUK We Expect':'No new permanent LUK is required in this bracket for the selected progression.',
-        'Effective LUK Plan':'Hold 50 base LUK and put all AP into INT.',
-        'Scroll Plan':'INT / Wand M.ATK first.',
-        'Why':'No selected Lv61–65 core breakpoint requires more than 50 base LUK.',
-        'Status':'current plan / VERIFY LIVE'
-      },
-      {
-        'Level Range':'66–70',
-        'AP Action':'+2 INT / +3 LUK each level',
-        'Base LUK Target':65,
-        'Weapon Target':'Angel Wings',
-        'Weapon LUK Req':65,
-        'Gear LUK We Expect':'Lv70 armor needs 60 LUK; Angel Wings needs 65.',
-        'Effective LUK Plan':'Reach 65 base LUK at Lv70, then spend every remaining point on INT.',
-        'Scroll Plan':'Do not make the core requirement depend on risky LUK scrolls.',
-        'Why':'This arrives at the selected Lv70 Angel Wings requirement exactly at the breakpoint.',
-        'Status':'current plan / VERIFY LIVE'
-      }
-    );
-  }
+  // MeowDB is the build-plan authority; OSMS is the item/requirement authority.
+  // Traditional low-LUK I/L progression: 5 LUK through Lv15, then +4 INT/+1 LUK
+  // through Lv65. At Lv70 the selected Blue Lapiz/Brown Lapiz shoe contributes
+  // +2 LUK, so 63 base LUK reaches Angel Wings' OSMS 65-LUK requirement.
+  data.apPlan = [
+    {
+      'Level Range':'1–15','AP Action':'ONLY INT','Base LUK Target':5,
+      'Weapon Target':'Wooden Wand / Hardwood Wand','Weapon LUK Req':0,
+      'Gear LUK We Expect':'No LUK gear required',
+      'Effective LUK Plan':'Keep 5 base LUK through Lv15.',
+      'Scroll Plan':'INT / Magic Attack; do not spend scrolls to patch core LUK requirements.',
+      'Why':'MeowDB Magician guide: Lv15 target is 82 base INT / 5 base LUK.',
+      'Status':'MeowDB build baseline · OSMS requirements'
+    },
+    {
+      'Level Range':'16–20','AP Action':'+4 INT / +1 LUK each level','Base LUK Target':10,
+      'Weapon Target':'Metal Wand','Weapon LUK Req':10,
+      'Gear LUK We Expect':'Do not count the item being equipped toward its own requirement.',
+      'Effective LUK Plan':'Reach 10 base LUK at Lv20.',
+      'Scroll Plan':'INT / Magic Attack first.',
+      'Why':'MeowDB Lv20 target is 102 INT / 10 LUK; OSMS Metal Wand requires 10 LUK.',
+      'Status':'MeowDB build baseline · OSMS requirements'
+    },
+    {
+      'Level Range':'21–25','AP Action':'+4 INT / +1 LUK each level','Base LUK Target':15,
+      'Weapon Target':'Ice Wand','Weapon LUK Req':15,
+      'Gear LUK We Expect':'Any equipped LUK is a bonus, not assumed for the core target.',
+      'Effective LUK Plan':'Reach 15 base LUK at Lv25.',
+      'Scroll Plan':'INT / Magic Attack first.',
+      'Why':'MeowDB Lv25 target is 122 INT / 15 LUK; OSMS Ice Wand requires 15 LUK.',
+      'Status':'MeowDB build baseline · OSMS requirements'
+    },
+    {
+      'Level Range':'26–30','AP Action':'+4 INT / +1 LUK each level','Base LUK Target':20,
+      'Weapon Target':'Mithril Wand','Weapon LUK Req':20,
+      'Gear LUK We Expect':'Do not rely on conditional gear to reach the wand requirement.',
+      'Effective LUK Plan':'Reach 20 base LUK at Lv30.',
+      'Scroll Plan':'INT / Magic Attack first.',
+      'Why':'MeowDB Lv30 target is 142 INT / 20 LUK; OSMS Mithril Wand requires 20 LUK.',
+      'Status':'MeowDB build baseline · OSMS requirements'
+    },
+    {
+      'Level Range':'31–40','AP Action':'+4 INT / +1 LUK each level','Base LUK Target':30,
+      'Weapon Target':'Wizard Wand / Fairy Wand breakpoints','Weapon LUK Req':30,
+      'Gear LUK We Expect':'Gear can raise effective LUK, but the low-LUK baseline keeps requirements deterministic.',
+      'Effective LUK Plan':'Reach 30 base LUK at Lv40.',
+      'Scroll Plan':'INT / Wand Magic Attack first.',
+      'Why':'Continue the MeowDB low-LUK rule: raise LUK only with the next equipment requirement.',
+      'Status':'MeowDB-derived low-LUK progression · OSMS requirements'
+    },
+    {
+      'Level Range':'41–50','AP Action':'+4 INT / +1 LUK each level','Base LUK Target':40,
+      'Weapon Target':'Cromi + Lv50 Mage set','Weapon LUK Req':40,
+      'Gear LUK We Expect':'Blue Goldwind Shoes add +2 LUK only after their own 40-LUK requirement is met.',
+      'Effective LUK Plan':'Reach 40 base LUK at Lv50; selected Lv50 gear then raises effective LUK to 42.',
+      'Scroll Plan':'Spend scroll budget on INT / Wand M.ATK, not LUK.',
+      'Why':'MeowDB standard Lv50 I/L uses 40 base LUK. OSMS confirms Cromi, Blue Calas, Aqua Golden Circlet, Blue Penance and Blue Goldwind Shoes require 40 LUK.',
+      'Status':'MeowDB standard build · OSMS verified'
+    },
+    {
+      'Level Range':'51–60','AP Action':'+4 INT / +1 LUK each level','Base LUK Target':50,
+      'Weapon Target':'Lv60 Mage gear','Weapon LUK Req':50,
+      'Gear LUK We Expect':'Selected Lv50 gear can add effective stats, but base LUK reaches the Lv60 armor gate by itself.',
+      'Effective LUK Plan':'Reach 50 base LUK at Lv60.',
+      'Scroll Plan':'INT / Magic Attack first.',
+      'Why':'Selected Lv60 Mage gear uses the 50-LUK requirement tier.',
+      'Status':'MeowDB-derived low-LUK progression · OSMS requirements'
+    },
+    {
+      'Level Range':'61–65','AP Action':'+4 INT / +1 LUK each level','Base LUK Target':55,
+      'Weapon Target':'Lv60 set / Blue Gaia Cape','Weapon LUK Req':50,
+      'Gear LUK We Expect':'Hold the same low-LUK slope toward the Lv70 equipment gate.',
+      'Effective LUK Plan':'Reach 55 base LUK at Lv65.',
+      'Scroll Plan':'INT / Magic Attack first.',
+      'Why':'Maintains the MeowDB low-LUK progression without a late AP spike.',
+      'Status':'MeowDB-derived low-LUK progression'
+    },
+    {
+      'Level Range':'66–68','AP Action':'+3 INT / +2 LUK each level','Base LUK Target':61,
+      'Weapon Target':'Prepare Lv70 Mage set / Angel Wings','Weapon LUK Req':65,
+      'Gear LUK We Expect':'Lv70 shoes contribute +2 LUK after the 60-LUK armor gate is satisfied.',
+      'Effective LUK Plan':'Reach 61 base LUK at Lv68.',
+      'Scroll Plan':'INT / Magic Attack first.',
+      'Why':'Starts the final push toward the MeowDB Lv70 realistic build while keeping more AP in INT.',
+      'Status':'MeowDB-derived Lv70 target · OSMS requirements'
+    },
+    {
+      'Level Range':'69–70','AP Action':'+4 INT / +1 LUK each level','Base LUK Target':63,
+      'Weapon Target':'Angel Wings','Weapon LUK Req':65,
+      'Gear LUK We Expect':'Brown/Blue Lapiz shoes provide +2 LUK once equipped.',
+      'Effective LUK Plan':'63 base LUK + 2 equipped LUK = 65 effective LUK for Angel Wings.',
+      'Scroll Plan':'No LUK scroll dependency; use INT / Magic Attack scrolls.',
+      'Why':'MeowDB realistic Lv70 I/L has 299 base INT / 63 base LUK (352 INT / 65 LUK after its listed gear). OSMS Angel Wings requires 65 LUK.',
+      'Status':'MeowDB realistic build · OSMS verified'
+    }
+  ];
   const catalog = multiBuildCatalog(data.catalog);
   const fighter = fighterVariant(data);
   const hunter = hunterVariant(data);
