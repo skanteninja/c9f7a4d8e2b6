@@ -6,7 +6,7 @@
 - Replaced legacy appended rows with structured objectives, prerequisite-aware availability, inherited level gates, correct repeat/rotation metadata, start-item handling, and class-filtered reward choices.
 - Added expandable Royal Maple quest journal, chain navigation, status/type/sort filters, stable-ID progress migration, and browser/data release gates.
 - Missing source prerequisite #80117 is retained and clearly flagged on #506018. The separate ETC lifetime/reserve audit remains open.
-- Local validation passes; publication/live validation pending. See QUEST_AUDIT_2026-10-04.md.
+- Final release `0.11.1-quest-journal-styles` is deployed. All six release gates pass. Verified desktop and 390px screenshots show readable framed cards and filters. See QUEST_AUDIT_2026-10-04.md.
 
 
 ## 2026-09-24 — 0.10.21 MeowDB AP + multi-row layout fix

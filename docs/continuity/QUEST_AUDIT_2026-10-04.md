@@ -1,6 +1,6 @@
 # Quest reconciliation — 2026-10-04
 
-Release: `0.11.0-quest-journal`.
+Final release: `0.11.1-quest-journal-styles`.
 
 ## Source and coverage
 
@@ -27,7 +27,14 @@ Quest #506018 references #80117, which is absent from the OSMS export. Preserve 
 
 - Local: build, generated JavaScript syntax, multi-build contracts, and quest-regression.cjs pass.
 - Added browser release gate: exact ID search, details disclosure, given-on-start items, prerequisite completion/undo, chain navigation, Mage-only reward choices, repeatability, source-gap blocking, objectives/rewards, empty state, and 1365/1024/390px containment.
-- GitHub release gates and post-deployment visual QA: pending source publication.
+- Final source: `5567063c68e8bf19e95af435cf575d8766bf5d0c`; generated site: `abf575c44a89a82aba3dbfb5de19f8eca7f3bf2f`.
+- All six final source gates passed: Build Static 37208640377, Maps/ETC 37208640387, Visual/UI 37208640385, Monster Integrity 37208640375, Real Input Skill Stability 37208640424, Verify Live 37208640389. Post-generated Verify Live 37208716127 also passed.
+- Fresh screenshots visually inspected at 1365×1000 and 390×1000 after live build-info reported 0.11.1. Cards are framed, titles readable, filters separated, no visible overlap. Evidence: evidence/quest-journal-desktop-2026-10-04.png and evidence/quest-journal-mobile-2026-10-04.png.
+- TinyFish live interaction pass confirmed the 310-entry journal, #1001 prerequisite navigation and given-on-start handling, filters, mobile containment, and compact Lv18 dashboard. Its Blackbull reward example conflated #10400 and #10401, so that portion is not accepted as game-data evidence. Pinned data and the exact-ID browser fixture verify #10401 Mage Wand/Staff scroll choices and 1,404 mesos.
+
+## Build defect found and closed
+
+The first 0.11.0 generated output copied the original Royal Maple stylesheet after preparing an appended quest stylesheet, leaving the new journal unstyled. The screenshot exposed the bug despite functional checks passing. The final build writes the composed stylesheet, bumps the cache token, and checks the actual card background, disclosure flex layout, minimum title font, and detail grid in Chrome. The generated CSS check also requires the journal selector. Do not regress to copying the uncomposed file.
 
 ## Scope boundary
 
