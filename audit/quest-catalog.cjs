@@ -26,6 +26,10 @@ function questCatalog(snapshot, previous, branch) {
     legacy.add(`${slug(q.region)}-${slug(q.name)}-${Number(q.level_min ?? q.chain_level_min ?? 1)}`);
     const cadence = q.is_daily ? 'Daily' : q.is_weekly ? 'Weekly' : q.is_repeatable ? 'Repeatable' : 'Once';
     const guaranteed = (q.rewards || []).filter(r => r.type === 'item' && r.guaranteed && (!r.job_mask || r.job_name === branch));
+    const choices = groups(q.reward_choices), random = groups(q.reward_weighted);
+    const rewardSummary = [...guaranteed.map(r => `${r.count}x ${r.name}`),
+      ...choices.flatMap(g => g.items.map(r => `Choose one: ${r.name}`)),
+      ...random.flatMap(g => g.items.map(r => `${r.name} (${r.chance_pct}%)`))].join(' · ');
     const description = String(q.description || '').split('\n').filter(Boolean);
     return {
       'Quest ID': String(q.id), Quest: q.name, Region: q.region, Lv: lv,
@@ -33,11 +37,11 @@ function questCatalog(snapshot, previous, branch) {
       Eligibility: branches.has(q.region) ? `${branch} advancement` : 'Any class',
       NPC: q.npc_name || '—', Chain: q.parent || '', 'Next Quest ID': q.next_quest ? String(q.next_quest) : '',
       'Next Quest': q.next_quest_name || '', Repeatable: cadence, EXP: Number(q.rewards_exp || 0), Mesos: Number(q.rewards_money || 0),
-      'Reward / Unlock': q.rewards_items || (q.next_quest_name ? `Unlocks ${q.next_quest_name}` : 'No item reward'),
+      'Reward / Unlock': rewardSummary || (q.next_quest_name ? `Unlocks ${q.next_quest_name}` : 'No item reward'),
       'Why Do It': description[0] || 'Talk to the quest giver to begin.',
       Journal: description, Requirements: q.requirements || '', Objectives: req.filter(r => r.type !== 'quest'),
       Prerequisites: req.filter(r => r.type === 'quest'), 'Start Items': start, Gather: gather,
-      'Guaranteed Rewards': guaranteed, 'Choice Rewards': groups(q.reward_choices), 'Random Rewards': groups(q.reward_weighted),
+      'Guaranteed Rewards': guaranteed, 'Choice Rewards': choices, 'Random Rewards': random,
       Contribution: q.rewards_contribution || null, Rotation: q.rotation || null,
       'ETC / Item To Save': gather.map(r => r.name).join(' · '), Qty: gather.map(r => r.count).join(' · '),
       'Save Guidance': gather.length ? gather.map(r => `${r.name} ×${r.count}`).join(' · ') : 'No items to gather before starting.',
