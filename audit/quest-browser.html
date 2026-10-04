@@ -10,6 +10,9 @@ document.getElementById('app').addEventListener('load', async () => {
     d.getElementById('session-entry-continue')?.click();
     d.querySelector('[data-session-gender="male"]')?.click();
     d.querySelector('#nav [data-page="quests"]').click();
+    check(w.getComputedStyle(d.querySelector('.quest-journal-card')).backgroundImage!=='none','Quest card stylesheet not applied');
+    check(w.getComputedStyle(d.querySelector('.quest-journal-card summary')).display==='flex','Quest disclosure layout missing');
+    check(parseFloat(w.getComputedStyle(d.querySelector('.quest-journal-card .quest-name')).fontSize)>=17,'Quest name is too small');
     const input = (id,value) => {const el=d.getElementById(id);el.value=value;el.dispatchEvent(new w.Event('input',{bubbles:true}));};
     const selectQuest = id => {d.getElementById('quest-clear').click();input('quest-search',`#${id}`);};
     selectQuest('1001');
@@ -18,6 +21,7 @@ document.getElementById('app').addEventListener('load', async () => {
     d.querySelector('.quest-journal-card summary').click();
     await delay(60);
     check(d.querySelector('details').open,'Quest details did not open');
+    check(w.getComputedStyle(d.querySelector('.quest-detail-grid')).display==='grid','Quest detail grid stylesheet missing');
     check(d.querySelector('.quest-detail-grid').textContent.includes('Given on start'),'Given-on-start objective missing');
     check(!d.querySelector('.quest-save'),'NPC-given mirror incorrectly listed as gatherable');
     d.querySelector('[data-quest-jump="1000"]').click();

@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.11.0-quest-journal';
+const assetVersion = '0.11.1-quest-journal-styles';
 const {questCatalog} = require('./audit/quest-catalog.cjs');
 const QUEST_SNAPSHOT = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-quests.json'), 'utf8'));
 const BRAND = 'Top Classic World Maplestory';
@@ -1835,7 +1835,7 @@ html=html.replace('</head>', '<link rel="stylesheet" href="potions.css?v='+asset
 html=html.replace('</head>', '<link rel="stylesheet" href="royal-maple-theme.css?v='+assetVersion+'"></head>');
 fs.copyFileSync(path.join(source,'equipment-branding.css'),path.join(out,'equipment-branding.css'));
 fs.copyFileSync(path.join(source,'potions.css'),path.join(out,'potions.css'));
-fs.copyFileSync(path.join(source,'royal-maple-theme.css'),path.join(out,'royal-maple-theme.css'));
+fs.writeFileSync(path.join(out,'royal-maple-theme.css'), royalMapleThemeCss);
 html = html.replace(/\n[ \t]+\n/g, '\n\n');
 fs.writeFileSync(path.join(out, 'index.html'), html);
 const atlasAssets = path.join(source, 'assets', 'map-atlas');

@@ -46,4 +46,5 @@ sandbox.q = find(506018); assert.equal(run('questState(q)'), 'blocked', 'Missing
 sandbox.state.quests['quest-506018'] = true; assert.equal(run('questState(q)'), 'done');
 // No stale catalog appender or old absolute layout is part of this release.
 assert.ok(!fs.readFileSync(`${output}/quest-audit-additions.js`, 'utf8').includes('D.quests.push'));
+assert.ok(fs.readFileSync(`${output}/royal-maple-theme.css`, 'utf8').includes('.quest-journal-card {'), 'Quest stylesheet missing from output');
 console.log('quest-regression-ok: 322 source records; 310 isolated quests per build; migration, prerequisites, rewards, and cadence passed');
