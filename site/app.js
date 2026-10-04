@@ -1755,6 +1755,6 @@ function renderQuests() {
   hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.11.0-quest-journal').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.11.1-quest-journal-styles').catch(()=>{});
   }
 })();
