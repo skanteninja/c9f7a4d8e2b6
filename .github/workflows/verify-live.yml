@@ -62,8 +62,12 @@ jobs:
           test "$ready" -eq 1
           test "$(curl -fsSL --max-time 15 "$BASE_URL/maps-tab.css?ci=$GITHUB_RUN_ID" | wc -c)" -gt 4000
           test "$(curl -fsSL --max-time 15 "$BASE_URL/etc-audit-data.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 5000
-          test "$(curl -fsSL --max-time 15 "$BASE_URL/quest-audit-additions.js?ci=$GITHUB_RUN_ID" | wc -c)" -gt 5000
+          quest_signal="$(curl -fsSL --max-time 15 "$BASE_URL/quest-audit-additions.js?ci=$GITHUB_RUN_ID")"
+          [[ "$quest_signal" == *"quest-catalog-audit-ready"* ]]
+          [[ "$quest_signal" != *"D.quests.push"* ]]
           app_js="$(curl -fsSL --max-time 15 "$BASE_URL/app.js?ci=$GITHUB_RUN_ID")"
+          [[ "$app_js" == *"quest-planner-ready"* ]]
+          [[ "$app_js" == *"normalizeQuestProgress"* ]]
           visuals_db_js="$(curl -fsSL --max-time 15 "$BASE_URL/visuals-db.js?ci=$GITHUB_RUN_ID")"
           visuals_npc_js="$(curl -fsSL --max-time 15 "$BASE_URL/visuals-npc.js?ci=$GITHUB_RUN_ID")"
           [[ "$app_js" != *"raw.githubusercontent.com/ohmi69/osms_datamine_dashboard"* ]]
