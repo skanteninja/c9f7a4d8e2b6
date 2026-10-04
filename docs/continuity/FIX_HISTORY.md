@@ -1,5 +1,14 @@
 # Historical Fix / Regression Log
 
+## 2026-10-04 — OSMS quest journal overhaul
+
+- Source release `0.11.0-quest-journal`: refreshed 322-record OSMS snapshot; 310 unique, class-isolated quests per build.
+- Replaced legacy appended rows with structured objectives, prerequisite-aware availability, inherited level gates, correct repeat/rotation metadata, start-item handling, and class-filtered reward choices.
+- Added expandable Royal Maple quest journal, chain navigation, status/type/sort filters, stable-ID progress migration, and browser/data release gates.
+- Missing source prerequisite #80117 is retained and clearly flagged on #506018. The separate ETC lifetime/reserve audit remains open.
+- Local validation passes; publication/live validation pending. See QUEST_AUDIT_2026-10-04.md.
+
+
 ## 2026-09-24 — 0.10.21 multi-row Skill Tree collapse + AP source correction
 
 Observed problems:

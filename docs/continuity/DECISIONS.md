@@ -207,3 +207,8 @@ The derived job must drive:
 ## Communication preference during project work
 - When requested, keep chat replies minimal and spend effort on implementation, research and verification.
 - Report completed fixes clearly and briefly, while preserving full detail in continuity files for the next chat.
+
+
+## 2026-10-04 — Quest identity and unlock rules
+
+Use the pinned OSMS structured quest snapshot for every build. Filter other advancement branches; use numeric IDs for saved completion and migrate legacy keys without clearing their data. Availability must include prerequisite completion and inherited minimum levels. Rotation, town, event, and crafting conditions are manual in-game checks. Never treat a missing prerequisite as completed. NPC-given start items are turn-in requirements, not gathering targets. Keep choice/random reward groups distinct and class-filtered.

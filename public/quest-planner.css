@@ -1,0 +1,45 @@
+/* Scoped quest journal; the dashboard keeps its approved compact geometry. */
+[data-page="quests"] { --quest-gold:#e0c18b; --quest-muted:#c4b9c8; }
+[data-page="quests"] .filters { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+[data-page="quests"] .filters input[type="text"], #quest-search { flex:1 1 280px; min-width:0; }
+.quest-intro { max-width:850px; color:var(--quest-muted); line-height:1.65; margin:0 0 18px; }
+.quest-extra-filters { display:flex; flex-wrap:wrap; gap:12px; align-items:end; margin:14px 0 20px; }
+.quest-extra-filters label { display:grid; gap:6px; color:var(--quest-muted); font-size:13px; }
+.quest-extra-filters select { min-width:170px; }
+[data-page="quests"] .quest-summary { display:grid; grid-template-columns:1fr auto; gap:12px; padding:18px 20px; background:#241c29; border:1px solid #796043; margin-bottom:16px; }
+.quest-summary-main { display:grid; gap:6px; }.quest-summary-main > b { font-size:18px; color:#fff0dc; }
+.quest-summary-main > span { color:var(--quest-muted); font-size:13px; }
+.quest-summary-counts { display:flex; gap:24px; align-items:center; font-size:13px; color:var(--quest-muted); }
+.quest-summary-counts b { color:var(--quest-gold); }
+.quest-summary progress { width:100%; height:6px; grid-column:1/-1; accent-color:#c5a168; }
+[data-page="quests"] .quest-list { display:grid; gap:12px; }
+.quest-journal-card { background:linear-gradient(110deg,#2b202e,#1e1925); border:1px solid #896d47; box-shadow:inset 3px 0 #b39360; padding:16px 20px; min-width:0; color:#f4e8d8; }
+.quest-journal-card.done { box-shadow:inset 3px 0 #7fbb98; }
+.quest-card-top { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:10px; font-size:12px; }
+.quest-complete-control { display:flex; align-items:center; gap:7px; cursor:pointer; color:#d8cddb; padding:4px 0; }
+.quest-complete-control input { width:19px; height:19px; margin:0; accent-color:#c6a473; }
+.quest-priority-tag { color:#d5c6d8; font-size:12px; }
+.quest-level { color:var(--quest-gold); font-weight:700; }
+.quest-state { border:1px solid #716075; padding:4px 8px; border-radius:4px; }.quest-state.ready,.quest-state.done { background:#293b30; color:#c4ecd0; border-color:#67866f; }
+.quest-state.blocked { background:#493323; color:#ffdab5; border-color:#aa8553; }.quest-state.check { color:#ead7a7; }.quest-state.upcoming { color:#c9c0d5; }
+.quest-cadence { margin-left:auto; color:var(--quest-muted); }
+.quest-journal-card summary { display:flex; align-items:center; gap:20px; cursor:pointer; list-style:none; padding:4px 0; }
+.quest-journal-card summary::-webkit-details-marker { display:none; }
+.quest-title-copy { display:grid; gap:7px; flex:1; min-width:0; }
+.quest-journal-card .quest-name { font-size:18px; line-height:1.45; font-weight:700; white-space:normal; overflow-wrap:anywhere; }
+.quest-location { color:var(--quest-muted); font-size:13px; line-height:1.5; overflow-wrap:anywhere; }
+.quest-preview-reward { display:grid; text-align:right; gap:5px; color:var(--quest-gold); font-size:14px; }.quest-preview-reward small { color:var(--quest-muted); font-size:12px; }
+.quest-expand-label { color:var(--quest-gold); font-size:13px; }.quest-expand-label::after { content:' +'; }details[open] .quest-expand-label::after { content:' −'; }
+.quest-detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px 30px; margin-top:18px; border-top:1px solid #6e583d; padding-top:18px; }
+.quest-detail-grid section { min-width:0; }.quest-detail-grid h3 { color:var(--quest-gold); font-size:15px; margin:0 0 10px; }.quest-detail-grid h4 { font-size:13px; color:#ded0df; margin:14px 0 8px; }
+.quest-detail-grid p { font-size:14px; line-height:1.65; color:#dfd4e0; margin:8px 0; overflow-wrap:anywhere; }
+.quest-item-list,.quest-dependencies { list-style:none; padding:0; margin:8px 0; display:grid; gap:9px; }
+.quest-item-list li,.quest-dependencies li { display:flex; align-items:center; gap:10px; font-size:14px; line-height:1.5; min-width:0; }
+.quest-item-list li > span { min-width:0; overflow-wrap:anywhere; }.quest-item-list img { object-fit:contain; image-rendering:pixelated; flex-shrink:0; }
+.quest-item-list small { display:block; font-size:12px; color:var(--quest-muted); }
+.quest-dependencies li { flex-wrap:wrap; }.quest-dependency { color:#edc792; font-size:12px; }.quest-dependency.complete { color:#b9e2c5; }
+.quest-chain-link { background:none; border:0; color:#f0cc91; text-decoration:underline; text-underline-offset:3px; cursor:pointer; padding:4px 0; font:inherit; text-align:left; overflow-wrap:anywhere; }
+.quest-condition { border-left:2px solid #c5a168; padding-left:10px; }.quest-reward-stats { display:flex; gap:20px; color:#d7c9dd; font-size:13px; }.quest-reward-stats b { color:#f5dfb8; }
+.quest-reference { color:var(--quest-gold); font-size:13px; text-underline-offset:4px; }.quest-empty { padding:35px; text-align:center; background:#251d2c; border:1px solid #8c714a; }.quest-empty p { color:var(--quest-muted); }
+[data-page="quests"] :is(button,input,select,summary,a):focus-visible { outline:2px solid #f4d499; outline-offset:4px; }
+@media(max-width:700px) { .quest-journal-card { padding:14px; }.quest-journal-card summary { flex-wrap:wrap; gap:12px; }.quest-title-copy { flex-basis:100%; }.quest-preview-reward { text-align:left; margin-right:auto; }.quest-journal-card .quest-name { font-size:17px; }.quest-detail-grid { grid-template-columns:1fr; gap:20px; }.quest-extra-filters label { flex:1 1 140px; min-width:0; }.quest-extra-filters select { min-width:0; width:100%; }.quest-summary-counts { gap:10px; flex-wrap:wrap; }[data-page="quests"] .quest-summary { grid-template-columns:1fr; padding:14px; }[data-page="quests"] .filters select { max-width:100%; }.quest-cadence { margin-left:0; } }

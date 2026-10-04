@@ -1,0 +1,48 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0}iframe{border:0;height:900px;width:100%}#result{position:fixed;bottom:0;background:white;color:black}</style><iframe id="app" src="/?build=magician-il-fresh&page=quests&ci=quest-journal"></iframe><pre id="result">pending</pre><script>
+const delay = ms => new Promise(r => setTimeout(r,ms));
+document.getElementById('app').addEventListener('load', async () => {
+  const result = document.getElementById('result');
+  try {
+    const frame = document.getElementById('app'), d = frame.contentDocument, w = frame.contentWindow;
+    for(let i=0;i<80&&!d.documentElement.classList.contains('quest-planner-ready');i++) await delay(100);
+    const check = (ok,msg) => {if(!ok) throw Error(msg);};
+    check(d.documentElement.classList.contains('quest-planner-ready'),'Quest planner did not initialize');
+    d.getElementById('session-entry-continue')?.click();
+    d.querySelector('[data-session-gender="male"]')?.click();
+    d.querySelector('#nav [data-page="quests"]').click();
+    const input = (id,value) => {const el=d.getElementById(id);el.value=value;el.dispatchEvent(new w.Event('input',{bubbles:true}));};
+    const selectQuest = id => {d.getElementById('quest-clear').click();input('quest-search',`#${id}`);};
+    selectQuest('1001');
+    check(d.querySelectorAll('.quest-journal-card').length===1,'Exact quest ID search is ambiguous');
+    check(d.querySelector('.quest-state').textContent==='Prerequisites needed','Dependent quest incorrectly ready');
+    d.querySelector('.quest-journal-card summary').click();
+    await delay(60);
+    check(d.querySelector('details').open,'Quest details did not open');
+    check(d.querySelector('.quest-detail-grid').textContent.includes('Given on start'),'Given-on-start objective missing');
+    check(!d.querySelector('.quest-save'),'NPC-given mirror incorrectly listed as gatherable');
+    d.querySelector('[data-quest-jump="1000"]').click();
+    check(d.querySelector('[data-quest-id="1000"]'),'Prerequisite navigation failed');
+    const c = d.querySelector('.quest-check');c.checked=true;c.dispatchEvent(new w.Event('change',{bubbles:true}));
+    selectQuest('1001');check(d.querySelector('.quest-state').textContent==='Ready to start','Completing prerequisite did not unlock child');
+    selectQuest('1000');const undo=d.querySelector('.quest-check');undo.checked=false;undo.dispatchEvent(new w.Event('change',{bubbles:true}));
+    selectQuest('1001');check(d.querySelector('.quest-state').textContent==='Prerequisites needed','Unchecking prerequisite did not relock child');
+    selectQuest('10401');d.querySelector('summary').click();await delay(60);
+    check(d.querySelector('.quest-detail-grid').textContent.includes('Wand Magic Attack Scroll'),'Magician reward choice missing');
+    check(!d.querySelector('.quest-detail-grid').textContent.includes('Claw Attack Scroll'),'Wrong-class choice reward leaked');
+    selectQuest('10200');check(d.querySelector('.quest-cadence').textContent==='Repeatable','Repeatable metadata missing');
+    selectQuest('506018');check(d.querySelector('.quest-state').textContent==='Prerequisites needed','Missing source prerequisite ignored');
+    selectQuest('10010');d.querySelector('summary').click();await delay(80);
+    check(d.querySelector('.quest-detail-grid').textContent.includes('Defeat Slime x 10'),'Kill objective missing');
+    check(d.querySelector('.quest-detail-grid').textContent.includes('234'),'Meso reward missing');
+    for(const width of [1365,1024,390]) {
+      frame.style.width=width+'px';await delay(100);
+      check(d.documentElement.scrollWidth<=d.documentElement.clientWidth+2,`Page overflows at ${width}`);
+      for(const el of d.querySelectorAll('[data-page="quests"] .quest-journal-card,[data-page="quests"] .quest-detail-grid')) check(el.scrollWidth<=el.clientWidth+2,`Quest content overflows at ${width}`);
+    }
+    d.getElementById('quest-clear').click();input('quest-status','upcoming');
+    check(d.querySelectorAll('.quest-journal-card').length>0,'Upcoming filter has no quests at level 1');
+    input('quest-search','no-such-quest-xyz');check(d.querySelector('.quest-empty'),'Empty result state missing');
+    result.textContent='quest-browser-regression-ok';
+  } catch(e) {result.textContent='quest-browser-regression-failed: '+e.message;}
+});
+</script>

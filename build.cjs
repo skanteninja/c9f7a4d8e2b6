@@ -7,7 +7,9 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.10.21-meowdb-ap-layout';
+const assetVersion = '0.11.0-quest-journal';
+const {questCatalog} = require('./audit/quest-catalog.cjs');
+const QUEST_SNAPSHOT = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-quests.json'), 'utf8'));
 const BRAND = 'Top Classic World Maplestory';
 
 // The OSMS export is the identity authority for the equipment picker.  The
@@ -1116,6 +1118,11 @@ function publicGuide(raw) {
   const catalog = multiBuildCatalog(data.catalog);
   const fighter = fighterVariant(data);
   const hunter = hunterVariant(data);
+  // Publish one reconciled quest catalog per class, including I/L. The old
+  // runtime additions are superseded so stale entries cannot reappear.
+  data.quests = questCatalog(QUEST_SNAPSHOT, data.quests, 'Magician');
+  fighter.quests = questCatalog(QUEST_SNAPSHOT, fighter.quests, 'Warrior');
+  hunter.quests = questCatalog(QUEST_SNAPSHOT, hunter.quests, 'Bowman');
   // Every guide reads the same build library. Gameplay arrays differ by build;
   // navigation metadata must not.
   data.catalog = catalog;
@@ -1754,7 +1761,21 @@ fs.mkdirSync(out, { recursive: true });
 
 const css = readChunks('styles', 3);
 const guideJson = publicGuide(readChunks('guide', 6));
-const app = publicScript(patchApp(readChunks('app', 4)))
+function patchQuestPlanner(app) {
+  const begin = app.indexOf('  function questRelevant(');
+  const end = app.indexOf('  function actionClass(', begin);
+  if (begin < 0 || end < 0) throw new Error('Quest renderer insertion point missing');
+  app = app.slice(0, begin) + fs.readFileSync(path.join(source, 'quest-planner-runtime.js'), 'utf8') + '\n' + app.slice(end);
+  app = app.replace('quests:raw.quests||{},', 'quests:normalizeQuestProgress(raw.quests||{}),');
+  app = app.replace(/function questId\(q,i\)\{[^\n]+\}/, 'function questId(q,i){ return `quest-${q["Quest ID"]}`; }');
+  // The dashboard, queue, and legacy summary must use the same unlock logic.
+  app = app.replaceAll("questRelevant(q)&&(q.Lv===''||q.Lv==null||Number(q.Lv)<=state.level)", 'questReady(q)');
+  app = app.replace("!state.quests[q._id] && !/only/i.test(String(q.Eligibility||'')) && (q.Lv===''||q.Lv==null||Number(q.Lv)<=state.level)", '!state.quests[q._id] && questReady(q)');
+  // Keep the existing ten-second completion undo visible after marking done.
+  app = app.replace('&&questReady(q))\n        .sort', '&&(questReady(q)||pendingActive(pendingQuestUndo,q._id)))\n        .sort');
+  return app;
+}
+const app = patchQuestPlanner(publicScript(patchApp(readChunks('app', 4))))
   .replace("navigator.serviceWorker.register('./sw.js?v=0.8.0')", `navigator.serviceWorker.register('./sw.js?v=${assetVersion}')`);
 const visualCss = fs.readFileSync(path.join(source, 'visuals.css'), 'utf8');
 const visuals = publicScript(fs.readFileSync(path.join(source, 'visuals.js'), 'utf8'));
@@ -1779,12 +1800,12 @@ const ownershipUi = fs.readFileSync(path.join(source, 'ownership-ui.js'), 'utf8'
 const mapsTabCss = fs.readFileSync(path.join(source, 'maps-tab.css'), 'utf8');
 const mapsTab = publicScript(fs.readFileSync(path.join(source, 'maps-tab.js'), 'utf8'));
 const etcAuditData = fs.readFileSync(path.join(source, 'etc-audit-data.js'), 'utf8');
-const questAuditAdditions = fs.readFileSync(path.join(source, 'quest-audit-additions.js'), 'utf8');
+const questAuditAdditions = '// Quest snapshot is normalized at build time; no legacy runtime additions.\n';
 const etcAuditUiCss = fs.readFileSync(path.join(source, 'etc-audit-ui.css'), 'utf8');
 const etcAuditUi = fs.readFileSync(path.join(source, 'etc-audit-ui.js'), 'utf8');
 const sessionFlowCss = fs.readFileSync(path.join(source, 'session-flow.css'), 'utf8');
 const potionsCss = fs.readFileSync(path.join(source, 'potions.css'), 'utf8');
-const royalMapleThemeCss = fs.readFileSync(path.join(source, 'royal-maple-theme.css'), 'utf8');
+const royalMapleThemeCss = fs.readFileSync(path.join(source, 'royal-maple-theme.css'), 'utf8') + '\n' + fs.readFileSync(path.join(source, 'quest-planner.css'), 'utf8');
 const classThemeJs = fs.readFileSync(path.join(source, 'class-theme.js'), 'utf8');
 
 JSON.parse(guideJson);

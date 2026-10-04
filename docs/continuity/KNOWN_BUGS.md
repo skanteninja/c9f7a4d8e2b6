@@ -432,3 +432,9 @@ An issue may be moved out of this file only when:
 3. boundary cases relevant to the issue have been checked,
 4. known-good behavior in other builds has not regressed,
 5. the fix is recorded in `FIX_HISTORY.md` / `CHANGELOG.md`.
+
+
+## 2026-10-04 — Quest source and reserve follow-ups
+
+- OSMS #506018 references absent quest #80117. Journal preserves and flags it; availability stays blocked.
+- The separate cumulative ETC lifetime totals and repeatable/rotation reserve policy need an independent audit. Use the journal per-quest Gather list for exact quantities.
