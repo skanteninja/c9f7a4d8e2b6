@@ -30,6 +30,8 @@ document.getElementById('app').addEventListener('load', async () => {
     check(d.querySelector('.quest-detail-grid').textContent.includes('Wand Magic Attack Scroll'),'Magician reward choice missing');
     check(!d.querySelector('.quest-detail-grid').textContent.includes('Claw Attack Scroll'),'Wrong-class choice reward leaked');
     selectQuest('10200');check(d.querySelector('.quest-cadence').textContent==='Repeatable','Repeatable metadata missing');
+    const level = n => {const el=d.getElementById('level-select');el.value=String(n);el.dispatchEvent(new w.Event('change',{bubbles:true}));};
+    level(70);await delay(100);
     selectQuest('506018');check(d.querySelector('.quest-state').textContent==='Prerequisites needed','Missing source prerequisite ignored');
     selectQuest('10010');d.querySelector('summary').click();await delay(80);
     check(d.querySelector('.quest-detail-grid').textContent.includes('Defeat Slime x 10'),'Kill objective missing');
@@ -39,6 +41,7 @@ document.getElementById('app').addEventListener('load', async () => {
       check(d.documentElement.scrollWidth<=d.documentElement.clientWidth+2,`Page overflows at ${width}`);
       for(const el of d.querySelectorAll('[data-page="quests"] .quest-journal-card,[data-page="quests"] .quest-detail-grid')) check(el.scrollWidth<=el.clientWidth+2,`Quest content overflows at ${width}`);
     }
+    level(1);await delay(100);
     d.getElementById('quest-clear').click();input('quest-status','upcoming');
     check(d.querySelectorAll('.quest-journal-card').length>0,'Upcoming filter has no quests at level 1');
     input('quest-search','no-such-quest-xyz');check(d.querySelector('.quest-empty'),'Empty result state missing');
