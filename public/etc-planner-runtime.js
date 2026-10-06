@@ -48,7 +48,7 @@ function renderEtcFilters() {
     state.questTown = e.target.value; save(); renderEtc(); renderQuests(); renderDashboard();
   });
   document.getElementById('etc-search').setAttribute('aria-label','Search materials, quests, and crafts');
-  const section = document.querySelector('[data-page="etc"]');
+  const section = document.querySelector('section[data-page="etc"]');
   section.querySelector('.section-head h2').textContent = 'Quest & ETC Planner';
   section.querySelector('.section-head .eyebrow').textContent = 'YOUR BUILD’S MATERIALS';
   const intro = document.createElement('p'); intro.className = 'etc-planner-intro';
