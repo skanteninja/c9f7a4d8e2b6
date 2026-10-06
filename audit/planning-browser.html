@@ -30,7 +30,9 @@
       for(const width of [1365,1024,390]) {
         frame.style.width=width+'px';await delay(100);
         check(d.documentElement.scrollWidth<=d.documentElement.clientWidth+2,`${build} dashboard overflow at ${width}`);
-        const panel=d.getElementById('job-planning');check(panel.scrollWidth<=panel.clientWidth+2,`${build} job panel overflow at ${width}`);
+        const panel=d.getElementById('job-planning');
+        const overflow=[...panel.querySelectorAll('*')].filter(el=>el.scrollWidth>el.clientWidth+2).map(el=>`${el.tagName}.${el.className} ${el.clientWidth}/${el.scrollWidth}`).slice(0,5).join('; ');
+        check(panel.scrollWidth<=panel.clientWidth+2,`${build} job panel overflow at ${width}: ${overflow}`);
         const controls=d.querySelector('.progression-avatar-level-controls');
         check(panel.getBoundingClientRect().top>=controls.getBoundingClientRect().bottom-2,`${build} job panel overlaps level controls`);
       }
