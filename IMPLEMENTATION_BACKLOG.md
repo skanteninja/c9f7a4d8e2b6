@@ -1,5 +1,11 @@
 # MapleStory Classic Builder — Prioritized Implementation Backlog
 
+## 2026-10-06 — Founder’s Access Cash Shop completed
+
+- Release `0.13.1-founders-cash-shop` is deployed and verified. Current release and archived Beta Cash Shop catalogs are separate, with all beta records/prices preserved and price-adjacent expiry tags.
+- All six release gates and Cloudflare Workers build pass. See `docs/continuity/CASH_SHOP_AUDIT_2026-10-06.md` for data coverage and screenshots.
+- Unavailable beta records without an expiry and mystery-crate reward lifetimes stay explicitly unconfirmed until source evidence establishes them.
+
 ## 2026-10-06 — quests and ETC reconciliation completed
 
 - Release `0.12.1-quest-etc-level-100` is deployed and verified. Current OSMS quests, class-specific advancement/rewards, town/grade conditions, and source-derived material targets are reconciled for I/L, Fighter, and Hunter.

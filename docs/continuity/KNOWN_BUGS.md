@@ -1,5 +1,11 @@
 # Known Bugs / Incomplete Work
 
+## 2026-10-06 — Cash Shop evidence limits
+
+- Release `0.13.1-founders-cash-shop` is live and all six release gates pass. Complete current and beta catalogs remain separate; the original beta prices are preserved.
+- 725 unavailable beta entries have no sold commodity/expiry establishing their lifetime. Their grey tag says Duration unconfirmed. Nexon’s announcement and crate-rate tables also do not specify decorative reward lifetimes; do not inherit the 7-day crate duration or invent permanent rewards.
+- The first 0.13.0 live gate hit a transient asset-propagation 404 after the build-info version changed. Final 0.13.1 readiness waits for the catalog as well; both final live jobs pass.
+
 ## 2026-10-06 — remaining scope
 
 - Quest #506018 still references missing source quest #80117; retain its blocked state and the missing-reference note.

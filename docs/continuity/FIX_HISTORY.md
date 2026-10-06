@@ -1,10 +1,10 @@
 # Historical Fix / Regression Log
 
-## 2026-10-06 — Founder’s Access Cash Shop source checkpoint
+## 2026-10-06 — Founder’s Access Cash Shop deployed
 
-- Release `0.13.0-founders-cash-shop` adds all 69 distinct Nexon-priced products as the default catalog, including discount/pack prices, Aurora Stamps, item expiry and separate sale windows.
-- The complete 872-row prior catalog is preserved as Beta Cash Shop with unchanged beta prices. Duration tags sit beside each price: grey time-limited/unconfirmed and red uppercase PERMANENT. Pet life and timed contents of permanent packages are explicit.
-- Build and local data/regression checks pass. Deployment, six release gates and live screenshot verification are pending at this checkpoint; see CASH_SHOP_AUDIT_2026-10-06.md.
+- Release `0.13.1-founders-cash-shop` is live: all 69 distinct Nexon-priced products are the default catalog, including discount/pack prices, Aurora Stamps, item expiry, separate sale windows, coupon style choices and weapon-cover restrictions.
+- The complete 872-row prior catalog remains in the database as Beta Cash Shop with unchanged beta prices. Duration tags sit beside each price: grey time-limited/unconfirmed and red uppercase PERMANENT. Pet life and timed contents of permanent packages are explicit.
+- Local checks, all six release gates, Cloudflare Workers build and final live browser verification pass. Source `a1601b924e2324e50f2ac0d932f1b9b74c1e77a4`; generated site `b05549627d3baac854529e07f3aa793f83ba4069`. Screenshots and gate IDs are recorded in CASH_SHOP_AUDIT_2026-10-06.md.
 
 ## 2026-10-06 — quest-linked ETC planner and level 100
 

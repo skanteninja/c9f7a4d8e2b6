@@ -1,6 +1,6 @@
 # Founder’s Access Cash Shop audit — 2026-10-06
 
-Release: `0.13.1-founders-cash-shop`. Final deployment pending. The 0.13.0 browser/data gates passed; the final 0.13.1 snapshot adds coupon style lists and weapon restrictions and scopes regional restrictions to the products stated by Nexon.
+Release: `0.13.1-founders-cash-shop`, deployed and live verified. All required gates pass.
 
 The user explicitly requested the new Nexon release catalog as the default, retention of the previous catalog as Beta Cash Shop with its original prices, and lifetime tags beside prices: grey time-limited tags and red uppercase PERMANENT tags. This supersedes hiding useful beta-shop labels from the public UI.
 
@@ -38,4 +38,19 @@ The user explicitly requested the new Nexon release catalog as the default, rete
 - Cash-shop data gate compares every original beta field, verifies counts, discounts, currencies, quantities, package contents, coupon expiry, pet life and sale dates.
 - Cash-shop browser fixture covers default catalog isolation, colors/uppercase/price adjacency, filters, pagination, beta price retention, history restoration and 390/1024/1365px containment.
 - Existing Visual/UI gate checks release tags and archived unavailable entries; Verify Live now verifies the deployed catalog version and both catalog counts.
-- Release gate IDs, final commits and live screenshots will be recorded after deployment.
+
+## Verified release checkpoint
+
+- Source: [`a1601b924e2324e50f2ac0d932f1b9b74c1e77a4`](https://github.com/skanteninja/c9f7a4d8e2b6/commit/a1601b924e2324e50f2ac0d932f1b9b74c1e77a4).
+- Generated site: [`b05549627d3baac854529e07f3aa793f83ba4069`](https://github.com/skanteninja/c9f7a4d8e2b6/commit/b05549627d3baac854529e07f3aa793f83ba4069).
+- Cloudflare check `112185616893`, Workers Builds: maplestory-classic, passed.
+- Build Static `37438072013`; Visual/UI `37438071927`; Maps/ETC `37438071869`; Monster Integrity `37438071904`; Real Input Skill Stability `37438071875`; Verify Live source `37438072022`; post-generated Verify Live `37438270426` all passed.
+- Build browser fixture passed for release/beta switching, exact tag colors and uppercase, price adjacency, search, availability/lifetime filters, 872-row archive pagination, history restoration, discounts/currencies, and 390/1024/1365px containment.
+- Final live browser served `app.js?v=0.13.1-founders-cash-shop`, showed 69 release offers, and displayed Mystery Hair Coupon at 5,500 NX / 14 days with all six male and female style choices. Beta Pet category showed 14 archived entries, 100 NX permanent Pet Name Tag/Water of Life, and Brown Puppy at 100 NX / 3-day pet life.
+- Screenshot `evidence/cash-shop-release-2026-10-06.jpg` shows all three Essentials offers at 9,900 NX, grey 30-day Monthly Essentials and red uppercase PERMANENT on the two permanent packages.
+- Screenshot `evidence/cash-shop-beta-2026-10-06.jpg` shows the separate Beta Cash Shop label, unchanged prices and both tag treatments.
+- Release screenshot URL: https://maplestory-classic.ofri505.workers.dev/?build=magician-il-fresh&page=cashshop&cash-catalog=founders-access&cash-search=Essentials&cash-category=all&cash-duration-filter=all
+- Beta screenshot URL: https://maplestory-classic.ofri505.workers.dev/?build=magician-il-fresh&page=cashshop&cash-catalog=beta&cash-category=Pet&cash-duration-filter=all
+- Final browser state left at: https://maplestory-classic.ofri505.workers.dev/?build=magician-il-fresh&page=cashshop&cash-catalog=founders-access&cash-category=all&cash-duration-filter=all
+- Captured browser errors were extension metadata errors from chrome-extension://, distinct from site application errors.
+- Initial 0.13.0 generated live gate `37437600272` failed on a transient propagation 404 after build-info updated. The final gate waits for the catalog version inside readiness; both final live checks pass. Browser refresh reached the final cache version with a release-query navigation; the service-worker/catalog/asset token is 0.13.1.

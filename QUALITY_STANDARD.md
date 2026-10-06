@@ -1,7 +1,7 @@
 # MapleStory Classic Builder — Quality Standard
 
 Status: working release contract, established 2026-09-15
-Current live checkpoint: `0.12.1-quest-etc-level-100`
+Current live checkpoint: `0.13.1-founders-cash-shop`
 
 This document defines what “ready” means for the public MapleStory Classic Builder. It is intentionally stricter than “the page loads”: the builder is a data product, a planner, and a visual interface at the same time.
 
