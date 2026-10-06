@@ -1,5 +1,11 @@
 # MapleStory Classic Builder — Prioritized Implementation Backlog
 
+## 2026-10-06 — quests and ETC reconciliation completed
+
+- Release `0.12.1-quest-etc-level-100` is deployed and verified. Current OSMS quests, class-specific advancement/rewards, town/grade conditions, and source-derived material targets are reconciled for I/L, Fighter, and Hunter.
+- Lv1–100 controls and manual third-job previews are available. Independent Lv71–100 route, gear, AP, and SP recommendations remain open; do not extrapolate the Lv70 researched checkpoint into invented allocations.
+- See `docs/continuity/QUEST_ETC_AUDIT_2026-10-06.md` for source IDs, material examples, screenshots, and all passing release gates.
+
 ## 0.10.13 deployed — Figma-measured corner frames
 
 - Replaced the CSS border approximation with the exact three-line stepped/chamfered frame measured from the connected Figma component.

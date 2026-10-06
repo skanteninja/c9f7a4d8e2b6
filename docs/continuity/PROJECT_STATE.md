@@ -2,10 +2,10 @@
 
 ## 2026-10-06 — quest-linked ETC planner and level 100
 
-- Source release `0.12.1-quest-etc-level-100` prepared from current OSMS records. All 322 source quests remain represented; each active build has 310 class-isolated quests. 86 records now expose explicit citizenship town/grade requirements.
+- Release `0.12.1-quest-etc-level-100` is deployed from current OSMS records. All 322 source quests remain represented; each active build has 310 class-isolated quests. 86 records now expose explicit citizenship town/grade requirements.
 - Replaced handwritten ETC totals with exact item-ID demand from remaining one-time quests. NPC-given items are excluded from gathering; daily/weekly/repeatable demand is per run; optional weapon recipes reserve ingredients only when selected. Added shared town filtering, held stock, quest links, and safe legacy progress migration.
 - Active planners accept Lv1–100. The user reports launch scope of second job; manual Lv70+ I/L Mage, Crusader, and Ranger previews remain available with current skill references. Lv71–100 route/AP/SP allocations remain explicitly unresearched; retain the verified Lv70 checkpoint rather than inventing a plan.
-- Local build, syntax, quest, ETC, and multi-build checks pass. Browser/CI and live verification are pending; see QUEST_ETC_AUDIT_2026-10-06.md for the final checkpoint.
+- Local checks, all six release gates, and follow-up live verification pass. Desktop screenshots and 390/1024/1365px browser fixtures are recorded in QUEST_ETC_AUDIT_2026-10-06.md.
 
 ## 2026-10-04 — OSMS quest journal overhaul
 
@@ -16,10 +16,10 @@
 - Final release `0.11.1-quest-journal-styles` is deployed. All six release gates pass. Verified desktop and 390px screenshots show readable framed cards and filters. See QUEST_AUDIT_2026-10-04.md.
 
 
-Last continuity baseline: 2026-09-18
+Last continuity baseline: 2026-10-06
 
-Current deployed checkpoint: 0.11.1-quest-journal-styles (live verified)
-Current source checkpoint: 0.11.1-quest-journal-styles
+Current deployed checkpoint: 0.12.1-quest-etc-level-100 (live verified)
+Current source checkpoint: 0.12.1-quest-etc-level-100
 
 ## Read this first in every new chat
 This file is the persistent handoff for the MapleStory Classic Builder. Before changing code or making recommendations, read this file together with:

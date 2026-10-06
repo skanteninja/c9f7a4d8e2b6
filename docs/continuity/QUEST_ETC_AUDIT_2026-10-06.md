@@ -30,4 +30,10 @@ Release: `0.12.1-quest-etc-level-100`.
 
 - Passed locally: `node build.cjs`, generated JavaScript/browser fixture syntax, `audit/quest-regression.cjs`, `audit/etc-regression.cjs`, `audit/check-multibuild.cjs`, `git diff --check`.
 - Added browser tests for citizenship town/grade, exact advancement materials, optional recipe selection and stock subtraction, 390/1024/1365px containment, all three builds at 9/10/29/30/69/70/71/99/100, future-job preview persistence, and unchanged researched skills.
-- GitHub browser gates and deployment verification are pending. Direct Cloudflare dashboard sign-in remains unavailable in this browser; deployment uses the existing GitHub integration.
+- Final source: `98c02927099b3441e41edecbd5434e7ead6a5dd1`; generated site: `7f61590faa6f331ff64a915c477b72d1c85d0c91`.
+- All six final source gates passed: Build Static 37428628669, Visual/UI 37428628683, Maps/ETC 37428628649, Monster Integrity 37428628732, Real Input Skill Stability 37428628580, Verify Live 37428628564.
+- Post-generated Verify Live 37428770066 passed on attempt 2. Attempt 1 hit Chrome `net::ERR_CERT_VERIFIER_CHANGED` at page load; one retry passed.
+- Live browser verified Lv100 selection, explicit Henesys grade-1 objective on #506001, Orange Mushroom Cap #4000009 target 48 changing to 82 when recipe #194 adds 30 ingredients, and I/L Mage third-job preview.
+- Visually inspected final desktop screenshots at 1348×926: `evidence/etc-planner-2026-10-06.jpg` and `evidence/quest-citizenship-2026-10-06.jpg`. Functional containment at 390/1024/1365px passed in the browser fixtures for all three builds.
+- Browser QA found and fixed the legacy quest-status `check` class colliding with checkbox sizing; the final cache token is 0.12.1.
+- Direct Cloudflare dashboard sign-in remains unavailable in this browser; the existing GitHub integration deployed the verified site successfully.

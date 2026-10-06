@@ -4,7 +4,7 @@
 
 - Quest #506018 still references missing source quest #80117; retain its blocked state and the missing-reference note.
 - The Lv1–100 controls and optional third-job preview do not constitute a researched Lv71–100 route, equipment, AP, or SP plan. Those allocations remain open work.
-- The separate handwritten ETC audit is superseded by the source-derived planner. Release browser and live checks are pending until recorded in QUEST_ETC_AUDIT_2026-10-06.md.
+- The separate handwritten ETC audit is superseded by the source-derived planner. Release browser and live checks passed; the final checkpoint is recorded in QUEST_ETC_AUDIT_2026-10-06.md.
 
 ## Verification snapshot — 0.10.18 readable merged hero (verified 2026-09-18)
 

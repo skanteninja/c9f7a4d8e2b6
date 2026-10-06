@@ -1,7 +1,7 @@
 # MapleStory Classic Builder — Quality Standard
 
 Status: working release contract, established 2026-09-15
-Current live checkpoint: `0.10.4-session-entry-once`
+Current live checkpoint: `0.12.1-quest-etc-level-100`
 
 This document defines what “ready” means for the public MapleStory Classic Builder. It is intentionally stricter than “the page loads”: the builder is a data product, a planner, and a visual interface at the same time.
 
@@ -21,7 +21,7 @@ The supported build names are exact and stable:
 
 1. **Build isolation.** Fighter, Hunter, and I/L use their own skills, AP/stat plan, equipment, routes, quests, ETCs, buffs, labels, and avatar IDs. A shared renderer is acceptable; shared gameplay decisions are not.
 2. **Exact levels.** Level `N` means level `N` in every visible and computed surface. Boundary checks include 9/10 and 29/30.
-3. **Single job truth.** The visible job, Skill Tree tier, SP allocation, equipment filter, dashboard copy, and avatar badge agree.
+3. **Single job truth.** In current-job mode, the visible job, Skill Tree tier, SP allocation, equipment filter, dashboard copy, and avatar badge agree. A future-job preview is explicitly labeled and keeps the researched allocation intact.
 4. **Classic identity.** An item or skill’s displayed name, numeric ID, slot, metadata, and artwork must refer to the same Classic record. Missing art is shown as missing; it is never silently replaced with an unrelated table.
 5. **Equipment compatibility.** Overall is exclusive with Top/Bottom in saved state, picker state, displayed inventory, and avatar compositor input.
 6. **Stable interaction identity.** Same-tier level changes update allocation/status without remounting stable Skill Tree cards or reloading their artwork.
