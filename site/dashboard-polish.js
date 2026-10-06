@@ -212,6 +212,8 @@
     if (!page || !list) return;
 
     document.documentElement.classList.add('etc-planner-fixed-ready');
+    // The quest-linked renderer already owns its targets, labels, and stock inputs.
+    if (list.querySelector('.etc-planner-card')) return;
     const heading = page.querySelector('.section-head h2');
     if (heading) heading.textContent = 'ETC Keep Checklist';
 

@@ -124,6 +124,11 @@
     const bounded = Math.max(min, Math.min(max, Number(lv) || min));
     const pct = max > min ? ((bounded - min) / (max - min)) * 100 : 0;
     track.style.setProperty('--level-pct', `${pct}%`);
+    [...milestones.children].forEach(tick => {
+      const tickLevel = Number.parseInt(tick.textContent,10);
+      const tickPct = max > min ? ((tickLevel-min)/(max-min))*100 : 0;
+      tick.style.left = `${Math.max(0,Math.min(100,tickPct))}%`;
+    });
     readout.textContent = `LV ${bounded}`;
     document.documentElement.classList.add('progression-level-scale-correct-ready');
     return track;

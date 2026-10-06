@@ -172,7 +172,7 @@
     if(!nodes.length) return;
     const idx=await tcwItemIndex();
     nodes.forEach(node=>{
-      const item=idx.get(String(node.dataset.etcIconName||'').trim().toLowerCase());
+      const item=node.dataset.etcIconId?{id:Number(node.dataset.etcIconId),name:node.dataset.etcIconName}:idx.get(String(node.dataset.etcIconName||'').trim().toLowerCase());
       if(!item?.id) return;
       const id=String(item.id).padStart(8,'0');
       node.innerHTML=`<img src="${TCW_RAW_BASE}images/items/${id}.png" alt="${esc(item.name)}">`;
@@ -199,9 +199,12 @@
       activeBuildId:((id)=>D.catalog?.builds?.some(b=>b.id===id&&b.status==='active')?id:(D.catalog?.activeBuildId||'magician-il-fresh'))(new URLSearchParams(location.search).get('build')||window.TCW_ACTIVE_BUILD_ID||raw.activeBuildId),
       quests:normalizeQuestProgress(raw.quests||{}),
       skills:raw.skills||{},
-      etcHeld:raw.etcHeld||{},
-      etcDone:raw.etcDone||{},
+      etcHeld:normalizeEtcProgress(raw.etcHeld||{}),
+      etcDone:normalizeEtcProgress(raw.etcDone||{}),
       levelChecks:raw.levelChecks||{},
+      questTown:['1','2'].includes(String(raw.questTown))?String(raw.questTown):'all',
+      craftPlans:(Array.isArray(raw.craftPlans)?raw.craftPlans:[]).filter(id=>D.etcCraftPlans.some(p=>p.id===String(id))).map(String),
+      jobPlan:raw.jobPlan==='third'?'third':'second',
       skillTab:raw.skillTab||'auto',
       targetUpgrade:raw.targetUpgrade||'auto',
       gender:raw.gender==='female'?'female':raw.gender==='male'?'male':'',
@@ -260,7 +263,7 @@
   function priorityClass(p){ return String(p||'').startsWith('Low')?'Low':String(p||''); }
   function slug(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
   function questId(q,i){ return `quest-${q["Quest ID"]}`; }
-  function etcId(e){ return slug(e.Item); }
+  function etcId(e){ return `etc-${e["Item ID"]}`; }
   function skillId(s){ return `lv${s.Level}-${slug(s.Spend)}`; }
 
   // Visual assets and game-data evidence are intentionally separate concerns.
@@ -337,7 +340,7 @@
     if(nums.length>=2) return level>=nums[0] && level<=nums[1];
     return false;
   }
-  function currentLevelRow(){ return D.leveling.find(x=>Number(x.Lv)===state.level); }
+  function currentLevelRow(){ const row=D.leveling.find(x=>Number(x.Lv)===state.level); return row?{...row,Job:plannedJobName(state.level)||row.Job}:row; }
   function currentSkillRow(){ const rows=D.skills.filter(x=>Number(x.Level)===state.level); return state.level>=30?(rows.at(-1)||rows[0]):rows[0]; }
   function currentAP(){ return D.apPlan.find(x=>rangeContains(x['Level Range'],state.level)); }
   function baseLukTarget(){ const a=currentAP(); const numeric=v=>{const n=Number(v);if(Number.isFinite(n))return n;const m=String(v??'').match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):5;}; if(activeBuild()?.id==='warrior-fighter') return numeric(a?.['Base DEX Target'] ?? 5); if(activeBuild()?.id==='archer-hunter') return numeric(a?.['Base STR Target'] ?? 5); return numeric(a?.['Base LUK Target'] ?? (state.level>50?30:5)); }
@@ -478,6 +481,7 @@
     document.getElementById('page-subtitle').textContent=pageMeta[p][1];
     const back=document.getElementById('page-back'); if(back) back.hidden=p==='dashboard';
     updateBuildCopy();
+    renderPlanningControls();
     if(p==='dashboard') renderDashboard();
     if(p==='leveling') renderRoutes();
     if(p==='quests') renderQuests();
@@ -639,7 +643,7 @@
       badge=root.querySelector('.avatar-job-badge');
       genderBadge=root.querySelector('.avatar-gender-badge');
     }
-    if(badge)badge.textContent=activeBuild()?.shortName||'I/L';
+    if(badge)badge.textContent=plannedJobName(state.level)||activeBuild()?.shortName||'I/L';
     if(genderBadge){genderBadge.textContent=gender.toUpperCase();genderBadge.dataset.gender=gender;}
     if(img){
       img.alt=label;
@@ -790,14 +794,14 @@
       }));
     }
     if(er){
-      const list=D.etc.filter(x=>Number(x['Start Lv']||999)<=state.level+5 && (!state.etcDone[etcId(x)]||pendingActive(pendingEtcUndo,etcId(x))))
+      const list=D.etc.filter(x=>etcDashboardNeeded(x) && (!state.etcDone[etcId(x)]||pendingActive(pendingEtcUndo,etcId(x))))
         .sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,12);
       er.innerHTML=list.length?list.map(x=>{
         const id=etcId(x),base=Number(x['Core + Craft Minimum']||0),allIn=Number(x['All-In Total']||0);
-        const need=Math.ceil((base||allIn||0)*1.15);
+        const need=etcPlan(x).keep;
         const held=Number(state.etcHeld[id]||0),pending=state.etcDone[id]&&pendingActive(pendingEtcUndo,id);
-        if(pending) return `<div class="v72-etc-chip pending-undo" title="${esc(x.Item)}"><span class="etc-icon-shell" data-etc-icon-name="${esc(x.Item)}">◌</span><span class="tcw-etc-name">${esc(x.Item)}</span><b>✓</b><button class="undo-btn" data-undo-etc="${esc(id)}">Undo</button></div>`;
-        return `<label class="v72-etc-chip" title="${esc(x.Item)} · safe target ${need||'optional'}"><span class="etc-icon-shell" data-etc-icon-name="${esc(x.Item)}">◌</span><span class="tcw-etc-name">${esc(x.Item)}</span><b>${need?`×${need}`:'OPT'}</b><input class="check" type="checkbox" data-atlas-etc-done="${esc(id)}"></label>`;
+        if(pending) return `<div class="v72-etc-chip pending-undo" title="${esc(x.Item)}"><span class="etc-icon-shell" data-etc-icon-name="${esc(x.Item)}" data-etc-icon-id="${x['Item ID']}">◌</span><span class="tcw-etc-name">${esc(x.Item)}</span><b>✓</b><button class="undo-btn" data-undo-etc="${esc(id)}">Undo</button></div>`;
+        return `<label class="v72-etc-chip" title="${esc(x.Item)} · safe target ${need||'optional'}"><span class="etc-icon-shell" data-etc-icon-name="${esc(x.Item)}" data-etc-icon-id="${x['Item ID']}">◌</span><span class="tcw-etc-name">${esc(x.Item)}</span><b>${need?`×${need}`:'OPT'}</b><input class="check" type="checkbox" data-atlas-etc-done="${esc(id)}"></label>`;
       }).join(''):'<div class="queue-empty">No urgent ETC pressure.</div>';
       er.querySelectorAll('[data-atlas-etc-done]').forEach(c=>c.addEventListener('change',()=>{
         if(!c.checked) return;
@@ -831,6 +835,30 @@
     root.innerHTML=items.map(([name,lv,status,tag])=>`<div class="buff-chip"><span class="skill-img-wrap">${skillImgTag(name,'skill-icon')}</span><div><b>${esc(name)} <span>Lv${lv}</span></b><small>${esc(tag)} · ${esc(status)}</small></div></div>`).join('')+`<div class="economy-note"><b>Builder rule</b><span>Do not buy a gear tier unless it changes a breakpoint, solves a requirement, or is a meaningful long hold.</span></div>`;
     hookImageFallback(root);
   }
+function plannedJobName(level) {
+  return state.jobPlan === 'third' && Number(level) >= D.futureJob.level ? `${D.futureJob.name} · preview` : '';
+}
+window.TCW_PLANNED_JOB = () => plannedJobName(state.level);
+function renderPlanningControls() {
+  const hero = document.querySelector('.dashboard-v72 .v5-character-hero');
+  if (!hero) return;
+  let panel = document.getElementById('job-planning');
+  if (!panel) {
+    panel = document.createElement('div'); panel.id = 'job-planning'; panel.className = 'job-planning';
+    panel.innerHTML = `<p>Launch scope: Lv100 · second job</p><label>Dashboard job<select id="job-plan"><option value="second">Current job path</option><option value="third">${esc(D.futureJob.name)} · third-job preview</option></select></label><details id="third-job-reference"><summary>${esc(D.futureJob.name)} skill reference · future planning</summary><p>Third job is outside the announced launch scope. This preview keeps future planning available; no third-job SP is assigned automatically.</p><div class="future-skill-grid">${D.futureJob.skills.map(s => `<div><img src="/game-data/data/current/images/skills/${String(s.id).padStart(7,'0')}.png" width="28" height="28" loading="lazy" alt=""><span><b>${esc(s.name)}</b><small>Max Lv${s.max} · allocation unplanned</small></span></div>`).join('')}</div></details>`;
+    hero.appendChild(panel);
+    document.getElementById('job-plan').addEventListener('change',e => {
+      state.jobPlan = e.target.value; save(); renderDashboard(); window.TCW_REFRESH_SKILL_STATE?.();
+    });
+  }
+  const select = document.getElementById('job-plan');
+  select.querySelector('[value="third"]').disabled = state.level < D.futureJob.level;
+  select.value = state.level < D.futureJob.level ? 'second' : state.jobPlan;
+  const reference = document.getElementById('third-job-reference');
+  reference.hidden = state.level < D.futureJob.level;
+  panel.dataset.plannedJob = plannedJobName(state.level) ? 'third' : 'second';
+}
+
   function updateBuildCopy(){
     const profile=activeBuild();
     const id=profile?.id||'magician-il-fresh';
@@ -846,7 +874,7 @@
       milestones.innerHTML='<span>1</span><b>10<br><small>'+esc(at(10).label||className)+'</small></b><b>30<br><small>'+esc(at(30).label||short)+'</small></b><span>'+max+'</span>';
     }
     const etcSmall=document.querySelector('.v72-etc-panel .atlas-panel-head small');
-    if(etcSmall)etcSmall.textContent=id==='magician-il-fresh'?'Lifetime quest + I/L craft reserve · 15% buffer':'Lifetime quest reserve · 15% safety buffer';
+    if(etcSmall)etcSmall.textContent='Remaining quests + selected crafts · 15% buffer';
     const buffSmall=document.querySelector('.v6-buffs-panel .atlas-panel-head small');
     if(buffSmall)buffSmall.textContent=id==='magician-il-fresh'?'I/L utility and spending rules':short+' skill checkpoints and spending rules';
     const equipmentEyebrow=document.querySelector('[data-page="equipment"] .section-head .eyebrow');
@@ -870,6 +898,7 @@
   }
   function renderDashboard(){
     updateBuildCopy();
+    renderPlanningControls();
     const l=currentLevelRow()||{}, srow=currentSkillRow()||{}, a=currentAP()||{};
     const build=computeBuild();
     const profile=activeBuild();
@@ -886,7 +915,7 @@
     const sp=document.getElementById('v5-sp'); if(sp) sp.textContent=srow.Spend||'No SP action';
     const qready=D.quests.map((q,i)=>({...q,_id:questId(q,i)})).filter(q=>!state.quests[q._id]&&questReady(q)).length;
     const qe=document.getElementById('v5-quests'); if(qe) qe.textContent=`${qready} ready`;
-    const urgent=D.etc.filter(x=>Number(x['Start Lv']||999)<=state.level+3&&!state.etcDone[etcId(x)]).length;
+    const urgent=D.etc.filter(x=>etcDashboardNeeded(x)&&!state.etcDone[etcId(x)]).length;
     const ee=document.getElementById('v5-etc'); if(ee) ee.textContent=`${urgent} urgent`;
     const range=document.getElementById('level-range'); if(range)range.value=String(state.level);
     const hsel=document.getElementById('hero-level-select'); if(hsel)hsel.value=String(state.level);
@@ -1213,10 +1242,10 @@
 
   function renderDashboardEtc(){
     const root=document.getElementById('dashboard-etc');
-    const list=D.etc.filter(x=>Number(x['Start Lv']||999)<=state.level+3 && !state.etcDone[etcId(x)])
+    const list=D.etc.filter(x=>etcDashboardNeeded(x) && !state.etcDone[etcId(x)])
       .sort((a,b)=>Number(a['Start Lv']||99)-Number(b['Start Lv']||99)).slice(0,6);
     root.innerHTML=list.length?list.map(x=>{
-      const held=Number(state.etcHeld[etcId(x)]||0),need=Number(x['Core + Craft Minimum']||0),left=Math.max(0,need-held);
+      const held=Number(state.etcHeld[etcId(x)]||0),need=etcPlan(x).keep,left=Math.max(0,need-held);
       return `<div class="stat-row"><span>${esc(x.Item)} <small style="color:#778196">(${esc(x['Used For'])})</small></span><b>${need?`${left} left`:'optional'}</b></div>`;
     }).join(''):`<div class="quest-meta">Nothing urgent in the current ETC queue.</div>`;
   }
@@ -1275,7 +1304,7 @@ function questState(q) {
   if (state.quests[questId(q)]) return 'done';
   if (q.Lv > state.level) return 'upcoming';
   if ((q.Prerequisites || []).some(r => !state.quests[`quest-${r.id}`])) return 'blocked';
-  if (q.Rotation || ['Citizenship','Event'].includes(q.Region) || (q.Objectives || []).some(r => r.type === 'skill')) return 'check';
+  if (q.Rotation || q.Conditions?.length || ['Citizenship','Event'].includes(q.Region)) return 'check';
   return 'ready';
 }
 function questReady(q) { return questState(q) === 'ready'; }
@@ -1287,6 +1316,15 @@ function renderQuestFilters() {
   const select = document.getElementById('quest-region');
   if (select.options.length <= 1) regions.forEach(r => select.add(new Option(r, r)));
   const filters = select.parentElement;
+  if (!document.getElementById('quest-town')) {
+    const town = document.createElement('label'); town.className = 'quest-town-filter';
+    town.innerHTML = 'Citizenship town<select id="quest-town"><option value="all">All towns</option><option value="1">Henesys</option><option value="2">Kerning City</option></select>';
+    filters.appendChild(town);
+    town.querySelector('select').addEventListener('input',e => {
+      state.questTown=e.target.value; save(); renderQuests(); renderEtc(); renderDashboard();
+    });
+  }
+  document.getElementById('quest-town').value=state.questTown;
   if (!document.getElementById('quest-status')) {
     const holder = document.createElement('div'); holder.className = 'quest-extra-filters';
     holder.innerHTML = `<label>Status<select id="quest-status"><option value="all">All statuses</option><option value="ready">Ready to start</option><option value="blocked">Prerequisites needed</option><option value="check">Check requirements</option><option value="upcoming">Upcoming</option><option value="done">Completed</option></select></label><label>Quest type<select id="quest-type"><option value="all">All types</option><option value="Once">One-time quests</option><option value="Daily">Daily quests</option><option value="Weekly">Weekly quests</option><option value="Repeatable">Repeatable quests</option><option value="rotation">Rotation pool</option></select></label><label>Sort<select id="quest-sort"><option value="route">Availability</option><option value="level">Level</option><option value="exp">EXP reward</option><option value="name">Name</option></select></label><button class="mini-btn" id="quest-clear" type="button">Clear filters</button>`;
@@ -1298,6 +1336,7 @@ function renderQuestFilters() {
       document.getElementById('quest-sort').value = 'route';
       document.getElementById('quest-available').checked = false;
       document.getElementById('quest-hide-done').checked = false;
+      state.questTown='all'; save();
       renderQuests();
     });
     const available = document.getElementById('quest-available');
@@ -1325,7 +1364,7 @@ function renderQuestDetails(x) {
   const prerequisites = (x.Prerequisites || []).map(r => `<li><span class="quest-dependency ${state.quests[`quest-${r.id}`] ? 'complete' : ''}">${state.quests[`quest-${r.id}`] ? '✓ Completed' : 'Needed'}</span>${questLink(r.id, r.name)}</li>`).join('');
   const objectives = (x.Objectives || []).map(r => {
     if (r.type === 'item') return questItem(r, (x['Start Items'] || []).some(s => Number(s.id) === Number(r.id)) ? 'Given when starting this quest; still required for turn-in' : 'Collect for turn-in');
-    return `<li><span>${esc(r.label || (r.type === 'mob' ? `Defeat ${r.name} ×${r.count}` : `${r.name} Lv.${r.level}`))}</span></li>`;
+    return `<li><span>${esc(r.label || (r.type === 'mob' ? `Defeat ${r.name} ×${r.count}` : r.name || 'Check the quest requirement in-game'))}</span></li>`;
   }).join('');
   const rotation = x.Rotation;
   return `<div class="quest-detail-grid">
@@ -1340,6 +1379,7 @@ function renderQuests() {
   const value = id => document.getElementById(id).value;
   const query = value('quest-search').trim().toLowerCase();
   const rows = D.quests.filter(x => {
+    if (!questTownMatches(x)) return false;
     const status = questState(x);
     if (query.startsWith('#') ? x['Quest ID'] !== query.slice(1) : query && ![x.Quest,x['Quest ID'],x.Region,x.NPC,x.Chain,x['Reward / Unlock'],x.Requirements,x.Repeatable].join(' ').toLowerCase().includes(query)) return false;
     if (value('quest-priority') !== 'all' && x.Priority !== value('quest-priority')) return false;
@@ -1363,7 +1403,7 @@ function renderQuests() {
   }).join('') : '<div class="quest-empty"><h3>No quests match these filters</h3><p>Try another region or status, or clear filters to explore the whole journal.</p></div>';
   root.querySelectorAll('details').forEach(el => el.addEventListener('toggle', () => {if (!el.isConnected) return; const id = el.closest('[data-quest-id]').dataset.questId; el.open ? questOpen.add(id) : questOpen.delete(id);}));
   root.querySelectorAll('.quest-check').forEach(el => el.addEventListener('change', () => {
-    state.quests[el.dataset.id] = el.checked; save(); renderQuests(); renderDashboard();
+    state.quests[el.dataset.id] = el.checked; save(); renderQuests(); renderEtc(); renderDashboard();
     const restored = root.querySelector(`[data-id="${el.dataset.id}"]`); (restored || document.getElementById('quest-hide-done')).focus();
   }));
   root.querySelectorAll('[data-quest-jump]').forEach(el => el.addEventListener('click', () => {
@@ -1434,7 +1474,7 @@ function renderQuests() {
       }).join('');
       const rows=D.skills.map(row=>`<div class="skill-row ${Number(row.Level)===state.level?'current':''}" data-informational="1" data-plan-level="${esc(row.Level)}"><b style="color:#8bdfff">Lv${esc(row.Level)}</b><b>${esc(row.SP)}</b><div class="skill-icon-host">${skillImgTag(String(row.Spend).split(/[+,]/)[0].trim())}</div><div class="skill-spend">${esc(row.Spend)}</div><div class="skill-why">${esc(row['Why This Is The Action']||'Follow the selected progression.')}</div><div><span class="beta-tag">verify</span></div><div class="skill-result" style="grid-column:4/-1">${esc(row['Result After Level']||'')}</div></div>`).join('');
       const current=D.skills.filter(row=>Number(row.Level)===state.level).at(-1);
-      list.innerHTML=`<section class="skill-beginner-reference" data-class-skill-header="1"><div class="skill-beginner-head"><div><span class="eyebrow">${esc(buildName.toUpperCase())} · LV1–70</span><h3>${esc(buildName)} Skills</h3></div><p>Current checkpoint: ${esc(current?.Spend||'Follow the level plan.')}</p></div><p class="class-build-rule"><b>Path:</b> ${esc(activeBuild()?.skillPath||'Class-specific skill path')}</p></section>${tierMarkup}<section class="skill-level-plan"><div class="skill-beginner-head"><div><span class="eyebrow">LEVEL PLAN</span><h3>Exact SP actions</h3></div><p>Rows are informational; level changes never create completion checkboxes.</p></div>${rows}</section>`;
+      list.innerHTML=`<section class="skill-beginner-reference" data-class-skill-header="1"><div class="skill-beginner-head"><div><span class="eyebrow">${esc(buildName.toUpperCase())} · LV1–100</span><h3>${esc(buildName)} Skills</h3></div><p>Current checkpoint: ${esc(current?.Spend||'Follow the level plan.')}</p></div><p class="class-build-rule"><b>Path:</b> ${esc(activeBuild()?.skillPath||'Class-specific skill path')}</p></section>${tierMarkup}<section class="skill-level-plan"><div class="skill-beginner-head"><div><span class="eyebrow">LEVEL PLAN</span><h3>Exact SP actions</h3></div><p>Rows are informational; level changes never create completion checkboxes.</p></div>${rows}</section>`;
       list.dataset.tcwFullSkillBuild=String(activeBuild()?.id||'');
       return;
     }
@@ -1482,32 +1522,112 @@ function renderQuests() {
   }
 
   ['etc-search','etc-current-only','etc-hide-done'].forEach(id=>document.getElementById(id).addEventListener('input',renderEtc));
-  function renderEtc(){
-    const q=document.getElementById('etc-search').value.trim().toLowerCase();
-    const current=document.getElementById('etc-current-only').checked;
-    const hide=document.getElementById('etc-hide-done').checked;
-    const list=D.etc.filter(e=>{
-      const id=etcId(e);if(q&&!JSON.stringify(e).toLowerCase().includes(q))return false;
-      if(current&&Number(e['Start Lv']||999)>state.level)return false;
-      if(hide&&state.etcDone[id])return false;return true;
-    });
-    document.getElementById('etc-list').innerHTML=list.map(e=>{
-      const id=etcId(e),held=Number(state.etcHeld[id]||0),min=Number(e['Core + Craft Minimum']||0),pct=min?Math.min(100,held/min*100):0,done=!!state.etcDone[id];
-      return `<div class="etc-row ${done?'done':''}">
-        <div><div class="etc-name">${esc(e.Item)}</div><div class="etc-note">${esc(e['Used For'])}</div><div class="progress"><i style="width:${pct}%"></i></div></div>
-        <div class="etc-note">Start ${esc(e['Start Saving'])}</div>
-        <b>${min} min</b>
-        <input type="number" min="0" value="${held}" data-held="${esc(id)}" title="Your held quantity">
-        <div class="etc-note">${esc(e['All-In Total'])} all-in</div>
-        <div class="etc-note">${esc(e['Stop Saving When'])}</div>
-        <span class="${isBeta(e.Confidence)?'beta-tag':'status-tag'}">${esc(e.Confidence)}</span>
-        <input class="check" type="checkbox" data-etc-done="${esc(id)}" ${done?'checked':''}>
-      </div>`;
-    }).join('');
-    document.querySelectorAll('[data-held]').forEach(i=>i.addEventListener('change',()=>{state.etcHeld[i.dataset.held]=Math.max(0,Number(i.value)||0);save();renderEtc();renderDashboard();}));
-    document.querySelectorAll('[data-etc-done]').forEach(i=>i.addEventListener('change',()=>{state.etcDone[i.dataset.etcDone]=i.checked;save();renderEtc();renderDashboard();}));
+// Included in the main app closure: quantities use the same build-scoped progress as quests.
+function normalizeEtcProgress(progress) {
+  const out = {...progress}, counts = {};
+  for (const e of D.etc) counts[e.Item] = (counts[e.Item] || 0) + 1;
+  for (const e of D.etc) {
+    const key = `etc-${e['Item ID']}`;
+    if (key in out || counts[e.Item] !== 1) continue;
+    const aliases = [slug(e.Item), ...(e.Item === "Pig's Head" ? ['pig-head'] : []),
+      ...(e.Item === "Arwen's Glass Shoe" ? ['glass-shoe'] : [])];
+    const old = aliases.find(k => k in progress);
+    if (old) out[key] = progress[old];
   }
-
+  return out;
+}
+function questTownMatches(q) {
+  return !state.questTown || state.questTown === 'all' || (q.Conditions || q.conditions || [])
+    .filter(c => c.type === 'citizenship').every(c => String(c.town) === state.questTown);
+}
+function etcPlan(e) {
+  const once = (e['Once Uses'] || []).filter(u => questTownMatches(u) && !state.quests[`quest-${u.questId}`]);
+  const crafts = (e['Craft Uses'] || []).filter(u => state.craftPlans.includes(u.recipeId));
+  const repeats = (e['Repeat Uses'] || []).filter(questTownMatches);
+  const quest = once.reduce((n,u) => n + u.count,0), craft = crafts.reduce((n,u) => n + u.count,0);
+  const base = quest + craft, keep = e['Buffer Eligible'] && base > 1 ? Math.ceil(base * 1.15) : base;
+  const held = Number(state.etcHeld[etcId(e)] || 0);
+  return {once, crafts, repeats, quest, craft, base, keep, held, left:Math.max(0,keep-held),
+    start:Math.min(101,...once.map(u => u.level),...crafts.map(u => u.level))};
+}
+function etcDashboardNeeded(e) {
+  const p = etcPlan(e);
+  return e.Category === 'Etc' && !e['Quest Item'] && p.keep > 0 && p.left > 0 && p.start <= state.level + 5;
+}
+function renderEtcFilters() {
+  const filters = document.getElementById('etc-search').parentElement;
+  if (document.getElementById('etc-kind')) return;
+  const bar = document.createElement('div'); bar.className = 'etc-planner-filters';
+  bar.innerHTML = `<label>Materials<select id="etc-kind"><option value="bank">Bank targets</option><option value="quest">Quest-specific items</option><option value="craft">Crafting materials</option><option value="repeat">Recurring requests</option><option value="all">All requirements</option></select></label><label>Citizenship town<select id="etc-town"><option value="all">All towns</option><option value="1">Henesys</option><option value="2">Kerning City</option></select></label><span id="etc-summary" role="status"></span>`;
+  filters.after(bar);
+  const recipes = document.createElement('details'); recipes.className = 'etc-craft-plans panel';
+  recipes.innerHTML = `<summary>Optional weapon crafts · ${D.etcCraftPlans.length} recipes for this build</summary><p>Select only the weapons you plan to craft. Shop purchases and drops need no crafting reserve. Quantities below are for one craft each.</p><div class="etc-craft-grid">${D.etcCraftPlans.map(p => `<label><input type="checkbox" data-craft-plan="${esc(p.id)}"><span><b>${esc(p.name)}</b><small>Character Lv${p.level} · ${esc(p.discipline)} Lv${p.craftLevel} · ${Number(p.mesos || 0).toLocaleString()} mesos</small></span></label>`).join('')}</div>${D.etcCraftPlans.length ? '' : '<p>No recipe is listed for the current weapon checkpoints.</p>'}`;
+  bar.after(recipes);
+  recipes.querySelectorAll('[data-craft-plan]').forEach(input => input.addEventListener('change', () => {
+    state.craftPlans = [...recipes.querySelectorAll('[data-craft-plan]:checked')].map(el => el.dataset.craftPlan);
+    save(); renderEtc(); renderDashboard();
+  }));
+  document.getElementById('etc-kind').addEventListener('input',renderEtc);
+  document.getElementById('etc-town').addEventListener('input',e => {
+    state.questTown = e.target.value; save(); renderEtc(); renderQuests(); renderDashboard();
+  });
+  document.getElementById('etc-search').setAttribute('aria-label','Search materials, quests, and crafts');
+  const section = document.querySelector('section[data-page="etc"]');
+  section.querySelector('.section-head h2').textContent = 'Quest & ETC Planner';
+  section.querySelector('.section-head .eyebrow').textContent = 'YOUR BUILD’S MATERIALS';
+  const intro = document.createElement('p'); intro.className = 'etc-planner-intro';
+  intro.textContent = 'Bank targets cover remaining one-time quests and selected crafts. Ordinary ETC stacks include a 15% buffer; quest-specific items use exact quantities. Daily, weekly, and repeatable requests are shown per run. Held counts are your current inventory; update them after turn-ins.';
+  filters.before(intro);
+}
+function etcUseMarkup(u, repeat = false) {
+  const conditions = (u.conditions || []).map(c => c.label).filter(Boolean);
+  if (u.region === 'Event') conditions.push('Event must be active');
+  if (u.rotation) conditions.push(u.rotation.one_time ? 'One-time rotation quest' : 'Only when selected by the rotation');
+  return `<li><button type="button" data-material-quest="${esc(u.questId)}">${esc(u.name)}</button><b>×${u.count}</b><small>Lv${u.level}+${repeat ? ` · ${esc(u.cadence)} · per run` : ''}${u.job !== 'Any class' ? ` · ${esc(u.job)}` : ''}${conditions.length ? ` · ${esc(conditions.join(' · '))}` : ''}</small></li>`;
+}
+function renderEtc() {
+  renderEtcFilters();
+  document.getElementById('etc-town').value = state.questTown;
+  document.querySelectorAll('[data-craft-plan]').forEach(el => el.checked = state.craftPlans.includes(el.dataset.craftPlan));
+  const search = document.getElementById('etc-search').value.trim().toLowerCase();
+  const kind = document.getElementById('etc-kind').value;
+  const current = document.getElementById('etc-current-only').checked, hide = document.getElementById('etc-hide-done').checked;
+  const rows = D.etc.map(e => ({e,p:etcPlan(e)})).filter(({e,p}) => {
+    if (search && !JSON.stringify(e).toLowerCase().includes(search)) return false;
+    if (hide && state.etcDone[etcId(e)]) return false;
+    const start = kind === 'repeat' ? Math.min(101,...p.repeats.map(u => u.level)) : p.start;
+    if (current && start > state.level) return false;
+    if (kind === 'bank') return !e['Quest Item'] && e.Category === 'Etc' && p.base > 0;
+    if (kind === 'quest') return (e['Quest Item'] || e.Category !== 'Etc') && p.once.length > 0;
+    if (kind === 'craft') return e['Craft Uses'].length > 0;
+    if (kind === 'repeat') return p.repeats.length > 0;
+    return p.base > 0 || p.repeats.length > 0 || e['Craft Uses'].length > 0;
+  });
+  const branch = D.quests.find(q => q['Job Family'] !== 'Any class')?.['Job Family'] || 'Current build';
+  document.getElementById('etc-summary').textContent = `${branch} · ${rows.length} materials · ${state.craftPlans.length} crafts selected`;
+  const root = document.getElementById('etc-list');
+  root.innerHTML = rows.map(({e,p}) => {
+    const id = etcId(e), done = !!state.etcDone[id], repeated = kind === 'repeat';
+    const perRun = Math.max(0,...p.repeats.map(u => u.count));
+    const oneOff = e['Quest Item'] || e.Category !== 'Etc';
+    return `<article class="etc-row etc-planner-card ${done ? 'done' : ''}" data-item-id="${e['Item ID']}" data-etc-target="${p.keep}"><div class="etc-card-head"><img src="/game-data/data/current/images/items/${String(e['Item ID']).padStart(8,'0')}.png" width="32" height="32" loading="lazy" alt=""><div><h3 class="etc-name">${esc(e.Item)}</h3><p>${oneOff ? 'Exact quest turn-in item' : 'ETC material'} · #${e['Item ID']}</p></div><div class="etc-recommended"><b>${repeated ? perRun : p.keep}</b><small>${repeated ? 'largest single request' : p.keep ? 'remaining target' : 'optional'}</small></div></div><div class="etc-audit-breakdown"><span><small>QUESTS LEFT</small><b>${p.quest}</b></span><span><small>SELECTED CRAFTS</small><b>${p.craft}</b></span><span><small>${e['Buffer Eligible'] ? 'WITH 15% BUFFER' : 'EXACT QUANTITY'}</small><b>${p.keep}</b></span>${p.repeats.length ? '<span class="weekly"><small>RECURRING</small><b>per run below</b></span>' : ''}</div><div class="etc-stock-controls"><label>Currently held<input type="number" min="0" step="1" value="${p.held}" data-held="${esc(id)}" aria-label="Currently held ${esc(e.Item)}"></label><span><b>${p.left}</b> left to bank</span><label><input class="check" type="checkbox" data-etc-done="${esc(id)}" ${done ? 'checked' : ''}> Banked / finished</label></div><details><summary>Quests & crafting requirements</summary>${p.once.length ? `<h4>Remaining one-time quests</h4><ul class="etc-use-list">${p.once.map(u => etcUseMarkup(u)).join('')}</ul>` : '<p>No remaining one-time quest demand.</p>'}${p.crafts.length ? `<h4>Selected crafts</h4><ul class="etc-use-list">${p.crafts.map(u => `<li><span>${esc(u.name)}</span><b>×${u.count}</b><small>Weapon checkpoint Lv${u.level}</small></li>`).join('')}</ul>` : ''}${p.repeats.length ? `<h4>Recurring requests · collect for the active quest</h4><ul class="etc-use-list">${p.repeats.map(u => etcUseMarkup(u,true)).join('')}</ul>` : ''}${oneOff ? '<p>Quest items may be obtained during the quest or its chain. Do not farm spare copies.</p>' : ''}</details></article>`;
+  }).join('') || '<div class="quest-empty"><h3>No materials match these filters</h3><p>Try another material type, clear the search, or select a craft.</p></div>';
+  root.querySelectorAll('[data-held]').forEach(input => input.addEventListener('change', () => {
+    state.etcHeld[input.dataset.held] = Math.max(0,Math.floor(Number(input.value)||0)); save(); renderEtc(); renderDashboard();
+  }));
+  root.querySelectorAll('[data-etc-done]').forEach(input => input.addEventListener('change', () => {
+    state.etcDone[input.dataset.etcDone] = input.checked; save(); renderEtc(); renderDashboard();
+  }));
+  root.querySelectorAll('[data-material-quest]').forEach(button => button.addEventListener('click', () => {
+    const town = state.questTown;
+    document.getElementById('quest-clear').click(); state.questTown = town; save();
+    document.getElementById('quest-search').value = `#${button.dataset.materialQuest}`;
+    questOpen.add(button.dataset.materialQuest); renderQuests();
+    document.querySelector('#nav [data-page="quests"]').click();
+  }));
+  root.querySelectorAll('img').forEach(img => img.addEventListener('error', () => {img.hidden=true;},{once:true}));
+  document.documentElement.classList.add('etc-lifetime-audit-ready','etc-planner-ready');
+}
 
   const TCW_DATASETS = {
     items:{label:'Items',file:'items.json'},
@@ -1755,6 +1875,6 @@ function renderQuests() {
   hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.11.1-quest-journal-styles').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.12.0-quest-etc-level-100').catch(()=>{});
   }
 })();

@@ -3,6 +3,6 @@
 (() => {
   const D = window.GUIDE_DATA;
   if (!D) return;
-  window.TCW_QUEST_AUDIT = {revision:'2026-10-04',added:0,total:D.quests.length};
+  window.TCW_QUEST_AUDIT = {revision:D.questRevision,added:0,total:D.quests.length};
   document.documentElement.classList.add('quest-catalog-audit-ready');
 })();

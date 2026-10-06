@@ -227,7 +227,7 @@
   }
 
   async function enhanceEtc() {
-    const rows = [...document.querySelectorAll('#etc-list .etc-row')];
+    const rows = [...document.querySelectorAll('#etc-list .etc-row:not(.etc-planner-card)')];
     if (!rows.length) return;
     const idx = await index('items.json');
     rows.forEach(row => {

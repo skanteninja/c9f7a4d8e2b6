@@ -7,19 +7,19 @@
   <meta name="theme-color" content="#170d16">
   <title>Top Classic World Maplestory</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=0.11.1-quest-journal-styles">
-  <link rel="stylesheet" href="visuals.css?v=0.11.1-quest-journal-styles">
-  <link rel="stylesheet" href="visuals-db.css?v=0.11.1-quest-journal-styles">
-  <link rel="stylesheet" href="visuals-npc.css?v=0.11.1-quest-journal-styles">
-  <link rel="stylesheet" href="visuals-skills.css?v=0.11.1-quest-journal-styles">
-  <link rel="stylesheet" href="visuals-portals.css?v=0.11.1-quest-journal-styles">
-  <link rel="stylesheet" href="dashboard-polish.css?v=0.11.1-quest-journal-styles">
-  <link rel="stylesheet" href="progression-sync.css?v=0.11.1-quest-journal-styles">
-  <link rel="stylesheet" href="progression-gear-visual.css?v=0.11.1-quest-journal-styles">
-  <link rel="stylesheet" href="ownership-ui.css?v=0.11.1-quest-journal-styles">
-  <link rel="stylesheet" href="maps-tab.css?v=0.11.1-quest-journal-styles">
-  <link rel="stylesheet" href="etc-audit-ui.css?v=0.11.1-quest-journal-styles">
-<link rel="stylesheet" href="readability.css?v=0.11.1-quest-journal-styles"><link rel="stylesheet" href="equipment-branding.css?v=0.11.1-quest-journal-styles"><link rel="stylesheet" href="session-flow.css?v=0.11.1-quest-journal-styles"><link rel="stylesheet" href="potions.css?v=0.11.1-quest-journal-styles"><link rel="stylesheet" href="royal-maple-theme.css?v=0.11.1-quest-journal-styles"></head>
+  <link rel="stylesheet" href="styles.css?v=0.12.0-quest-etc-level-100">
+  <link rel="stylesheet" href="visuals.css?v=0.12.0-quest-etc-level-100">
+  <link rel="stylesheet" href="visuals-db.css?v=0.12.0-quest-etc-level-100">
+  <link rel="stylesheet" href="visuals-npc.css?v=0.12.0-quest-etc-level-100">
+  <link rel="stylesheet" href="visuals-skills.css?v=0.12.0-quest-etc-level-100">
+  <link rel="stylesheet" href="visuals-portals.css?v=0.12.0-quest-etc-level-100">
+  <link rel="stylesheet" href="dashboard-polish.css?v=0.12.0-quest-etc-level-100">
+  <link rel="stylesheet" href="progression-sync.css?v=0.12.0-quest-etc-level-100">
+  <link rel="stylesheet" href="progression-gear-visual.css?v=0.12.0-quest-etc-level-100">
+  <link rel="stylesheet" href="ownership-ui.css?v=0.12.0-quest-etc-level-100">
+  <link rel="stylesheet" href="maps-tab.css?v=0.12.0-quest-etc-level-100">
+  <link rel="stylesheet" href="etc-audit-ui.css?v=0.12.0-quest-etc-level-100">
+<link rel="stylesheet" href="readability.css?v=0.12.0-quest-etc-level-100"><link rel="stylesheet" href="equipment-branding.css?v=0.12.0-quest-etc-level-100"><link rel="stylesheet" href="session-flow.css?v=0.12.0-quest-etc-level-100"><link rel="stylesheet" href="potions.css?v=0.12.0-quest-etc-level-100"><link rel="stylesheet" href="royal-maple-theme.css?v=0.12.0-quest-etc-level-100"></head>
 <body>
   <div id="app">
     <aside class="sidebar">
@@ -59,7 +59,7 @@
       </header>
 <section data-page="dashboard" class="page active dashboard-v5 dashboard-v72">
         <div class="v5-buildbar">
-          <div><div class="v5-kicker-row"><span class="class-pill">MAGICIAN</span><span class="job-pill">WIZARD (I/L)</span></div><h2 id="hero-build-title">I/L Wizard Build</h2><p id="hero-build-subtitle">Ice / Lightning Wizard · Level 1–70 · equipment, skills, quests, targets and progression in one build.</p></div>
+          <div><div class="v5-kicker-row"><span class="class-pill">MAGICIAN</span><span class="job-pill">WIZARD (I/L)</span></div><h2 id="hero-build-title">I/L Wizard Build</h2><p id="hero-build-subtitle">Ice / Lightning Wizard · Level 1–100 · equipment, skills, quests, targets and progression in one build.</p></div>
           <div class="v5-build-actions"><button class="ghost-btn" data-goto="builds">Build Library</button><button class="primary-btn" id="preset-efficient">Equip Efficient Set</button></div>
         </div>
 <section class="v72-command-grid">
@@ -71,7 +71,7 @@
         <section class="v5-hero-grid v72-hero-grid">
           <section class="panel v5-equipment-hero"><div class="v5-panel-heading"><div><span class="eyebrow">LOADOUT</span><h3>Equipment Inventory</h3><small>Click any slot to replace it</small></div><button class="mini-btn" data-goto="equipment">Progression</button></div><div id="equipment-window" class="equipment-window atlas-equipment-window v5-equipment-window"></div><div class="equipment-presets-inline"><button class="mini-btn" id="preset-luk">LUK Bridge</button><button class="mini-btn" id="clear-gear">Clear</button></div></section>
           <section class="panel v5-character-hero"><div id="atlas-avatar" class="atlas-avatar v5-avatar"></div><div class="v5-character-copy"><span class="eyebrow">ACTIVE BUILD</span><h3 id="v5-job-title">Beginner</h3><p id="atlas-route-sub">Current route</p><div class="v5-quick-metrics"><button data-goto="leveling"><small>TRAINING</small><b id="v5-training">—</b></button><button data-goto="skills"><small>NEXT SP</small><b id="v5-sp">—</b></button><button data-goto="quests"><small>QUESTS</small><b id="v5-quests">0 ready</b></button><button data-goto="etc"><small>ETC</small><b id="v5-etc">0 urgent</b></button></div></div></section>
-          <section class="panel v5-level-hero"><div class="v5-level-caption">CURRENT LEVEL</div><div class="v5-level-number"><span>LV</span><strong id="hero-level">1</strong></div><div id="atlas-job-line" class="v5-job-line">Lv1 Beginner</div><div class="v5-level-stepper"><button id="level-prev" class="level-round" aria-label="Previous level">−</button><select id="hero-level-select" aria-label="Jump to level"></select><button id="level-next" class="level-round" aria-label="Next level">+</button></div><input id="level-range" class="v5-level-range" type="range" min="1" max="70" step="1" value="1" aria-label="Character level"><div class="v5-milestones"><span>1</span><b>10<br><small>Magician</small></b><b>30<br><small>I/L</small></b><span>70</span></div></section>
+          <section class="panel v5-level-hero"><div class="v5-level-caption">CURRENT LEVEL</div><div class="v5-level-number"><span>LV</span><strong id="hero-level">1</strong></div><div id="atlas-job-line" class="v5-job-line">Lv1 Beginner</div><div class="v5-level-stepper"><button id="level-prev" class="level-round" aria-label="Previous level">−</button><select id="hero-level-select" aria-label="Jump to level"></select><button id="level-next" class="level-round" aria-label="Next level">+</button></div><input id="level-range" class="v5-level-range" type="range" min="1" max="100" step="1" value="1" aria-label="Character level"><div class="v5-milestones"><span>1</span><b>10<br><small>Magician</small></b><b>30<br><small>I/L</small></b><span>70</span></div></section>
         </section>
 
         <section class="v6-primary-grid v72-secondary-content"><section class="panel atlas-panel skills-main-panel v6-skills-panel"><div class="atlas-panel-head"><div><h3>Skill Tree</h3><small>Your current allocation and the exact next SP action</small></div><button class="mini-btn" data-goto="skills">Full Tree</button></div><div id="atlas-skill-tabs" class="atlas-skill-tabs"></div><div id="atlas-skill-grid" class="atlas-skill-grid"></div><div id="atlas-skill-detail" class="atlas-skill-detail"></div></section><section class="panel atlas-panel v6-stats-panel"><div class="atlas-panel-head"><div><h3>Character Stats</h3><small>Calculated from your current loadout</small></div><span class="panel-accent purple"></span></div><div id="build-summary" class="atlas-stat-list"></div></section></section>
@@ -114,25 +114,25 @@
   <div id="gear-modal" class="modal" aria-hidden="true"><div class="modal-backdrop" data-close-modal></div><div class="modal-card"><div class="modal-head"><div><span class="eyebrow">EQUIPMENT SLOT</span><h2 id="modal-title">Choose item</h2></div><button class="close-btn" data-close-modal>×</button></div><div class="modal-filter-row" data-class-equipment-filters><label class="toggle"><input id="modal-show-future" type="checkbox"><span id="modal-future-label">Show future-level items</span></label><label class="toggle"><input id="modal-show-optional" type="checkbox" checked><span id="modal-optional-label">Show all curated class options</span></label><span id="modal-gender-label" class="gender-filter-badge" aria-live="polite"></span></div><div id="modal-filter-summary" class="modal-filter-summary" aria-live="polite"></div><div id="gear-options" class="gear-options"></div></div></div>
   <div id="potion-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="potion-modal-title"><div class="modal-backdrop" data-close-potion></div><div class="modal-card potion-modal-card"><div class="modal-head"><div><span class="eyebrow">CONSUMABLE PLAN</span><h2 id="potion-modal-title">Recommended Pots</h2><p id="potion-modal-copy"></p></div><button id="potion-modal-close" class="close-btn" type="button">×</button></div><div id="potion-modal-feature" class="potion-feature"></div><div class="potion-options-heading"><span class="eyebrow">OTHER OPTIONS</span><h3>Other shop options</h3></div><div id="potion-options" class="potion-options"></div></div></div>
   <div id="toast" class="toast"></div>
-  <script src="guide-data.js?v=0.11.1-quest-journal-styles"></script>
+  <script src="guide-data.js?v=0.12.0-quest-etc-level-100"></script>
   <script>(()=>{const root=window.GUIDE_DATA;if(!root)return;try{const saved=JSON.parse(localStorage.getItem('ultimateILGuideState.v1')||'{}');let id=new URLSearchParams(location.search).get('build')||saved.activeBuildId||root.catalog?.activeBuildId||'magician-il-fresh';const active=new Set((root.catalog?.builds||[]).filter(x=>x.status==='active').map(x=>x.id));if(!active.has(id))id=root.catalog?.activeBuildId||'magician-il-fresh';const map={'warrior-fighter':'fighter','archer-hunter':'hunter'};if(map[id]&&root.buildVariants?.[map[id]])window.GUIDE_DATA=root.buildVariants[map[id]];window.TCW_ACTIVE_BUILD_ID=id;}catch(e){window.TCW_ACTIVE_BUILD_ID='magician-il-fresh';}})();</script>
-  <script src="etc-audit-data.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="quest-audit-additions.js?v=0.11.1-quest-journal-styles"></script>
-<script src="job-search.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="app.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="visuals.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="visuals-db.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="visuals-npc.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="visuals-skills.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="visuals-portals.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="dashboard-polish.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="progression-sync.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="progression-level-hook.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="progression-skill-state.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="progression-gear-visual.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="ownership-ui.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="maps-tab.js?v=0.11.1-quest-journal-styles"></script>
-  <script src="etc-audit-ui.js?v=0.11.1-quest-journal-styles"></script>
-<script src="navigation-history.js?v=0.11.1-quest-journal-styles"></script>
-<script src="class-theme.js?v=0.11.1-quest-journal-styles"></script></body>
+  <script src="etc-audit-data.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="quest-audit-additions.js?v=0.12.0-quest-etc-level-100"></script>
+<script src="job-search.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="app.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="visuals.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="visuals-db.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="visuals-npc.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="visuals-skills.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="visuals-portals.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="dashboard-polish.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="progression-sync.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="progression-level-hook.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="progression-skill-state.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="progression-gear-visual.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="ownership-ui.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="maps-tab.js?v=0.12.0-quest-etc-level-100"></script>
+  <script src="etc-audit-ui.js?v=0.12.0-quest-etc-level-100"></script>
+<script src="navigation-history.js?v=0.12.0-quest-etc-level-100"></script>
+<script src="class-theme.js?v=0.12.0-quest-etc-level-100"></script></body>
 </html>
