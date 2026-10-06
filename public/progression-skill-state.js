@@ -10,7 +10,7 @@
   const bnames=['Nimble Feet','Three Snails','Recovery'];
   const first=new Set(Object.values(maps.magician)),second=new Set(Object.values(maps.il));
   const maxes={'Nimble Feet':3,'Three Snails':3,'Recovery':3,'Energy Bolt':20,'Magic Claw':20,'Magic Guard':15,'Improved MP Recovery':16,'Max MP Increase':15,'Magic Armor':20,'Teleport':20,'Cold Beam':30,'Thunder Bolt':30,'MP Eater':20,'Meditation':20,'Slow':20};
-  const lvl=()=>Math.max(1,Math.min(70,Number(document.getElementById('level-select')?.value||document.getElementById('hero-level-select')?.value||document.getElementById('hero-level')?.textContent||1)));
+  const lvl=()=>Math.max(1,Math.min(Number(D.meta?.maxLevel)||100,Number(document.getElementById('level-select')?.value||document.getElementById('hero-level-select')?.value||document.getElementById('hero-level')?.textContent||1)));
   const stage=n=>n<10
     ?{id:'beginner',tab:'beginner',job:'Beginner',badge:'Beginner',classPill:'BEGINNER',jobPill:'PRE-JOB'}
     :n<30
@@ -19,7 +19,7 @@
 
   window.TCW_CLASS_PROGRESSION=Object.freeze({
     thresholds:Object.freeze({magician:10,iceLightning:30}),
-    forLevel:n=>({...stage(Math.max(1,Math.min(70,Number(n)||1)))})
+    forLevel:n=>({...stage(Math.max(1,Math.min(Number(D.meta?.maxLevel)||100,Number(n)||1)))})
   });
 
   function alloc(kind,n){
@@ -43,7 +43,8 @@
   }
 
   function syncClassProgression(n){
-    const s=stage(n);
+    const s=stage(n),planned=window.TCW_PLANNED_JOB?.();
+    if(planned){s.job=planned;s.badge=planned;s.jobPill='3RD JOB PREVIEW';}
     const tab=document.querySelector(`#atlas-skill-tabs [data-skill-tab="${s.tab}"]`);
     if(tab&&!tab.classList.contains('active'))tab.click();
 

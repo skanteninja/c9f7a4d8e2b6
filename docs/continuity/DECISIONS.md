@@ -1,5 +1,12 @@
 # Durable Project Decisions
 
+## 2026-10-06 — level 100 and exact quest-linked material planning
+
+- The user's current launch brief supersedes the old level-70 cap: level 100, second job at launch. Keep third-job dashboard planning available manually from Lv70; do not fabricate third-job SP or treat a preview as a confirmed launch feature.
+- Quest and material identity use numeric source IDs. Subtract given-on-start items from gathering, preserve class branch restrictions, and show citizenship town/grade requirements.
+- Bank targets sum remaining one-time quests plus explicitly selected crafts, with one 15% buffer for ordinary ETC stacks. Quest items and equipment/consumable turn-ins use exact quantities. Recurring requests stay separate, per run; optional crafts are not a compulsory lifetime reserve.
+- Held quantities are current stock and require manual updates after turn-ins. Legacy progress is preserved; ambiguous duplicate-name counters must not be copied to multiple item IDs.
+
 Last continuity baseline: 2026-09-17
 
 Use this file for settled choices that future chats should preserve unless new evidence justifies changing them.

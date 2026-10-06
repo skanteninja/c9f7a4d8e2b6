@@ -152,7 +152,7 @@ for (const [name, guide] of Object.entries(root.buildVariants)) {
   const skillLevels = guide.skills.map(row => Number(row.Level));
   const level30Rows = skillLevels.filter(level => level === 30).length;
   const expectedQuestCount = name === 'fighter' || name === 'hunter' ? 310 : 322;
-  if (guide.meta?.maxLevel !== 70 || guide.leveling.length !== 70 || guide.skills.length !== 71 || skillLevels[0] !== 1 || skillLevels.at(-1) !== 70 || level30Rows !== 2 || guide.gear.length === 0 || guide.quests.length !== expectedQuestCount) {
+  if (guide.meta?.maxLevel !== 100 || guide.leveling.length !== 100 || guide.skills.length !== 101 || skillLevels[0] !== 1 || skillLevels.at(-1) !== 100 || level30Rows !== 2 || guide.gear.length === 0 || guide.quests.length !== expectedQuestCount) {
     throw new Error(`${name} is missing a complete progression payload`);
   }
   if (!Array.isArray(guide.skillOrder) || guide.skillOrder.length < 10 || !guide.skillIcons?.['Three Snails']) {

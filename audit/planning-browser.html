@@ -1,0 +1,48 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0}iframe{border:0;height:1000px;width:1365px}#result{position:fixed;bottom:0;background:white;color:black}</style><iframe id="app"></iframe><pre id="result">pending</pre><script>
+(async()=>{
+  const frame=document.getElementById('app'),result=document.getElementById('result');
+  const delay=ms=>new Promise(r=>setTimeout(r,ms));
+  const check=(ok,msg)=>{if(!ok)throw Error(msg)};
+  try {
+    for(const [build,first,second,third,marble] of [
+      ['magician-il-fresh','Magician','Wizard (I/L)','I/L Mage',4031019],
+      ['warrior-fighter','Warrior','Fighter','Crusader',4031017],
+      ['archer-hunter','Bowman','Hunter','Ranger',4031021]
+    ]) {
+      await new Promise(resolve=>{frame.onload=resolve;frame.src=`/?build=${build}&page=dashboard&ci=planning`;});
+      const d=frame.contentDocument,w=frame.contentWindow;
+      for(let i=0;i<80&&!d.getElementById('job-plan');i++)await delay(100);
+      d.getElementById('session-entry-continue')?.click();d.querySelector('[data-session-gender="male"]')?.click();
+      d.querySelector('#nav [data-page="dashboard"]').click();
+      const level=async n=>{const el=d.getElementById('level-select');el.value=String(n);el.dispatchEvent(new w.Event('change',{bubbles:true}));await delay(100);};
+      const choose=value=>{const el=d.getElementById('job-plan');el.value=value;el.dispatchEvent(new w.Event('change',{bubbles:true}));};
+      choose('second');
+      for(const [n,job] of [[9,'Beginner'],[10,first],[29,first],[30,second],[69,second],[70,second],[71,second],[99,second],[100,second]]) {
+        await level(n);
+        check(d.getElementById('hero-level').textContent===String(n),`${build} level ${n} clamped`);
+        check(d.getElementById('v5-job-title').textContent===job,`${build} wrong job at ${n}`);
+      }
+      const skills=[...d.querySelectorAll('#atlas-skill-grid [data-skill-name]')].map(el=>el.textContent);
+      choose('third');await delay(100);
+      check(d.getElementById('v5-job-title').textContent===`${third} · preview`,`${build} third-job preview missing`);
+      check(skills.join('|')===[...d.querySelectorAll('#atlas-skill-grid [data-skill-name]')].map(el=>el.textContent).join('|'),`${build} third preview fabricated SP`);
+      d.getElementById('third-job-reference').open=true;
+      for(const width of [1365,1024,390]) {
+        frame.style.width=width+'px';await delay(100);
+        check(d.documentElement.scrollWidth<=d.documentElement.clientWidth+2,`${build} dashboard overflow at ${width}`);
+        const panel=d.getElementById('job-planning');check(panel.scrollWidth<=panel.clientWidth+2,`${build} job panel overflow at ${width}`);
+        const controls=d.querySelector('.progression-avatar-level-controls');
+        check(panel.getBoundingClientRect().top>=controls.getBoundingClientRect().bottom-2,`${build} job panel overlaps level controls`);
+      }
+      frame.style.width='1365px';
+      d.querySelector('#nav [data-page="etc"]').click();
+      const filter=(id,value)=>{const el=d.getElementById(id);el.value=value;el.dispatchEvent(new w.Event('input',{bubbles:true}));};
+      filter('etc-kind','quest');filter('etc-search','Dark Marble');
+      check(d.querySelectorAll('#etc-list [data-item-id]').length===1,`${build} wrong advancement materials`);
+      check(d.querySelector(`#etc-list [data-item-id="${marble}"]`)?.dataset.etcTarget==='30',`${build} wrong marble ID or count`);
+      check(d.querySelectorAll('[data-craft-plan]').length>0,`${build} recipes missing`);
+    }
+    result.textContent='planning-browser-regression-ok';
+  }catch(e){result.textContent='planning-browser-regression-failed: '+e.message;}
+})();
+</script>

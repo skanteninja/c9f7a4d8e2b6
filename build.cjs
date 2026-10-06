@@ -7,9 +7,13 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.11.1-quest-journal-styles';
+const assetVersion = '0.12.0-quest-etc-level-100';
 const {questCatalog} = require('./audit/quest-catalog.cjs');
+const {etcCatalog} = require('./audit/etc-catalog.cjs');
 const QUEST_SNAPSHOT = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-quests.json'), 'utf8'));
+const ITEM_SNAPSHOT = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-items.json'), 'utf8'));
+const CRAFT_SNAPSHOT = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-crafting.json'), 'utf8'));
+const SKILL_SNAPSHOT = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-skills.json'), 'utf8'));
 const BRAND = 'Top Classic World Maplestory';
 
 // The OSMS export is the identity authority for the equipment picker.  The
@@ -253,9 +257,9 @@ function multiBuildCatalog(baseCatalog = {}) {
     shortName: 'Fighter',
     subtitle: 'Axe-focused Warrior progression',
     levelMin: 1,
-    levelMax: 70,
+    levelMax: 100,
     status: 'active',
-    tags: ['Warrior', 'Fighter', 'Level 1–70', 'Quest-aware', 'Axe route', '2H damage'],
+    tags: ['Warrior', 'Fighter', 'Level 1–100', 'Quest-aware', 'Axe route', '2H damage'],
     primaryStat: 'STR',
     secondaryPolicy: 'DEX only for verified accuracy or equipment breakpoints',
     weaponPath: 'Axe family · two-handed damage default; one-handed axe + shield is the defensive alternative',
@@ -271,9 +275,9 @@ function multiBuildCatalog(baseCatalog = {}) {
     shortName: 'Hunter',
     subtitle: 'DEX-first bow progression',
     levelMin: 1,
-    levelMax: 70,
+    levelMax: 100,
     status: 'active',
-    tags: ['Bowman', 'Hunter', 'Level 1–70', 'Bow route'],
+    tags: ['Bowman', 'Hunter', 'Level 1–100', 'Bow route'],
     primaryStat: 'DEX',
     secondaryPolicy: 'Minimum STR for bow requirements',
     weaponPath: 'Bow + arrows · two-handed ranged weapon; no shield slot',
@@ -290,6 +294,7 @@ function multiBuildCatalog(baseCatalog = {}) {
         name: 'I/L Wizard Build',
         shortName: 'I/L Wizard',
         subtitle: 'Ice / Lightning Wizard progression',
+        levelMax: 100,
         description: 'A complete Classic I/L Wizard path covering AP, SP, equipment, training, quests, monsters and crafting.',
         dataRef: 'root'
       };
@@ -1123,6 +1128,32 @@ function publicGuide(raw) {
   data.quests = questCatalog(QUEST_SNAPSHOT, data.quests, 'Magician');
   fighter.quests = questCatalog(QUEST_SNAPSHOT, fighter.quests, 'Warrior');
   hunter.quests = questCatalog(QUEST_SNAPSHOT, hunter.quests, 'Bowman');
+  const futures = [[data,'magician','I/L Mage'],[fighter,'warrior','Crusader'],[hunter,'archer','Ranger']];
+  for (const [guide, family, name] of futures) {
+    const etc = etcCatalog(guide, ITEM_SNAPSHOT, CRAFT_SNAPSHOT);
+    guide.etc = etc.rows;
+    guide.etcCraftPlans = etc.plans;
+    guide.questRevision = '2026-10-06';
+    guide.catalog = catalog;
+    const third = SKILL_SNAPSHOT[family].find(g => g.class_name === name && g.job === '3rd Job');
+    guide.futureJob = {name, level:70, skills:(third?.skills || []).map(s => ({
+      id:s.id, name:s.name, max:s.max_level, description:s.description
+    }))};
+    const endpoint = guide.leveling.find(r => Number(r.Lv) === 70);
+    const spEndpoint = guide.skills.filter(r => Number(r.Level) === 70).at(-1);
+    for (let lv = 71; lv <= 100; lv++) {
+      guide.leveling.push({...endpoint, Lv:lv, 'Primary Route':'Lv71–100 route planning',
+        'Main Monsters':'Choose a suitable current map', 'Planning Only':true});
+      guide.skills.push({Level:lv, SP:3, Spend:'3 SP earned · allocation not yet researched',
+        'Result After Level':spEndpoint['Result After Level'], 'Planning Only':true,
+        'Why This Is The Action':'Keep the verified skill checkpoint until a level-71+ allocation is confirmed.'});
+    }
+    guide.apPlan.push({...guide.apPlan.at(-1), 'Level Range':'71–100', 'AP Action':'5 AP per level · allocation not yet researched',
+      'Planning Only':true,
+      'Why':'Level-71+ gear and AP recommendations need an independent audit.'});
+    guide.dashboardMilestones = [...(guide.dashboardMilestones || []),
+      {level:100,label:'Launch level cap',detail:'Second job at launch; third-job preview remains available'}];
+  }
   // Every guide reads the same build library. Gameplay arrays differ by build;
   // navigation metadata must not.
   data.catalog = catalog;
@@ -1137,7 +1168,9 @@ function publicGuide(raw) {
       title: BRAND,
       version: assetVersion,
       builtAt: data.meta.builtAt,
-      maxLevel: data.meta.maxLevel,
+      maxLevel: 100,
+      launchMaxJob: 2,
+      thirdJobPlanning: true,
       recommendationPolicy: data.meta.recommendationPolicy
     };
   }
@@ -1737,7 +1770,7 @@ function patchHtml(raw) {
   html = html.replace(/\s*<button data-page="formulas"[^>]*>[\s\S]*?<\/button>\s*/, '\n');
   html = html.replace('<div><b>Headless data source attached</b><small>Website is the main interface</small></div>', '<div><b>Top Classic World</b><small>Database online</small></div>');
   html = html.replace('<span id="atlas-beta-pill" class="beta-tag">COT2-AWARE</span>', '');
-  html = html.replace('<h2>Top Classic World Maplestory</h2><p>Ice / Lightning Wizard · Level 1–70 · equipment, skills, quests, targets and progression in one build.</p>', '<h2 id="hero-build-title">I/L Wizard Build</h2><p id="hero-build-subtitle">Ice / Lightning Wizard · Level 1–70 · equipment, skills, quests, targets and progression in one build.</p>');
+  html = html.replace('<h2>Top Classic World Maplestory</h2><p>Ice / Lightning Wizard · Level 1–100 · equipment, skills, quests, targets and progression in one build.</p>', '<h2 id="hero-build-title">I/L Wizard Build</h2><p id="hero-build-subtitle">Ice / Lightning Wizard · Level 1–100 · equipment, skills, quests, targets and progression in one build.</p>');
   html = html.replace('Ice / Lightning is the active personalized build today; future class cards stay infrastructure-only until researched and verified.', 'Choose a researched build and follow its level-by-level progression.');
 
   html = html.replace(
@@ -1767,12 +1800,35 @@ function patchQuestPlanner(app) {
   if (begin < 0 || end < 0) throw new Error('Quest renderer insertion point missing');
   app = app.slice(0, begin) + fs.readFileSync(path.join(source, 'quest-planner-runtime.js'), 'utf8') + '\n' + app.slice(end);
   app = app.replace('quests:raw.quests||{},', 'quests:normalizeQuestProgress(raw.quests||{}),');
+  app = app.replace('etcHeld:raw.etcHeld||{},', 'etcHeld:normalizeEtcProgress(raw.etcHeld||{}),');
+  app = app.replace('etcDone:raw.etcDone||{},', 'etcDone:normalizeEtcProgress(raw.etcDone||{}),');
+  app = app.replace('levelChecks:raw.levelChecks||{},', `levelChecks:raw.levelChecks||{},
+      questTown:['1','2'].includes(String(raw.questTown))?String(raw.questTown):'all',
+      craftPlans:(Array.isArray(raw.craftPlans)?raw.craftPlans:[]).filter(id=>D.etcCraftPlans.some(p=>p.id===String(id))).map(String),
+      jobPlan:raw.jobPlan==='third'?'third':'second',`);
   app = app.replace(/function questId\(q,i\)\{[^\n]+\}/, 'function questId(q,i){ return `quest-${q["Quest ID"]}`; }');
+  app = app.replace('function etcId(e){ return slug(e.Item); }', 'function etcId(e){ return `etc-${e["Item ID"]}`; }');
   // The dashboard, queue, and legacy summary must use the same unlock logic.
   app = app.replaceAll("questRelevant(q)&&(q.Lv===''||q.Lv==null||Number(q.Lv)<=state.level)", 'questReady(q)');
   app = app.replace("!state.quests[q._id] && !/only/i.test(String(q.Eligibility||'')) && (q.Lv===''||q.Lv==null||Number(q.Lv)<=state.level)", '!state.quests[q._id] && questReady(q)');
   // Keep the existing ten-second completion undo visible after marking done.
   app = app.replace('&&questReady(q))\n        .sort', '&&(questReady(q)||pendingActive(pendingQuestUndo,q._id)))\n        .sort');
+  const etcStart = app.indexOf('  function renderEtc(){');
+  const etcEnd = app.indexOf('  const TCW_DATASETS',etcStart);
+  if(etcStart<0||etcEnd<0)throw new Error('ETC renderer insertion point missing');
+  app = app.slice(0,etcStart) + fs.readFileSync(path.join(source,'etc-planner-runtime.js'),'utf8') + '\n' + app.slice(etcEnd);
+  app = app.replaceAll("Number(x['Start Lv']||999)<=state.level+5", 'etcDashboardNeeded(x)');
+  app = app.replaceAll("Number(x['Start Lv']||999)<=state.level+3", 'etcDashboardNeeded(x)');
+  app = app.replace('const need=Math.ceil((base||allIn||0)*1.15);','const need=etcPlan(x).keep;');
+  app = app.replace("need=Number(x['Core + Craft Minimum']||0),left",'need=etcPlan(x).keep,left');
+  app = app.replaceAll('data-etc-icon-name="${esc(x.Item)}"','data-etc-icon-name="${esc(x.Item)}" data-etc-icon-id="${x[\'Item ID\']}"');
+  app = app.replace("const item=idx.get(String(node.dataset.etcIconName||'').trim().toLowerCase());", "const item=node.dataset.etcIconId?{id:Number(node.dataset.etcIconId),name:node.dataset.etcIconName}:idx.get(String(node.dataset.etcIconName||'').trim().toLowerCase());");
+  app = app.replace("id==='magician-il-fresh'?'Lifetime quest + I/L craft reserve · 15% buffer':'Lifetime quest reserve · 15% safety buffer'", "'Remaining quests + selected crafts · 15% buffer'");
+  app = app.replace('function currentLevelRow(){ return D.leveling.find(x=>Number(x.Lv)===state.level); }', 'function currentLevelRow(){ const row=D.leveling.find(x=>Number(x.Lv)===state.level); return row?{...row,Job:plannedJobName(state.level)||row.Job}:row; }');
+  app = app.replace("if(badge)badge.textContent=activeBuild()?.shortName||'I/L';", "if(badge)badge.textContent=plannedJobName(state.level)||activeBuild()?.shortName||'I/L';");
+  app = app.replaceAll('    updateBuildCopy();','    updateBuildCopy();\n    renderPlanningControls();');
+  const planningPoint = app.indexOf('  function updateBuildCopy(){');
+  app = app.slice(0,planningPoint) + fs.readFileSync(path.join(source,'planning-runtime.js'),'utf8') + '\n' + app.slice(planningPoint);
   return app;
 }
 const app = patchQuestPlanner(publicScript(patchApp(readChunks('app', 4))))

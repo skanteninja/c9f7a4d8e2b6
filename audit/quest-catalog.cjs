@@ -3,6 +3,9 @@ function questCatalog(snapshot, previous, branch) {
   const raw = snapshot.quests;
   const byId = new Map(raw.map(q => [String(q.id), q]));
   const branches = new Set(['Warrior', 'Magician', 'Bowman', 'Thief']);
+  // Quest reward masks use 2/4/8/16, unlike equipment's 1/2/4/8.
+  const jobMask = {Warrior:2, Magician:4, Bowman:8, Thief:16}[branch];
+  const fits = row => !row.job_mask || (Number(row.job_mask) & jobMask) !== 0;
   const effectiveLevel = (q, visiting = new Set()) => {
     if (visiting.has(String(q.id))) throw new Error(`Quest prerequisite cycle: ${q.id}`);
     const next = new Set(visiting).add(String(q.id));
@@ -18,14 +21,14 @@ function questCatalog(snapshot, previous, branch) {
     const gather = req.filter(r => r.type === 'item').map(r => ({...r,
       count: Math.max(0, Number(r.count || 1) - start.filter(s => Number(s.id) === Number(r.id)).reduce((n, s) => n + Number(s.count || 1), 0))
     })).filter(r => r.count > 0);
-    const groups = entries => (entries || []).flatMap(e => (e.groups || []).filter(g => !g.job_mask || g.job_name === branch)
-      .map(g => ({...g, items: g.items || []})));
+    const groups = entries => (entries || []).flatMap(e => (e.groups || []).filter(fits)
+      .map(g => ({...g, items: (g.items || []).filter(fits)})));
     const old = (previous || []).filter(p => p.Quest === q.name && p.Region === q.region);
     const legacy = new Set(old.map(p => `${slug(p.Region)}-${slug(p.Quest)}-${p.Lv ?? 'x'}`));
     // The original canonical converter had no inherited prerequisite level.
     legacy.add(`${slug(q.region)}-${slug(q.name)}-${Number(q.level_min ?? q.chain_level_min ?? 1)}`);
     const cadence = q.is_daily ? 'Daily' : q.is_weekly ? 'Weekly' : q.is_repeatable ? 'Repeatable' : 'Once';
-    const guaranteed = (q.rewards || []).filter(r => r.type === 'item' && r.guaranteed && (!r.job_mask || r.job_name === branch));
+    const guaranteed = (q.rewards || []).filter(r => r.type === 'item' && r.guaranteed && fits(r));
     const choices = groups(q.reward_choices), random = groups(q.reward_weighted);
     const rewardSummary = [...guaranteed.map(r => `${r.count}x ${r.name}`),
       ...choices.flatMap(g => g.items.map(r => `Choose one: ${r.name}`)),
@@ -41,6 +44,8 @@ function questCatalog(snapshot, previous, branch) {
       'Why Do It': description[0] || 'Talk to the quest giver to begin.',
       Journal: description, Requirements: q.requirements || '', Objectives: req.filter(r => r.type !== 'quest'),
       Prerequisites: req.filter(r => r.type === 'quest'), 'Start Items': start, Gather: gather,
+      Conditions: req.filter(r => !['quest','item','mob'].includes(r.type)),
+      'Job Family': branches.has(q.region) ? q.region : 'Any class',
       'Guaranteed Rewards': guaranteed, 'Choice Rewards': choices, 'Random Rewards': random,
       Contribution: q.rewards_contribution || null, Rotation: q.rotation || null,
       'ETC / Item To Save': gather.map(r => r.name).join(' · '), Qty: gather.map(r => r.count).join(' · '),

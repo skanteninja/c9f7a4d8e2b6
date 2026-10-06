@@ -10,6 +10,9 @@ on:
       - 'public/**'
       - 'audit/check-multibuild.cjs'
       - 'audit/quest-*.cjs'
+      - 'audit/etc-*.cjs'
+      - 'audit/quest-browser.html'
+      - 'audit/planning-browser.html'
       - 'audit/fighter-quests.json'
       - 'build.cjs'
       - 'patches/**'
@@ -41,6 +44,7 @@ jobs:
         run: |
           node audit/check-multibuild.cjs
           node audit/quest-regression.cjs
+          node audit/etc-regression.cjs
           for f in app guide-data visuals visuals-db visuals-npc visuals-skills visuals-portals dashboard-polish progression-sync progression-level-hook progression-skill-state progression-gear-visual ownership-ui class-theme; do
             node --check "site/$f.js"
             test -s "site/$f.js"
@@ -49,15 +53,15 @@ jobs:
             test -s "site/$f.css"
           done
           for asset in styles.css visuals.css visuals-db.css visuals-npc.css visuals-skills.css visuals-portals.css dashboard-polish.css progression-sync.css progression-gear-visual.css ownership-ui.css session-flow.css potions.css royal-maple-theme.css guide-data.js app.js visuals.js visuals-db.js visuals-npc.js visuals-skills.js visuals-portals.js dashboard-polish.js progression-sync.js progression-level-hook.js progression-skill-state.js progression-gear-visual.js ownership-ui.js class-theme.js; do
-            grep -q "$asset?v=0.11.1-quest-journal-styles" site/index.html
+            grep -q "$asset?v=0.12.0-quest-etc-level-100" site/index.html
           done
           for asset in perion.webp henesys.webp ellinia.webp; do
             test -s "site/assets/class-themes/$asset"
           done
           test -s "site/assets/variant-b-card-frame.svg"
           test -s "site/assets/royal-maple-card-frame.svg"
-          grep -q 'royal-maple-card-frame.svg?v=0.11.1-quest-journal-styles' site/royal-maple-theme.css
-          grep -q 'Top Classic World Maplestory 0.11.1-quest-journal-styles' site/build-info.txt
+          grep -q 'royal-maple-card-frame.svg?v=0.12.0-quest-etc-level-100' site/royal-maple-theme.css
+          grep -q 'Top Classic World Maplestory 0.12.0-quest-etc-level-100' site/build-info.txt
           ! grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard' site/app.js
           ! grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard' site/visuals.js
           grep -q '/game-data/' site/app.js
@@ -242,17 +246,17 @@ jobs:
             ! grep -q 'dashboard-page-overflow-detected' "$file"
             grep -Eq 'visual-media-strip|visualized-item-row|visual-quest-items' "$file"
             grep -q 'class="etc-recommended"' "$file"
-            grep -q 'class="etc-check-wrap' "$file"
+            grep -q 'class="etc-stock-controls' "$file"
             python3 - "$file" <<'PY'
           import re, sys
           s=open(sys.argv[1], encoding='utf-8', errors='replace').read()
           held=re.findall(r'<input[^>]*data-held="[^"]+"[^>]*>', s)
           recs=re.findall(r'class="etc-recommended"', s)
-          checks=re.findall(r'class="etc-check-wrap', s)
+          checks=re.findall(r'<input[^>]*data-etc-done="[^"]+"[^>]*>', s)
           assert len(held) >= 10, f'expected ETC held controls, got {len(held)}'
-          assert all('hidden' in tag for tag in held), 'visible ETC quantity input detected'
+          assert all('hidden' not in tag for tag in held), 'ETC stock input hidden by legacy decorator'
           assert len(recs) == len(held), f'recommendation mismatch: {len(recs)} recs vs {len(held)} rows'
-          assert len(checks) == len(held), f'checkbox wrapper mismatch: {len(checks)} vs {len(held)} rows'
+          assert len(checks) == len(held), f'checkbox mismatch: {len(checks)} vs {len(held)} rows'
           PY
           done
 
@@ -278,7 +282,7 @@ jobs:
           import re,sys
           s=open(sys.argv[1],encoding='utf-8',errors='replace').read()
           m=re.search(r'id="level-range"[^>]*max="([0-9]+)"',s)
-          assert m and m.group(1)=='70', 'class build level range is not 1–70'
+          assert m and m.group(1)=='100', 'class build level range is not 1–100'
           assert re.search(r'class="atlas-queue-row"[^>]*>.*?<b>[^<]+</b>',s,re.S), 'class quest queue is blank'
           assert re.search(r'class="tcw-etc-name">[^<]+</span>',s), 'class ETC queue is blank'
           PY
@@ -287,7 +291,11 @@ jobs:
           "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=45000 --dump-dom http://127.0.0.1:4173/ci-quest-test.html >/tmp/quest-test.html
           grep -o 'quest-browser-regression-[^<]*' /tmp/quest-test.html || true
           grep -q '>quest-browser-regression-ok<' /tmp/quest-test.html
-          rm -f site/ci-progression-test.html site/ci-quest-test.html
+          cp audit/planning-browser.html site/ci-planning-test.html
+          "$chrome" --headless --no-sandbox --disable-gpu --window-size=1440,1000 --virtual-time-budget=45000 --dump-dom http://127.0.0.1:4173/ci-planning-test.html >/tmp/planning-test.html
+          grep -o 'planning-browser-regression-[^<]*' /tmp/planning-test.html || true
+          grep -q '>planning-browser-regression-ok<' /tmp/planning-test.html
+          rm -f site/ci-progression-test.html site/ci-quest-test.html site/ci-planning-test.html
 
       - name: Commit generated site
         run: |

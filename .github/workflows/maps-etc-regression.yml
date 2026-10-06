@@ -69,7 +69,7 @@ jobs:
         run: |
           for f in maps-tab.js maps-tab.css etc-audit-data.js quest-audit-additions.js etc-audit-ui.js etc-audit-ui.css; do
             test -s "dist/$f"
-            grep -q "$f?v=0.11.1-quest-journal-styles" dist/index.html
+            grep -q "$f?v=0.12.0-quest-etc-level-100" dist/index.html
           done
           test "$(wc -c < dist/assets/map-atlas/sheets/maple-world.png)" -gt 100000
           test "$(wc -c < dist/assets/map-atlas/sheets/victoria-island.png)" -gt 5000
@@ -82,7 +82,7 @@ jobs:
           from pathlib import Path
           s=Path('dist/index.html').read_text()
           assert s.index('data-page="quests" class="nav-btn"') < s.index('data-page="maps" class="nav-btn') < s.index('data-page="equipment" class="nav-btn')
-          assert s.index('guide-data.js?v=0.11.1-quest-journal-styles') < s.index('etc-audit-data.js?v=0.11.1-quest-journal-styles') < s.index('quest-audit-additions.js?v=0.11.1-quest-journal-styles') < s.index('app.js?v=0.11.1-quest-journal-styles')
+          assert s.index('guide-data.js?v=0.12.0-quest-etc-level-100') < s.index('etc-audit-data.js?v=0.12.0-quest-etc-level-100') < s.index('quest-audit-additions.js?v=0.12.0-quest-etc-level-100') < s.index('app.js?v=0.12.0-quest-etc-level-100')
           PY
 
       - name: Browser gate for audited ETC and visual atlas navigation
@@ -102,7 +102,8 @@ jobs:
             const expected={"Pig's Ribbon":58,'Orange Mushroom Cap':48,'Green Mushroom Cap':98,'Leaf':121,'Octopus Leg':92,'Cursed Doll':690,'Stone Golem Rubble':173,'Tablecloth':115};
             for(const [name,keep] of Object.entries(expected)){const row=item(name);if(!row||Number(row['Permanent Keep'])!==keep||Number(row['All-In Total'])!==keep)throw Error('bad KEEP '+name);}
             const pig=item("Pig's Ribbon");if(Number(pig['Optional / Donation'])!==100||Number(pig['All-In Total'])===158)throw Error('weekly donation accounting');
-            const blue=item('Blue Mushroom Cap');if(Number(blue['Crafting Need'])!==30||Number(blue['Permanent Keep'])!==115)throw Error('craft reserve');
+            const blue=item('Blue Mushroom Cap');if(Number(blue['Crafting Need'])!==0||Number(blue['Permanent Keep'])!==81)throw Error('unselected craft reserve');
+            if(!D.etcCraftPlans.some(p=>p.name==='Hardwood Wand'&&p.ingredients.some(i=>i.id===4000001&&i.count===30)))throw Error('optional canonical craft recipe missing');
             if(!w.TCW_QUEST_AUDIT||Number(w.TCW_QUEST_AUDIT.total)<=176)throw Error('quest catalog not expanded');
 
             d.querySelector('#nav .nav-btn[data-page="maps"]')?.click();

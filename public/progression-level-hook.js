@@ -2,7 +2,7 @@
   const D = window.GUIDE_DATA;
 
   function level() {
-    return Math.max(1, Math.min(70, Number(document.getElementById('level-select')?.value || document.getElementById('hero-level')?.textContent || 1)));
+    return Math.max(1, Math.min(Number(window.GUIDE_DATA?.meta?.maxLevel)||100, Number(document.getElementById('level-select')?.value || document.getElementById('hero-level')?.textContent || 1)));
   }
 
   function gearBreakpoint(levelValue) {
@@ -109,7 +109,7 @@
    excluded: this is the permanent/base AP the character should have at the
    selected level. */
 (() => {
-  const clamp = value => Math.max(1, Math.min(70, Number(value) || 1));
+  const clamp = value => Math.max(1, Math.min(Number(window.GUIDE_DATA?.meta?.maxLevel)||100, Number(value) || 1));
   const totalBase = level => 25 + (clamp(level) - 1) * 5;
 
   function ilTarget(level) {
@@ -186,7 +186,14 @@
       const metrics=copy.querySelector('.v5-quick-metrics');
       metrics ? copy.insertBefore(box,metrics) : copy.appendChild(box);
     }
-    const lv=selectedLevel(), plan=target(lv), s=plan.stats;
+    const lv=selectedLevel(), plan=target(Math.min(lv,70)), s=plan.stats;
+    if(lv>70){
+      box.dataset.apLevel=String(lv);
+      box.dataset.apBuild=window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh';
+      box.innerHTML=`<div class="tcw-ap-head"><span>AP PLANNING · LV${lv}</span><small>5 AP per level</small></div><div class="tcw-ap-main"><b>Allocation not yet researched</b></div><div class="tcw-ap-sub"><span>Lv70 checkpoint: ${plan.primary} ${s[plan.primary]} / ${plan.secondary} ${s[plan.secondary]}</span></div>`;
+      document.documentElement.classList.add('tcw-ap-target-ready');
+      return;
+    }
     const secondary=[...['STR','DEX','INT','LUK']].filter(k=>k!==plan.primary&&k!==plan.secondary);
     box.dataset.apLevel=String(lv);
     box.dataset.apBuild=window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh';
@@ -257,7 +264,7 @@
   let shieldedSkillUpdates = 0;
   let activeMask = null;
 
-  const clamp = n => Math.max(1, Math.min(70, Number(n) || 1));
+  const clamp = n => Math.max(1, Math.min(Number(window.GUIDE_DATA?.meta?.maxLevel)||100, Number(n) || 1));
   const stage = n => {
     const tiers = Array.isArray(D?.skillTiers) ? D.skillTiers : [];
     const tier = n < 10 ? tiers[0] : n < 30 ? tiers[1] : tiers[2];

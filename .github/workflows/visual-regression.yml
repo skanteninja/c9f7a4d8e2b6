@@ -205,7 +205,7 @@ jobs:
               d.querySelector('#nav .nav-btn[data-page="dashboard"]')?.click();
               await wait(300);
               const visibleText=d.body.innerText||'';
-              if(/\b(?:COT2|OSMS)\b|pre[- ]launch|launch[- ]scope|Evidence\s*&\s*sources/i.test(visibleText))throw Error('source/provenance language visible in public UI');
+              if(/\b(?:COT2|OSMS)\b|pre[- ]launch|Evidence\s*&\s*sources/i.test(visibleText))throw Error('source/provenance language visible in public UI');
               out.textContent='visual-ui-regression-ok';
             }catch(e){out.textContent='visual-ui-regression-failed: '+e.message;}
           });

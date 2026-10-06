@@ -14,7 +14,7 @@ function questState(q) {
   if (state.quests[questId(q)]) return 'done';
   if (q.Lv > state.level) return 'upcoming';
   if ((q.Prerequisites || []).some(r => !state.quests[`quest-${r.id}`])) return 'blocked';
-  if (q.Rotation || ['Citizenship','Event'].includes(q.Region) || (q.Objectives || []).some(r => r.type === 'skill')) return 'check';
+  if (q.Rotation || q.Conditions?.length || ['Citizenship','Event'].includes(q.Region)) return 'check';
   return 'ready';
 }
 function questReady(q) { return questState(q) === 'ready'; }
@@ -26,6 +26,15 @@ function renderQuestFilters() {
   const select = document.getElementById('quest-region');
   if (select.options.length <= 1) regions.forEach(r => select.add(new Option(r, r)));
   const filters = select.parentElement;
+  if (!document.getElementById('quest-town')) {
+    const town = document.createElement('label'); town.className = 'quest-town-filter';
+    town.innerHTML = 'Citizenship town<select id="quest-town"><option value="all">All towns</option><option value="1">Henesys</option><option value="2">Kerning City</option></select>';
+    filters.appendChild(town);
+    town.querySelector('select').addEventListener('input',e => {
+      state.questTown=e.target.value; save(); renderQuests(); renderEtc(); renderDashboard();
+    });
+  }
+  document.getElementById('quest-town').value=state.questTown;
   if (!document.getElementById('quest-status')) {
     const holder = document.createElement('div'); holder.className = 'quest-extra-filters';
     holder.innerHTML = `<label>Status<select id="quest-status"><option value="all">All statuses</option><option value="ready">Ready to start</option><option value="blocked">Prerequisites needed</option><option value="check">Check requirements</option><option value="upcoming">Upcoming</option><option value="done">Completed</option></select></label><label>Quest type<select id="quest-type"><option value="all">All types</option><option value="Once">One-time quests</option><option value="Daily">Daily quests</option><option value="Weekly">Weekly quests</option><option value="Repeatable">Repeatable quests</option><option value="rotation">Rotation pool</option></select></label><label>Sort<select id="quest-sort"><option value="route">Availability</option><option value="level">Level</option><option value="exp">EXP reward</option><option value="name">Name</option></select></label><button class="mini-btn" id="quest-clear" type="button">Clear filters</button>`;
@@ -37,6 +46,7 @@ function renderQuestFilters() {
       document.getElementById('quest-sort').value = 'route';
       document.getElementById('quest-available').checked = false;
       document.getElementById('quest-hide-done').checked = false;
+      state.questTown='all'; save();
       renderQuests();
     });
     const available = document.getElementById('quest-available');
@@ -64,7 +74,7 @@ function renderQuestDetails(x) {
   const prerequisites = (x.Prerequisites || []).map(r => `<li><span class="quest-dependency ${state.quests[`quest-${r.id}`] ? 'complete' : ''}">${state.quests[`quest-${r.id}`] ? '✓ Completed' : 'Needed'}</span>${questLink(r.id, r.name)}</li>`).join('');
   const objectives = (x.Objectives || []).map(r => {
     if (r.type === 'item') return questItem(r, (x['Start Items'] || []).some(s => Number(s.id) === Number(r.id)) ? 'Given when starting this quest; still required for turn-in' : 'Collect for turn-in');
-    return `<li><span>${esc(r.label || (r.type === 'mob' ? `Defeat ${r.name} ×${r.count}` : `${r.name} Lv.${r.level}`))}</span></li>`;
+    return `<li><span>${esc(r.label || (r.type === 'mob' ? `Defeat ${r.name} ×${r.count}` : r.name || 'Check the quest requirement in-game'))}</span></li>`;
   }).join('');
   const rotation = x.Rotation;
   return `<div class="quest-detail-grid">
@@ -79,6 +89,7 @@ function renderQuests() {
   const value = id => document.getElementById(id).value;
   const query = value('quest-search').trim().toLowerCase();
   const rows = D.quests.filter(x => {
+    if (!questTownMatches(x)) return false;
     const status = questState(x);
     if (query.startsWith('#') ? x['Quest ID'] !== query.slice(1) : query && ![x.Quest,x['Quest ID'],x.Region,x.NPC,x.Chain,x['Reward / Unlock'],x.Requirements,x.Repeatable].join(' ').toLowerCase().includes(query)) return false;
     if (value('quest-priority') !== 'all' && x.Priority !== value('quest-priority')) return false;
@@ -102,7 +113,7 @@ function renderQuests() {
   }).join('') : '<div class="quest-empty"><h3>No quests match these filters</h3><p>Try another region or status, or clear filters to explore the whole journal.</p></div>';
   root.querySelectorAll('details').forEach(el => el.addEventListener('toggle', () => {if (!el.isConnected) return; const id = el.closest('[data-quest-id]').dataset.questId; el.open ? questOpen.add(id) : questOpen.delete(id);}));
   root.querySelectorAll('.quest-check').forEach(el => el.addEventListener('change', () => {
-    state.quests[el.dataset.id] = el.checked; save(); renderQuests(); renderDashboard();
+    state.quests[el.dataset.id] = el.checked; save(); renderQuests(); renderEtc(); renderDashboard();
     const restored = root.querySelector(`[data-id="${el.dataset.id}"]`); (restored || document.getElementById('quest-hide-done')).focus();
   }));
   root.querySelectorAll('[data-quest-jump]').forEach(el => el.addEventListener('click', () => {

@@ -14,7 +14,7 @@ for (const [branch, guide] of Object.entries(branches)) {
   assert.equal(new Set(guide.quests.map(q => q['Quest ID'])).size, 310);
   for (const q of expected) {
     const actual = guide.quests.find(x => x['Quest ID'] === q['Quest ID']);
-    for (const key of ['Quest','Lv','EXP','Mesos','Repeatable','Objectives','Prerequisites','Start Items','Gather','Guaranteed Rewards','Choice Rewards','Random Rewards','Rotation'])
+    for (const key of ['Quest','Lv','EXP','Mesos','Repeatable','Objectives','Prerequisites','Start Items','Gather','Conditions','Job Family','Guaranteed Rewards','Choice Rewards','Random Rewards','Rotation'])
       assert.equal(JSON.stringify(actual[key]), JSON.stringify(q[key], (k,v) => typeof v === 'string' ? v.replace(/\s{2,}/g, ' ').trim() : v), `${branch} quest ${q['Quest ID']} ${key}`);
     assert.equal(actual['Choice Rewards'].some(g => g.job_name !== branch && g.job_mask), false);
     assert.equal(actual['Random Rewards'].some(g => g.job_name !== branch && g.job_mask), false);
