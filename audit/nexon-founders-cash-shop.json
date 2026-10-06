@@ -38,7 +38,8 @@
         "Reward item lifetimes are not stated in the announcement or rate table.",
         "Unwanted unequipped rewards can be exchanged for Aurora Stamps.",
         "Mystery purchases are unavailable in Belgium, Slovakia and Brazil.",
-        "Rewards obtained in the Netherlands can only be traded within the account."
+        "Rewards obtained in the Netherlands can only be traded within the account.",
+        "Angel Wand, Orange Toy Hammer and Yellow Spatula cover any weapon. Cherub’s Bow covers Bow-type weapons only."
       ],
       "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
       "image": "https://g.nexonstatic.com/media/25qnhwjs/founders-mystery-fashion-crate-icon-founders-access-cash-shop-maplestory-classic-world.png",
@@ -278,7 +279,8 @@
         "Reward item lifetimes are not stated in the announcement or rate table.",
         "Unwanted unequipped rewards can be exchanged for Aurora Stamps.",
         "Mystery purchases are unavailable in Belgium, Slovakia and Brazil.",
-        "Rewards obtained in the Netherlands can only be traded within the account."
+        "Rewards obtained in the Netherlands can only be traded within the account.",
+        "Soft Chocolate Fondue Scepter, Detective Glass and Starlight Heart Scepter cover any weapon."
       ],
       "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
       "image": "https://g.nexonstatic.com/media/2gtbora5/aurora-mystery-fashion-crate-icon-founders-access-cash-shop-maplestory-classic-world.png",
@@ -420,7 +422,6 @@
         "An item must have been equipped or been otherwise made untradable for a Palette to be used on it.",
         "Outfit items that can be recolored with Palettes are marked with the Aurora Badge in the item icon, indicating that it has absorbed the power of Aurora and can be dyed.",
         "The list of items that can be dyed with Palettes can be found here.",
-        "Mystery purchases are unavailable in Belgium, Slovakia and Brazil.",
         "Coupon expires in 14 days; the resulting utility item expires in 30 days."
       ],
       "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
@@ -480,7 +481,10 @@
         "kind": "limited"
       },
       "details": [
-        "Mystery purchases are unavailable in Belgium, Slovakia and Brazil."
+        "Mystery purchases are unavailable in Belgium, Slovakia and Brazil.",
+        "Take the coupon to Hair Salon in town. A style is chosen randomly.",
+        "Male styles: Bed Head Hair, Prince Cut Hair, Short Regent Cut, Dreamcatcher, Metrosexual Hair, Antagonist.",
+        "Female styles: Lovely Ladyhawk, Ponytail-to-the-Side, Vivacious Wavy Hair, Angelica Hair, Caspia Hair, Rose."
       ],
       "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
       "image": "https://g.nexonstatic.com/media/1yqfhd3m/mystery-hair-coupon-founders-access-cash-shop-maplestory-classic-world.png",
@@ -508,7 +512,10 @@
         "kind": "limited"
       },
       "details": [
-        "Mystery purchases are unavailable in Belgium, Slovakia and Brazil."
+        "Mystery purchases are unavailable in Belgium, Slovakia and Brazil.",
+        "Take the coupon to Plastic Surgery in town. A style is chosen randomly.",
+        "Male styles: Innocent Gaze, Distant Gaze, Rebel's Fire, Worrisome Glare, Alert Face, Overjoyed Smile.",
+        "Female styles: Prim Face, Posh Look, Bulbous-Eyed Face, Round Eyed Face, Beauty Stare, Strong Stare."
       ],
       "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
       "image": "https://g.nexonstatic.com/media/tu4jomam/mystery-face-coupon-founders-access-cash-shop-maplestory-classic-world.png",
@@ -535,7 +542,11 @@
         "ends": null,
         "kind": "evergreen"
       },
-      "details": [],
+      "details": [
+        "Take the coupon to Hair Salon in town. Choose the style you want.",
+        "Male styles: Bowl Cut, Line Scratch Hair, Chestnut, Mohecan Shaggy 'Do, Medium Cornrows, Mane.",
+        "Female styles: Bridget, Jolie, Holla' Back 'Do, Veronica, Rastafari Hair, Penelope Hair."
+      ],
       "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
       "image": "https://g.nexonstatic.com/media/vgvikvmo/signature-hair-coupon-founders-access-cash-shop-maplestory-classic-world.png",
       "imageAlt": "Signature Style Coupons illustration"
@@ -561,7 +572,11 @@
         "ends": null,
         "kind": "evergreen"
       },
-      "details": [],
+      "details": [
+        "Take the coupon to Plastic Surgery in town. Choose the style you want.",
+        "Male styles: Smart Aleck, Cool Guy Gaze, Insomniac Daze, Look of Wonder, Wisdom Glance, Babyface Pout.",
+        "Female styles: Curious Look, Hera's Radiance, Gentle Glow, Hopeless Gaze, Wide-eyed Girl, Babyface Pout."
+      ],
       "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
       "image": "https://g.nexonstatic.com/media/syhdp4s2/signature-face-coupon-founders-access-cash-shop-maplestory-classic-world.png",
       "imageAlt": "Signature Style Coupons illustration"

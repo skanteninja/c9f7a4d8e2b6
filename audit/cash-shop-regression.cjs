@@ -29,6 +29,11 @@ assert.equal(find('Aurora Mystery Fashion Crate').prices[0].currency,'Aurora Sta
 assert.equal(find('Aurora Mystery Fashion Crate').sale.ends,'2027-01-13T07:59:00Z');
 assert.equal(find('Mystery Palette Exchange Coupon').prices[0].price,5);
 assert.equal(find('Mystery Palette Exchange Coupon').duration.days,14);
+assert(!find('Mystery Palette Exchange Coupon').details.some(x=>x.includes('Belgium')));
+assert(find('Mystery Hair Coupon').details.some(x=>x.includes('Belgium')));
+assert(find('Mystery Hair Coupon').details.some(x=>x.startsWith('Male styles:')&&x.includes('Bed Head Hair')));
+assert(find('Signature Face Coupon').details.some(x=>x.startsWith('Female styles:')&&x.includes('Hera’s Radiance')||x.includes("Hera's Radiance")));
+assert(find("Founder's Mystery Fashion Crate").details.some(x=>x.includes('Bow-type weapons only')));
 assert(find('Mystery Palette Exchange Coupon').duration.text.includes('30-day'));
 assert.equal(find('Dark Rider').duration.days,10);
 assert.equal(find('Dark Rider').sale.ends,'2026-11-18T17:59:00Z');

@@ -62,12 +62,27 @@ def import_catalog(markdown, rates):
             details.extend(['Contains one random decorative equip. The 7-day duration belongs to the unopened crate.',
                             'Reward item lifetimes are not stated in the announcement or rate table.',
                             'Unwanted unequipped rewards can be exchanged for Aurora Stamps.'])
-        if 'Mystery' in name:
+        if name in ["Founder's Mystery Fashion Crate", 'Aurora Mystery Fashion Crate', 'Mystery Hair Coupon', 'Mystery Face Coupon', 'Mystery Hair Color Coupon']:
             details.append('Mystery purchases are unavailable in Belgium, Slovakia and Brazil.')
         if 'Fashion Crate' in name:
             details.append('Rewards obtained in the Netherlands can only be traded within the account.')
         if 'Palette' in name:
             details.append('Coupon expires in 14 days; the resulting utility item expires in 30 days.')
+        if name == "Founder's Mystery Fashion Crate":
+            details.append('Angel Wand, Orange Toy Hammer and Yellow Spatula cover any weapon. Cherub’s Bow covers Bow-type weapons only.')
+        if name == 'Aurora Mystery Fashion Crate':
+            details.append('Soft Chocolate Fondue Scepter, Detective Glass and Starlight Heart Scepter cover any weapon.')
+        if section in ['Mystery Style Coupons', 'Signature Style Coupons']:
+            location = 'Hair Salon' if 'Hair' in name else 'Plastic Surgery'
+            details.append(f'Take the coupon to {location} in town. '+('A style is chosen randomly.' if name.startswith('Mystery') else 'Choose the style you want.'))
+            style_section = re.search(r'^# \*\*'+re.escape(section)+r'\*\*\n(.*?)(?=^# \*\*|\Z)', markdown, re.M|re.S)[1]
+            kind = 'Hairs' if 'Hair' in name else 'Faces'
+            for gender in ['Male','Female']:
+                styles = re.search(r'^### \*\*'+gender+' '+kind+r'\*\*\n(.*?)(?=^### |^See all|\Z)', style_section, re.M|re.S)[1]
+                styles = re.sub(r'!\[[^\]]*\]\([^)]+\)', '', styles)
+                names = [plain(line) for line in styles.splitlines() if line.strip()]
+                assert len(names) == 6, (name, gender, names)
+                details.append(gender+' styles: '+', '.join(names)+'.')
         item = {
             'id': 'founders-' + re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-'),
             'name': name, 'category': section, 'prices': price_options,

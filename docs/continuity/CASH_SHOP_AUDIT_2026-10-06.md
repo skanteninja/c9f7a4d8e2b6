@@ -1,6 +1,6 @@
 # Founder’s Access Cash Shop audit — 2026-10-06
 
-Release: `0.13.0-founders-cash-shop`. Deployment and browser gates pending at the source checkpoint.
+Release: `0.13.1-founders-cash-shop`. Final deployment pending. The 0.13.0 browser/data gates passed; the final 0.13.1 snapshot adds coupon style lists and weapon restrictions and scopes regional restrictions to the products stated by Nexon.
 
 The user explicitly requested the new Nexon release catalog as the default, retention of the previous catalog as Beta Cash Shop with its original prices, and lifetime tags beside prices: grey time-limited tags and red uppercase PERMANENT tags. This supersedes hiding useful beta-shop labels from the public UI.
 
@@ -21,7 +21,7 @@ The user explicitly requested the new Nexon release catalog as the default, rete
 - Both fashion crates expire in 7 days. The announcement and official rate tables do not specify reward lifetimes, so the UI does not apply the crate’s expiry to its clothing rewards or invent permanent reward status.
 - Aurora prices stay in Aurora Stamps. Exchange coupons expire in 14 days; resulting palette/cleanser utilities expire in 30 days.
 - Founder’s crate and Mystery Style offers end 2026-10-28 07:59 UTC. 10-day equipment covers and Fall Store Permit end 2026-11-18 17:59 UTC. Aurora Season 1 ends 2027-01-13 07:59 UTC. All opening times are after maintenance on October 6; no precise maintenance-end time is invented.
-- Bundle discounts use the current price, retaining crossed-out comparison prices. Gifting requires Lv12. Per-world/account purchase limits, contents, relevant pet compatibility, and Mystery regional purchase restrictions are in the UI.
+- Bundle discounts use the current price, retaining crossed-out comparison prices. Gifting requires Lv12. Per-world/account purchase limits, contents, relevant pet compatibility, hair/face choice lists, weapon-cover restrictions, and the regional restrictions explicitly stated for each product are in the UI.
 
 ## Implementation
 

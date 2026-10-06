@@ -22,9 +22,11 @@ jobs:
         run: |
           ready=0
           for i in {1..60}; do
-            build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0; visuals_ok=0; integrity_ok=0; stability_ok=0
+            build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0; visuals_ok=0; integrity_ok=0; stability_ok=0; cash_ok=0
             build_info="$(curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" || true)"
-            [[ "$build_info" == *"Top Classic World Maplestory 0.13.0-founders-cash-shop"* ]] && build_ok=1 || true
+            [[ "$build_info" == *"Top Classic World Maplestory 0.13.1-founders-cash-shop"* ]] && build_ok=1 || true
+            cash_catalog="$(curl -fsSL --max-time 15 "$BASE_URL/cash-shop-catalogs.json?v=0.13.1-founders-cash-shop" || true)"
+            [[ "$cash_catalog" == *'"version":"0.13.1-founders-cash-shop"'* ]] && [[ "$cash_catalog" == *'"defaultCatalog":"founders-access"'* ]] && cash_ok=1 || true
 
             theme_css="$(curl -fsSL --max-time 15 "$BASE_URL/royal-maple-theme.css?ci=$GITHUB_RUN_ID" || true)"
             theme_js="$(curl -fsSL --max-time 15 "$BASE_URL/class-theme.js?ci=$GITHUB_RUN_ID" || true)"
@@ -55,8 +57,8 @@ jobs:
             sync_css="$(curl -fsSL --max-time 15 "$BASE_URL/progression-sync.css?ci=$GITHUB_RUN_ID" || true)"
             if [[ "$level_hook" == *"tcw-skill-images-connected-ready"* ]] && [[ "$level_hook" != *"node.remove()"* ]] && [[ "$sync_css" == *"Dashboard skill artwork never fades"* ]] && [[ "$sync_css" == *"filter:none!important;opacity:1!important"* ]]; then stability_ok=1; fi
 
-            echo "live-check[$i] build=$build_ok theme=$theme_ok maps=$maps_ok legacy=$legacy_ok atlas=$atlas_ok visuals=$visuals_ok integrity=$integrity_ok stability=$stability_ok world_bytes=${world_bytes:-0} monster_bytes=${monster_bytes:-0}"
-            if [ "$build_ok" -eq 1 ] && [ "$theme_ok" -eq 1 ] && [ "$maps_ok" -eq 1 ] && [ "$legacy_ok" -eq 1 ] && [ "$atlas_ok" -eq 1 ] && [ "$visuals_ok" -eq 1 ] && [ "$integrity_ok" -eq 1 ] && [ "$stability_ok" -eq 1 ]; then ready=1; break; fi
+            echo "live-check[$i] build=$build_ok cash=$cash_ok theme=$theme_ok maps=$maps_ok legacy=$legacy_ok atlas=$atlas_ok visuals=$visuals_ok integrity=$integrity_ok stability=$stability_ok world_bytes=${world_bytes:-0} monster_bytes=${monster_bytes:-0}"
+            if [ "$build_ok" -eq 1 ] && [ "$cash_ok" -eq 1 ] && [ "$theme_ok" -eq 1 ] && [ "$maps_ok" -eq 1 ] && [ "$legacy_ok" -eq 1 ] && [ "$atlas_ok" -eq 1 ] && [ "$visuals_ok" -eq 1 ] && [ "$integrity_ok" -eq 1 ] && [ "$stability_ok" -eq 1 ]; then ready=1; break; fi
             sleep 5
           done
           test "$ready" -eq 1
@@ -73,12 +75,12 @@ jobs:
           [[ "$app_js" == *"etc-planner-ready"* ]]
           [[ "$app_js" == *"normalizeEtcProgress"* ]]
           [[ "$app_js" == *"job-planning"* ]]
-          [[ "$app_js" == *"cash-shop-catalogs.json?v=0.13.0-founders-cash-shop"* ]]
-          curl -fsSL --max-time 20 "$BASE_URL/cash-shop-catalogs.json?v=0.13.0-founders-cash-shop" >/tmp/live-cash-shop.json
+          [[ "$app_js" == *"cash-shop-catalogs.json?v=0.13.1-founders-cash-shop"* ]]
+          curl -fsSL --max-time 20 "$BASE_URL/cash-shop-catalogs.json?v=0.13.1-founders-cash-shop" >/tmp/live-cash-shop.json
           python3 - <<'PY'
           import json
           data=json.load(open('/tmp/live-cash-shop.json'))
-          assert data['version']=='0.13.0-founders-cash-shop'
+          assert data['version']=='0.13.1-founders-cash-shop'
           assert data['defaultCatalog']=='founders-access'
           current=data['catalogs']['founders-access']['items']; beta=data['catalogs']['beta']['items']
           assert len(current)==69 and len(beta)==872
