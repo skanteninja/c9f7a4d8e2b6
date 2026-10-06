@@ -465,7 +465,7 @@
     skills:['Skill Tree','One definitive SP path for the selected class build.'],
     etc:['Quest & ETC Planner','Remaining quests, selected crafts, and recurring requests for this build.'],
     classicdb:['Classic Database','Broad current CURRENT client-export metadata, kept separate from curated guide decisions.'],
-    cashshop:['Cash Shop','CURRENT client catalog with beta pricing and availability warnings.'],
+    cashshop:['Cash Shop','Founder’s Access offers, item lifetimes and archived beta prices.'],
     beauty:['Beauty','Hair and face catalogs with exact exported IDs and artwork.'],
     formulas:['Formula Lab','Client-audited magical damage math for I/L planning.'],
     research:['Research & Sources','What is official, what is beta, and why each major decision exists.'],
@@ -1753,34 +1753,83 @@ function renderEtc() {
     }
   }
 
-  let cashWired=false;
+  let cashWired=false, cashCatalogPromise=null, cashRenderSequence=0, cashLimit=96;
+  const CASH_CATALOG_URL='./cash-shop-catalogs.json?v=0.13.0-founders-cash-shop';
+  function fetchCashCatalogs(){
+    if(!cashCatalogPromise)cashCatalogPromise=fetch(CASH_CATALOG_URL,{cache:'force-cache'}).then(r=>{
+      if(!r.ok)throw Error('Cash Shop catalog could not be loaded.');
+      return r.json();
+    }).catch(error=>{cashCatalogPromise=null;throw error;});
+    return cashCatalogPromise;
+  }
+  function cashDurationTag(duration){
+    const kind=duration?.kind||'unknown';
+    const label=kind==='permanent'?'PERMANENT':kind==='timed'?`Time-limited · ${duration.text}`:'Duration unconfirmed';
+    return `<span class="cash-duration cash-duration-${kind}" data-duration="${kind}">${esc(label)}</span>`;
+  }
+  function cashOfferAvailable(item,beta){
+    return beta?!!item.on_sale&&Number(item.price)>0:!item.sale?.ends||Date.now()<Date.parse(item.sale.ends);
+  }
+  function cashDate(iso){
+    const d=new Date(iso);
+    return `${d.getUTCDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()]} ${d.getUTCFullYear()} · ${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')} UTC`;
+  }
+  function cashCard(item,beta){
+    const available=cashOfferAvailable(item,beta);
+    const unpriced=beta&&Number(item.price)<=0;
+    const prices=(item.prices||[]).map(p=>`<div class="cash-price-row">${p.count>1?`<small>×${esc(p.count)}</small>`:''}${p.originalPrice?`<del>${Number(p.originalPrice).toLocaleString()} ${esc(p.currency)}</del>`:''}<b>${unpriced?'UNAVAILABLE':`${Number(p.price).toLocaleString()} ${esc(p.currency)}`}</b>${cashDurationTag(item.duration)}</div>`).join('');
+    const details=[...(item.details||[])];
+    if(beta&&unpriced)details.unshift('Not sold in the beta snapshot. Its recorded price is 0; this does not mean free.');
+    if(beta&&item.duration?.kind==='unknown')details.push('No sold beta offer establishes this item’s expiry.');
+    const sale=beta?(available?'Sold in beta · beta price':'Not sold in beta'):item.sale.ends?`${available?'Sale ends':'Sale ended'} ${cashDate(item.sale.ends)}`:'Sale: until further notice';
+    const rewards=(item.rewards||[]).map(reward=>`<li><span>${esc(reward.name)}</span><b>${reward.rate.toFixed(2)}%</b></li>`).join('');
+    return `<article class="cash-card cash-offer${beta&&!available?' cash-unavailable':''}" data-cash-id="${esc(item.catalogId||item.id)}" data-cash-catalog="${beta?'beta':'founders-access'}">${item.image?`<img class="cash-offer-art" src="${esc(item.image)}" alt="${esc(item.imageAlt||item.name)}" loading="lazy">`:''}<div class="cash-offer-body"><small class="cash-category-label">${esc(item.category)}${beta?' · Beta Cash Shop':''}</small><h3>${esc(item.name)}</h3><div class="cash-meta">${prices}</div><p class="cash-sale-window">${esc(sale)}</p>${details.length||rewards?`<details class="cash-offer-details"><summary>${rewards?'Details & reward rates':'Details & contents'}</summary>${details.length?`<ul>${details.map(detail=>`<li>${esc(detail)}</li>`).join('')}</ul>`:''}${rewards?`<p>Reward duration: unconfirmed. These are crate rewards, with no separate purchase price.</p><ul class="cash-reward-list">${rewards}</ul><a href="${esc(item.ratesUrl)}" target="_blank" rel="noopener noreferrer">Official reward rates ↗</a>`:''}</details>`:''}${beta?`<code class="cash-item-id">#${esc(item.id)}</code>`:''}</div></article>`;
+  }
   async function renderCashShop(){
-    const cat=document.getElementById('cash-category'), input=document.getElementById('cash-search'), sale=document.getElementById('cash-sale-only'), status=document.getElementById('cash-status'), results=document.getElementById('cash-results');
-    if(!cat||!input||!sale||!status||!results) return;
+    const catalogSelect=document.getElementById('cash-catalog'),cat=document.getElementById('cash-category'),input=document.getElementById('cash-search'),sale=document.getElementById('cash-sale-only'),duration=document.getElementById('cash-duration-filter'),status=document.getElementById('cash-status'),results=document.getElementById('cash-results'),note=document.getElementById('cash-catalog-note'),more=document.getElementById('cash-load-more');
+    if(!catalogSelect||!cat||!input||!sale||!duration||!status||!results)return;
     if(!cashWired){
-      [cat,input,sale].forEach(elm=>elm.addEventListener(elm===input?'input':'change',renderCashShop));
+      [catalogSelect,cat,input,sale,duration].forEach(el=>el.addEventListener(el===input?'input':'change',()=>{cashLimit=96;renderCashShop();}));
+      more.addEventListener('click',()=>{cashLimit+=96;renderCashShop();});
       cashWired=true;
     }
-    status.innerHTML='<span class="db-loading">Loading Cash Shop catalog…</span>';
+    const sequence=++cashRenderSequence;
+    status.setAttribute('aria-busy','true');
     try{
-      const data=await fetchTcw('cash_shop.json');
-      const categories=Array.isArray(data.categories)?data.categories:[];
-      if(cat.options.length===1){
-        categories.forEach(c=>{const o=document.createElement('option');o.value=c.category;o.textContent=c.category;cat.appendChild(o);});
+      const data=await fetchCashCatalogs();
+      if(sequence!==cashRenderSequence)return;
+      const key=catalogSelect.value==='beta'?'beta':'founders-access',beta=key==='beta',catalog=data.catalogs[key];
+      if(cat.dataset.catalog!==key){
+        const previous=cat.dataset.catalog? 'all':cat.value;
+        cat.innerHTML='<option value="all">All categories</option>'+[...new Set(catalog.items.map(i=>i.category))].map(category=>`<option value="${esc(category)}">${esc(category)}</option>`).join('');
+        cat.value=[...cat.options].some(o=>o.value===previous)?previous:'all';
+        cat.dataset.catalog=key;
       }
-      const q=input.value.trim().toLowerCase();
-      let rows=categories.flatMap(c=>(c.items||[]).map(x=>({...x,__group:c.category})));
-      if(cat.value!=='all') rows=rows.filter(r=>r.__group===cat.value);
-      if(sale.checked) rows=rows.filter(r=>r.on_sale);
-      if(q) rows=rows.filter(r=>searchableRecord(r).includes(q));
-      status.innerHTML=`<b>${rows.length.toLocaleString()}</b> items · <span>prices/availability are CURRENT beta values, not launch promises</span>`;
-      results.innerHTML=rows.slice(0,240).map(r=>{
-        const thumb=tcwImage(r.thumbnail);
-        return `<article class="cash-card">${thumb?`<img src="${esc(thumb)}" alt="${esc(r.name)}" loading="lazy">`:''}<div><small>${esc(r.__group)}${r.sub_category?` · ${esc(r.sub_category)}`:''}</small><h3>${esc(r.name)}</h3><code>#${esc(r.id)}</code><p>${esc(String(r.description||'').replace(/\\n/g,' ').slice(0,180))}</p><div class="cash-meta"><b>${Number(r.price||0).toLocaleString()} NX</b><span>${r.on_sale?'CURRENT on sale':'Not marked on sale'}</span>${Number(r.period)>0?`<span>${esc(r.period)} days</span>`:''}</div></div></article>`;
-      }).join('')||'<div class="db-empty">No matching Cash Shop items.</div>';
+      note.innerHTML=beta?'<b>Beta Cash Shop · archived</b><span>Original beta prices and durations. This catalog is kept for reference; it is not the Founder’s Access release shop.</span>':`<b>Founder’s Access · 6 October 2026</b><span>Opens after maintenance. Item expiry is tagged beside each price; sale windows are shown separately. Gifting unlocks at Lv. ${catalog.giftingMinimumLevel}.</span><a href="${esc(catalog.sourceUrl)}" target="_blank" rel="noopener noreferrer">Nexon announcement ↗</a>`;
+      const query=input.value.trim().toLowerCase();
+      const rows=catalog.items.filter(item=>(cat.value==='all'||item.category===cat.value)&&(!sale.checked||cashOfferAvailable(item,beta))&&(duration.value==='all'||item.duration.kind===duration.value)&&(!query||[item.name,item.category,...(item.details||[]),...(item.rewards||[]).map(r=>r.name)].join(' ').toLowerCase().includes(query)));
+      status.innerHTML=`<b>${rows.length.toLocaleString()}</b> ${beta?'beta entries':'release offers'} · ${esc(catalog.label)}${rows.length>cashLimit?` · showing ${cashLimit}`:''}`;
+      results.innerHTML=rows.slice(0,cashLimit).map(item=>cashCard(item,beta)).join('')||'<div class="db-empty">No matching Cash Shop items.</div>';
+      more.hidden=rows.length<=cashLimit;
+      more.textContent=`Show more (${Math.max(0,rows.length-cashLimit).toLocaleString()} remaining)`;
+      document.documentElement.classList.add('cash-shop-catalogs-ready');
+      results.dataset.catalog=key;
       hookImageFallback(results);
-    }catch(err){status.innerHTML=`<span class="db-error">${esc(err.message)}</span>`;results.innerHTML='';}
+    }catch(error){
+      if(sequence!==cashRenderSequence)return;
+      status.innerHTML=`<span class="db-error">${esc(error.message)}</span>`;results.innerHTML='';more.hidden=true;
+    }finally{if(sequence===cashRenderSequence)status.setAttribute('aria-busy','false');}
   }
+  window.TCW_CASH_SHOP={restore:async controls=>{
+    const catalog=document.getElementById('cash-catalog');
+    catalog.value=controls['cash-catalog']==='beta'?'beta':'founders-access';
+    await renderCashShop();
+    for(const id of ['cash-category','cash-search','cash-duration-filter']){
+      if(controls[id]!==undefined)document.getElementById(id).value=controls[id];
+    }
+    cashLimit=96;
+    await renderCashShop();
+  }};
 
   let beautyWired=false;
   async function renderBeauty(){
@@ -1876,6 +1925,6 @@ function renderEtc() {
   hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.12.1-quest-etc-level-100').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.13.0-founders-cash-shop').catch(()=>{});
   }
 })();

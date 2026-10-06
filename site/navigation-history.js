@@ -1,6 +1,6 @@
 (() => {
   let restoring=false,ready=false,timer;
-  const controlIds=['db-dataset','db-search','maps-explorer-search','maps-explorer-continent','maps-continent-search','quest-search','quest-priority','quest-region','etc-search','cash-search','cash-category'];
+  const controlIds=['db-dataset','db-search','maps-explorer-search','maps-explorer-continent','maps-continent-search','quest-search','quest-priority','quest-region','etc-search','cash-catalog','cash-search','cash-category','cash-duration-filter'];
   function selectedBuild(){
     return new URL(location.href).searchParams.get('build')||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh';
   }
@@ -18,6 +18,7 @@
     try{
       if(s.build&&s.build!==selectedBuild()){location.assign(urlFor(s));return;}
       if(s.page==='maps')await window.TCW_MAPS.restore(s.map||{view:'world'},s.controls||{});
+      else if(s.page==='cashshop'){window.TCW_NAV.setPage(s.page);await window.TCW_CASH_SHOP.restore(s.controls||{});}
       else{window.TCW_NAV.setPage(s.page);for(const [id,value] of Object.entries(s.controls||{})){const el=document.getElementById(id);if(el){el.value=value;el.dispatchEvent(new Event(el.tagName==='SELECT'?'change':'input',{bubbles:true}));}}}
     }finally{restoring=false;}
   }

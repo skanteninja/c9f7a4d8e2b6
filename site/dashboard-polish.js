@@ -149,7 +149,7 @@
       card.dataset.cashAvailability = 'unavailable';
       if (price && priceText.toUpperCase() !== 'UNAVAILABLE') {
         price.textContent = 'UNAVAILABLE';
-        price.setAttribute('aria-label', 'Unavailable in the current CURRENT Cash Shop catalog');
+        price.setAttribute('aria-label', 'Not sold in the archived Beta Cash Shop');
       }
     });
     if (cards.length) {
