@@ -103,7 +103,7 @@ jobs:
             for(const [name,keep] of Object.entries(expected)){const row=item(name);if(!row||Number(row['Permanent Keep'])!==keep||Number(row['All-In Total'])!==keep)throw Error('bad KEEP '+name);}
             const pig=item("Pig's Ribbon");if(Number(pig['Optional / Donation'])!==100||Number(pig['All-In Total'])===158)throw Error('weekly donation accounting');
             const blue=item('Blue Mushroom Cap');if(Number(blue['Crafting Need'])!==0||Number(blue['Permanent Keep'])!==81)throw Error('unselected craft reserve');
-            if(!D.etcCraftPlans.some(p=>p.name==='Hardwood Wand'&&p.ingredients.some(i=>i.id===4000001&&i.count===30)))throw Error('optional canonical craft recipe missing');
+            if(!D.etcCraftPlans.some(p=>p.name==='Hardwood Wand'&&p.ingredients.some(i=>i.id===4000009&&i.count===30)))throw Error('optional canonical craft recipe missing');
             if(!w.TCW_QUEST_AUDIT||Number(w.TCW_QUEST_AUDIT.total)<=176)throw Error('quest catalog not expanded');
 
             d.querySelector('#nav .nav-btn[data-page="maps"]')?.click();

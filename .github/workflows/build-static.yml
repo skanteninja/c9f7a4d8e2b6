@@ -222,12 +222,13 @@ jobs:
           done
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
           test -n "$chrome"
+          trap 'code=$?; echo "Browser gate failed: $BASH_COMMAND (viewport=${viewport:-fixture})"; exit "$code"' ERR
 
           for viewport in 1365,900 1024,768 800,900; do
             file="/tmp/maplestory-static-${viewport//,/-}.html"
             "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=14000 --dump-dom http://127.0.0.1:4173/ >"$file"
             for marker in visual-layer-ready visual-db-layer-ready visual-npc-layer-ready visual-skill-layer-ready visual-portal-layer-ready dashboard-polish-ready progression-sync-ready progression-level-hook-ready progression-skill-state-ready progression-gear-visual-ready progression-compact-dashboard-ready progression-avatar-level-merged-ready progression-gear-decision-verified skill-progression-board-ready beginner-skill-tree-ready dashboard-action-layout-ok dashboard-page-layout-ok etc-planner-fixed-ready top-classic-world-ready public-source-clean-ready dashboard-queues-after-hero-ready dashboard-avatar-level-footer-ready owned-image-urls-ready tcw-skill-images-connected-ready; do
-              grep -q "$marker" "$file"
+              grep -q "$marker" "$file" || { echo "Missing browser marker $marker at $viewport"; exit 1; }
             done
             grep -q 'class="atlas-action-row' "$file"
             grep -q 'class="gear-slot' "$file"

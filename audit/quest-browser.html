@@ -46,7 +46,7 @@ document.getElementById('app').addEventListener('load', async () => {
     d.getElementById('quest-clear').click();
     d.querySelector('#nav [data-page="etc"]').click();
     input('etc-search','Orange Mushroom Cap');
-    const cap=()=>d.querySelector('[data-item-id="4000001"]');
+    const cap=()=>d.querySelector('#etc-list [data-item-id="4000009"]');
     check(cap()&&cap().dataset.etcTarget==='48','Quest material baseline incorrect');
     d.querySelector('.etc-craft-plans summary').click();
     const craft=d.querySelector('[data-craft-plan="194"]');

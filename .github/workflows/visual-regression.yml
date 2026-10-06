@@ -104,8 +104,9 @@ jobs:
               const tr=track.getBoundingClientRect(),m30=milestones[2].getBoundingClientRect(),rr=readout.getBoundingClientRect();
               const m30pct=((m30.left+m30.width/2)-tr.left)/tr.width;
               const readpct=((rr.left+rr.width/2)-tr.left)/tr.width;
-              if(Math.abs(m30pct-(29/69))>.035)throw Error('Lv30 milestone is not on the true numeric scale: '+m30pct.toFixed(3));
-              if(Math.abs(readpct-(43/69))>.045)throw Error('Lv44 marker is not on the true numeric scale: '+readpct.toFixed(3));
+              const max=Number(d.getElementById('level-range').max),min=Number(d.getElementById('level-range').min);
+              if(Math.abs(m30pct-((30-min)/(max-min)))>.035)throw Error('Lv30 milestone is not on the true numeric scale: '+m30pct.toFixed(3));
+              if(Math.abs(readpct-((44-min)/(max-min)))>.045)throw Error('Lv44 marker is not on the true numeric scale: '+readpct.toFixed(3));
               if(!(readpct>m30pct+.12))throw Error('Lv44 still visually overlaps the Lv30 milestone');
 
               const questRows=[...d.querySelectorAll('#atlas-quest-queue .atlas-queue-row')];
