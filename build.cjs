@@ -7,7 +7,7 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.12.0-quest-etc-level-100';
+const assetVersion = '0.12.1-quest-etc-level-100';
 const {questCatalog} = require('./audit/quest-catalog.cjs');
 const {etcCatalog} = require('./audit/etc-catalog.cjs');
 const QUEST_SNAPSHOT = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-quests.json'), 'utf8'));
@@ -1795,6 +1795,7 @@ fs.mkdirSync(out, { recursive: true });
 const css = readChunks('styles', 3);
 const guideJson = publicGuide(readChunks('guide', 6));
 function patchQuestPlanner(app) {
+  app = app.replace("etc:['ETC Master Planner','Know the full future requirement before you vendor the first drop.']", "etc:['Quest & ETC Planner','Remaining quests, selected crafts, and recurring requests for this build.']");
   const begin = app.indexOf('  function questRelevant(');
   const end = app.indexOf('  function actionClass(', begin);
   if (begin < 0 || end < 0) throw new Error('Quest renderer insertion point missing');

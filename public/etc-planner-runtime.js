@@ -48,6 +48,7 @@ function renderEtcFilters() {
     state.questTown = e.target.value; save(); renderEtc(); renderQuests(); renderDashboard();
   });
   document.getElementById('etc-search').setAttribute('aria-label','Search materials, quests, and crafts');
+  document.getElementById('etc-hide-done').closest('label').lastChild.textContent = ' Hide banked / finished';
   const section = document.querySelector('section[data-page="etc"]');
   section.querySelector('.section-head h2').textContent = 'Quest & ETC Planner';
   section.querySelector('.section-head .eyebrow').textContent = 'YOUR BUILD’S MATERIALS';
@@ -80,7 +81,7 @@ function renderEtc() {
     return p.base > 0 || p.repeats.length > 0 || e['Craft Uses'].length > 0;
   });
   const branch = D.quests.find(q => q['Job Family'] !== 'Any class')?.['Job Family'] || 'Current build';
-  document.getElementById('etc-summary').textContent = `${branch} · ${rows.length} materials · ${state.craftPlans.length} crafts selected`;
+  document.getElementById('etc-summary').textContent = `${branch} · ${rows.length} ${rows.length === 1 ? 'material' : 'materials'} · ${state.craftPlans.length} ${state.craftPlans.length === 1 ? 'craft' : 'crafts'} selected`;
   const root = document.getElementById('etc-list');
   root.innerHTML = rows.map(({e,p}) => {
     const id = etcId(e), done = !!state.etcDone[id], repeated = kind === 'repeat';

@@ -1,6 +1,6 @@
 # Quest and ETC reconciliation — 2026-10-06
 
-Release: `0.12.0-quest-etc-level-100`.
+Release: `0.12.1-quest-etc-level-100`.
 
 ## Primary data
 
