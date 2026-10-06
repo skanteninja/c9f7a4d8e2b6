@@ -917,7 +917,7 @@ body.royal-maple-theme .dashboard-v72 .panel::before {
      instead of stretching deep into wide cards. */
   background: transparent !important;
   border: 22px solid transparent !important;
-  border-image-source: url("assets/royal-maple-card-frame.svg?v=0.12.0-quest-etc-level-100") !important;
+  border-image-source: url("assets/royal-maple-card-frame.svg?v=0.12.1-quest-etc-level-100") !important;
   border-image-slice: 54 fill !important;
   border-image-width: 22px !important;
   border-image-outset: 0 !important;
@@ -1412,7 +1412,7 @@ body.royal-maple-theme .dashboard-v72 .v5-character-hero .v5-quick-metrics butto
 .quest-priority-tag { color:#d5c6d8; font-size:12px; }
 .quest-level { color:var(--quest-gold); font-weight:700; }
 .quest-state { border:1px solid #716075; padding:4px 8px; border-radius:4px; }.quest-state.ready,.quest-state.done { background:#293b30; color:#c4ecd0; border-color:#67866f; }
-.quest-state.blocked { background:#493323; color:#ffdab5; border-color:#aa8553; }.quest-state.check { color:#ead7a7; }.quest-state.upcoming { color:#c9c0d5; }
+.quest-state.blocked { background:#493323; color:#ffdab5; border-color:#aa8553; }.quest-state.requires-check { color:#ead7a7; }.quest-state.upcoming { color:#c9c0d5; }
 .quest-cadence { margin-left:auto; color:var(--quest-muted); }
 .quest-journal-card summary { display:flex; align-items:center; gap:20px; cursor:pointer; list-style:none; padding:4px 0; }
 .quest-journal-card summary::-webkit-details-marker { display:none; }

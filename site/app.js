@@ -463,7 +463,7 @@
     quests:['Quest Tracker','Prioritized for the selected class build and saved in your browser.'],
     equipment:['Equipment & Crafting','Breakpoint-driven upgrades and a real slot-based build builder.'],
     skills:['Skill Tree','One definitive SP path for the selected class build.'],
-    etc:['ETC Master Planner','Know the full future requirement before you vendor the first drop.'],
+    etc:['Quest & ETC Planner','Remaining quests, selected crafts, and recurring requests for this build.'],
     classicdb:['Classic Database','Broad current CURRENT client-export metadata, kept separate from curated guide decisions.'],
     cashshop:['Cash Shop','CURRENT client catalog with beta pricing and availability warnings.'],
     beauty:['Beauty','Hair and face catalogs with exact exported IDs and artwork.'],
@@ -1399,7 +1399,7 @@ function renderQuests() {
   root.innerHTML = rows.length ? rows.map(x => {
     const status = questState(x), id = questId(x);
     const repeat = x.Rotation?.one_time ? `Once · ${x.Rotation.cadence} rotation` : x.Repeatable;
-    return `<article class="quest-journal-card ${status === 'done' ? 'done' : ''}" data-quest-id="${esc(x['Quest ID'])}"><div class="quest-card-top"><label class="quest-complete-control"><input class="check quest-check" data-id="${esc(id)}" type="checkbox" ${status === 'done' ? 'checked' : ''} aria-label="Mark ${esc(x.Quest)} completed"><span>${status === 'done' ? 'Done' : 'Done?'}</span></label><span class="quest-level">Lv ${x.Lv}+</span><span class="quest-priority-tag">${esc(x.Priority)}</span><span class="quest-state ${status}">${questStateLabels[status]}</span><span class="quest-cadence">${esc(repeat)}</span></div><details ${questOpen.has(x['Quest ID']) ? 'open' : ''}><summary><span class="quest-title-copy"><span class="quest-name">${esc(x.Quest)}</span><span class="quest-location">${esc(x.Region)} · ${esc(x.NPC)}${x.Chain ? ` · ${esc(x.Chain)}` : ''}</span></span><span class="quest-preview-reward">${x.EXP ? `${Number(x.EXP).toLocaleString()} EXP` : 'Quest dialogue'}${x.Gather.length ? `<small>${x.Gather.length} item ${x.Gather.length === 1 ? 'type' : 'types'} to gather</small>` : ''}</span><span class="quest-expand-label">Details</span></summary>${renderQuestDetails(x)}</details></article>`;
+    return `<article class="quest-journal-card ${status === 'done' ? 'done' : ''}" data-quest-id="${esc(x['Quest ID'])}"><div class="quest-card-top"><label class="quest-complete-control"><input class="check quest-check" data-id="${esc(id)}" type="checkbox" ${status === 'done' ? 'checked' : ''} aria-label="Mark ${esc(x.Quest)} completed"><span>${status === 'done' ? 'Done' : 'Done?'}</span></label><span class="quest-level">Lv ${x.Lv}+</span><span class="quest-priority-tag">${esc(x.Priority)}</span><span class="quest-state ${status === 'check' ? 'requires-check' : status}">${questStateLabels[status]}</span><span class="quest-cadence">${esc(repeat)}</span></div><details ${questOpen.has(x['Quest ID']) ? 'open' : ''}><summary><span class="quest-title-copy"><span class="quest-name">${esc(x.Quest)}</span><span class="quest-location">${esc(x.Region)} · ${esc(x.NPC)}${x.Chain ? ` · ${esc(x.Chain)}` : ''}</span></span><span class="quest-preview-reward">${x.EXP ? `${Number(x.EXP).toLocaleString()} EXP` : 'Quest dialogue'}${x.Gather.length ? `<small>${x.Gather.length} item ${x.Gather.length === 1 ? 'type' : 'types'} to gather</small>` : ''}</span><span class="quest-expand-label">Details</span></summary>${renderQuestDetails(x)}</details></article>`;
   }).join('') : '<div class="quest-empty"><h3>No quests match these filters</h3><p>Try another region or status, or clear filters to explore the whole journal.</p></div>';
   root.querySelectorAll('details').forEach(el => el.addEventListener('toggle', () => {if (!el.isConnected) return; const id = el.closest('[data-quest-id]').dataset.questId; el.open ? questOpen.add(id) : questOpen.delete(id);}));
   root.querySelectorAll('.quest-check').forEach(el => el.addEventListener('change', () => {
@@ -1572,6 +1572,7 @@ function renderEtcFilters() {
     state.questTown = e.target.value; save(); renderEtc(); renderQuests(); renderDashboard();
   });
   document.getElementById('etc-search').setAttribute('aria-label','Search materials, quests, and crafts');
+  document.getElementById('etc-hide-done').closest('label').lastChild.textContent = ' Hide banked / finished';
   const section = document.querySelector('section[data-page="etc"]');
   section.querySelector('.section-head h2').textContent = 'Quest & ETC Planner';
   section.querySelector('.section-head .eyebrow').textContent = 'YOUR BUILD’S MATERIALS';
@@ -1604,7 +1605,7 @@ function renderEtc() {
     return p.base > 0 || p.repeats.length > 0 || e['Craft Uses'].length > 0;
   });
   const branch = D.quests.find(q => q['Job Family'] !== 'Any class')?.['Job Family'] || 'Current build';
-  document.getElementById('etc-summary').textContent = `${branch} · ${rows.length} materials · ${state.craftPlans.length} crafts selected`;
+  document.getElementById('etc-summary').textContent = `${branch} · ${rows.length} ${rows.length === 1 ? 'material' : 'materials'} · ${state.craftPlans.length} ${state.craftPlans.length === 1 ? 'craft' : 'crafts'} selected`;
   const root = document.getElementById('etc-list');
   root.innerHTML = rows.map(({e,p}) => {
     const id = etcId(e), done = !!state.etcDone[id], repeated = kind === 'repeat';
@@ -1875,6 +1876,6 @@ function renderEtc() {
   hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.12.0-quest-etc-level-100').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.12.1-quest-etc-level-100').catch(()=>{});
   }
 })();
