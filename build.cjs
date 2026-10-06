@@ -7,9 +7,10 @@ const source = path.join(root, 'public');
 const runtime = path.join(source, 'assets', 'runtime');
 const repairs = path.join(source, 'repairs');
 const out = path.join(root, 'dist');
-const assetVersion = '0.12.1-quest-etc-level-100';
+const assetVersion = '0.13.0-founders-cash-shop';
 const {questCatalog} = require('./audit/quest-catalog.cjs');
 const {etcCatalog} = require('./audit/etc-catalog.cjs');
+const {cashShopCatalogs} = require('./audit/cash-shop-catalog.cjs');
 const QUEST_SNAPSHOT = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-quests.json'), 'utf8'));
 const ITEM_SNAPSHOT = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-items.json'), 'utf8'));
 const CRAFT_SNAPSHOT = JSON.parse(fs.readFileSync(path.join(root, 'audit', 'fighter-crafting.json'), 'utf8'));
@@ -1779,7 +1780,7 @@ function patchHtml(raw) {
   );
   html = html.replace(
     '<section data-page="cashshop" class="page"><div class="db-hero"><div><span class="eyebrow">COT2 CATALOG · PRICES ARE BETA DATA</span><h2>Cash Shop</h2><p>Browse the client-exported catalog. Availability and prices stay visibly pre-launch until live confirmation.</p></div><span class="beta-tag">COT2 / VERIFY LIVE</span></div>',
-    '<section data-page="cashshop" class="page"><div class="db-hero"><div><span class="eyebrow">TOP CLASSIC WORLD</span><h2>Cash Shop</h2><p>Browse the current catalog, prices and availability.</p></div></div>'
+    '<section data-page="cashshop" class="page"><div class="db-hero"><div><span class="eyebrow">TOP CLASSIC WORLD</span><h2>Cash Shop</h2><p>Founder’s Access offers, item lifetimes and the archived Beta Cash Shop.</p></div></div>'
   );
   html = html.replace(
     '<section data-page="beauty" class="page"><div class="db-hero"><div><span class="eyebrow">COT2 CLIENT CATALOG</span><h2>Beauty</h2><p>Hair and face styles with exact IDs and current exported artwork.</p></div></div>',
@@ -1832,7 +1833,15 @@ function patchQuestPlanner(app) {
   app = app.slice(0,planningPoint) + fs.readFileSync(path.join(source,'planning-runtime.js'),'utf8') + '\n' + app.slice(planningPoint);
   return app;
 }
-const app = patchQuestPlanner(publicScript(patchApp(readChunks('app', 4))))
+function patchCashShop(app) {
+  const start = app.indexOf('  let cashWired=false;');
+  const end = app.indexOf('  let beautyWired=false;', start);
+  if(start<0||end<0)throw new Error('Cash Shop renderer insertion point missing');
+  const cash = fs.readFileSync(path.join(source,'cash-shop-runtime.js'),'utf8').replaceAll('__CASH_CATALOG_VERSION__',assetVersion);
+  return (app.slice(0,start)+cash+'\n'+app.slice(end))
+    .replace("cashshop:['Cash Shop','CURRENT client catalog with beta pricing and availability warnings.']", "cashshop:['Cash Shop','Founder’s Access offers, item lifetimes and archived beta prices.']");
+}
+const app = patchCashShop(patchQuestPlanner(publicScript(patchApp(readChunks('app', 4)))))
   .replace("navigator.serviceWorker.register('./sw.js?v=0.8.0')", `navigator.serviceWorker.register('./sw.js?v=${assetVersion}')`);
 const visualCss = fs.readFileSync(path.join(source, 'visuals.css'), 'utf8');
 const visuals = publicScript(fs.readFileSync(path.join(source, 'visuals.js'), 'utf8'));
@@ -1862,7 +1871,7 @@ const etcAuditUiCss = fs.readFileSync(path.join(source, 'etc-audit-ui.css'), 'ut
 const etcAuditUi = fs.readFileSync(path.join(source, 'etc-audit-ui.js'), 'utf8');
 const sessionFlowCss = fs.readFileSync(path.join(source, 'session-flow.css'), 'utf8');
 const potionsCss = fs.readFileSync(path.join(source, 'potions.css'), 'utf8');
-const royalMapleThemeCss = fs.readFileSync(path.join(source, 'royal-maple-theme.css'), 'utf8') + '\n' + fs.readFileSync(path.join(source, 'quest-planner.css'), 'utf8');
+const royalMapleThemeCss = fs.readFileSync(path.join(source, 'royal-maple-theme.css'), 'utf8') + '\n' + fs.readFileSync(path.join(source, 'quest-planner.css'), 'utf8') + '\n' + fs.readFileSync(path.join(source, 'cash-shop.css'), 'utf8');
 const classThemeJs = fs.readFileSync(path.join(source, 'class-theme.js'), 'utf8');
 
 JSON.parse(guideJson);
@@ -1943,9 +1952,11 @@ fs.writeFileSync(path.join(out, 'maps-tab.js'), mapsTab);
 fs.writeFileSync(path.join(out, 'etc-audit-ui.js'), etcAuditUi);
 fs.writeFileSync(path.join(out, 'class-theme.js'), classThemeJs);
 fs.writeFileSync(path.join(out, 'build-info.txt'), `${BRAND} ${assetVersion}\n`);
+fs.writeFileSync(path.join(out, 'cash-shop-catalogs.json'), JSON.stringify(cashShopCatalogs(assetVersion))+'\n');
 
 const sw = `const CACHE='top-classic-world-${assetVersion}';\nconst CORE=['./','./index.html','./styles.css?v=${assetVersion}','./visuals.css?v=${assetVersion}','./visuals-db.css?v=${assetVersion}','./visuals-npc.css?v=${assetVersion}','./visuals-skills.css?v=${assetVersion}','./visuals-portals.css?v=${assetVersion}','./dashboard-polish.css?v=${assetVersion}','./progression-sync.css?v=${assetVersion}','./progression-gear-visual.css?v=${assetVersion}','./ownership-ui.css?v=${assetVersion}','./guide-data.js?v=${assetVersion}','./app.js?v=${assetVersion}','./visuals.js?v=${assetVersion}','./visuals-db.js?v=${assetVersion}','./visuals-npc.js?v=${assetVersion}','./visuals-skills.js?v=${assetVersion}','./visuals-portals.js?v=${assetVersion}','./dashboard-polish.js?v=${assetVersion}','./progression-sync.js?v=${assetVersion}','./progression-level-hook.js?v=${assetVersion}','./progression-skill-state.js?v=${assetVersion}','./progression-gear-visual.js?v=${assetVersion}','./ownership-ui.js?v=${assetVersion}','./maps-tab.css?v=${assetVersion}','./maps-tab.js?v=${assetVersion}','./etc-audit-data.js?v=${assetVersion}','./quest-audit-additions.js?v=${assetVersion}','./etc-audit-ui.css?v=${assetVersion}','./etc-audit-ui.js?v=${assetVersion}','./manifest.webmanifest'];\nself.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).catch(()=>{}));});\nself.addEventListener('activate',e=>{e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('top-classic-world-')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]));});\nself.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin)return;e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy)).catch(()=>{});return r;}).catch(()=>caches.match(e.request).then(x=>x||caches.match('./index.html'))));});\n`;
 const swWithSessionFlow = sw
+  .replace(`'./manifest.webmanifest'];`, `'./cash-shop-catalogs.json?v=${assetVersion}','./manifest.webmanifest'];`)
   .replace(`'./styles.css?v=${assetVersion}',`, `'./styles.css?v=${assetVersion}','./session-flow.css?v=${assetVersion}','./potions.css?v=${assetVersion}',`)
   .replace(`'./manifest.webmanifest'];`, `'./royal-maple-theme.css?v=${assetVersion}','./class-theme.js?v=${assetVersion}','./assets/class-themes/perion.webp','./assets/class-themes/henesys.webp','./assets/class-themes/ellinia.webp','./assets/class-themes/royal-maple-leaf.png','./assets/variant-b-card-frame.svg','./assets/royal-maple-card-frame.svg','./manifest.webmanifest'];`);
 fs.writeFileSync(path.join(out, 'sw.js'), swWithSessionFlow);

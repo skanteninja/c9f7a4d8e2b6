@@ -1,5 +1,11 @@
 # Durable Project Decisions
 
+## 2026-10-06 — release and archived beta Cash Shops
+
+- Founder’s Access is the default Cash Shop; Beta Cash Shop remains a separate accessible archive with all original prices/records. The user explicitly wants the beta label visible.
+- Item lifetime belongs beside each price. PERMANENT is red and uppercase; time-limited tags are grey. Sale availability and item lifetime are separate facts. Unknown lifetimes remain grey and unconfirmed rather than being invented.
+- Zero beta prices mean unavailable, not free. Pet-life limits and timed bundle contents must remain explicit even when the container or commodity period is permanent.
+
 ## 2026-10-06 — level 100 and exact quest-linked material planning
 
 - The user's current launch brief supersedes the old level-70 cap: level 100, second job at launch. Keep third-job dashboard planning available manually from Lv70; do not fabricate third-job SP or treat a preview as a confirmed launch feature.

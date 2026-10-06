@@ -1,0 +1,2377 @@
+{
+  "id": "founders-access",
+  "label": "Founder's Access",
+  "published": "2026-10-05",
+  "checked": "2026-10-06",
+  "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+  "giftingMinimumLevel": 12,
+  "stampExpiry": "2027-01-13T07:59:00Z",
+  "items": [
+    {
+      "id": "founders-founder-s-mystery-fashion-crate",
+      "name": "Founder's Mystery Fashion Crate",
+      "category": "Founder's Mystery Fashion Crate",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3500,
+          "currency": "NX"
+        },
+        {
+          "count": 11,
+          "price": 35000,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 7,
+        "text": "7 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-10-28T07:59:00Z",
+        "kind": "limited"
+      },
+      "details": [
+        "Contains one random decorative equip. The 7-day duration belongs to the unopened crate.",
+        "Reward item lifetimes are not stated in the announcement or rate table.",
+        "Unwanted unequipped rewards can be exchanged for Aurora Stamps.",
+        "Mystery purchases are unavailable in Belgium, Slovakia and Brazil.",
+        "Rewards obtained in the Netherlands can only be traded within the account."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/25qnhwjs/founders-mystery-fashion-crate-icon-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Founder's Mystery Fashion Crate illustration",
+      "rewards": [
+        {
+          "name": "Angel Halo",
+          "rate": 1.0
+        },
+        {
+          "name": "Toga",
+          "rate": 1.0
+        },
+        {
+          "name": "Baby Angel Wings",
+          "rate": 1.0
+        },
+        {
+          "name": "Angel Wand",
+          "rate": 1.0
+        },
+        {
+          "name": "Cherub's Bow",
+          "rate": 1.0
+        },
+        {
+          "name": "Blue Cap",
+          "rate": 2.0
+        },
+        {
+          "name": "Orange Baseball Jacket",
+          "rate": 2.5
+        },
+        {
+          "name": "Rainbow Knit",
+          "rate": 2.5
+        },
+        {
+          "name": "Ripped Jeans",
+          "rate": 2.5
+        },
+        {
+          "name": "Orange Toy Hammer",
+          "rate": 1.0
+        },
+        {
+          "name": "Blue Bucket Hat",
+          "rate": 2.5
+        },
+        {
+          "name": "Tourist T",
+          "rate": 2.5
+        },
+        {
+          "name": "White Jeans",
+          "rate": 2.5
+        },
+        {
+          "name": "Black Sunglasses",
+          "rate": 1.0
+        },
+        {
+          "name": "Cat Hat",
+          "rate": 2.5
+        },
+        {
+          "name": "Cat Suit",
+          "rate": 2.5
+        },
+        {
+          "name": "Gold Kitty Slippers",
+          "rate": 2.5
+        },
+        {
+          "name": "Kitty Chat Ring",
+          "rate": 2.5
+        },
+        {
+          "name": "Meshcap",
+          "rate": 2.5
+        },
+        {
+          "name": "Pink Allstar",
+          "rate": 2.5
+        },
+        {
+          "name": "Jean Shorts",
+          "rate": 2.5
+        },
+        {
+          "name": "Beret",
+          "rate": 2.5
+        },
+        {
+          "name": "Red Sailor Shirt",
+          "rate": 2.5
+        },
+        {
+          "name": "Red Sailor Skirt",
+          "rate": 2.5
+        },
+        {
+          "name": "Black Enamel Shoes",
+          "rate": 2.5
+        },
+        {
+          "name": "Patissier Hat",
+          "rate": 3.0
+        },
+        {
+          "name": "Patissier Uniform",
+          "rate": 3.0
+        },
+        {
+          "name": "Yellow Spatula",
+          "rate": 1.0
+        },
+        {
+          "name": "Bunny Ears",
+          "rate": 1.0
+        },
+        {
+          "name": "Bunny Earmuffs",
+          "rate": 1.0
+        },
+        {
+          "name": "Orange Mushroom Balloon",
+          "rate": 1.0
+        },
+        {
+          "name": "Blue Watch",
+          "rate": 2.5
+        },
+        {
+          "name": "Red Trainer Jacket",
+          "rate": 2.5
+        },
+        {
+          "name": "Red Trainer Pants",
+          "rate": 2.5
+        },
+        {
+          "name": "Yellow Rainbow Sneaks",
+          "rate": 2.5
+        },
+        {
+          "name": "Dollish Pink",
+          "rate": 1.0
+        },
+        {
+          "name": "Purple Dorothy Dress",
+          "rate": 2.5
+        },
+        {
+          "name": "Sailor Hat",
+          "rate": 2.0
+        },
+        {
+          "name": "Sailor Outfit",
+          "rate": 2.0
+        },
+        {
+          "name": "White Ribboned Sailor Dress",
+          "rate": 2.0
+        },
+        {
+          "name": "Slime T-Shirt",
+          "rate": 1.0
+        },
+        {
+          "name": "Slime Slippers",
+          "rate": 1.0
+        },
+        {
+          "name": "Slime Earrings",
+          "rate": 1.0
+        },
+        {
+          "name": "Reggae Hat",
+          "rate": 2.5
+        },
+        {
+          "name": "Orange Hooded Shirt",
+          "rate": 2.5
+        },
+        {
+          "name": "White Hooded Vest",
+          "rate": 2.5
+        },
+        {
+          "name": "Butterfly Skirt",
+          "rate": 2.5
+        },
+        {
+          "name": "Beetle Long Sleeve",
+          "rate": 2.5
+        },
+        {
+          "name": "Lined Hip-Hop Pants",
+          "rate": 2.5
+        },
+        {
+          "name": "White Label Ring",
+          "rate": 1.0
+        }
+      ],
+      "ratesUrl": "https://www.nexon.com/maplestory/general-post/45538"
+    },
+    {
+      "id": "founders-aurora-mystery-fashion-crate",
+      "name": "Aurora Mystery Fashion Crate",
+      "category": "Aurora Stamp Shop Season 1",
+      "prices": [
+        {
+          "count": 1,
+          "price": 20,
+          "currency": "Aurora Stamps"
+        },
+        {
+          "count": 10,
+          "price": 200,
+          "currency": "Aurora Stamps"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 7,
+        "text": "7 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2027-01-13T07:59:00Z",
+        "kind": "limited"
+      },
+      "details": [
+        "Contains one random decorative equip. The 7-day duration belongs to the unopened crate.",
+        "Reward item lifetimes are not stated in the announcement or rate table.",
+        "Unwanted unequipped rewards can be exchanged for Aurora Stamps.",
+        "Mystery purchases are unavailable in Belgium, Slovakia and Brazil.",
+        "Rewards obtained in the Netherlands can only be traded within the account."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/2gtbora5/aurora-mystery-fashion-crate-icon-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Aurora Mystery Fashion Crate illustration",
+      "rewards": [
+        {
+          "name": "White Choco Bunny",
+          "rate": 1.5
+        },
+        {
+          "name": "Splash Choco Boy",
+          "rate": 2.5
+        },
+        {
+          "name": "Splash Choco Girl",
+          "rate": 2.5
+        },
+        {
+          "name": "Cacao Bear Shoes",
+          "rate": 2.5
+        },
+        {
+          "name": "Chocolate Ribbon",
+          "rate": 2.5
+        },
+        {
+          "name": "Soft Chocolate Fondue Scepter",
+          "rate": 1.5
+        },
+        {
+          "name": "Choco Candy Cookie",
+          "rate": 2.0
+        },
+        {
+          "name": "Black Cat Beanie",
+          "rate": 5.0
+        },
+        {
+          "name": "Sky Blue Cat Beanie",
+          "rate": 5.0
+        },
+        {
+          "name": "Orange Cat Beanie",
+          "rate": 5.0
+        },
+        {
+          "name": "Heart Sunglasses",
+          "rate": 5.0
+        },
+        {
+          "name": "Red Check Rider",
+          "rate": 5.0
+        },
+        {
+          "name": "Violet Dot Jeans",
+          "rate": 5.0
+        },
+        {
+          "name": "Pink Bunny Sweater",
+          "rate": 5.0
+        },
+        {
+          "name": "Hearts Tights",
+          "rate": 5.0
+        },
+        {
+          "name": "Pink Elephant Slippers",
+          "rate": 5.0
+        },
+        {
+          "name": "Loose Fit Sweater",
+          "rate": 4.5
+        },
+        {
+          "name": "Stocking Shorts",
+          "rate": 4.5
+        },
+        {
+          "name": "Detective Glass",
+          "rate": 2.0
+        },
+        {
+          "name": "Blank Eye Patch",
+          "rate": 2.0
+        },
+        {
+          "name": "Heartbreaker Lips",
+          "rate": 2.0
+        },
+        {
+          "name": "Starlight Heart Scepter",
+          "rate": 2.0
+        },
+        {
+          "name": "Ink-and-Wash Thought Bubble Ring",
+          "rate": 5.75
+        },
+        {
+          "name": "Ink-and-Wash Painting Name Tag Ring",
+          "rate": 5.75
+        },
+        {
+          "name": "Chocolate Label Ring",
+          "rate": 5.75
+        },
+        {
+          "name": "Chocolate Chat Ring",
+          "rate": 5.75
+        }
+      ],
+      "ratesUrl": "https://www.nexon.com/maplestory/general-post/45659"
+    },
+    {
+      "id": "founders-mystery-palette-exchange-coupon",
+      "name": "Mystery Palette Exchange Coupon",
+      "category": "Aurora Stamp Shop Season 1",
+      "prices": [
+        {
+          "count": 1,
+          "price": 5,
+          "currency": "Aurora Stamps"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 14,
+        "text": "14 days (resulting item has a 30-day duration)"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2027-01-13T07:59:00Z",
+        "kind": "limited"
+      },
+      "details": [
+        "Randomly changes the color of a Dyeable decoration item once.",
+        "Coupon is tradable, however the resulting item cannot be traded.",
+        "Even if used multiple times, the colors will be changed based on the item's original appearance.",
+        "Special effects and certain weapons will retain their original color even if a Palette is used.",
+        "An item must have been equipped or been otherwise made untradable for a Palette to be used on it.",
+        "Outfit items that can be recolored with Palettes are marked with the Aurora Badge in the item icon, indicating that it has absorbed the power of Aurora and can be dyed.",
+        "The list of items that can be dyed with Palettes can be found here.",
+        "Mystery purchases are unavailable in Belgium, Slovakia and Brazil.",
+        "Coupon expires in 14 days; the resulting utility item expires in 30 days."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/maglp32d/mystery-palette-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Aurora Stamp Shop Season 1 illustration"
+    },
+    {
+      "id": "founders-palette-cleanser-exchange-coupon",
+      "name": "Palette Cleanser Exchange Coupon",
+      "category": "Aurora Stamp Shop Season 1",
+      "prices": [
+        {
+          "count": 1,
+          "price": 10,
+          "currency": "Aurora Stamps"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 14,
+        "text": "14 days (resulting item has a 30-day duration)"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2027-01-13T07:59:00Z",
+        "kind": "limited"
+      },
+      "details": [
+        "Reverts the color of an item dyed with a Palette (such as the Mystery Palette) once.",
+        "Coupon is tradable, however the resulting item cannot be traded.",
+        "The list of items that can be dyed with Palettes can be found here.",
+        "Coupon expires in 14 days; the resulting utility item expires in 30 days."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/30dpo1ap/palette-cleanser-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Aurora Stamp Shop Season 1 illustration"
+    },
+    {
+      "id": "founders-mystery-hair-coupon",
+      "name": "Mystery Hair Coupon",
+      "category": "Mystery Style Coupons",
+      "prices": [
+        {
+          "count": 1,
+          "price": 5500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 14,
+        "text": "14 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-10-28T07:59:00Z",
+        "kind": "limited"
+      },
+      "details": [
+        "Mystery purchases are unavailable in Belgium, Slovakia and Brazil."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/1yqfhd3m/mystery-hair-coupon-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Mystery Style Coupons illustration"
+    },
+    {
+      "id": "founders-mystery-face-coupon",
+      "name": "Mystery Face Coupon",
+      "category": "Mystery Style Coupons",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 14,
+        "text": "14 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-10-28T07:59:00Z",
+        "kind": "limited"
+      },
+      "details": [
+        "Mystery purchases are unavailable in Belgium, Slovakia and Brazil."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/tu4jomam/mystery-face-coupon-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Mystery Style Coupons illustration"
+    },
+    {
+      "id": "founders-signature-hair-coupon",
+      "name": "Signature Hair Coupon",
+      "category": "Signature Style Coupons",
+      "prices": [
+        {
+          "count": 1,
+          "price": 7500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 14,
+        "text": "14 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/vgvikvmo/signature-hair-coupon-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Signature Style Coupons illustration"
+    },
+    {
+      "id": "founders-signature-face-coupon",
+      "name": "Signature Face Coupon",
+      "category": "Signature Style Coupons",
+      "prices": [
+        {
+          "count": 1,
+          "price": 5500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 14,
+        "text": "14 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/syhdp4s2/signature-face-coupon-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Signature Style Coupons illustration"
+    },
+    {
+      "id": "founders-dark-rider",
+      "name": "Dark Rider",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 900,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/codcx2wo/dark-rider-basic-wildcats-baseball-pants-black-baseball-cleats-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-basic-wildcats-baseball-pants",
+      "name": "Basic Wildcats Baseball Pants",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 800,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/codcx2wo/dark-rider-basic-wildcats-baseball-pants-black-baseball-cleats-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-black-baseball-cleats",
+      "name": "Black Baseball Cleats",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 800,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/codcx2wo/dark-rider-basic-wildcats-baseball-pants-black-baseball-cleats-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-blue-picnic-hat",
+      "name": "Blue Picnic Hat",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 900,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/l2fd3a0n/blue-picnic-hat-beige-double-coat-military-shorts-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-beige-double-coat",
+      "name": "Beige Double Coat",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 900,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/l2fd3a0n/blue-picnic-hat-beige-double-coat-military-shorts-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-military-shorts",
+      "name": "Military Shorts",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 900,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/l2fd3a0n/blue-picnic-hat-beige-double-coat-military-shorts-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-kuniragi-hat",
+      "name": "Kuniragi Hat",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 1200,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/izllee0o/kuniragi-hat-green-striped-trainer-red-training-shorts-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-green-striped-trainer",
+      "name": "Green Striped Trainer",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 1000,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/izllee0o/kuniragi-hat-green-striped-trainer-red-training-shorts-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-red-training-shorts",
+      "name": "Red Training Shorts",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 700,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/izllee0o/kuniragi-hat-green-striped-trainer-red-training-shorts-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-red-raincoat",
+      "name": "Red Raincoat",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 1100,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/km1belqb/red-raincoat-red-rain-boots-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-red-rain-boots",
+      "name": "Red Rain Boots",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 700,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/km1belqb/red-raincoat-red-rain-boots-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-goggled-black-cap",
+      "name": "Goggled Black Cap",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 900,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/sl5debbb/goggled-black-cap-yellow-tights-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-yellow-tights",
+      "name": "Yellow Tights",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 1100,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/sl5debbb/goggled-black-cap-yellow-tights-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-green-picnicwear",
+      "name": "Green Picnicwear",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 1100,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/a52jaf2i/green-picnicwear-red-loose-sox-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-red-loose-sox",
+      "name": "Red Loose Sox",
+      "category": "10-Day Equip Covers",
+      "prices": [
+        {
+          "count": 1,
+          "price": 700,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 10,
+        "text": "10 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/a52jaf2i/green-picnicwear-red-loose-sox-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "10-Day Equip Covers illustration"
+    },
+    {
+      "id": "founders-fall-store-permit",
+      "name": "Fall Store Permit",
+      "category": "Fall Store Permit",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3000,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 90,
+        "text": "90 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": "2026-11-18T17:59:00Z",
+        "kind": "limited"
+      },
+      "details": [
+        "This special-edition coupon allows you to open an orange tree store in which you can list up to 18 items at once. Can be used in fields or the Free Market.",
+        "If you are attacked or killed by a monster, the store will close."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/bqnldxnb/fall-store-permit-90-days-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Fall Store Permit illustration"
+    },
+    {
+      "id": "founders-monthly-essentials",
+      "name": "Monthly Essentials",
+      "category": "Monthly Essentials",
+      "prices": [
+        {
+          "count": 1,
+          "price": 9900,
+          "currency": "NX",
+          "originalPrice": 28600
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 30,
+        "text": "30 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "20 Megaphone Exchange Coupon (30-day duration)",
+        "Transparent Hat (30-day duration)",
+        "Transparent Cape (30-day duration)",
+        "Transparent Shoes (30-day duration)",
+        "5 Double Item Megaphone Exchange Coupon (30-day duration)",
+        "Special Store Permit (30-day duration)",
+        "Portable Storage (30-day duration)",
+        "Purchasable once per world, with an additional purchase being made available after 30 days.",
+        "Can only be purchased with NX.",
+        "Both the package and its contents are untradable."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/prcdjtss/monthly-essentials-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Monthly Essentials illustration"
+    },
+    {
+      "id": "founders-convenience-essentials-pack",
+      "name": "Convenience Essentials Pack",
+      "category": "Convenience Essentials Pack",
+      "prices": [
+        {
+          "count": 1,
+          "price": 9900,
+          "currency": "NX",
+          "originalPrice": 42000
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "SP Reset Scroll",
+        "AP Reset Scroll",
+        "Selective 5-slot Coupon",
+        "Safety Charm (10) (90-day duration)",
+        "Super Megaphone (10) (90-day duration)",
+        "Can be purchased once per account.",
+        "Can only be purchased with NX.",
+        "Both the package and its contents are untradable."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/zrvka1xs/convenience-essentials-pack-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Convenience Essentials Pack illustration"
+    },
+    {
+      "id": "founders-pet-booster-essentials-pack",
+      "name": "Pet Booster Essentials Pack",
+      "category": "Pet Booster Essentials Pack",
+      "prices": [
+        {
+          "count": 1,
+          "price": 9900,
+          "currency": "NX",
+          "originalPrice": 47000
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Auto HP Potion Skill",
+        "Auto MP Potion Skill",
+        "Auto Move Skill",
+        "Expanded Auto Move Skill",
+        "30 Premium Pet Food Exchange Coupon (90-day duration)",
+        "Can be purchased once per account.",
+        "Can only be purchased with NX.",
+        "Both the package and its contents are untradable."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/tdpfwyie/pet-booster-essentials-pack-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Booster Essentials Pack illustration"
+    },
+    {
+      "id": "founders-mystery-hair-color-coupon",
+      "name": "Mystery Hair Color Coupon",
+      "category": "Beauty Color Coupons",
+      "prices": [
+        {
+          "count": 1,
+          "price": 1700,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 14,
+        "text": "14 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Can be used at the Hair Salon in town to randomly change your hair color.",
+        "Players in Belgium, Slovakia, and Brazil are unable to purchase Mystery items.",
+        "Mystery purchases are unavailable in Belgium, Slovakia and Brazil."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/ajwfp51z/mystery-hair-color-coupon-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Beauty Color Coupons illustration"
+    },
+    {
+      "id": "founders-signature-hair-color-coupon",
+      "name": "Signature Hair Color Coupon",
+      "category": "Beauty Color Coupons",
+      "prices": [
+        {
+          "count": 1,
+          "price": 4500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 14,
+        "text": "14 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Can be used at the Hair Salon in town to change your hair color to a color of your choice."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/2yxj5kpv/signature-hair-color-coupon-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Beauty Color Coupons illustration"
+    },
+    {
+      "id": "founders-signature-eye-color-coupon",
+      "name": "Signature Eye Color Coupon",
+      "category": "Beauty Color Coupons",
+      "prices": [
+        {
+          "count": 1,
+          "price": 2500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 14,
+        "text": "14 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Can be used at the Plastic Surgery shop in town to change your eye color to a color of your choice."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/wmpjw4se/signature-eye-color-coupon-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Beauty Color Coupons illustration"
+    },
+    {
+      "id": "founders-signature-skin-color-coupon",
+      "name": "Signature Skin Color Coupon",
+      "category": "Beauty Color Coupons",
+      "prices": [
+        {
+          "count": 1,
+          "price": 2000,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 14,
+        "text": "14 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Can be used at Henesys Skin-Care to change your skin color to a color of your choice."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/tu3nlaec/signature-skin-color-coupon-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Beauty Color Coupons illustration"
+    },
+    {
+      "id": "founders-brown-kitty",
+      "name": "Brown Kitty",
+      "category": "Pets",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 30,
+        "text": "30 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Pet activity can be extended with Water of Life."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/4fwieq2a/brown-kitty-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pets illustration"
+    },
+    {
+      "id": "founders-brown-puppy",
+      "name": "Brown Puppy",
+      "category": "Pets",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 30,
+        "text": "30 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Pet activity can be extended with Water of Life."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/z4dmtq0h/brown-puppy-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pets illustration"
+    },
+    {
+      "id": "founders-pink-bunny",
+      "name": "Pink Bunny",
+      "category": "Pets",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 30,
+        "text": "30 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Pet activity can be extended with Water of Life."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/0mwc2t42/pink-bunny-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pets illustration"
+    },
+    {
+      "id": "founders-black-kitty",
+      "name": "Black Kitty",
+      "category": "Pets",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 30,
+        "text": "30 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Pet activity can be extended with Water of Life."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/oduflutf/black-kitty-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pets illustration"
+    },
+    {
+      "id": "founders-white-bunny",
+      "name": "White Bunny",
+      "category": "Pets",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 30,
+        "text": "30 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Pet activity can be extended with Water of Life."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/aadpvw2f/white-bunny-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pets illustration"
+    },
+    {
+      "id": "founders-black-pig",
+      "name": "Black Pig",
+      "category": "Pets",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 30,
+        "text": "30 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Pet activity can be extended with Water of Life."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/nivhf31y/black-pig-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pets illustration"
+    },
+    {
+      "id": "founders-red-ribbon",
+      "name": "Red Ribbon",
+      "category": "Pet Equipment",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3200,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Compatible with Brown Kitty, Black Kitty, Brown Puppy, Pink Bunny, White Bunny and Black Pig."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/moue1s1v/red-ribbon-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Equipment illustration"
+    },
+    {
+      "id": "founders-yellow-hat",
+      "name": "Yellow Hat",
+      "category": "Pet Equipment",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3200,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Compatible with Brown Kitty, Black Kitty, Brown Puppy, Pink Bunny, White Bunny and Black Pig."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/wtsly4mc/yellow-hat-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Equipment illustration"
+    },
+    {
+      "id": "founders-red-hat",
+      "name": "Red Hat",
+      "category": "Pet Equipment",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3200,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Compatible with Brown Kitty, Black Kitty, Brown Puppy, Pink Bunny, White Bunny and Black Pig."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/farnm4nu/red-hat-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Equipment illustration"
+    },
+    {
+      "id": "founders-black-hat",
+      "name": "Black Hat",
+      "category": "Pet Equipment",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3200,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Compatible with Brown Kitty, Black Kitty, Brown Puppy, Pink Bunny, White Bunny and Black Pig."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/m0zncb30/black-hat-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Equipment illustration"
+    },
+    {
+      "id": "founders-pink-laced-cap",
+      "name": "Pink Laced Cap",
+      "category": "Pet Equipment",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3200,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Compatible with Brown Kitty, Black Kitty, Brown Puppy, Pink Bunny, White Bunny and Black Pig."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/tixfiyjs/pink-laced-cap-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Equipment illustration"
+    },
+    {
+      "id": "founders-sky-blue-laced-cap",
+      "name": "Sky Blue Laced Cap",
+      "category": "Pet Equipment",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3200,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Compatible with Brown Kitty, Black Kitty, Brown Puppy, Pink Bunny, White Bunny and Black Pig."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/gk0n0hc0/sky-blue-laced-cap-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Equipment illustration"
+    },
+    {
+      "id": "founders-blue-top-hat",
+      "name": "Blue Top Hat",
+      "category": "Pet Equipment",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3200,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Compatible with Brown Kitty, Black Kitty, Brown Puppy, Pink Bunny, White Bunny and Black Pig."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/sflff5al/blue-top-hat-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Equipment illustration"
+    },
+    {
+      "id": "founders-red-top-hat",
+      "name": "Red Top Hat",
+      "category": "Pet Equipment",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3200,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Compatible with Brown Kitty, Black Kitty, Brown Puppy, Pink Bunny, White Bunny and Black Pig."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/egymaqfb/red-top-hat-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Equipment illustration"
+    },
+    {
+      "id": "founders-water-of-life",
+      "name": "Water of Life",
+      "category": "Pet Utility Items",
+      "prices": [
+        {
+          "count": 1,
+          "price": 2000,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 30,
+        "text": "30 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Can be used to extend the duration of a pet by 30 days, or brought to Mar the Fairy in Ellinia to restore a pet that has been turned into a doll, giving it a 30-day duration."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/0xhlpa4e/water-of-life-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Utility Items illustration"
+    },
+    {
+      "id": "founders-pet-name-tag",
+      "name": "Pet Name Tag",
+      "category": "Pet Utility Items",
+      "prices": [
+        {
+          "count": 1,
+          "price": 1800,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Used to name your pet.",
+        "Pets will respond much better if their name is called prior to making a command (ie: \"Lucky, sit!\")."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/u3inphy3/pet-name-tag-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Utility Items illustration"
+    },
+    {
+      "id": "founders-auto-hp-potion-skill",
+      "name": "Auto HP Potion Skill",
+      "category": "Pet Utility Items",
+      "prices": [
+        {
+          "count": 1,
+          "price": 2500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Allows your pet to use HP potions on you when your HP falls below the threshold that you set."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/jssjj3rz/auto-hp-potion-skill-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Utility Items illustration"
+    },
+    {
+      "id": "founders-auto-mp-potion-skill",
+      "name": "Auto MP Potion Skill",
+      "category": "Pet Utility Items",
+      "prices": [
+        {
+          "count": 1,
+          "price": 2500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Allows your pet to use MP potions on you when your MP falls below the threshold that you set."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/hrsjici2/auto-mp-potion-skill-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Utility Items illustration"
+    },
+    {
+      "id": "founders-auto-move-skill",
+      "name": "Auto Move Skill",
+      "category": "Pet Utility Items",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3000,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Adds a skill that allows your pet to automatically pick up nearby items and mesos without having to move. Can be used on pets with Meso Magnet or Item Pouch."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/z3mnb1tf/auto-move-skill-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Utility Items illustration"
+    },
+    {
+      "id": "founders-expanded-auto-move-skill",
+      "name": "Expanded Auto Move Skill",
+      "category": "Pet Utility Items",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3000,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Triples your pet's auto move distance. Can only be used on pets with the Auto Move Skill."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/cbld22ik/expanded-auto-move-skill-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Pet Utility Items illustration"
+    },
+    {
+      "id": "founders-ap-reset-scroll",
+      "name": "AP Reset Scroll",
+      "category": "AP and SP Reset Scrolls",
+      "prices": [
+        {
+          "count": 1,
+          "price": 7000,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Resets all stats, including AP invested in HP/MP.",
+        "Must be at least Lv. 10 to use."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/ibbdnwrh/ap-reset-scroll-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "AP and SP Reset Scrolls illustration"
+    },
+    {
+      "id": "founders-sp-reset-scroll",
+      "name": "SP Reset Scroll",
+      "category": "AP and SP Reset Scrolls",
+      "prices": [
+        {
+          "count": 1,
+          "price": 7000,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Resets all skills, excluding Beginner skills."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/gbgk0im0/sp-reset-scroll-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "AP and SP Reset Scrolls illustration"
+    },
+    {
+      "id": "founders-megaphone",
+      "name": "Megaphone",
+      "category": "Megaphones",
+      "prices": [
+        {
+          "count": 1,
+          "price": 350,
+          "currency": "NX"
+        },
+        {
+          "count": 3,
+          "price": 1000,
+          "currency": "NX",
+          "originalPrice": 1050
+        },
+        {
+          "count": 12,
+          "price": 3600,
+          "currency": "NX",
+          "originalPrice": 4200
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 90,
+        "text": "90 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Shout to everyone in the channel your character is on with this megaphone. Only available for characters that are at least Level 10."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/kzwfvonl/megaphone-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Megaphones illustration"
+    },
+    {
+      "id": "founders-super-megaphone",
+      "name": "Super Megaphone",
+      "category": "Megaphones",
+      "prices": [
+        {
+          "count": 1,
+          "price": 1500,
+          "currency": "NX"
+        },
+        {
+          "count": 3,
+          "price": 4300,
+          "currency": "NX",
+          "originalPrice": 4500
+        },
+        {
+          "count": 12,
+          "price": 13200,
+          "currency": "NX",
+          "originalPrice": 18000
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 90,
+        "text": "90 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Shout to everyone in the world your character is on with this megaphone. Only available for characters that are at least Level 10."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/fgbg4xns/super-megaphone-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Megaphones illustration"
+    },
+    {
+      "id": "founders-item-megaphone",
+      "name": "Item Megaphone",
+      "category": "Megaphones",
+      "prices": [
+        {
+          "count": 1,
+          "price": 1500,
+          "currency": "NX"
+        },
+        {
+          "count": 3,
+          "price": 4300,
+          "currency": "NX",
+          "originalPrice": 4500
+        },
+        {
+          "count": 12,
+          "price": 13200,
+          "currency": "NX",
+          "originalPrice": 18000
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 90,
+        "text": "90 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Use this megaphone to broadcast to everyone in your world about an item that may be for sale. Only available for characters that are at least Level 10."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/grfp1dsf/item-megaphone-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Megaphones illustration"
+    },
+    {
+      "id": "founders-storage-room-5-slot-coupon",
+      "name": "Storage Room 5-slot Coupon",
+      "category": "Slot Expansion Coupons",
+      "prices": [
+        {
+          "count": 1,
+          "price": 5000,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Double-click to expand your Storage Room by 5 slots. You may have up to 150 slots."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/wkxmvnky/storage-room-5-slot-coupon-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Slot Expansion Coupons illustration"
+    },
+    {
+      "id": "founders-selective-5-slot-coupon",
+      "name": "Selective 5-slot Coupon",
+      "category": "Slot Expansion Coupons",
+      "prices": [
+        {
+          "count": 1,
+          "price": 5000,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Double-click to expand one of your tabs (Equip, Use, Set-up, Etc) by 5 slots. Each tab can be expanded up to a total of 150 slots."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/f0ibaqr0/selective-5-slot-coupon-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Slot Expansion Coupons illustration"
+    },
+    {
+      "id": "founders-safety-charm",
+      "name": "Safety Charm",
+      "category": "Safety Charm",
+      "prices": [
+        {
+          "count": 1,
+          "price": 800,
+          "currency": "NX"
+        },
+        {
+          "count": 3,
+          "price": 2300,
+          "currency": "NX",
+          "originalPrice": 2400
+        },
+        {
+          "count": 12,
+          "price": 8400,
+          "currency": "NX",
+          "originalPrice": 9600
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 90,
+        "text": "90 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "It does not let the user lose EXP points after death, as long as it's in possession. 100% of your HP and MP will be recovered when you are revived. This item is consumed upon use."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/anbjkhjq/safety-charm-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Safety Charm illustration"
+    },
+    {
+      "id": "founders-regular-store-permit",
+      "name": "Regular Store Permit",
+      "category": "Store Permit",
+      "prices": [
+        {
+          "count": 1,
+          "price": 1500,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 90,
+        "text": "90 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "Allows you to open a regular store in which you can list up to 12 items at once. Can be used in fields or the Free Market.",
+        "If you are attacked or killed by a monster, the store will close."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/chzn3tek/regular-store-permit-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Store Permit illustration"
+    },
+    {
+      "id": "founders-pink-store-permit",
+      "name": "Pink Store Permit",
+      "category": "Store Permit",
+      "prices": [
+        {
+          "count": 1,
+          "price": 3000,
+          "currency": "NX"
+        }
+      ],
+      "duration": {
+        "kind": "timed",
+        "days": 90,
+        "text": "90 days"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "This special-edition coupon allows you to open a pink tree store in which you can list up to 18 items at once. Can be used in fields or the Free Market.",
+        "If you are attacked or killed by a monster, the store will close."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/qzxj5kkr/pink-store-permit-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Store Permit illustration"
+    },
+    {
+      "id": "founders-sprinkled-flowers",
+      "name": "Sprinkled Flowers",
+      "category": "Weather Effects",
+      "prices": [
+        {
+          "count": 1,
+          "price": 300,
+          "currency": "NX"
+        },
+        {
+          "count": 11,
+          "price": 3000,
+          "currency": "NX",
+          "originalPrice": 3300
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "One use displays your message and a weather effect for 30 seconds; permanent refers to item expiry."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/bvsnqkjv/sprinkled-flowers-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Weather Effects illustration"
+    },
+    {
+      "id": "founders-soap-bubbles",
+      "name": "Soap Bubbles",
+      "category": "Weather Effects",
+      "prices": [
+        {
+          "count": 1,
+          "price": 300,
+          "currency": "NX"
+        },
+        {
+          "count": 11,
+          "price": 3000,
+          "currency": "NX",
+          "originalPrice": 3300
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "One use displays your message and a weather effect for 30 seconds; permanent refers to item expiry."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/2hffh03h/soap-bubbles-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Weather Effects illustration"
+    },
+    {
+      "id": "founders-sprinkled-presents",
+      "name": "Sprinkled Presents",
+      "category": "Weather Effects",
+      "prices": [
+        {
+          "count": 1,
+          "price": 300,
+          "currency": "NX"
+        },
+        {
+          "count": 11,
+          "price": 3000,
+          "currency": "NX",
+          "originalPrice": 3300
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "One use displays your message and a weather effect for 30 seconds; permanent refers to item expiry."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/2vcplwb1/sprinkled-presents-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Weather Effects illustration"
+    },
+    {
+      "id": "founders-sprinkled-candy",
+      "name": "Sprinkled Candy",
+      "category": "Weather Effects",
+      "prices": [
+        {
+          "count": 1,
+          "price": 300,
+          "currency": "NX"
+        },
+        {
+          "count": 11,
+          "price": 3000,
+          "currency": "NX",
+          "originalPrice": 3300
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "One use displays your message and a weather effect for 30 seconds; permanent refers to item expiry."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/welbmzpg/sprinkled-candy-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Weather Effects illustration"
+    },
+    {
+      "id": "founders-sprinkled-chocolate",
+      "name": "Sprinkled Chocolate",
+      "category": "Weather Effects",
+      "prices": [
+        {
+          "count": 1,
+          "price": 300,
+          "currency": "NX"
+        },
+        {
+          "count": 11,
+          "price": 3000,
+          "currency": "NX",
+          "originalPrice": 3300
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "One use displays your message and a weather effect for 30 seconds; permanent refers to item expiry."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/1xfpmsr3/sprinkled-chocolate-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Weather Effects illustration"
+    },
+    {
+      "id": "founders-sprinkled-flower-petals",
+      "name": "Sprinkled Flower Petals",
+      "category": "Weather Effects",
+      "prices": [
+        {
+          "count": 1,
+          "price": 300,
+          "currency": "NX"
+        },
+        {
+          "count": 11,
+          "price": 3000,
+          "currency": "NX",
+          "originalPrice": 3300
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "One use displays your message and a weather effect for 30 seconds; permanent refers to item expiry."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/slif231y/sprinkled-flower-petals-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Weather Effects illustration"
+    },
+    {
+      "id": "founders-sprinkled-maple-leaves",
+      "name": "Sprinkled Maple Leaves",
+      "category": "Weather Effects",
+      "prices": [
+        {
+          "count": 1,
+          "price": 300,
+          "currency": "NX"
+        },
+        {
+          "count": 11,
+          "price": 3000,
+          "currency": "NX",
+          "originalPrice": 3300
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "One use displays your message and a weather effect for 30 seconds; permanent refers to item expiry."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/xmhhedfo/sprinkled-maple-leaves-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Weather Effects illustration"
+    },
+    {
+      "id": "founders-fireworks",
+      "name": "Fireworks",
+      "category": "Weather Effects",
+      "prices": [
+        {
+          "count": 1,
+          "price": 300,
+          "currency": "NX"
+        },
+        {
+          "count": 11,
+          "price": 3000,
+          "currency": "NX",
+          "originalPrice": 3300
+        }
+      ],
+      "duration": {
+        "kind": "permanent",
+        "days": null,
+        "text": "Permanent"
+      },
+      "sale": {
+        "starts": "2026-10-06-after-maintenance",
+        "ends": null,
+        "kind": "evergreen"
+      },
+      "details": [
+        "One use displays your message and a weather effect for 30 seconds; permanent refers to item expiry."
+      ],
+      "sourceUrl": "https://www.nexon.com/maplestory/news/sale/45819/founder-s-access-cash-shop",
+      "image": "https://g.nexonstatic.com/media/ojyhiklh/fireworks-founders-access-cash-shop-maplestory-classic-world.png",
+      "imageAlt": "Weather Effects illustration"
+    }
+  ]
+}

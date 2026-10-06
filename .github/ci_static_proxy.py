@@ -76,6 +76,8 @@ def upstream(path):
     parsed=urlsplit(path)
     p=parsed.path
     suffix=('?'+parsed.query) if parsed.query else ''
+    nexon_match=re.fullmatch(r'/game-media/nexon/([a-zA-Z0-9]+/[a-zA-Z0-9-]+\.(?:png|jpe?g|webp))',p)
+    if nexon_match: return 'https://g.nexonstatic.com/media/'+nexon_match.group(1)
     # Keep legacy primary URLs working, but resolve the numeric ID through
     # the Classic icon catalog instead of the incompatible DreamMS/GMS table.
     primary_match=re.match(r'^/game-media/items/primary/(\d+)(?:/icon)?$',p)

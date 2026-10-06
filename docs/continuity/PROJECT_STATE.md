@@ -1,5 +1,11 @@
 # MapleStory Classic Builder — Project State
 
+## 2026-10-06 — Founder’s Access Cash Shop source checkpoint
+
+- Release `0.13.0-founders-cash-shop` adds all 69 distinct Nexon-priced products as the default catalog, including discount/pack prices, Aurora Stamps, item expiry and separate sale windows.
+- The complete 872-row prior catalog is preserved as Beta Cash Shop with unchanged beta prices. Duration tags sit beside each price: grey time-limited/unconfirmed and red uppercase PERMANENT. Pet life and timed contents of permanent packages are explicit.
+- Build and local data/regression checks pass. Deployment, six release gates and live screenshot verification are pending at this checkpoint; see CASH_SHOP_AUDIT_2026-10-06.md.
+
 ## 2026-10-06 — quest-linked ETC planner and level 100
 
 - Release `0.12.1-quest-etc-level-100` is deployed from current OSMS records. All 322 source quests remain represented; each active build has 310 class-isolated quests. 86 records now expose explicit citizenship town/grade requirements.

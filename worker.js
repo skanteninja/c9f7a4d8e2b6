@@ -93,6 +93,8 @@ async function classicAvatarAsset(request, url, ctx) {
 
 function upstreamFor(url) {
   const p = url.pathname;
+  const nexon=p.match(/^\/game-media\/nexon\/([a-z0-9]+\/[a-z0-9-]+\.(?:png|jpe?g|webp))$/i);
+  if(nexon)return 'https://g.nexonstatic.com/media/'+nexon[1];
   const emblem=p.match(/^\/game-media\/class-emblems\/(Beginner|Warrior|Magician|Bowman|Thief)\.png$/);
   if(emblem)return 'https://media.maplestorywiki.net/yetidb/Class_'+emblem[1]+'.png';
   if (p.startsWith('/game-data/')) return CURRENT_DATA + p.slice('/game-data/'.length) + url.search;

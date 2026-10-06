@@ -1,0 +1,35 @@
+[data-page="cashshop"] .cash-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0}
+[data-page="cashshop"] .cash-toolbar label:not(.toggle){display:grid;gap:5px;font-size:11px;color:#d8c39e}
+[data-page="cashshop"] .cash-toolbar input[type="search"]{flex:1;min-width:180px}
+[data-page="cashshop"] .cash-toolbar select{max-width:100%;min-height:40px}
+[data-page="cashshop"] .cash-catalog-note{display:flex;flex-wrap:wrap;gap:9px 20px;padding:14px 18px;border:1px solid #78633e;background:#231720;color:#d9cec3;font-size:12px;line-height:1.6;margin-top:12px}
+[data-page="cashshop"] .cash-catalog-note b{color:#f3ddaa;font-size:13px}
+[data-page="cashshop"] .cash-catalog-note span{flex:1 1 400px}
+[data-page="cashshop"] a{color:#e4c78e;text-underline-offset:3px}
+[data-page="cashshop"] #cash-results{grid-template-columns:repeat(auto-fit,minmax(min(100%,350px),1fr));align-items:start}
+[data-page="cashshop"] .cash-offer{display:grid;grid-template-columns:60px minmax(0,1fr);gap:14px;min-width:0;padding:20px!important;align-items:start}
+[data-page="cashshop"] .cash-offer-art{width:60px;height:70px;object-fit:contain;image-rendering:auto;align-self:start;filter:none}
+[data-page="cashshop"] .cash-offer-body{min-width:0}
+[data-page="cashshop"] .cash-category-label{display:block;color:#c9b598;font-size:10px;line-height:1.5;margin-bottom:6px}
+[data-page="cashshop"] .cash-offer h3{font-size:16px;line-height:1.35;color:#f2e6d5;margin:0 0 12px;overflow-wrap:anywhere}
+[data-page="cashshop"] .cash-meta{display:grid;gap:8px}
+[data-page="cashshop"] .cash-price-row{display:flex;flex-wrap:wrap;align-items:center;gap:7px 9px;line-height:1.6}
+[data-page="cashshop"] .cash-price-row b{font-size:14px;color:#f4d297;white-space:nowrap}
+[data-page="cashshop"] .cash-price-row small{font-size:11px;color:#cfc5bb}
+[data-page="cashshop"] .cash-price-row del{font-size:10px;color:#a69b9f}
+[data-page="cashshop"] .cash-meta .cash-duration{display:inline-block;font-size:10px;font-weight:700;border:1px solid;padding:2px 6px;line-height:1.6;opacity:1;white-space:normal;overflow-wrap:anywhere}
+[data-page="cashshop"] .cash-meta .cash-duration-permanent{color:#ff646d;border-color:#bc4651;background:#301a23;letter-spacing:.055em;text-transform:uppercase}
+[data-page="cashshop"] .cash-meta .cash-duration-timed,[data-page="cashshop"] .cash-meta .cash-duration-unknown{color:#c3c3c8;border-color:#727078;background:#29272f}
+[data-page="cashshop"] .cash-sale-window{font-size:11px;line-height:1.6;color:#c9b598;margin:12px 0 8px}
+[data-page="cashshop"] .cash-offer-details{font-size:11px;line-height:1.65;color:#d4c9bd;margin-top:10px;overflow-wrap:anywhere}
+[data-page="cashshop"] .cash-offer-details summary{cursor:pointer;color:#e4c78e;padding:5px 0}
+[data-page="cashshop"] .cash-offer-details ul{padding-left:17px;margin:9px 0}
+[data-page="cashshop"] .cash-offer-details li{margin-bottom:6px}
+[data-page="cashshop"] .cash-reward-list{max-height:260px;overflow:auto}
+[data-page="cashshop"] .cash-reward-list li{display:flex;justify-content:space-between;gap:14px}
+[data-page="cashshop"] .cash-item-id{display:block;font-size:10px;color:#aaa1a8;margin-top:8px}
+[data-page="cashshop"] .cash-card.cash-unavailable::after{display:none}
+[data-page="cashshop"] .cash-card.cash-unavailable .cash-price-row b{font-size:12px;color:#c4a3a7}
+[data-page="cashshop"] #cash-load-more{display:block;margin:20px auto;max-width:100%;padding:12px 20px}
+[data-page="cashshop"] #cash-load-more[hidden]{display:none}
+@media(max-width:600px){[data-page="cashshop"] .cash-toolbar label:not(.toggle){width:100%}[data-page="cashshop"] .cash-toolbar select,[data-page="cashshop"] .cash-toolbar input[type="search"]{width:100%}[data-page="cashshop"] .cash-offer{grid-template-columns:44px minmax(0,1fr);gap:10px;padding:16px!important}[data-page="cashshop"] .cash-offer-art{width:44px;height:56px}}

@@ -1,0 +1,53 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const {cashShopCatalogs,betaDuration}=require('./cash-shop-catalog.cjs');
+const catalog=cashShopCatalogs('regression');
+const current=catalog.catalogs['founders-access'].items,beta=catalog.catalogs.beta.items;
+const raw=JSON.parse(fs.readFileSync('audit/beta-cash-shop.json','utf8')).categories.flatMap(c=>c.items);
+assert.equal(current.length,69);
+assert.equal(beta.length,872);
+assert.equal(catalog.defaultCatalog,'founders-access');
+assert.equal(new Set(current.map(x=>x.id)).size,69);
+assert.equal(new Set(beta.map(x=>x.id)).size,872);
+for(const original of raw){
+  const archived=beta.find(x=>x.id===original.id);
+  for(const [key,value] of Object.entries(original))assert.deepEqual(archived[key],value,`Beta ${original.id}: ${key} changed`);
+  assert.equal(archived.prices[0].price,original.price);
+}
+const find=name=>current.find(x=>x.name===name);
+for(const name of ['Monthly Essentials','Convenience Essentials Pack','Pet Booster Essentials Pack'])assert.equal(find(name).prices[0].price,9900);
+assert.equal(find('Monthly Essentials').duration.days,30);
+assert.equal(find('Convenience Essentials Pack').duration.kind,'permanent');
+assert(find('Convenience Essentials Pack').details.some(x=>x.includes('Safety Charm')&&x.includes('90-day')));
+assert(find('Pet Booster Essentials Pack').details.some(x=>x.includes('Food')&&x.includes('90-day')));
+assert.deepEqual(find('Megaphone').prices.map(x=>[x.count,x.price]),[[1,350],[3,1000],[12,3600]]);
+assert.deepEqual(find('Safety Charm').prices.map(x=>[x.count,x.price]),[[1,800],[3,2300],[12,8400]]);
+assert.deepEqual(find("Founder's Mystery Fashion Crate").prices.map(x=>[x.count,x.price]),[[1,3500],[11,35000]]);
+assert.equal(find("Founder's Mystery Fashion Crate").duration.days,7);
+assert.equal(find("Founder's Mystery Fashion Crate").sale.ends,'2026-10-28T07:59:00Z');
+assert.equal(find('Aurora Mystery Fashion Crate').prices[0].currency,'Aurora Stamps');
+assert.equal(find('Aurora Mystery Fashion Crate').sale.ends,'2027-01-13T07:59:00Z');
+assert.equal(find('Mystery Palette Exchange Coupon').prices[0].price,5);
+assert.equal(find('Mystery Palette Exchange Coupon').duration.days,14);
+assert(find('Mystery Palette Exchange Coupon').duration.text.includes('30-day'));
+assert.equal(find('Dark Rider').duration.days,10);
+assert.equal(find('Dark Rider').sale.ends,'2026-11-18T17:59:00Z');
+assert.equal(find('Signature Hair Coupon').sale.ends,null);
+assert.equal(find('Brown Puppy').duration.days,30);
+assert.equal(beta.find(x=>x.id===5000001).duration.days,3);
+assert.equal(beta.find(x=>x.name==='Mystery Hair Coupon').duration.kind,'permanent');
+assert.equal(find('Mystery Hair Coupon').duration.days,14);
+assert.equal(betaDuration({period:0,price:0,on_sale:false}).kind,'unknown');
+for(const item of current){
+  assert(['timed','permanent'].includes(item.duration.kind));
+  assert(item.prices.every(p=>p.price>0&&p.count>0));
+  assert(item.image.startsWith('/game-media/nexon/'));
+}
+assert.equal(current.filter(i=>i.duration.kind==='permanent').length,27);
+assert.equal(beta.filter(i=>i.on_sale&&i.price>0).length,130);
+const output=fs.existsSync('dist/cash-shop-catalogs.json')?'dist':'site';
+const built=JSON.parse(fs.readFileSync(`${output}/cash-shop-catalogs.json`,'utf8'));
+assert.deepEqual({...built,version:'regression'},catalog);
+assert(fs.readFileSync(`${output}/app.js`,'utf8').includes(`cash-shop-catalogs.json?v=${built.version}`));
+assert(fs.readFileSync(`${output}/sw.js`,'utf8').includes(`cash-shop-catalogs.json?v=${built.version}`));
+console.log('cash-shop-regression-ok: 69 release offers; 872 beta rows preserved; prices, expiry and sale windows verified');

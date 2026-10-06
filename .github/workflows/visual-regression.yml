@@ -176,10 +176,15 @@ jobs:
               d.querySelector('#nav .nav-btn[data-page="cashshop"]')?.click();
               await wait(2600);
               const cash=d.getElementById('cash-results');
+              if(cash?.querySelectorAll('.cash-card').length!==69)throw Error('Founder’s Access Cash Shop missing');
+              if(!cash.querySelector('.cash-duration-permanent')||!cash.querySelector('.cash-duration-timed'))throw Error('Cash Shop duration tags missing');
+              const cashCatalog=d.getElementById('cash-catalog');cashCatalog.value='beta';cashCatalog.dispatchEvent(new w.Event('change',{bubbles:true}));
+              await wait(400);
               const unavailable=[...(cash?.querySelectorAll('.cash-card.cash-unavailable')||[])];
               if(!unavailable.length)throw Error('Cash Shop unavailable styling missing');
               if(/\b0\s*NX\b/i.test(cash?.innerText||''))throw Error('Cash Shop still displays 0 NX');
               if(unavailable.some(card=>!/UNAVAILABLE/i.test(card.querySelector('.cash-meta b')?.textContent||'')))throw Error('Unavailable Cash Shop price copy missing');
+              cashCatalog.value='founders-access';cashCatalog.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(400);
 
               const pages=['dashboard','leveling','quests','equipment','skills','etc','classicdb','cashshop','beauty'];
               const broken=[],external=[];

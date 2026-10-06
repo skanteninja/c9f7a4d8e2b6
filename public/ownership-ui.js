@@ -96,7 +96,7 @@
     const db=document.querySelector('.page[data-page="classicdb"] .db-hero');
     if(db&&!db.dataset.ownedHero){db.dataset.ownedHero='1';db.innerHTML='<div><span class="eyebrow">TOP CLASSIC WORLD</span><h2>Database</h2><p>Search items, equipment, monsters, maps, quests, skills, crafting and portals in one place.</p></div>';}
     const cash=document.querySelector('.page[data-page="cashshop"] .db-hero');
-    if(cash&&!cash.dataset.ownedHero){cash.dataset.ownedHero='1';cash.innerHTML='<div><span class="eyebrow">TOP CLASSIC WORLD</span><h2>Cash Shop</h2><p>Browse the current catalog, prices and availability.</p></div>';}
+    if(cash&&!cash.dataset.ownedHero){cash.dataset.ownedHero='1';cash.innerHTML='<div><span class="eyebrow">TOP CLASSIC WORLD</span><h2>Cash Shop</h2><p>Founder’s Access offers, item lifetimes and the archived Beta Cash Shop.</p></div>';}
     const beauty=document.querySelector('.page[data-page="beauty"] .db-hero');
     if(beauty&&!beauty.dataset.ownedHero){beauty.dataset.ownedHero='1';beauty.innerHTML='<div><span class="eyebrow">TOP CLASSIC WORLD</span><h2>Beauty</h2><p>Hair and face styles with exact IDs and artwork.</p></div>';}
   }
