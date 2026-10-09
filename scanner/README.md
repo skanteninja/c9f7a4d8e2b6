@@ -39,3 +39,11 @@ In calibration, select Shop title in the open shop, Channel around the channel i
 Optional cursor association: while hovering a shop sign, capture/calibrate that screen; choose Cursor anchor and click where the game pointer was, then choose Shop sign and drag around its name. This defines the offset between the pointer and visible shop label. While browsing, hold the pointer still long enough for OCR, then click the shop. The scanner observes mouse presses, associates a recent nearby label, and suggests it if an open-shop title is unavailable. The suggestion expires after 20 seconds. It does not move/click the mouse. Confirm the name: this calibration-dependent suggestion is not guaranteed identification. Multiple monitor offsets use DXcam monitor geometry.
 
 The dashboard and SHOPPER page download the latest public Windows package. Every change under scanner/ rebuilds a versioned GitHub release and updates scanner-latest after successful checks. Public downloads never contain upload credentials. Use the private connection previously supplied to you. Tesseract must be installed separately.
+
+## Nickname and scanner improvement data (0.14.2)
+
+The automatic nickname prompt appears once on first setup. Existing saved nicknames are kept silently, including across software updates. If setup is canceled, open **Settings → Change nickname** to finish it; restarting does not ask again. Later nickname changes are available only through Settings.
+
+**Settings → Share reviewed scanner examples** controls whether new confirmed listings include OCR readings and candidate matches. Sharing is enabled for this project by default. The same upload durably stores the reviewed item crop and your corrected item, price, quantity, shop, channel, FM room, public nickname, timestamp and observed stats. Private connection keys, full screenshots and local settings are excluded. Already queued confirmations retain their sharing choice.
+
+The website queues examples for GitHub; an Actions workflow archives them approximately every five minutes, subject to GitHub scheduling delays. Listing updates remain immediate. See `learning/scanner/README.md` for the dataset format. These examples support later scanner evaluation and code improvements; they do not automatically train a model.

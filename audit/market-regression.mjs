@@ -25,3 +25,17 @@ const unsupported=await api.marketApi(new Request('https://market.test/api/marke
 const unavailable=await api.marketApi(new Request('https://market.test/api/market/status'),{});assert.equal(unavailable.status,503);
 assert.equal((await get('q=nonexistent')).total,0);
 db.close();console.log('Market regression passed: input validation, authentication, retries, timestamps, history, slot identity, replacement and world isolation.');
+const learningEnv=environment();
+const sample={version:'0.14.2',readings:{name:'Sw0rd',price:'1,000',quantity:'10',shop:'Shop',channel:'CH 1',room:'FM 1',api_key:'SECRET'},matches:[{itemId:1302000,confidence:.8}],api_key:'SECRET'};
+const normalized=api.normalizeListing({...base,learning:sample});
+assert.ok(!JSON.stringify(normalized.learning).includes('SECRET'));
+const learnUpload=()=>learningEnv.object.fetch(new Request('https://market.test/api/market/listings',{method:'POST',headers:{'X-Market-Contributor':'private-auth-id'},body:JSON.stringify({listings:[normalized]})}));
+assert.equal((await (await learnUpload()).json()).accepted,1);
+assert.equal((await (await learnUpload()).json()).duplicates,1);
+const exported=await (await api.marketApi(new Request('https://market.test/api/market/learning'),learningEnv.env)).json();
+assert.equal(exported.examples.length,1);assert.equal(exported.examples[0].corrected.itemId,1302000);
+assert.ok(!JSON.stringify(exported).includes('private-auth-id'));assert.ok(!JSON.stringify(exported).includes('SECRET'));
+assert.equal((await (await learningEnv.object.fetch(new Request('https://market.test/api/market/learning?after='+exported.next))).json()).examples.length,0);
+assert.throws(()=>api.normalizeLearning({...sample,matches:[{itemId:1302000,confidence:2}]}));
+assert.equal((await api.marketApi(new Request('https://market.test/api/market/learning',{method:'POST',body:'{}'}),learningEnv.env)).status,405);
+learningEnv.db.close();console.log('Learning regression passed: reviewed examples, allowlisting, idempotency and export cursors.');

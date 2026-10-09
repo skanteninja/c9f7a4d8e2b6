@@ -541,3 +541,7 @@ Before fixing a bug that resembles an old issue:
 3. reuse the proven architectural fix rather than recreating a one-off patch,
 4. regression-test the build where the issue was already solved,
 5. record any new regression or durable fix here.
+
+### Scanner 0.14.2: nickname persistence and improvement dataset
+
+Nickname setup runs once; subsequent changes are through Settings. Reviewed OCR readings, candidate matches, corrected listings and item-row evidence are durably collected through the existing authenticated API and archived in GitHub every approximately five minutes. Sharing is controlled in Settings. Private keys, full screenshots and auth identity are excluded. This supports later evaluation and scanner code improvements; it does not automatically train a model.

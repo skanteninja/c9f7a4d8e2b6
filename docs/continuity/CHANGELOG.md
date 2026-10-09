@@ -329,3 +329,7 @@ The continuity system now explicitly preserves the following previously fixed or
 - Added persistent project state, known-bugs tracker and durable decisions files.
 - Recorded current multi-build direction: Fighter, Hunter and I/L Wizard.
 - Defined maintenance rule: update continuity documentation after meaningful project work.
+
+### Scanner 0.14.2: nickname persistence and improvement dataset
+
+Nickname setup runs once; subsequent changes are through Settings. Reviewed OCR readings, candidate matches, corrected listings and item-row evidence are durably collected through the existing authenticated API and archived in GitHub every approximately five minutes. Sharing is controlled in Settings. Private keys, full screenshots and auth identity are excluded. This supports later evaluation and scanner code improvements; it does not automatically train a model.

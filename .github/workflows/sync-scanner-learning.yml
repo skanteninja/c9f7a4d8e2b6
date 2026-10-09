@@ -1,0 +1,38 @@
+name: Archive reviewed scanner examples
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sync-scanner-learning.yml'
+      - 'audit/sync-scanner-learning.py'
+permissions:
+  contents: write
+concurrency:
+  group: scanner-learning-archive
+  cancel-in-progress: false
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify archive filtering
+        run: python -m unittest discover -s audit -p 'test_scanner_archive.py'
+      - name: Archive reviewed examples
+        run: python audit/sync-scanner-learning.py
+      - name: Commit new examples
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add learning/scanner
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Archive reviewed scanner OCR examples'
+          git pull --rebase origin main
+          git push origin main

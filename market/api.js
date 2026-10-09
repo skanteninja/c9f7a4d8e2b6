@@ -16,6 +16,22 @@ function integer(value,name,min,max) {
   if(!Number.isSafeInteger(value)||value<min||value>max)throw new Error(`Invalid ${name}`);
   return value;
 }
+export function normalizeLearning(raw) {
+  if(raw==null)return null;
+  if(typeof raw!=='object'||Array.isArray(raw))throw new Error('Invalid learning example');
+  const readings={};
+  for(const key of ['name','price','quantity','shop','channel','room']) {
+    const value=raw.readings?.[key]??'';
+    if(typeof value!=='string'||value.length>512||/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value))throw new Error('Invalid OCR reading');
+    readings[key]=value;
+  }
+  if(!Array.isArray(raw.matches)||raw.matches.length>5)throw new Error('Invalid OCR matches');
+  const matches=raw.matches.map(m=>{
+    if(!itemsById.has(m.itemId)||!Number.isFinite(m.confidence)||m.confidence<0||m.confidence>1)throw new Error('Invalid OCR match');
+    return {itemId:m.itemId,confidence:m.confidence};
+  });
+  return {version:text(raw.version,'scanner version',40),readings,matches};
+}
 export function normalizeListing(raw, now=Date.now()) {
   const itemId=integer(raw.itemId,'item ID',1,99999999);
   if(!itemsById.has(itemId))throw new Error('Item is not in the catalog');
@@ -43,7 +59,7 @@ export function normalizeListing(raw, now=Date.now()) {
     slot:integer(raw.slot,'shop slot',1,200),quantity:integer(raw.quantity,'quantity',1,9999999),
     price:integer(raw.price,'price',0,9000000000000),priceBasis:raw.priceBasis,
     stats:safeStats,statsKnown:raw.statsKnown===true,observedAt:new Date(observedAt).toISOString(),evidence,
-    reviewed:true
+    reviewed:true,learning:normalizeLearning(raw.learning)
   };
 }
 export async function marketApi(request,env) {
@@ -67,7 +83,7 @@ export async function marketApi(request,env) {
     }catch(error){return json({error:error.message||'Invalid listing upload'},400);}
   }
   if(request.method!=='GET')return json({error:'Method not allowed'},405);
-  if(!['/api/market/listings','/api/market/status','/api/market/live','/api/market/history','/api/market/evidence'].includes(p))return json({error:'Not found'},404);
+  if(!['/api/market/listings','/api/market/status','/api/market/live','/api/market/history','/api/market/evidence','/api/market/learning'].includes(p))return json({error:'Not found'},404);
   return env.MARKET.get(env.MARKET.idFromName('shared-classic-market-v1')).fetch(request);
 }
 
@@ -87,6 +103,8 @@ export class MarketListings {
       CREATE TABLE IF NOT EXISTS observations (event_id TEXT PRIMARY KEY, offer_id TEXT NOT NULL,
         item_id INTEGER NOT NULL, observed_at TEXT NOT NULL, received_at TEXT NOT NULL, data_json TEXT NOT NULL);
       CREATE INDEX IF NOT EXISTS observations_offer ON observations(offer_id,observed_at);
+      CREATE TABLE IF NOT EXISTS scanner_learning (sequence INTEGER PRIMARY KEY AUTOINCREMENT,
+        sample_id TEXT UNIQUE NOT NULL, received_at TEXT NOT NULL, data_json TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS rate_limits (contributor TEXT PRIMARY KEY, window INTEGER NOT NULL, count INTEGER NOT NULL);`);
     if(!Array.from(this.sql.exec('PRAGMA table_info(offers)')).some(column=>column.name==='nickname'))this.sql.exec("ALTER TABLE offers ADD COLUMN nickname TEXT NOT NULL DEFAULT 'Anonymous contributor'");
   }
@@ -108,6 +126,12 @@ export class MarketListings {
       const counts=this.sql.exec('SELECT COUNT(*) AS count,MAX(last_seen) AS lastSeen FROM offers').one();
       const scopes=Array.from(this.sql.exec('SELECT DISTINCT server,world FROM offers ORDER BY server,world'));
       return json({available:true,count:counts.count,lastSeen:counts.lastSeen,scopes});
+    }
+    if(p.endsWith('/learning')) {
+      const after=Number(u.searchParams.get('after')||0);
+      if(!Number.isSafeInteger(after)||after<0)return json({error:'Invalid learning cursor'},400);
+      const rows=Array.from(this.sql.exec('SELECT sequence,sample_id,received_at,data_json FROM scanner_learning WHERE sequence>? ORDER BY sequence LIMIT 100',after));
+      return json({examples:rows.map(r=>({sequence:r.sequence,id:r.sample_id,receivedAt:r.received_at,...JSON.parse(r.data_json)})),next:rows.length?rows[rows.length-1].sequence:after});
     }
     if(p.endsWith('/history')) {
       const offerId=u.searchParams.get('offerId');if(!offerId||offerId.length>64)return json({error:'Offer ID required'},400);
@@ -131,10 +155,17 @@ export class MarketListings {
         for(const row of listings) {
           const event=`${contributor}:${row.eventId}`;
           if(Array.from(this.sql.exec('SELECT event_id FROM observations WHERE event_id=?',event)).length){duplicates++;continue;}
+          if(row.learning) {
+            // Build public ground truth explicitly. Internal auth identity stays private.
+            const corrected={};
+            for(const key of ['itemId','name','price','quantity','priceBasis','shop','channel','room','slot','observedAt','nickname','server','world','stats','statsKnown'])corrected[key]=row[key];
+            const sample={schemaVersion:1,scanner:row.learning,corrected,evidence:row.evidence};
+            this.sql.exec('INSERT INTO scanner_learning (sample_id,received_at,data_json) VALUES (?,?,?)',crypto.randomUUID(),new Date().toISOString(),JSON.stringify(sample));
+          }
           const old=Array.from(this.sql.exec('SELECT * FROM offers WHERE server=? AND world=? AND channel=? AND room=? AND seller=? AND shop=? AND slot=?',row.server,row.world,row.channel,row.room,row.seller,row.shop,row.slot))[0];
           const id=old?.id||crypto.randomUUID(),stats=JSON.stringify(row.stats),first=old&&old.item_id===row.itemId?old.first_seen:row.observedAt;
           const unit=row.priceBasis==='unit'?row.price:row.price/row.quantity;
-          this.sql.exec('INSERT INTO observations VALUES (?,?,?,?,?,?)',event,id,row.itemId,row.observedAt,new Date().toISOString(),JSON.stringify({...row,evidence:undefined,offerId:id}));
+          this.sql.exec('INSERT INTO observations VALUES (?,?,?,?,?,?)',event,id,row.itemId,row.observedAt,new Date().toISOString(),JSON.stringify({...row,evidence:undefined,learning:undefined,offerId:id}));
           if(!old||row.observedAt>=old.last_seen) {
             this.sql.exec(`INSERT INTO offers (id,item_id,server,world,channel,room,seller,shop,slot,quantity,price,price_basis,unit_price,stats_json,stats_known,first_seen,last_seen,contributor,evidence,nickname) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
               ON CONFLICT(id) DO UPDATE SET item_id=excluded.item_id,quantity=excluded.quantity,price=excluded.price,

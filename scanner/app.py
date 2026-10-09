@@ -5,7 +5,7 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
 from PIL import Image, ImageTk, ImageOps
-from core import UploadQueue, match_items, parse_integer, now_iso, validate_nickname, read_location, cursor_rectangle, associated_shop
+from core import UploadQueue, match_items, parse_integer, now_iso, validate_nickname, read_location, cursor_rectangle, associated_shop, needs_nickname_setup, learning_readings
 
 ASSETS = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parent))
 HOME = Path(os.getenv('LOCALAPPDATA', str(Path.home()))) / 'TCW-Shopper'
@@ -13,7 +13,7 @@ HOME.mkdir(parents=True, exist_ok=True)
 
 class Scanner:
     def __init__(self, root):
-        self.root = root; root.title('TCW · SHOPPER Scanner 0.14.1'); root.geometry('1140x800')
+        self.root = root; root.title('TCW · SHOPPER Scanner 0.14.2'); root.geometry('1140x800')
         self.messages = queue.Queue(); self.uploads = UploadQueue(HOME / 'uploads.sqlite')
         self.catalog = json.loads((ASSETS / 'items.json').read_text(encoding='utf-8'))['items']
         self.settings_path = HOME / 'settings.json'
@@ -25,16 +25,35 @@ class Scanner:
             'world':'', 'channel':'', 'room':'', 'seller':'', 'shop':'', 'monitor':'0',
             'row_stride':'36', 'rows':'4', 'price_basis':'unit', 'tesseract':'', 'nickname':''}.items()}
         self.edit = {key: tk.StringVar() for key in ['item','price','quantity','slot','observed_at','stats']}
+        self.share_learning = tk.BooleanVar(value=self.config.get('share_learning', True))
         self.stats_known = tk.BooleanVar(value=False)
         self.status = tk.StringVar(value='Load your connection file, then calibrate a visible shop.')
         self.cursor_click=None; self.cursor_stop=threading.Event(); self.context_signature=None
-        self.draw_ui(); self.root.after_idle(self.ask_nickname); self.root.after(200, self.pump); root.protocol('WM_DELETE_WINDOW', self.close)
+        self.draw_ui(); self.root.after_idle(self.first_setup); self.root.after(200, self.pump); root.protocol('WM_DELETE_WINDOW', self.close)
+
+    def first_setup(self):
+        ask = needs_nickname_setup(self.config)
+        self.config['nickname_setup_seen'] = True
+        self.save()  # Persist before opening: cancel or restart never repeats setup.
+        if ask: self.ask_nickname()
+
+    def settings(self):
+        window = tk.Toplevel(self.root); window.title('SHOPPER Settings')
+        panel = ttk.Frame(window, padding=20); panel.pack(fill='both', expand=True)
+        ttk.Label(panel, text='Public nickname', font=('Segoe UI', 12, 'bold')).pack(anchor='w')
+        ttk.Label(panel, textvariable=self.vars['nickname']).pack(anchor='w', pady=6)
+        ttk.Button(panel, text='Change nickname', command=self.ask_nickname).pack(anchor='w')
+        ttk.Checkbutton(panel, text='Share reviewed scanner examples with the project',
+                        variable=self.share_learning, command=self.save).pack(anchor='w', pady=(20,6))
+        ttk.Label(panel, text='When you confirm a listing, its item-row crop, OCR readings and corrected\nitem, price, quantity, shop, channel and room are saved to the public GitHub\nproject. No full-screen captures, connection keys or settings are uploaded.\nExamples help us evaluate and improve future scanner versions.', wraplength=540).pack(anchor='w')
+        ttk.Label(panel, text=f'{self.uploads.count()} confirmed uploads waiting to send.').pack(anchor='w', pady=12)
+        ttk.Button(panel, text='Save & close', command=lambda: (self.save(), window.destroy())).pack(anchor='e')
 
     def ask_nickname(self):
         while True:
             name=simpledialog.askstring('Your public nickname','Choose a nickname for your scans. It can be anything; your game character name is not required.',initialvalue=self.vars['nickname'].get(),parent=self.root)
             if name is None:
-                self.status.set('Choose a nickname before publishing scans.');return
+                self.status.set('Set your nickname in Settings before publishing scans.');return
             try:self.vars['nickname'].set(validate_nickname(name));self.save();return
             except ValueError as exc:messagebox.showwarning('Nickname',str(exc))
 
@@ -48,7 +67,7 @@ class Scanner:
         ttk.Label(outer, text='SHOPPER · Shared shop scanner', font=('Segoe UI', 22, 'bold')).pack(anchor='w')
         ttk.Label(outer, text='Browse shops manually. Review captured prices, then publish to your website.').pack(anchor='w', pady=(3,12))
         connection = ttk.Frame(outer); connection.pack(fill='x')
-        ttk.Button(connection, text='Change nickname', command=self.ask_nickname).pack(side='left',padx=(0,8))
+        ttk.Button(connection, text='Settings', command=self.settings).pack(side='left',padx=(0,8))
         ttk.Label(connection,textvariable=self.vars['nickname']).pack(side='left',padx=(0,12))
         ttk.Button(connection, text='Load connection file', command=self.load_connection).pack(side='left')
         ttk.Button(connection, text='Save settings', command=self.save).pack(side='left', padx=8)
@@ -93,7 +112,7 @@ class Scanner:
         q=self.edit['item'].get().lower();self.item_combo['values']=[f"{i['name']} · #{i['id']}" for i in self.catalog if q in i['name'].lower()][:60]
 
     def save(self):
-        self.config.update({k:v.get() for k,v in self.vars.items()});self.config['regions']=self.regions
+        self.config.update({k:v.get() for k,v in self.vars.items()});self.config['regions']=self.regions;self.config['share_learning']=self.share_learning.get()
         self.settings_path.write_text(json.dumps(self.config,indent=2),encoding='utf-8')
         self.status.set('Settings saved locally. Keep the connection file private.')
 
@@ -307,6 +326,7 @@ class Scanner:
             if not all(listing[k] for k in ['world','seller','shop']):raise ValueError('Confirm world and seller for this shop.')
             if min(listing['quantity'],listing['channel'],listing['room'],listing['slot'])<1:raise ValueError('Quantity, channel, room and slot must be positive.')
             if not self.vars['api_key'].get():raise ValueError('Load your private connection file first.')
+            if self.share_learning.get():listing['learning']=learning_readings(self.selected)
             self.uploads.enqueue(listing);self.selected=None;self.status.set(f'Confirmed and queued. {self.uploads.count()} uploads pending.');self.send()
         except Exception as exc:messagebox.showerror('Review listing',str(exc))
 

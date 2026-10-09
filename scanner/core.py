@@ -110,3 +110,20 @@ def associated_shop(hover,click):
     if not 0<=click[1]-hover[2]<4:return None
     if abs(click[0][0]-hover[0][0])>=35 or abs(click[0][1]-hover[0][1])>=35:return None
     return hover[1],click[1]
+
+
+def needs_nickname_setup(config):
+    """Existing aliases migrate silently; canceled setup never prompts again."""
+    return not config.get('nickname_setup_seen', False) and not str(config.get('nickname', '')).strip()
+
+
+def learning_readings(candidate):
+    """Explicit allowlist: never serialize settings, credentials or full frames."""
+    readings = {'name': str(candidate.get('raw_name', ''))[:512],
+                'price': str(candidate.get('price', ''))[:512],
+                'quantity': str(candidate.get('quantity', ''))[:512]}
+    for key in ('shop', 'channel', 'room'):
+        readings[key] = str(candidate.get('context_reads', {}).get(key, ''))[:512]
+    return {'version': '0.14.2', 'readings': readings,
+            'matches': [{'itemId': item['id'], 'confidence': round(score, 4)}
+                        for score, item in candidate.get('matches', [])[:5]]}
