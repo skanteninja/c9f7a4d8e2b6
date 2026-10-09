@@ -106,8 +106,11 @@ def detect(lines,catalog,size,memory=None,image=None):
     for line in lines:
         text=line['text'];matches=match_items(text,catalog)
         if memory:matches=memory.matches(text,catalog,matches)
-        if not matches or matches[0][0]<.88:continue
-        if len(matches)>1 and matches[0][0]-matches[1][0]<.04 and matches[0][1]['id']!=matches[1][1]['id']:continue
+        # Keep credible item-looking OCR even when the catalog is incomplete.
+        # The reviewer can correct/select the catalog item before publishing.
+        if matches and matches[0][0]<.88:matches=[]
+        if matches and len(matches)>1 and matches[0][0]-matches[1][0]<.04 and matches[0][1]['id']!=matches[1][1]['id']:matches=[]
+        if not matches and (len(normalize_name(text))<3 or len(text)>80 or re.search(r'entered|mesos|channel|room|shop',text,re.I)):continue
         x,y,right,bottom=line['box'];height=max(8,bottom-y)
         nearby=[]
         for index,(price,raw) in enumerate(prices):
@@ -156,3 +159,4 @@ class NameMemory:
         if count<3:return fallback
         item=next((i for i in catalog if str(i['id'])==sid),None)
         return [(1.,item)] if item else fallback
+
