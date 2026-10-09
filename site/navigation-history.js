@@ -1,6 +1,6 @@
 (() => {
   let restoring=false,ready=false,timer;
-  const controlIds=['db-dataset','db-search','maps-explorer-search','maps-explorer-continent','maps-continent-search','quest-search','quest-priority','quest-region','etc-search','cash-catalog','cash-search','cash-category','cash-duration-filter'];
+  const controlIds=['db-dataset','db-search','maps-explorer-search','maps-explorer-continent','maps-continent-search','quest-search','quest-priority','quest-region','etc-search','cash-catalog','cash-search','cash-category','cash-duration-filter','dashboard-database-search','shopper-database-search','shopper-server','shopper-world','shopper-channel','shopper-room','shopper-age','shopper-sort'];
   function selectedBuild(){
     return new URL(location.href).searchParams.get('build')||window.TCW_ACTIVE_BUILD_ID||'magician-il-fresh';
   }

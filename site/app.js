@@ -27,6 +27,7 @@
   const STATE_UPDATED_KEY = `${KEY}.updatedAt`;
   let state = loadState();
   const SESSION_MODAL_IDS=['session-entry-modal','session-reset-modal','session-gender-modal'];
+  const SESSION_PUBLIC_ENTRY=(()=>{const p=new URLSearchParams(location.search);return p.get('page')==='shopper'||(!p.has('build')&&['dashboard','builds','classicdb'].includes(p.get('page')||'dashboard'));})();
   let sessionEntryStarted=false;
   let sessionEntryReady=false;
   let sessionLastFocus=null;
@@ -47,6 +48,7 @@
   function sessionBuildName(){return activeBuild()?.name||'this build';}
   function sessionFlowSuppressed(){
     const params=new URLSearchParams(location.search);
+    if(SESSION_PUBLIC_ENTRY||params.get('page')==='shopper')return true;
     return ['ci','qa','test','avatar-parity','skill-stability','skill-regression'].some(key=>params.has(key));
   }
   function sessionModal(id){return document.getElementById(id);}
@@ -457,6 +459,7 @@
   }
 
   const pageMeta={
+    shopper:['SHOPPER','Search scanned shop offers by item, price, seller and timestamp.'],
     dashboard:['Top Classic World Maplestory','Your selected multi-build workspace.'],
     builds:['Build Library','Multi-class build library with Fighter, Hunter, and I/L routes active.'],
     leveling:['Leveling Route','One clean route, with exact per-level instructions when you need them.'],
@@ -1754,7 +1757,7 @@ function renderEtc() {
   }
 
   let cashWired=false, cashCatalogPromise=null, cashRenderSequence=0, cashLimit=96;
-  const CASH_CATALOG_URL='./cash-shop-catalogs.json?v=0.13.1-founders-cash-shop';
+  const CASH_CATALOG_URL='./cash-shop-catalogs.json?v=0.14.0-shared-shopper';
   function fetchCashCatalogs(){
     if(!cashCatalogPromise)cashCatalogPromise=fetch(CASH_CATALOG_URL,{cache:'force-cache'}).then(r=>{
       if(!r.ok)throw Error('Cash Shop catalog could not be loaded.');
@@ -1925,6 +1928,6 @@ function renderEtc() {
   hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.13.1-founders-cash-shop').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.14.0-shared-shopper').catch(()=>{});
   }
 })();
