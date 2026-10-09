@@ -61,6 +61,12 @@ class UploadQueue:
         endpoint = endpoint.rstrip('/')
         if not endpoint.startswith('https://'):
             raise ValueError('Use an HTTPS website address.')
+        if any(row[1].get('learning') is not None for row in pending):
+            status_request = urllib.request.Request(endpoint + '/api/market/status',
+                headers={'User-Agent': 'TCW-Shopper/0.14.2'})
+            with urllib.request.urlopen(status_request, timeout=20) as response:
+                if json.load(response).get('learningAvailable') is not True:
+                    raise ValueError('Website learning storage is updating; confirmed scans are retained for retry.')
         body = json.dumps({'listings': [row[1] for row in pending]}).encode()
         request = urllib.request.Request(endpoint + '/api/market/listings', data=body,
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + api_key,

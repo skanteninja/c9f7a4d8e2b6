@@ -125,7 +125,7 @@ export class MarketListings {
     if(p.endsWith('/status')) {
       const counts=this.sql.exec('SELECT COUNT(*) AS count,MAX(last_seen) AS lastSeen FROM offers').one();
       const scopes=Array.from(this.sql.exec('SELECT DISTINCT server,world FROM offers ORDER BY server,world'));
-      return json({available:true,count:counts.count,lastSeen:counts.lastSeen,scopes});
+      return json({available:true,learningAvailable:true,count:counts.count,lastSeen:counts.lastSeen,scopes});
     }
     if(p.endsWith('/learning')) {
       const after=Number(u.searchParams.get('after')||0);

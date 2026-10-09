@@ -1,6 +1,7 @@
 import json, tempfile, unittest
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
+from io import BytesIO
 from app import Scanner
 from core import needs_nickname_setup, learning_readings, UploadQueue
 
@@ -20,6 +21,14 @@ class LearningTests(unittest.TestCase):
         self.assertTrue(saved[0]['nickname_setup_seen'])
         scanner.config={'nickname':'Mint'};scanner.ask_nickname.reset_mock()
         scanner.first_setup();scanner.ask_nickname.assert_not_called()
+
+    def test_old_server_cannot_acknowledge_and_lose_learning(self):
+        with tempfile.TemporaryDirectory() as folder:
+            q=UploadQueue(Path(folder)/'queue.sqlite');q.enqueue({'learning':{'version':'0.14.2'}})
+            with patch('core.urllib.request.urlopen',return_value=BytesIO(b'{"available":true}')) as network:
+                with self.assertRaises(ValueError):q.send('https://example.test','private')
+                network.assert_called_once()
+            self.assertEqual(q.count(),1)
 
     def test_examples_exclude_connection_and_full_frame(self):
         candidate={'raw_name':'Sw0rd','price':'1,000','quantity':'2','matches':[(.9,{'id':1302000})],
