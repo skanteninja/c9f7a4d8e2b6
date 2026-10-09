@@ -135,7 +135,7 @@ def learning_readings(candidate):
                 'quantity': str(candidate.get('quantity', ''))[:512]}
     for key in ('shop', 'channel', 'room'):
         readings[key] = str(candidate.get('context_reads', {}).get(key, ''))[:512]
-    return {'version': '0.16.3', 'readings': readings,
+    return {'version': '0.16.4', 'readings': readings,
             'matches': [{'itemId': item['id'], 'confidence': round(score, 4)}
                         for score, item in candidate.get('matches', [])[:5]]}
 
@@ -150,3 +150,4 @@ class ContextTracker:
             stable[key]=value if value and self.previous.get(key)==value else ''
             self.previous[key]=value
         return stable
+
