@@ -63,7 +63,8 @@ class UploadQueue:
             raise ValueError('Use an HTTPS website address.')
         body = json.dumps({'listings': [row[1] for row in pending]}).encode()
         request = urllib.request.Request(endpoint + '/api/market/listings', data=body,
-            headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + api_key})
+            headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + api_key,
+                     'User-Agent': 'TCW-Shopper/0.14 (+https://maplestory-classic.ofri505.workers.dev)'})
         try:
             with urllib.request.urlopen(request, timeout=20) as response:
                 result = json.load(response)
