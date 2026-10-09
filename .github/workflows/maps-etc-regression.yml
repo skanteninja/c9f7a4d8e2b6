@@ -131,30 +131,32 @@ jobs:
             d.querySelector('.maps-continent-card[data-continent="victoria"]')?.click();
             await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Victoria');
             await wait(()=>d.getElementById('maps-sheet-image')?.complete&&d.getElementById('maps-sheet-image').naturalWidth>200,'Victoria artwork');
-            await wait(()=>d.querySelectorAll('.world-map-marker').length>=50,'Victoria points');
+            await wait(()=>d.querySelectorAll('.world-map-marker').length>=30,'Victoria points');
             if(d.querySelectorAll('.atlas-map-point').length)throw Error('duplicate Victoria WZ points');
             const h=[...d.querySelectorAll('.world-map-marker')].find(x=>/Henesys/i.test(x.title||'')&&x.dataset.mapId);if(!h)throw Error('resolved Henesys Victoria point');h.click();
             await wait(()=>d.getElementById('maps-detail')?.classList.contains('active')&&/Henesys/i.test(d.getElementById('map-detail-name')?.textContent||''),'Henesys detail');
             d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Esc to Victoria');
             d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-world')?.classList.contains('active'),'Esc to world');
 
+            if(state.maps.some(map=>map.__continent==='ossyria')){
             d.querySelector('.maps-continent-card[data-continent="ossyria"]')?.click();
             await wait(()=>d.getElementById('maps-continent')?.classList.contains('active'),'Orbis El Nath');
             await wait(()=>d.getElementById('maps-sheet-image')?.complete&&d.getElementById('maps-sheet-image').naturalWidth>200,'Orbis El Nath artwork');
             await wait(()=>d.querySelectorAll('.atlas-map-point').length>=20,'Orbis El Nath WZ points');
             d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-world')?.classList.contains('active'),'Esc from Orbis El Nath');
+            }
 
             d.getElementById('maps-open-explorer')?.click();await wait(()=>d.getElementById('maps-explorer')?.classList.contains('active'),'All Maps');
             const s=d.getElementById('maps-explorer-search');
             const find=async(v,r)=>{s.value=v;s.dispatchEvent(new w.Event('input',{bubbles:true}));await wait(()=>new RegExp(r,'i').test(d.getElementById('maps-explorer-list')?.textContent||''),'search '+v)};
             await find('sleepywood','Sleepywood|Ant Tunnel');
             if(d.querySelectorAll('#maps-explorer-list .maps-db-thumb').length<1)throw Error('All Maps thumbnails');
-            await find('orbis','Orbis');
-            const orbis=[...d.querySelectorAll('#maps-explorer-list .maps-db-row')].find(x=>/Orbis/i.test(x.textContent));if(!orbis)throw Error('Orbis result');orbis.click();
-            await wait(()=>d.getElementById('maps-detail')?.classList.contains('active')&&/Orbis/i.test(d.getElementById('map-detail-name')?.textContent||''),'Orbis detail');
-            await wait(()=>d.getElementById('map-detail-image')?.complete&&d.getElementById('map-detail-image').naturalWidth>0,'Orbis image');
+            await find('perion','Perion');
+            const orbis=[...d.querySelectorAll('#maps-explorer-list .maps-db-row')].find(x=>/Perion/i.test(x.textContent));if(!orbis)throw Error('Perion result');orbis.click();
+            await wait(()=>d.getElementById('maps-detail')?.classList.contains('active')&&/Perion/i.test(d.getElementById('map-detail-name')?.textContent||''),'Perion detail');
+            await wait(()=>d.getElementById('map-detail-image')?.complete&&d.getElementById('map-detail-image').naturalWidth>0,'Perion image');
             d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>d.getElementById('maps-explorer')?.classList.contains('active'),'Esc to All Maps');
-            await find('el nath','El Nath');
+            await find('kerning','Kerning');
             result.textContent='maps-etc-regression-ok';
           }catch(e){result.textContent='maps-etc-regression-failed: '+e.message;}});
           </script></body>

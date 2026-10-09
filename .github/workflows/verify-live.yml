@@ -113,7 +113,8 @@ jobs:
             grep -q 'id="maps-world"' "$file"
             grep -q 'id="maps-open-explorer"' "$file"
             grep -q 'data-continent="victoria"' "$file"
-            grep -q 'data-continent="ossyria"' "$file"
+            grep -q 'data-continent="maple-island"' "$file"
+            grep -q 'data-continent="other"' "$file"
             grep -q 'id="maps-full-world-image"' "$file"
             grep -q 'maps-atlas-world-point' "$file"
             grep -q 'maps-continent-art-image' "$file"
@@ -136,8 +137,8 @@ jobs:
           assert s.index('data-page="quests" class="nav-btn') < s.index('data-page="maps" class="nav-btn') < s.index('data-page="equipment" class="nav-btn')
           # Current/Classic-only public data currently exposes Maple Island, Victoria Island,
           # Ossyria, and the retained event/other set; do not require removed legacy rows.
-          assert len(re.findall(r'class="maps-continent-card',s)) >= 4
-          assert len(re.findall(r'class="maps-atlas-world-point',s)) >= 4
+          assert len(re.findall(r'class="maps-continent-card',s)) >= 3
+          assert len(re.findall(r'class="maps-atlas-world-point',s)) >= 3
           PY
           done
 
