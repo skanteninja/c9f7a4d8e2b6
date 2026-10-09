@@ -1,5 +1,5 @@
 """Archive reviewed, sanitized API examples in GitHub; never use scanner keys."""
-import argparse, base64, json, re, urllib.request
+import argparse, base64, json, re, time, urllib.error, urllib.request
 from pathlib import Path
 
 
@@ -26,13 +26,28 @@ def archive(example, root):
     (folder / (sample_id + '.json')).write_text(json.dumps(data, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
 
 
+def read_batch(request):
+    # Worker and durable storage versions can briefly differ during a deploy.
+    for attempt in range(8):
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:batch=json.load(response)
+            if isinstance(batch.get('examples'), list) and isinstance(batch.get('next'), int):return batch
+            error=ValueError('Learning storage has not finished updating')
+        except urllib.error.HTTPError as exc:
+            if exc.code not in (404, 429, 500, 502, 503, 504):raise
+            error=exc
+        except urllib.error.URLError as exc:error=exc
+        if attempt==7:raise error
+        time.sleep(15)
+
+
 def sync(endpoint, root):
     state_file = root / 'cursor.json'
     cursor = json.loads(state_file.read_text())['after'] if state_file.exists() else 0
     count = 0
     for _ in range(10):
         request = urllib.request.Request(endpoint.rstrip('/')+'/api/market/learning?after='+str(cursor), headers={'User-Agent': 'TCW-Shopper-Learning/0.14.2'})
-        with urllib.request.urlopen(request, timeout=30) as response: batch=json.load(response)
+        batch=read_batch(request)
         examples=batch['examples']
         if not examples:break
         for example in examples:
