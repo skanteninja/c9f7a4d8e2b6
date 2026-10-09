@@ -54,6 +54,11 @@ class UploadQueue:
         with self.connect() as db:
             return db.execute('SELECT COUNT(*) FROM queue WHERE sent=0').fetchone()[0]
 
+    def summary(self):
+        with self.connect() as db:
+            total,sent=db.execute('SELECT COUNT(*),COALESCE(SUM(sent),0) FROM queue').fetchone()
+        return {'total':total,'sent':sent,'pending':total-sent}
+
     def send(self, endpoint, api_key):
         pending = self.pending()
         if not pending:
@@ -130,6 +135,6 @@ def learning_readings(candidate):
                 'quantity': str(candidate.get('quantity', ''))[:512]}
     for key in ('shop', 'channel', 'room'):
         readings[key] = str(candidate.get('context_reads', {}).get(key, ''))[:512]
-    return {'version': '0.14.3', 'readings': readings,
+    return {'version': '0.14.4', 'readings': readings,
             'matches': [{'itemId': item['id'], 'confidence': round(score, 4)}
                         for score, item in candidate.get('matches', [])[:5]]}

@@ -35,3 +35,13 @@ class CoreTests(unittest.TestCase):
             self.assertEqual(restored.count(),1)
 
 if __name__=='__main__':unittest.main()
+
+
+class UploadCountTests(unittest.TestCase):
+    def test_counts_distinguish_confirmations_from_acknowledged_uploads(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/'queue.sqlite';queue=UploadQueue(path)
+            queue.enqueue({'eventId':'first'});queue.enqueue({'eventId':'second'});queue.enqueue({'eventId':'second'})
+            self.assertEqual(queue.summary(),{'total':2,'sent':0,'pending':2})
+            with queue.connect() as db:db.execute('UPDATE queue SET sent=1 WHERE id=?',('first',))
+            self.assertEqual(UploadQueue(path).summary(),{'total':2,'sent':1,'pending':1})

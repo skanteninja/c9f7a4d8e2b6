@@ -13,12 +13,15 @@ HOME.mkdir(parents=True, exist_ok=True)
 
 class Scanner:
     def __init__(self, root):
-        self.root = root; root.title('TCW · SHOPPER Scanner 0.14.3'); root.geometry('1140x830')
+        self.root = root; root.title('TCW · SHOPPER Scanner 0.14.4'); root.geometry('980x700'); root.minsize(900,620)
         self.messages = queue.Queue(); self.uploads = UploadQueue(HOME / 'uploads.sqlite')
         self.catalog = json.loads((ASSETS / 'items.json').read_text(encoding='utf-8'))['items']
         self.settings_path = HOME / 'settings.json'
         self.config = json.loads(self.settings_path.read_text()) if self.settings_path.exists() else {}
         self.config['world'] = 'Windia'
+        self.confirmed_session = 0; self.next_retry = time.monotonic()+30
+        self.counts = tk.StringVar(); self.review_context = tk.StringVar(value='Select a captured item to review.')
+        self.show_details = tk.BooleanVar(value=False)
         self.pending_candidates = None
         self.detected_context = tk.StringVar(value='Windia · Channel ? · FM room ? · Seller ? · Shop ?')
         self.running = False; self.camera = None; self.image = None; self.regions = self.config.get('regions', {})
@@ -41,16 +44,28 @@ class Scanner:
         if ask: self.ask_nickname()
 
     def settings(self):
-        window = tk.Toplevel(self.root); window.title('SHOPPER Settings')
-        panel = ttk.Frame(window, padding=20); panel.pack(fill='both', expand=True)
-        ttk.Label(panel, text='Public nickname', font=('Segoe UI', 12, 'bold')).pack(anchor='w')
-        ttk.Label(panel, textvariable=self.vars['nickname']).pack(anchor='w', pady=6)
-        ttk.Button(panel, text='Change nickname', command=self.ask_nickname).pack(anchor='w')
-        ttk.Checkbutton(panel, text='Share reviewed scanner examples with the project',
-                        variable=self.share_learning, command=self.save).pack(anchor='w', pady=(20,6))
-        ttk.Label(panel, text='When you confirm a listing, its item-row crop, OCR readings and corrected\nitem, price, quantity, shop, channel and room are saved to the public GitHub\nproject. No full-screen captures, connection keys or settings are uploaded.\nExamples help us evaluate and improve future scanner versions.', wraplength=540).pack(anchor='w')
-        ttk.Label(panel, text=f'{self.uploads.count()} confirmed uploads waiting to send.').pack(anchor='w', pady=12)
-        ttk.Button(panel, text='Save & close', command=lambda: (self.save(), window.destroy())).pack(anchor='e')
+        window = tk.Toplevel(self.root); window.title('SHOPPER Settings'); window.geometry('620x500')
+        tabs=ttk.Notebook(window);tabs.pack(fill='both',expand=True,padx=16,pady=16)
+        general=ttk.Frame(tabs,padding=16);setup=ttk.Frame(tabs,padding=16);advanced=ttk.Frame(tabs,padding=16)
+        for panel,title in [(general,'General'),(setup,'Screen setup'),(advanced,'Troubleshooting')]:tabs.add(panel,text=title)
+        ttk.Label(general,text='Public nickname',font=('Segoe UI',12,'bold')).pack(anchor='w')
+        ttk.Label(general,textvariable=self.vars['nickname']).pack(anchor='w',pady=6)
+        ttk.Button(general,text='Change nickname',command=self.ask_nickname).pack(anchor='w')
+        ttk.Button(general,text='Load connection file',command=self.load_connection).pack(anchor='w',pady=12)
+        ttk.Checkbutton(general,text='Share reviewed scanner examples with the project',variable=self.share_learning,command=self.save).pack(anchor='w',pady=8)
+        ttk.Label(general,text='Confirmed item crops, OCR readings and corrections are archived in the public project GitHub to improve future scanner versions. Full-screen captures and connection keys are excluded.',wraplength=530).pack(anchor='w')
+        ttk.Label(setup,text='One-time setup for your game window',font=('Segoe UI',12,'bold')).pack(anchor='w')
+        ttk.Button(setup,text='Calibrate screen regions',command=lambda:(window.destroy(),self.calibrate_capture())).pack(anchor='w',pady=10)
+        for key,label in [('monitor','Game monitor'),('rows','Visible item rows'),('row_stride','Row spacing (pixels)'),('tesseract','Tesseract executable (optional)')]:
+            row=ttk.Frame(setup);row.pack(fill='x',pady=5)
+            ttk.Label(row,text=label,width=29).pack(side='left');ttk.Entry(row,textvariable=self.vars[key]).pack(side='left',fill='x',expand=True)
+        ttk.Label(setup,text='Displayed price').pack(anchor='w',pady=(10,3))
+        ttk.Combobox(setup,textvariable=self.vars['price_basis'],values=['unit','bundle'],state='readonly',width=14).pack(anchor='w')
+        ttk.Label(setup,text='World: Windia. Channel, minimap room, seller and shop are read automatically after calibration.',wraplength=530).pack(anchor='w',pady=12)
+        for label,command in [('Import screenshot',lambda:(window.destroy(),self.import_image())),('Read captured frame',self.read_current),('Retry waiting uploads',self.send)]:ttk.Button(advanced,text=label,command=command).pack(anchor='w',pady=6)
+        ttk.Label(advanced,text='Uploads also retry automatically every 30 seconds while the scanner is open.',wraplength=530).pack(anchor='w',pady=12)
+        ttk.Button(window,text='Done',command=lambda:(self.save(),window.destroy())).pack(anchor='e',padx=16,pady=(0,12))
+        window.protocol('WM_DELETE_WINDOW',lambda:(self.save(),window.destroy()))
 
     def ask_nickname(self):
         while True:
@@ -68,49 +83,48 @@ class Scanner:
         self.root.configure(bg='#211725')
         outer = ttk.Frame(self.root, padding=18); outer.pack(fill='both', expand=True)
         ttk.Label(outer, text='SHOPPER · Shared shop scanner', font=('Segoe UI', 22, 'bold')).pack(anchor='w')
-        ttk.Label(outer, text='Browse shops manually. Review captured prices, then publish to your website.').pack(anchor='w', pady=(3,12))
-        connection = ttk.Frame(outer); connection.pack(fill='x')
-        ttk.Button(connection, text='Settings', command=self.settings).pack(side='left',padx=(0,8))
-        ttk.Label(connection,textvariable=self.vars['nickname']).pack(side='left',padx=(0,12))
-        ttk.Button(connection, text='Load connection file', command=self.load_connection).pack(side='left')
-        ttk.Button(connection, text='Save settings', command=self.save).pack(side='left', padx=8)
-        ttk.Button(connection, text='Retry queued uploads', command=self.send).pack(side='left')
-        ttk.Label(connection, text='Monitor').pack(side='left', padx=(20,4))
-        ttk.Entry(connection, textvariable=self.vars['monitor'], width=4).pack(side='left')
-        fields = ttk.Frame(outer); fields.pack(fill='x', pady=12)
-        for column, key in enumerate(['server','world','channel','room','seller','shop']):
-            frame=ttk.Frame(fields);frame.grid(row=0,column=column,sticky='ew',padx=4);fields.columnconfigure(column,weight=1)
-            ttk.Label(frame,text={'room':'FM room (automatic)','channel':'Channel (automatic)','seller':'Seller (automatic)','shop':'Shop (automatic)'}.get(key,key.title())).pack(anchor='w')
-            ttk.Entry(frame,textvariable=self.vars[key],width=14,state='readonly' if key=='world' else 'normal').pack(fill='x')
-        controls=ttk.Frame(outer);controls.pack(fill='x')
-        ttk.Button(controls,text='Capture & calibrate',command=self.calibrate_capture).pack(side='left')
-        ttk.Button(controls,text='Import screenshot',command=self.import_image).pack(side='left',padx=6)
-        self.start_button=ttk.Button(controls,text='Start screen scanning',command=self.toggle);self.start_button.pack(side='left')
-        ttk.Button(controls,text='Read current frame',command=self.read_current).pack(side='left',padx=6)
-        ttk.Label(controls,text='Visible rows').pack(side='left',padx=(12,3));ttk.Entry(controls,textvariable=self.vars['rows'],width=3).pack(side='left')
-        ttk.Label(controls,text='Row spacing (px)').pack(side='left',padx=(10,3));ttk.Entry(controls,textvariable=self.vars['row_stride'],width=4).pack(side='left')
-        advanced=ttk.Frame(outer);advanced.pack(fill='x',pady=8)
-        ttk.Label(advanced,text='Displayed price is').pack(side='left')
-        ttk.Combobox(advanced,textvariable=self.vars['price_basis'],values=['unit','bundle'],state='readonly',width=10).pack(side='left',padx=6)
-        ttk.Label(advanced,text='Tesseract executable (optional)').pack(side='left',padx=(18,6));ttk.Entry(advanced,textvariable=self.vars['tesseract'],width=40).pack(side='left',fill='x',expand=True)
-        self.table=ttk.Treeview(outer,columns=('name','price','quantity','slot','confidence'),show='headings',height=8)
+        ttk.Label(outer, text='Scan shops, review a captured item, then Publish.').pack(anchor='w', pady=(3,12))
+        toolbar=ttk.Frame(outer);toolbar.pack(fill='x',pady=(0,10))
+        self.start_button=ttk.Button(toolbar,text='Start scanning',command=self.toggle);self.start_button.pack(side='left')
+        ttk.Button(toolbar,text='Settings',command=self.settings).pack(side='right')
+        ttk.Label(toolbar,textvariable=self.vars['nickname']).pack(side='right',padx=12)
+        ttk.Label(outer,textvariable=self.detected_context,wraplength=930).pack(anchor='w',pady=4)
+        ttk.Label(outer,textvariable=self.counts).pack(anchor='w',pady=4)
+        self.update_counts()
+        self.table=ttk.Treeview(outer,columns=('name','price','quantity','slot','confidence'),show='headings',height=6)
         for key,label,width in [('name','Detected item',420),('price','Price',130),('quantity','Quantity',90),('slot','Visible row',90),('confidence','Match',90)]:
             self.table.heading(key,text=label);self.table.column(key,width=width)
         self.table.pack(fill='both',expand=True,pady=8);self.table.bind('<<TreeviewSelect>>',self.select)
-        editor=ttk.LabelFrame(outer,text='Review selected listing',padding=12);editor.pack(fill='x')
-        ttk.Label(editor,text='Item').grid(row=0,column=0,sticky='w')
-        self.item_combo=ttk.Combobox(editor,textvariable=self.edit['item'],width=54);self.item_combo.grid(row=0,column=1,columnspan=3,sticky='ew',padx=6,pady=4)
-        self.item_combo.bind('<KeyRelease>',self.filter_items)
-        for row,(key,label) in enumerate([('price','Displayed price'),('quantity','Quantity'),('slot','Shop slot number'),('observed_at','Captured at (UTC ISO)')],1):
-            ttk.Label(editor,text=label).grid(row=row,column=0,sticky='w');ttk.Entry(editor,textvariable=self.edit[key],width=44).grid(row=row,column=1,columnspan=3,sticky='ew',padx=6,pady=3)
-        ttk.Checkbutton(editor,text='Actual equipment tooltip stats recorded',variable=self.stats_known).grid(row=5,column=0,columnspan=4,sticky='w')
-        ttk.Label(editor,text='Stats JSON, e.g. {"W.ATK": 45, "slots": 7}').grid(row=6,column=0,columnspan=4,sticky='w')
-        ttk.Entry(editor,textvariable=self.edit['stats'],width=65).grid(row=7,column=0,columnspan=4,sticky='ew',pady=4)
-        self.preview_label=ttk.Label(editor);self.preview_label.grid(row=0,column=4,rowspan=6,padx=12)
-        ttk.Button(editor,text='Confirm & publish listing',command=self.publish).grid(row=7,column=4,padx=10)
-        ttk.Label(outer,textvariable=self.detected_context,wraplength=1000).pack(anchor='w',pady=(6,0))
-        ttk.Label(outer,textvariable=self.status,wraplength=1000).pack(anchor='w',pady=10)
-        ttk.Label(outer,text='Calibrate once: shop owner/title, channel indicator and FM room minimap label. Confirm detected location and shop before publishing.').pack(anchor='w')
+        editor=ttk.LabelFrame(outer,text='Selected item',padding=12);editor.pack(fill='x')
+        ttk.Label(editor,textvariable=self.review_context,wraplength=900).pack(anchor='w',pady=(0,6))
+        basic=ttk.Frame(editor);basic.pack(fill='x')
+        for key,label,width in [('item','Item',48),('price','Price',16),('quantity','Quantity',8)]:
+            group=ttk.Frame(basic);group.pack(side='left',fill='x',expand=key=='item',padx=(0,8))
+            ttk.Label(group,text=label).pack(anchor='w')
+            if key=='item':
+                self.item_combo=ttk.Combobox(group,textvariable=self.edit[key],width=width);self.item_combo.pack(fill='x');self.item_combo.bind('<KeyRelease>',self.filter_items)
+            else:ttk.Entry(group,textvariable=self.edit[key],width=width).pack(fill='x')
+        footer=ttk.Frame(editor);footer.pack(fill='x',pady=(10,0))
+        self.preview_label=ttk.Label(footer);self.preview_label.pack(side='left')
+        self.publish_button=ttk.Button(footer,text='Publish',command=self.publish,state='disabled');self.publish_button.pack(side='right',padx=4)
+        ttk.Checkbutton(editor,text='More details / corrections',variable=self.show_details,command=self.toggle_details).pack(anchor='w',pady=(8,0))
+        self.details=ttk.Frame(editor)
+        for index,(key,label) in enumerate([('channel','Channel'),('room','FM room'),('seller','Seller'),('shop','Shop')]):
+            frame=ttk.Frame(self.details);frame.grid(row=0,column=index,sticky='ew',padx=4);self.details.columnconfigure(index,weight=1)
+            ttk.Label(frame,text=label).pack(anchor='w');ttk.Entry(frame,textvariable=self.vars[key],width=16).pack(fill='x')
+        for index,(key,label) in enumerate([('slot','Shop slot'),('observed_at','Captured at (UTC)'),('stats','Observed equipment stats (JSON)')],1):
+            ttk.Label(self.details,text=label).grid(row=index,column=0,sticky='w',pady=3)
+            ttk.Entry(self.details,textvariable=self.edit[key]).grid(row=index,column=1,columnspan=3,sticky='ew',padx=4)
+        ttk.Checkbutton(self.details,text='Equipment tooltip stats recorded',variable=self.stats_known).grid(row=4,column=0,columnspan=4,sticky='w')
+        ttk.Label(outer,textvariable=self.status,wraplength=930).pack(anchor='w',pady=10)
+
+    def toggle_details(self):
+        if self.show_details.get():self.details.pack(fill='x',pady=8)
+        else:self.details.pack_forget()
+
+    def update_counts(self):
+        summary=self.uploads.summary()
+        self.counts.set(f"Confirmed this session: {self.confirmed_session} · Uploaded: {summary['sent']} · Waiting: {summary['pending']}")
 
     def filter_items(self,event=None):
         q=self.edit['item'].get().lower();self.item_combo['values']=[f"{i['name']} · #{i['id']}" for i in self.catalog if q in i['name'].lower()][:60]
@@ -256,7 +270,9 @@ class Scanner:
         threading.Thread(target=work,daemon=True).start();self.status.set('Reading shop fields…')
 
     def toggle(self):
-        if self.running:self.running=False;self.cursor_stop.set();self.start_button.configure(text='Start screen scanning');self.status.set('Scanning paused.');return
+        if not self.running and (not self.vars['api_key'].get() or not all(k in self.regions for k in ['name','price','channel','room','seller']) or not ('shop' in self.regions or ('hover' in self.regions and self.config.get('hover_anchor')))):
+            self.status.set('Finish connection and screen setup in Settings once, then start scanning.');self.settings();return
+        if self.running:self.running=False;self.cursor_stop.set();self.start_button.configure(text='Start scanning');self.status.set('Scanning paused.');return
         try:
             settings=self.settings_snapshot()
             validate_nickname(settings['nickname'])
@@ -321,14 +337,17 @@ class Scanner:
         selection=self.table.selection()
         if not selection:return
         index=int(selection[0]);self.selected=self.candidates[index];row=self.selected
+        self.publish_button.configure(state='normal')
         self.item_combo['values']=[f"{i['name']} · #{i['id']}" for _,i in row['matches']]
         self.edit['item'].set(self.item_combo['values'][0] if self.item_combo['values'] else row['raw_name'])
         for key in ['price','quantity','slot','observed_at']:self.edit[key].set(str(row[key]))
         self.edit['stats'].set('{}');self.stats_known.set(False)
-        self.preview=ImageTk.PhotoImage(row['image']);self.preview_label.configure(image=self.preview)
+        preview=row['image'].copy();preview.thumbnail((360,70))
+        self.preview=ImageTk.PhotoImage(preview);self.preview_label.configure(image=self.preview)
         # The capture's location is preserved; later channel/room edits must not move an old listing.
         for key in ['server','world','channel','room','seller','shop']:self.vars[key].set(row['settings'][key])
         if row['seller_read']:self.vars['seller'].set(row['seller_read'])
+        ctx=row['settings'];self.review_context.set(f"Captured: CH {ctx['channel']} · FM {ctx['room']} · {ctx['seller']} · {ctx['shop']}")
 
     def publish(self):
         if not self.selected:messagebox.showwarning('Publish','Choose a captured row first.');return
@@ -347,7 +366,7 @@ class Scanner:
             if min(listing['quantity'],listing['channel'],listing['room'],listing['slot'])<1:raise ValueError('Quantity, channel, room and slot must be positive.')
             if not self.vars['api_key'].get():raise ValueError('Load your private connection file first.')
             if self.share_learning.get():listing['learning']=learning_readings(self.selected)
-            self.uploads.enqueue(listing);self.selected=None;
+            self.uploads.enqueue(listing);self.publish_button.configure(state='disabled');self.confirmed_session+=1;self.update_counts();self.selected=None;self.review_context.set('Published to the upload queue. Select another captured item.')
             if self.pending_candidates is not None:
                 self.messages.put(('candidates',self.pending_candidates));self.pending_candidates=None
             self.status.set(f'Confirmed and queued. {self.uploads.count()} uploads pending.');self.send()
@@ -368,6 +387,9 @@ class Scanner:
         threading.Thread(target=work,daemon=True).start()
 
     def pump(self):
+        if hasattr(self,'next_retry') and time.monotonic()>=self.next_retry:
+            self.next_retry=time.monotonic()+30
+            if self.vars['api_key'].get() and self.uploads.count():self.send()
         if self.running:self.live_settings=self.settings_snapshot()
         while True:
             try:kind,value=self.messages.get_nowait()
@@ -396,10 +418,10 @@ class Scanner:
                 else:self.status.set(f'{len(value)} rows read. Confirm item ID, digits, quantity, slot and location before publishing.')
             elif kind=='error':self.root.deiconify();self.status.set(value)
             elif kind=='upload_error':self.status.set('Upload retained for retry: '+value)
-            elif kind=='uploaded':self.status.set(f'{value} listings acknowledged by website. {self.uploads.count()} queued.')
+            elif kind=='uploaded':self.update_counts();self.status.set(f'{value} listings uploaded.')
             elif kind=='upload_done':self.upload_busy=False
             elif kind=='capture_done':self.capture_busy=False
-            elif kind=='stopped':self.running=False;self.start_button.configure(text='Start screen scanning')
+            elif kind=='stopped':self.running=False;self.start_button.configure(text='Start scanning')
         self.root.after(200,self.pump)
 
     def close(self):
