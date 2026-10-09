@@ -10,7 +10,7 @@
   function builds(){
     const root=document.getElementById('dashboard-builds'),data=window.GUIDE_DATA?.catalog;
     if(!root||!data)return;
-    root.innerHTML=(data.builds||[]).filter(b=>b.status==='active').map(b=>`<a class="market-build-card" href="?build=${encodeURIComponent(b.id)}&page=dashboard" data-build-select="${escape(b.id)}"><img src="/game-media/class-emblems/${({warrior:'Warrior',archer:'Bowman',magician:'Magician',bowman:'Bowman'}[b.classId]||'Magician')}.png" alt="" loading="lazy"><div><span class="eyebrow">Lv ${b.levelMin||1}–${b.levelMax||70}</span><h3>${escape(b.name)}</h3><p>${escape(b.weaponPath||b.subtitle||'Skills, equipment and progression')}</p><strong>Open build →</strong></div></a>`).join('');
+    root.innerHTML=(data.builds||[]).filter(b=>b.status==='active').map(b=>`<a class="market-build-card" href="?build=${encodeURIComponent(b.id)}&page=dashboard" data-build-select="${escape(b.id)}"><img src="/assets/class-themes/${({warrior:'perion',archer:'henesys',magician:'ellinia',bowman:'henesys'}[b.classId]||'ellinia')}.webp" alt="" loading="lazy"><div><span class="eyebrow">Lv ${b.levelMin||1}–${b.levelMax||70}</span><h3>${escape(b.name)}</h3><p>${escape(b.weaponPath||b.subtitle||'Skills, equipment and progression')}</p><strong>Open build →</strong></div></a>`).join('');
   }
   function setStatus(message,kind=''){document.querySelectorAll('[data-market-status]').forEach(el=>{el.textContent=message;el.dataset.state=kind;});}
   function scopeParams(root){
