@@ -71,7 +71,7 @@
       const data=await response.json();
       if(!ws||ws.readyState!==WebSocket.OPEN)setStatus('Refreshing every 5 seconds','polling');
       const badge=document.getElementById('dashboard-market-count');if(badge)badge.textContent=`${data.count.toLocaleString()} scanned offers`;
-      for(const name of ['server','world']) {
+      for(const name of ['server']) {
         const select=document.querySelector(`[data-market-filter="${name}"]`),values=[...new Set(data.scopes.map(s=>s[name]))];
         for(const value of values)if(!Array.from(select.options).some(o=>o.value===value)){const option=document.createElement('option');option.value=value;option.textContent=value;select.append(option);}
       }
