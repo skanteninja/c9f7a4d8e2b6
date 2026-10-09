@@ -1,5 +1,11 @@
 # Continuity Changelog
 
+## 2026-10-09 — shared SHOPPER release verified
+
+- Live dashboard item search, Builds below search and retained top navigation, separate SHOPPER page, durable authenticated listings API and WebSocket updates deployed. All six release gates and Windows packaging pass.
+- Fixed Windows SQLite connection cleanup, Cloudflare scanner request identification, bundled build artwork, SHOPPER filter section selection and exact duplicate-name browser assertions. Current map gates follow available current records.
+- No production test offers inserted. Real game screen capture/OCR calibration remains pending; review is mandatory. Release evidence and gate IDs: `SHOPPER_2026-10-09.md`.
+
 ## 2026-10-09 — SHOPPER source implementation
 
 - Added dashboard item search, build cards below search, SHOPPER offers page, authenticated shared SQLite listing storage, live refresh and reviewed Windows scanner with offline upload queue.

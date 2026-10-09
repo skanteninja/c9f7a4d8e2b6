@@ -1,9 +1,9 @@
 # MapleStory Classic Builder — Project State
 
-## 2026-10-09 — shared SHOPPER implementation
+## 2026-10-09 — shared SHOPPER deployed
 
 - Dashboard catalog search/build cards, SHOPPER navigation, shared durable listing API, live updates and reviewed Windows scanner implemented in source release `0.14.0-shared-shopper`.
-- Local build/data/API/scanner checks pass. Deployment and browser verification pending at this checkpoint; not yet verified live.
+- Live release, all six release gates and Windows packaging pass. Shared API and live WebSocket verified with zero fabricated listings; actual Windows game capture/OCR still needs calibration.
 - See `SHOPPER_2026-10-09.md` for behavior, key management and remaining real-client OCR checks.
 
 ## 2026-10-06 — Founder’s Access Cash Shop deployed
@@ -30,7 +30,7 @@
 
 Last continuity baseline: 2026-10-06
 
-Current deployed checkpoint: 0.13.1-founders-cash-shop (live verified)
+Current deployed checkpoint: 0.14.0-shared-shopper (live verified)
 Current source checkpoint: 0.13.1-founders-cash-shop
 
 ## Read this first in every new chat
