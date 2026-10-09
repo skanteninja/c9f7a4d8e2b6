@@ -75,3 +75,7 @@ This is capture of visible screen pixels, not background video recording or acce
 ## Ready-to-upload download (0.14.6)
 
 The packaged website connection loads automatically before first setup, including for existing installations without a key. The nickname prompt still appears only once. Screen calibration and Tesseract remain required. The shared credential grants listing uploads, not repository access.
+
+## Capture dependency fix (0.14.7)
+
+OpenCV is explicitly installed and bundled to resolve the missing cv2 error during calibration. The Windows release now runs a capture-import smoke check inside the packaged executable before publishing.

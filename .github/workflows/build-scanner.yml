@@ -18,7 +18,12 @@ jobs:
       - run: python audit/export-scanner-catalog.py
       - run: python -m unittest discover -s scanner -p 'test_*.py'
       - working-directory: scanner
-        run: pyinstaller --onedir --windowed --name TCW-Shopper --add-data "items.json;." --add-data "connection.json;." app.py
+        run: pyinstaller --onedir --windowed --name TCW-Shopper --add-data "items.json;." --add-data "connection.json;." --hidden-import cv2 app.py
+      - name: Check capture imports inside packaged executable
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath scanner/dist/TCW-Shopper/TCW-Shopper.exe -ArgumentList '--capture-self-test' -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Packaged capture dependency check failed: $($process.ExitCode)" }
       - shell: pwsh
         run: Copy-Item scanner/README.md scanner/dist/TCW-Shopper/README.md
       - uses: actions/upload-artifact@v4

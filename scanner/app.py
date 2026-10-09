@@ -14,7 +14,7 @@ HOME.mkdir(parents=True, exist_ok=True)
 
 class Scanner:
     def __init__(self, root):
-        self.root = root; root.title('TCW · SHOPPER Scanner 0.14.6'); root.geometry('980x700'); root.minsize(900,620)
+        self.root = root; root.title('TCW · SHOPPER Scanner 0.14.7'); root.geometry('980x700'); root.minsize(900,620)
         self.messages = queue.Queue(); self.uploads = UploadQueue(HOME / 'uploads.sqlite')
         self.catalog = json.loads((ASSETS / 'items.json').read_text(encoding='utf-8'))['items']
         self.settings_path = HOME / 'settings.json'
@@ -444,6 +444,9 @@ class Scanner:
         self.root.destroy()
 
 if __name__=='__main__':
+    if '--capture-self-test' in sys.argv:
+        import cv2, dxcam, numpy
+        sys.exit(0)
     if sys.platform=='win32':
         try:
             import ctypes
