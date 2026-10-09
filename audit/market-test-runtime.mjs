@@ -9,8 +9,9 @@ const source=fs.readFileSync(new URL('../market/api.js',import.meta.url),'utf8')
   .replace("import {itemsById} from './catalog.js';",'const itemsById=globalThis.__marketItems;')
   .replace("import contributors from './contributors.json';",'const contributors=globalThis.__marketContributors;');
 export const api=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
-export function environment() {
+export function environment(legacy=false) {
   const db=new DatabaseSync(':memory:');
+  if(legacy)db.exec(`CREATE TABLE offers(id TEXT PRIMARY KEY,item_id INTEGER NOT NULL,server TEXT NOT NULL,world TEXT NOT NULL,channel INTEGER NOT NULL,room INTEGER NOT NULL,seller TEXT NOT NULL,shop TEXT NOT NULL,slot INTEGER NOT NULL,quantity INTEGER NOT NULL,price INTEGER NOT NULL,price_basis TEXT NOT NULL,unit_price REAL NOT NULL,stats_json TEXT NOT NULL,stats_known INTEGER NOT NULL,first_seen TEXT NOT NULL,last_seen TEXT NOT NULL,contributor TEXT NOT NULL,evidence TEXT,UNIQUE(server,world,channel,room,seller,shop,slot));`);
   const sql={exec(query,...args){
     if(!args.length&&query.includes(';')){db.exec(query);return [];}
     const statement=db.prepare(query),rows=statement.all(...args);

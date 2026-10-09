@@ -29,3 +29,13 @@ pyinstaller --onedir --windowed --name TCW-Shopper --add-data "items.json;." --a
 ```
 
 The source catalog and release images are shared with the website. Actual asking prices are written through /api/market/listings and stored in the shared Durable Object; they are never GitHub commits.
+
+## Nicknames and screen context
+
+The scanner asks for a public nickname on startup. This is an arbitrary alias, not your in-game name. Each confirmed listing keeps the alias used when captured/published; private uploader account IDs are not shown publicly. Change nickname from the toolbar.
+
+In calibration, select Shop title in the open shop, Channel around the channel indicator, and Top-left map label around the Free Market room text. These fixed regions are read from the same screenshot as the prices. Unreadable calibrated channel/room labels clear the candidate location instead of silently reusing an older room. Review and correct them before publishing. Location on older candidates stays attached to the original frame.
+
+Optional cursor association: while hovering a shop sign, capture/calibrate that screen; choose Cursor anchor and click where the game pointer was, then choose Shop sign and drag around its name. This defines the offset between the pointer and visible shop label. While browsing, hold the pointer still long enough for OCR, then click the shop. The scanner observes mouse presses, associates a recent nearby label, and suggests it if an open-shop title is unavailable. The suggestion expires after 20 seconds. It does not move/click the mouse. Confirm the name: this calibration-dependent suggestion is not guaranteed identification. Multiple monitor offsets use DXcam monitor geometry.
+
+The dashboard and SHOPPER page download the latest public Windows package. Every change under scanner/ rebuilds a versioned GitHub release and updates scanner-latest after successful checks. Public downloads never contain upload credentials. Use the private connection previously supplied to you. Tesseract must be installed separately.

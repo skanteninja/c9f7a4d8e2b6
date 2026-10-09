@@ -1,8 +1,17 @@
 import tempfile, unittest
 from pathlib import Path
-from core import UploadQueue, match_items, parse_integer
+from core import UploadQueue, match_items, parse_integer, read_location, cursor_rectangle, validate_nickname
 
 class CoreTests(unittest.TestCase):
+    def test_location_and_nickname(self):
+        self.assertEqual(read_location('Free Market <12>','room'),12)
+        self.assertEqual(read_location('CH. 7','channel'),7)
+        self.assertIsNone(read_location('Channel 7 Channel 8','channel'))
+        self.assertIsNone(read_location('Henesys 12','room'))
+        self.assertEqual(validate_nickname('  Mint  '),'Mint')
+        with self.assertRaises(ValueError):validate_nickname('bad\nname')
+        self.assertEqual(cursor_rectangle((500,300),(-100,-60,100,-30),(1920,1080)),(400,240,600,270))
+        self.assertIsNone(cursor_rectangle((1,1),(-100,-60,100,-30),(1920,1080)))
     def test_ambiguous_identity(self):
         items=[{'id':1,'name':'Blue Moon'},{'id':2,'name':'Blue Moon'},{'id':3,'name':'Red Moon'}]
         self.assertEqual(len(match_items('Blue Moon',items)),2)

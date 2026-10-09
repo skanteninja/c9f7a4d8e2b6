@@ -105,7 +105,7 @@
     if(button.hasAttribute('data-offer-history')){
       const root=button.closest('.market-listing').querySelector('[data-history-for]');root.hidden=!root.hidden;if(root.hidden)return;
       root.textContent='Loading observations…';
-      try{const r=await fetch('/api/market/history?offerId='+encodeURIComponent(button.dataset.offerHistory),{cache:'no-store'});if(!r.ok)throw new Error();const data=await r.json();root.innerHTML='<ul class="market-observations">'+data.observations.map(row=>`<li>${time(row.observedAt)} · ${escape(row.name)} · ${money(row.price)} mesos / ${row.priceBasis} · qty ${row.quantity} · ${escape(row.contributor)}</li>`).join('')+'</ul>';}catch{root.textContent='Observation history is temporarily unavailable.';}
+      try{const r=await fetch('/api/market/history?offerId='+encodeURIComponent(button.dataset.offerHistory),{cache:'no-store'});if(!r.ok)throw new Error();const data=await r.json();root.innerHTML='<ul class="market-observations">'+data.observations.map(row=>`<li>${time(row.observedAt)} · ${escape(row.name)} · ${money(row.price)} mesos / ${row.priceBasis} · qty ${row.quantity} · ${escape(row.contributor)} · ${escape(row.shop)} · CH ${row.channel} / FM ${row.room}</li>`).join('')+'</ul>';}catch{root.textContent='Observation history is temporarily unavailable.';}
     }
   });
   document.getElementById('shopper-more')?.addEventListener('click',()=>{shopperLimit=Math.min(100,shopperLimit+30);refreshShopper();});

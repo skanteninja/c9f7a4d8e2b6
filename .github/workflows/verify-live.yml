@@ -24,9 +24,9 @@ jobs:
           for i in {1..60}; do
             build_ok=0; maps_ok=0; legacy_ok=0; atlas_ok=0; visuals_ok=0; integrity_ok=0; stability_ok=0; cash_ok=0
             build_info="$(curl -fsSL --max-time 12 "$BASE_URL/build-info.txt?ci=$GITHUB_RUN_ID" || true)"
-            [[ "$build_info" == *"Top Classic World Maplestory 0.14.0-shared-shopper"* ]] && build_ok=1 || true
-            cash_catalog="$(curl -fsSL --max-time 15 "$BASE_URL/cash-shop-catalogs.json?v=0.14.0-shared-shopper" || true)"
-            [[ "$cash_catalog" == *'"version":"0.14.0-shared-shopper"'* ]] && [[ "$cash_catalog" == *'"defaultCatalog":"founders-access"'* ]] && cash_ok=1 || true
+            [[ "$build_info" == *"Top Classic World Maplestory 0.14.1-shopper-context"* ]] && build_ok=1 || true
+            cash_catalog="$(curl -fsSL --max-time 15 "$BASE_URL/cash-shop-catalogs.json?v=0.14.1-shopper-context" || true)"
+            [[ "$cash_catalog" == *'"version":"0.14.1-shopper-context"'* ]] && [[ "$cash_catalog" == *'"defaultCatalog":"founders-access"'* ]] && cash_ok=1 || true
 
             theme_css="$(curl -fsSL --max-time 15 "$BASE_URL/royal-maple-theme.css?ci=$GITHUB_RUN_ID" || true)"
             theme_js="$(curl -fsSL --max-time 15 "$BASE_URL/class-theme.js?ci=$GITHUB_RUN_ID" || true)"
@@ -75,12 +75,12 @@ jobs:
           [[ "$app_js" == *"etc-planner-ready"* ]]
           [[ "$app_js" == *"normalizeEtcProgress"* ]]
           [[ "$app_js" == *"job-planning"* ]]
-          [[ "$app_js" == *"cash-shop-catalogs.json?v=0.14.0-shared-shopper"* ]]
-          curl -fsSL --max-time 20 "$BASE_URL/cash-shop-catalogs.json?v=0.14.0-shared-shopper" >/tmp/live-cash-shop.json
+          [[ "$app_js" == *"cash-shop-catalogs.json?v=0.14.1-shopper-context"* ]]
+          curl -fsSL --max-time 20 "$BASE_URL/cash-shop-catalogs.json?v=0.14.1-shopper-context" >/tmp/live-cash-shop.json
           python3 - <<'PY'
           import json
           data=json.load(open('/tmp/live-cash-shop.json'))
-          assert data['version']=='0.14.0-shared-shopper'
+          assert data['version']=='0.14.1-shopper-context'
           assert data['defaultCatalog']=='founders-access'
           current=data['catalogs']['founders-access']['items']; beta=data['catalogs']['beta']['items']
           assert len(current)==69 and len(beta)==872

@@ -231,3 +231,8 @@ The derived job must drive:
 ## 2026-10-04 — Quest identity and unlock rules
 
 Use the pinned OSMS structured quest snapshot for every build. Filter other advancement branches; use numeric IDs for saved completion and migrate legacy keys without clearing their data. Availability must include prerequisite completion and inherited minimum levels. Rotation, town, event, and crafting conditions are manual in-game checks. Never treat a missing prerequisite as completed. NPC-given start items are turn-in requirements, not gathering targets. Keep choice/random reward groups distinct and class-filtered.
+
+
+## 2026-10-09 — scanner downloads and public aliases
+
+Each scanner source change automatically builds/tests/publishes a versioned Windows GitHub release and replaces scanner-latest. Website download links always use scanner-latest. Public packages must never contain bearer credentials. User-chosen nicknames are public attribution only; upload authentication and rate limits continue using private contributor identities. Screen OCR produces captured shop/channel/room suggestions requiring review. Blank calibrated location reads invalidate candidate fields rather than reusing a prior location.

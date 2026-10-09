@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths: ['scanner/**','audit/export-scanner-catalog.py','.github/workflows/build-scanner.yml']
 permissions:
-  contents: read
+  contents: write
 jobs:
   scanner:
     runs-on: windows-latest
@@ -26,3 +26,20 @@ jobs:
           name: TCW-Shopper-Windows
           path: scanner/dist/TCW-Shopper
           retention-days: 30
+
+      - name: Publish versioned and latest scanner downloads
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          Compress-Archive -Path scanner/dist/TCW-Shopper/* -DestinationPath TCW-Shopper-Windows.zip
+          $tag = "scanner-$env:GITHUB_SHA"
+          gh release create $tag TCW-Shopper-Windows.zip --title "SHOPPER Windows $($env:GITHUB_SHA.Substring(0,7))" --notes "Windows scanner built from commit $env:GITHUB_SHA. Extract the whole ZIP. Install Tesseract, load your private connection file and choose a public nickname. Review scans before publishing."
+          if ($LASTEXITCODE -ne 0) { throw 'Versioned scanner release failed' }
+          gh release view scanner-latest *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create scanner-latest --title "Latest SHOPPER Windows scanner" --notes "Automatically updated after scanner changes. Private upload connections are supplied separately."
+          }
+          gh release upload scanner-latest TCW-Shopper-Windows.zip --clobber
+          if ($LASTEXITCODE -ne 0) { throw 'Latest scanner upload failed' }
+          gh release edit scanner-latest --title "Latest SHOPPER Windows scanner" --notes "Latest successful Windows package: $env:GITHUB_SHA. Extract the ZIP, install Tesseract, load your private connection and choose a nickname. Confirm OCR and shop/location before publishing."

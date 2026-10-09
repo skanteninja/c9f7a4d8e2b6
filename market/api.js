@@ -9,7 +9,7 @@ export async function sha256(value) {
   return Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('');
 }
 function text(value, name, max=100) {
-  if(typeof value !== 'string' || !value.trim() || value.length>max) throw new Error(`Invalid ${name}`);
+  if(typeof value !== 'string' || !value.trim() || value.length>max || /[\u0000-\u001f\u007f]/.test(value)) throw new Error(`Invalid ${name}`);
   return value.trim();
 }
 function integer(value,name,min,max) {
@@ -36,7 +36,7 @@ export function normalizeListing(raw, now=Date.now()) {
     evidence=raw.evidence;
   }
   return {
-    eventId:text(raw.eventId,'event ID',80),itemId,name:itemsById.get(itemId).name,
+    nickname:text(raw.nickname||'Anonymous contributor','nickname',32),eventId:text(raw.eventId,'event ID',80),itemId,name:itemsById.get(itemId).name,
     server:text(raw.server,'server',60),world:text(raw.world,'world',60),
     channel:integer(raw.channel,'channel',1,100),room:integer(raw.room,'room',1,100),
     seller:text(raw.seller,'seller',50),shop:text(raw.shop||raw.seller,'shop',100),
@@ -80,6 +80,7 @@ export class MarketListings {
       slot INTEGER NOT NULL, quantity INTEGER NOT NULL, price INTEGER NOT NULL, price_basis TEXT NOT NULL,
       unit_price REAL NOT NULL, stats_json TEXT NOT NULL, stats_known INTEGER NOT NULL,
       first_seen TEXT NOT NULL, last_seen TEXT NOT NULL, contributor TEXT NOT NULL, evidence TEXT,
+      nickname TEXT NOT NULL DEFAULT 'Anonymous contributor',
       UNIQUE(server,world,channel,room,seller,shop,slot));
       CREATE INDEX IF NOT EXISTS offers_item_time ON offers(item_id,last_seen);
       CREATE INDEX IF NOT EXISTS offers_scope ON offers(server,world,channel,room);
@@ -87,6 +88,7 @@ export class MarketListings {
         item_id INTEGER NOT NULL, observed_at TEXT NOT NULL, received_at TEXT NOT NULL, data_json TEXT NOT NULL);
       CREATE INDEX IF NOT EXISTS observations_offer ON observations(offer_id,observed_at);
       CREATE TABLE IF NOT EXISTS rate_limits (contributor TEXT PRIMARY KEY, window INTEGER NOT NULL, count INTEGER NOT NULL);`);
+    if(!Array.from(this.sql.exec('PRAGMA table_info(offers)')).some(column=>column.name==='nickname'))this.sql.exec("ALTER TABLE offers ADD COLUMN nickname TEXT NOT NULL DEFAULT 'Anonymous contributor'");
   }
   broadcast() {
     const message=JSON.stringify({type:'listings-updated',at:new Date().toISOString()});
@@ -110,7 +112,7 @@ export class MarketListings {
     if(p.endsWith('/history')) {
       const offerId=u.searchParams.get('offerId');if(!offerId||offerId.length>64)return json({error:'Offer ID required'},400);
       const rows=Array.from(this.sql.exec('SELECT data_json,received_at FROM observations WHERE offer_id=? ORDER BY observed_at DESC LIMIT 50',offerId));
-      return json({observations:rows.map(row=>({...JSON.parse(row.data_json),receivedAt:row.received_at}))});
+      return json({observations:rows.map(row=>{const data=JSON.parse(row.data_json);return {...data,contributor:data.nickname||'Anonymous contributor',receivedAt:row.received_at};})});
     }
     if(p.endsWith('/evidence')) {
       const id=u.searchParams.get('offerId');
@@ -134,12 +136,12 @@ export class MarketListings {
           const unit=row.priceBasis==='unit'?row.price:row.price/row.quantity;
           this.sql.exec('INSERT INTO observations VALUES (?,?,?,?,?,?)',event,id,row.itemId,row.observedAt,new Date().toISOString(),JSON.stringify({...row,evidence:undefined,offerId:id}));
           if(!old||row.observedAt>=old.last_seen) {
-            this.sql.exec(`INSERT INTO offers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            this.sql.exec(`INSERT INTO offers (id,item_id,server,world,channel,room,seller,shop,slot,quantity,price,price_basis,unit_price,stats_json,stats_known,first_seen,last_seen,contributor,evidence,nickname) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
               ON CONFLICT(id) DO UPDATE SET item_id=excluded.item_id,quantity=excluded.quantity,price=excluded.price,
               price_basis=excluded.price_basis,unit_price=excluded.unit_price,stats_json=excluded.stats_json,
               stats_known=excluded.stats_known,first_seen=excluded.first_seen,last_seen=excluded.last_seen,
-              contributor=excluded.contributor,evidence=excluded.evidence`,
-              id,row.itemId,row.server,row.world,row.channel,row.room,row.seller,row.shop,row.slot,row.quantity,row.price,row.priceBasis,unit,stats,row.statsKnown?1:0,first,row.observedAt,contributor,row.evidence);
+              contributor=excluded.contributor,evidence=excluded.evidence,nickname=excluded.nickname`,
+              id,row.itemId,row.server,row.world,row.channel,row.room,row.seller,row.shop,row.slot,row.quantity,row.price,row.priceBasis,unit,stats,row.statsKnown?1:0,first,row.observedAt,contributor,row.evidence,row.nickname||'Anonymous contributor');
           }
           accepted++;
         }
@@ -161,7 +163,7 @@ export class MarketListings {
     const offset=Math.max(0,Math.min(100000,Number(u.searchParams.get('offset'))||0));
     const total=this.sql.exec('SELECT COUNT(*) AS count FROM offers'+clause,...args).one().count;
     const rows=Array.from(this.sql.exec('SELECT * FROM offers'+clause+' ORDER BY '+sort+' LIMIT ? OFFSET ?',...args,limit,offset));
-    return json({total,listings:rows.map(row=>({id:row.id,itemId:row.item_id,name:itemsById.get(row.item_id)?.name||'Unknown item',server:row.server,world:row.world,channel:row.channel,room:row.room,seller:row.seller,shop:row.shop,slot:row.slot,quantity:row.quantity,price:row.price,priceBasis:row.price_basis,unitPrice:row.unit_price,stats:JSON.parse(row.stats_json),statsKnown:!!row.stats_known,firstSeen:row.first_seen,lastSeen:row.last_seen,contributor:row.contributor,evidence:!!row.evidence}))});
+    return json({total,listings:rows.map(row=>({id:row.id,itemId:row.item_id,name:itemsById.get(row.item_id)?.name||'Unknown item',server:row.server,world:row.world,channel:row.channel,room:row.room,seller:row.seller,shop:row.shop,slot:row.slot,quantity:row.quantity,price:row.price,priceBasis:row.price_basis,unitPrice:row.unit_price,stats:JSON.parse(row.stats_json),statsKnown:!!row.stats_known,firstSeen:row.first_seen,lastSeen:row.last_seen,contributor:row.nickname||'Anonymous contributor',evidence:!!row.evidence}))});
   }
   webSocketMessage(ws,message){if(message==='ping')ws.send('pong');}
   webSocketClose(ws,code,reason){ws.close(code,reason);}

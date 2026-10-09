@@ -5,6 +5,7 @@ frame.addEventListener('load',async()=>{try{
  const w=frame.contentWindow,d=frame.contentDocument;
  for(let n=0;n<70&&!d.documentElement.classList.contains('shopper-ready');n++)await delay(150);
  if(!d.documentElement.classList.contains('shopper-ready'))throw Error('shopper boot');
+ for(const view of ['dashboard','shopper']){const link=d.querySelector(`#${view}-database [data-scanner-download]`);if(!link||!link.href.endsWith('/scanner-latest/TCW-Shopper-Windows.zip'))throw Error('scanner download '+view);}
  const search=d.getElementById('dashboard-database-search');if(search.placeholder!=='Search the database')throw Error('search placeholder');
  if(d.querySelectorAll('#dashboard-builds [data-build-select]').length!==3)throw Error('dashboard build count');
  const a=d.getElementById('dashboard-database').getBoundingClientRect(),b=d.getElementById('dashboard-build-section').getBoundingClientRect();if(a.bottom>b.top+1)throw Error('builds not below search');

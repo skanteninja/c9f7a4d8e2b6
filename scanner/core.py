@@ -82,3 +82,24 @@ class UploadQueue:
 
 def now_iso():
     return datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+
+
+def validate_nickname(value):
+    value=value.strip()
+    if not value or len(value)>32 or any(ord(c)<32 or ord(c)==127 for c in value):
+        raise ValueError('Choose a nickname of 1–32 characters.')
+    return value
+
+def read_location(value,kind):
+    """Read only the explicitly calibrated channel or map-label region."""
+    value=value.strip()
+    pattern = r'(?:channel|ch)\s*[:.#-]?\s*(\d{1,3})\b' if kind=='channel' else r'(?:free\s*market|fm|room)\s*[-:<># ]*\s*(\d{1,3})\b'
+    hits=re.findall(pattern,value,re.I)
+    if not hits and re.fullmatch(r'\d{1,3}',value):hits=[value]
+    if len(set(hits))!=1:return None
+    number=int(hits[0]);return number if 1<=number<=100 else None
+
+def cursor_rectangle(point,offset,size):
+    if point is None:return None
+    rect=(point[0]+offset[0],point[1]+offset[1],point[0]+offset[2],point[1]+offset[3])
+    return rect if 0<=rect[0]<rect[2]<=size[0] and 0<=rect[1]<rect[3]<=size[1] else None
