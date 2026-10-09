@@ -19,6 +19,13 @@ frame.addEventListener('load',async()=>{try{
  if(!d.querySelector('#shopper-search-results [data-market-item]'))throw Error('SHOPPER catalog search');
  if(!d.querySelector('#nav [data-page="builds"]'))throw Error('Builds navigation lost');
  for(const name of ['server','world','channel','room','age','sort'])if(!d.querySelector(`[data-market-filter="${name}"]`))throw Error('filter '+name);
+ const originalFetch=w.fetch.bind(w),at=new Date().toISOString();
+ const offer={id:'fixture',itemId:1302000,name:'Sword',server:'Classic World',world:'Fixture',channel:3,room:12,seller:'ShopOwner',shop:'Cheap Scrolls',slot:1,quantity:2,price:1000,priceBasis:'unit',unitPrice:1000,stats:{},statsKnown:false,firstSeen:at,lastSeen:at,contributor:'Mint <alias>',evidence:false};
+ w.fetch=(url,options)=>{const path=String(url);if(path.includes('/api/market/status'))return Promise.resolve(new w.Response(JSON.stringify({available:true,count:1,scopes:[{server:'Classic World',world:'Fixture'}]})));if(path.includes('/api/market/listings'))return Promise.resolve(new w.Response(JSON.stringify({total:1,listings:[offer]})));return originalFetch(url,options);};
+ await w.TCW_MARKET.refresh();await delay(200);
+ const card=d.querySelector('#shopper-listings .market-listing');if(!card)throw Error('individual listing render');
+ for(const value of ['Cheap Scrolls','Mint <alias>','CH 3','FM 12'])if(!card.textContent.includes(value))throw Error('listing attribution/context '+value);
+ if(card.querySelector('alias')||!card.querySelector(`time[datetime="${at}"]`))throw Error('nickname escaping or exact timestamp');
  if(d.documentElement.scrollWidth>d.documentElement.clientWidth+3)throw Error('horizontal overflow');
  result.textContent='shopper-browser-regression-ok';
 }catch(error){result.textContent='shopper-browser-regression-failed: '+error.stack;}});
