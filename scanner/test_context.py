@@ -61,6 +61,6 @@ class AutomaticContextTests(unittest.TestCase):
         import queue
         from unittest.mock import Mock
         scanner=Scanner.__new__(Scanner);scanner.running=False;scanner.messages=queue.Queue();scanner.root=Mock()
-        scanner.selected=None;scanner.pending_candidates=[];scanner.table=Mock();scanner.status=Mock()
+        scanner.selected=None;scanner.pending_candidates=[];scanner.table=Mock();scanner.table.get_children.return_value=[];scanner.status=Mock()
         scanner.messages.put(('candidates',[]));scanner.pump()
         self.assertIsNone(scanner.pending_candidates)
