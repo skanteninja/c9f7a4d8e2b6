@@ -15,7 +15,7 @@ HOME.mkdir(parents=True, exist_ok=True)
 
 class Scanner:
     def __init__(self, root):
-        self.root = root; root.title('TCW · SHOPPER Scanner 0.15.0'); root.geometry('980x700'); root.minsize(900,620)
+        self.root = root; root.title('TCW · SHOPPER Scanner 0.16.0'); root.geometry('980x700'); root.minsize(900,620)
         self.messages = queue.Queue(); self.uploads = UploadQueue(HOME / 'uploads.sqlite')
         self.catalog = json.loads((ASSETS / 'items.json').read_text(encoding='utf-8'))['items']
         self.settings_path = HOME / 'settings.json'
@@ -242,7 +242,7 @@ class Scanner:
 
     def auto_extract(self,image,settings,captured_at):
         lines=ocr_lines(image,settings['tesseract'])
-        proposals,context,readings=detect(lines,self.catalog,image.size,self.name_memory)
+        proposals,context,readings=detect(lines,self.catalog,image.size,self.name_memory,image=image)
         detected=dict(settings,world='Windia',**context);candidates=[]
         for row in proposals:
             crop=image.crop(row['box']);crop.thumbnail((650,100));buffer=io.BytesIO();crop.save(buffer,format='JPEG',quality=75)

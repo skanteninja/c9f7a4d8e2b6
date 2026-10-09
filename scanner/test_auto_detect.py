@@ -12,6 +12,16 @@ class AutoTests(unittest.TestCase):
     def test_unlabeled_numbers_and_ambiguous_prices_rejected(self):
         for prices in [[line('99999',350,259)],[line('Price: 100 mesos',350,259),line('Price: 200 mesos',350,260)]]:
             rows,_,_=detect([line('Red Potion',350,240)]+prices,CAT,(1024,768));self.assertEqual(rows,[])
+
+    def test_sold_out_row_is_excluded_from_realistic_listing_crop(self):
+        from PIL import Image,ImageDraw
+        image=Image.new('RGB',(411,460),(220,230,238));draw=ImageDraw.Draw(image)
+        draw.rectangle((0,0,410,75),fill=(180,195,205));draw.text((82,18),'Green Morrican',fill='black');draw.text((82,50),'1 for 7,000 mesos',fill='black')
+        draw.rectangle((0,80,410,145),fill=(225,232,238));draw.text((82,98),'Blue Morrican',fill=(220,225,230));draw.text((82,130),'1 for 7,000 mesos',fill=(220,225,230))
+        lines=[line('Green Morrican',82,18,155),line('1 for 7,000 mesos',82,50,190),line('Blue Morrican',82,98,155),line('1 for 7,000 mesos',82,130,190)]
+        rows,_,_=detect(lines,[{'id':1,'name':'Green Morrican'},{'id':2,'name':'Blue Morrican'}],image.size,image=image)
+        self.assertEqual([r['raw_name'] for r in rows],['Green Morrican'])
+        self.assertEqual(rows[0]['quantity'],'1')
     def test_multiple_rows_keep_distinct_prices(self):
         rows,_,_=detect([line('Red Potion',350,240),line('Price: 100 mesos',350,259),line('Blue Potion',350,300),line('Price: 200 mesos',350,319)],CAT,(1024,768));self.assertEqual([r['price'] for r in rows],['100','200'])
     def test_memory_requires_consistent_three_reviews_and_persists(self):

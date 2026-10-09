@@ -8,15 +8,17 @@ Use the packaged scanner folder with items.json and icons/. Install Python 3.11+
 
 The website upload connection is included and loaded automatically. You and your friend can use the same download; each uses their own public nickname. Existing saved connections and nicknames are retained. Local settings and the retryable upload queue live in %LOCALAPPDATA%/TCW-Shopper.
 
-## Scan a shop (automatic mode, 0.15.0)
+## Scan a shop (automatic mode, 0.16.0)
 
 1. Keep MapleStory.exe visible and open a shop. Start scanning; manual calibration is no longer required by default.
 2. The scanner searches the entire client image for catalog item names and nearby prices explicitly labeled Price or mesos. Results need two consistent reads before appearing. Each item keeps its own evidence crop and capture timestamp.
 3. Select an offer and check the item, price, quantity and actual shop slot. Unknown quantities stay blank. More details opens automatically for missing seller, shop, channel or room. Correct these before Publish. Opening the channel chooser alone does not establish a new channel.
 4. Publish confirms the listing, uploads its reviewed evidence, and adds the item-name correction to local memory. A non-exact OCR name needs three consistent confirmations of the same item before the memory helps recognize it. Conflicting corrections disable that mapping. Numbers/prices are always read fresh.
-5. If no offers appear, use Settings → Troubleshooting → Import screenshot to test a shop image, or disable automatic detection under Screen setup and use Manual calibration fallback in Troubleshooting. Existing calibration is preserved.
+5. Greyed-out rows are treated as sold out and ignored. Active rows include the listing quantity from the `1 for 7,000 mesos` text. If no offers appear, use Settings → Troubleshooting → Import screenshot to test a shop image, or disable automatic detection under Screen setup and use Manual calibration fallback in Troubleshooting. Existing calibration is preserved.
 
 This is an experimental text-and-layout detector, not a trained visual model. Explicit owner/seller and shop/store labels are supported; unlabeled titles or player names can require correction. Only room labels in the upper-left area and channel labels in the upper area are considered. It refuses multiple different channel values and ambiguous nearby prices. A different layout or unreadable font may yield no proposals. No full-screen images are uploaded. Gameplay recording/video-file import and automatic publishing are not implemented.
+
+The MapleStory shop-window fallback recognises the title line at the top and the owner name in the left seller panel when those labels have no literal prefix. Visitor names in the right panel are not treated as the seller. Grey disabled text/icons are excluded using the row's rendered pixels, so sold-out offers do not enter the website.
 
 Screenshot import is available for calibration and review. Its file modified time is only a suggested capture time; confirm the actual observation timestamp. Uploads more than 30 days old are rejected. Hidden room/channel labels remain unknown; this version does not process recorded video files or auto-publish unreviewed OCR. Live capture and OCR accuracy need testing with real shop screenshots before removing the review step.
 

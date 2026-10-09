@@ -33,7 +33,53 @@ def unique_field(lines,pattern,area=None):
     return found[0] if len(values)==1 else ('','')
 
 
-def detect(lines,catalog,size,memory=None):
+def _clean_label(value):
+    return re.sub(r'^[^A-Za-z0-9+]+|[^A-Za-z0-9 _+.-]+$','',value).replace('_',' ').strip()
+
+
+def _shop_window_labels(lines, size, image=None):
+    """MapleStory shop-window fallback labels when the UI has no literal 'Shop:' prefix."""
+    title = ''
+    for line in lines:
+        x,y,right,bottom=line['box']; text=_clean_label(line['text'])
+        if y > size[1]*.14 or x > size[0]*.45 or len(text)<3: continue
+        if re.search(r'channel|free market|mesos|item|seller|buy|leave|entered|world',text,re.I): continue
+        if re.fullmatch(r'[+0-9 .-]+',text): continue
+        if image is not None:
+            try:
+                import pytesseract
+                from PIL import ImageOps
+                crop=image.crop((max(0,x-15),max(0,y-12),min(image.width,right+15),min(image.height,bottom+12)))
+                crop=ImageOps.grayscale(crop.resize((crop.width*4,crop.height*4)))
+                refined_raw=pytesseract.image_to_string(crop,config='--psm 7',timeout=5).strip()
+                refined_raw=re.sub(r'^\+\?', '+2', refined_raw)
+                refined=_clean_label(refined_raw)
+                if len(refined)>=3: text=refined.replace('intluck','int luck')
+            except Exception: pass
+        title=text[:100]; break
+    seller = ''
+    for line in lines:
+        x,y,right,bottom=line['box']; text=_clean_label(line['text'])
+        if not (x < size[0]*.28 and size[1]*.24 < y < size[1]*.42): continue
+        if re.search(r'item|seller|buy|leave|mesos|entered|room',text,re.I): continue
+        words=re.findall(r'[A-Za-z0-9][A-Za-z0-9_.-]{2,31}',text)
+        if words: seller=words[-1]; break
+    return title,seller
+
+
+def _looks_disabled(image, box):
+    """Sold-out rows are rendered pale grey; active text has dark pixels."""
+    if image is None: return False
+    x1,y1,x2,y2=box
+    crop=image.crop((max(0,x1),max(0,y1),min(image.width,x2),min(image.height,y2))).convert('RGB')
+    pixels=list(crop.getdata())
+    if not pixels:return False
+    # Text/icon area: a live row contains dark outline/text, a sold-out row does not.
+    dark=sum(1 for r,g,b in pixels if max(r,g,b)<100)
+    return dark/max(1,len(pixels)) < .012
+
+
+def detect(lines,catalog,size,memory=None,image=None):
     """Return proposals plus explicitly visible context, with ambiguous labels blank."""
     context={};readings={}
     patterns={'channel':r'\b(?:channel|ch)\s*[:.#-]?\s*(\d{1,3})\b',
@@ -44,6 +90,9 @@ def detect(lines,catalog,size,memory=None):
         area=(lambda b:b[0]<size[0]*.45 and b[1]<size[1]*.4) if key=='room' else ((lambda b:b[1]<size[1]*.4) if key=='channel' else None)
         context[key],readings[key]=unique_field(lines,pattern,area)
         if key in ('channel','room') and context[key] and not 1<=int(context[key])<=100:context[key]=''
+    title,seller=_shop_window_labels(lines,size,image)
+    if not context.get('shop'): context['shop']=title; readings['shop']=title
+    if not context.get('seller'): context['seller']=seller; readings['seller']=seller
     # Channel chooser lists multiple channels: unique_field deliberately refuses it.
     prices=[]
     for line in lines:
@@ -74,6 +123,9 @@ def detect(lines,catalog,size,memory=None):
         px,py,pr,pb=price['box'];box=(max(0,min(x,px)-4),max(0,min(y,py)-4),min(size[0],max(right,pr)+4),min(size[1],max(bottom,pb)+4))
         # Quantity must be explicit within these lines; unknown stays blank for review.
         quantities=re.findall(r'\b(?:qty|quantity)\s*[:：]?\s*(\d+)\b',text+' '+price['text'],re.I)
+        if not quantities:
+            quantities=re.findall(r'\b(\d+)\s+for\s+'+NUMBER,price['text'],re.I)
+        if _looks_disabled(image, box): continue
         rows.append({'raw_name':text,'price':raw,'quantity':quantities[0] if len(quantities)==1 else '',
             'matches':matches,'box':box,'slot':len(rows)+1})
     return rows,context,readings
