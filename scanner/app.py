@@ -15,7 +15,7 @@ HOME.mkdir(parents=True, exist_ok=True)
 
 class Scanner:
     def __init__(self, root):
-        self.root = root; root.title('TCW · SHOPPER Scanner 0.16.0'); root.geometry('980x700'); root.minsize(900,620)
+        self.root = root; root.title('TCW · SHOPPER Scanner 0.16.1'); root.geometry('980x700'); root.minsize(900,620)
         self.messages = queue.Queue(); self.uploads = UploadQueue(HOME / 'uploads.sqlite')
         self.catalog = json.loads((ASSETS / 'items.json').read_text(encoding='utf-8'))['items']
         self.settings_path = HOME / 'settings.json'
@@ -37,10 +37,13 @@ class Scanner:
         self.detected_context = tk.StringVar(value='Windia · Channel ? · FM room ? · Seller ? · Shop ?')
         self.running = False; self.camera = None; self.image = None; self.regions = self.config.get('regions', {})
         self.candidates = []; self.selected = None; self.upload_busy = False; self.capture_busy = False
+        bundled_tesseract = ASSETS / 'tesseract' / 'tesseract.exe'
+        saved_tesseract = self.config.get('tesseract') or ''
+        configured_tesseract = saved_tesseract if Path(saved_tesseract).exists() else (str(bundled_tesseract) if bundled_tesseract.exists() else '')
         self.vars = {key: tk.StringVar(value=str(self.config.get(key, default))) for key, default in {
             'endpoint':'https://maplestory-classic.ofri505.workers.dev', 'api_key':'', 'server':'Classic World',
             'world':'Windia', 'channel':'', 'room':'', 'seller':'', 'shop':'', 'monitor':'0',
-            'row_stride':'36', 'rows':'4', 'price_basis':'unit', 'tesseract':'', 'nickname':''}.items()}
+            'row_stride':'36', 'rows':'4', 'price_basis':'unit', 'tesseract':configured_tesseract, 'nickname':''}.items()}
         self.edit = {key: tk.StringVar() for key in ['item','price','quantity','slot','observed_at','stats']}
         self.share_learning = tk.BooleanVar(value=self.config.get('share_learning', True))
         self.stats_known = tk.BooleanVar(value=False)

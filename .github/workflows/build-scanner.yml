@@ -17,8 +17,17 @@ jobs:
       - run: python -m pip install -r scanner/requirements.txt pyinstaller
       - run: python audit/export-scanner-catalog.py
       - run: python -m unittest discover -s scanner -p 'test_*.py'
+      - name: Install portable Tesseract for the release
+        shell: pwsh
+        run: |
+          choco install tesseract --no-progress -y
+          $ocr = Join-Path $env:ProgramFiles 'Tesseract-OCR'
+          if (!(Test-Path (Join-Path $ocr 'tesseract.exe'))) { throw "Tesseract was not installed at $ocr" }
+          New-Item -ItemType Directory -Force scanner/tesseract | Out-Null
+          Copy-Item "$ocr/*" scanner/tesseract -Recurse -Force
+          if (!(Test-Path scanner/tesseract/tessdata/eng.traineddata)) { throw 'English Tesseract data is missing' }
       - working-directory: scanner
-        run: pyinstaller --onedir --windowed --name TCW-Shopper --add-data "items.json;." --add-data "connection.json;." --hidden-import cv2 app.py
+        run: pyinstaller --onedir --windowed --name TCW-Shopper --add-data "items.json;." --add-data "connection.json;." --add-data "tesseract;tesseract" --hidden-import cv2 app.py
       - name: Check capture imports inside packaged executable
         shell: pwsh
         run: |
@@ -39,7 +48,7 @@ jobs:
         run: |
           Compress-Archive -Path scanner/dist/TCW-Shopper/* -DestinationPath TCW-Shopper-Windows.zip
           $tag = "scanner-$env:GITHUB_SHA"
-          gh release create $tag TCW-Shopper-Windows.zip --title "SHOPPER Windows $($env:GITHUB_SHA.Substring(0,7))" --notes "Windows scanner built from commit $env:GITHUB_SHA. Extract the whole ZIP. Install Tesseract, choose a public nickname; the website connection is included. Review scans before publishing."
+          gh release create $tag TCW-Shopper-Windows.zip --title "SHOPPER Windows $($env:GITHUB_SHA.Substring(0,7))" --notes "Windows scanner built from commit $env:GITHUB_SHA. Extract the whole ZIP. Tesseract OCR and the website connection are included. Choose a public nickname and review scans before publishing."
           if ($LASTEXITCODE -ne 0) { throw 'Versioned scanner release failed' }
           gh release view scanner-latest *> $null
           if ($LASTEXITCODE -ne 0) {
@@ -47,4 +56,4 @@ jobs:
           }
           gh release upload scanner-latest TCW-Shopper-Windows.zip --clobber
           if ($LASTEXITCODE -ne 0) { throw 'Latest scanner upload failed' }
-          gh release edit scanner-latest --title "Latest SHOPPER Windows scanner" --notes "Latest successful Windows package: $env:GITHUB_SHA. Extract the ZIP, install Tesseract, choose a nickname; the website upload connection is included. Confirm OCR and shop/location before publishing."
+          gh release edit scanner-latest --title "Latest SHOPPER Windows scanner" --notes "Latest successful Windows package: $env:GITHUB_SHA. Extract the ZIP; Tesseract OCR and the website upload connection are included. Choose a nickname and confirm OCR and shop/location before publishing."

@@ -4,13 +4,13 @@ The website owns search and shared listings. This Windows companion captures scr
 
 ## Run
 
-Use the packaged scanner folder with items.json and icons/. Install Python 3.11+ for Windows and Tesseract OCR with English language data. Tesseract's installation options are documented at https://tesseract-ocr.github.io/tessdoc/Installation.html. Run start.bat. If Tesseract is not on PATH, enter its tesseract.exe path in the app.
+For source runs, use the packaged scanner folder with items.json and icons/, install Python 3.11+ and Tesseract OCR with English language data, then run start.bat. The normal Windows ZIP already includes Tesseract and selects it automatically.
 
 The website upload connection is included and loaded automatically. You and your friend can use the same download; each uses their own public nickname. Existing saved connections and nicknames are retained. Local settings and the retryable upload queue live in %LOCALAPPDATA%/TCW-Shopper.
 
 ## Scan a shop (automatic mode, 0.16.0)
 
-1. Keep MapleStory.exe visible and open a shop. Start scanning; manual calibration is no longer required by default.
+1. Keep MapleStory.exe visible and open a shop. Start scanning; manual calibration is no longer required by default. Tesseract OCR is bundled in the Windows download and selected automatically.
 2. The scanner searches the entire client image for catalog item names and nearby prices explicitly labeled Price or mesos. Results need two consistent reads before appearing. Each item keeps its own evidence crop and capture timestamp.
 3. Select an offer and check the item, price, quantity and actual shop slot. Unknown quantities stay blank. More details opens automatically for missing seller, shop, channel or room. Correct these before Publish. Opening the channel chooser alone does not establish a new channel.
 4. Publish confirms the listing, uploads its reviewed evidence, and adds the item-name correction to local memory. A non-exact OCR name needs three consistent confirmations of the same item before the memory helps recognize it. Conflicting corrections disable that mapping. Numbers/prices are always read fresh.
@@ -18,13 +18,13 @@ The website upload connection is included and loaded automatically. You and your
 
 This is an experimental text-and-layout detector, not a trained visual model. Explicit owner/seller and shop/store labels are supported; unlabeled titles or player names can require correction. Only room labels in the upper-left area and channel labels in the upper area are considered. It refuses multiple different channel values and ambiguous nearby prices. A different layout or unreadable font may yield no proposals. No full-screen images are uploaded. Gameplay recording/video-file import and automatic publishing are not implemented.
 
-The MapleStory shop-window fallback recognises the title line at the top and the owner name in the left seller panel when those labels have no literal prefix. Visitor names in the right panel are not treated as the seller. Grey disabled text/icons are excluded using the row's rendered pixels, so sold-out offers do not enter the website.
+The MapleStory shop-window fallback recognises the title line at the top and the owner name in the left seller panel when those labels have no literal prefix. Visitor names in the right panel are not treated as the seller. Grey disabled text/icons are excluded using the row's rendered pixels, so sold-out offers do not enter the website. The Windows ZIP includes Tesseract and English `eng.traineddata`; no separate OCR installation is required.
 
 Screenshot import is available for calibration and review. Its file modified time is only a suggested capture time; confirm the actual observation timestamp. Uploads more than 30 days old are rejected. Hidden room/channel labels remain unknown; this version does not process recorded video files or auto-publish unreviewed OCR. Live capture and OCR accuracy need testing with real shop screenshots before removing the review step.
 
 ## Packaging
 
-The Windows GitHub Action builds a portable Python/Tk application. Tesseract must still be installed separately. For source runs, the release folder includes catalog and artwork. To package locally, install PyInstaller, export the catalog, and run:
+The Windows GitHub Action builds a portable Python/Tk application and includes Tesseract in the release folder. For source runs, install Tesseract separately. To package locally, install PyInstaller, export the catalog, place a Tesseract folder at scanner/tesseract, and run:
 
 ```
 pyinstaller --onedir --windowed --name TCW-Shopper --add-data "items.json;." --add-data "icons;icons" app.py
@@ -40,7 +40,7 @@ In calibration, select Shop title in the open shop, Channel around the channel i
 
 Optional cursor association: while hovering a shop sign, capture/calibrate that screen; choose Cursor anchor and click where the game pointer was, then choose Shop sign and drag around its name. This defines the offset between the pointer and visible shop label. While browsing, hold the pointer still long enough for OCR, then click the shop. The scanner observes mouse presses, associates a recent nearby label, and suggests it if an open-shop title is unavailable. The suggestion expires after 20 seconds. It does not move/click the mouse. Confirm the name: this calibration-dependent suggestion is not guaranteed identification. Multiple monitor offsets use DXcam monitor geometry.
 
-The dashboard and SHOPPER page download the latest public Windows package. Every change under scanner/ rebuilds a versioned GitHub release and updates scanner-latest after successful checks. The public download includes a shared upload connection, as requested. No connection-file setup is needed. Tesseract must be installed separately.
+The dashboard and SHOPPER page download the latest public Windows package. Every change under scanner/ rebuilds a versioned GitHub release and updates scanner-latest after successful checks. The public download includes a shared upload connection and bundled OCR; no connection-file or Tesseract setup is needed.
 
 ## Nickname and scanner improvement data (0.14.2)
 
@@ -76,7 +76,7 @@ This is capture of visible screen pixels, not background video recording or acce
 
 ## Ready-to-upload download (0.14.6)
 
-The packaged website connection loads automatically before first setup, including for existing installations without a key. The nickname prompt still appears only once. Screen calibration and Tesseract remain required. The shared credential grants listing uploads, not repository access.
+The packaged website connection and Tesseract OCR load automatically before first setup, including for existing installations without a key. The nickname prompt still appears only once. Screen calibration is optional in automatic mode. The shared credential grants listing uploads, not repository access.
 
 ## Capture dependency fix (0.14.7)
 
