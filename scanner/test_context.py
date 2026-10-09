@@ -56,3 +56,11 @@ class AutomaticContextTests(unittest.TestCase):
         self.assertEqual(scanner.vars['channel'].get(),'2');self.assertEqual(scanner.vars['seller'].get(),'OwnerA')
         scanner.selected=None;scanner.messages.put(('context',live));scanner.pump()
         self.assertEqual(scanner.vars['channel'].get(),'3');self.assertEqual(scanner.vars['seller'].get(),'OwnerB')
+
+    def test_applied_candidates_clear_deferred_invalidation(self):
+        import queue
+        from unittest.mock import Mock
+        scanner=Scanner.__new__(Scanner);scanner.running=False;scanner.messages=queue.Queue();scanner.root=Mock()
+        scanner.selected=None;scanner.pending_candidates=[];scanner.table=Mock();scanner.status=Mock()
+        scanner.messages.put(('candidates',[]));scanner.pump()
+        self.assertIsNone(scanner.pending_candidates)

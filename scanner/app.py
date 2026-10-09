@@ -310,6 +310,7 @@ class Scanner:
                     if signature==previous and signature!=published and all(detected[k] for k in ['channel','room','seller','shop']):
                         rows=self.extract(image,current_settings,now_iso(),(detected,readings));self.messages.put(('candidates',rows));published=signature
                     elif signature!=previous:
+                        published=None
                         self.messages.put(('invalidate_candidates',None))
                     previous=signature;time.sleep(1.5)
             except Exception as exc:self.messages.put(('error',str(exc)));self.messages.put(('stopped',None))
@@ -384,6 +385,7 @@ class Scanner:
                 if self.selected is not None:
                     self.pending_candidates=value
                     self.status.set('Live location is updating. The selected listing keeps its original shop and location.');continue
+                self.pending_candidates=None
                 self.candidates=value;self.table.delete(*self.table.get_children())
                 for index,row in enumerate(value):
                     confidence=row['matches'][0][0] if row['matches'] else 0
