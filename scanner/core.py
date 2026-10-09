@@ -1,5 +1,6 @@
 """Catalog matching and a durable local upload queue; no game hooks."""
 import json, re, sqlite3, urllib.error, urllib.request, uuid
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -30,8 +31,14 @@ class UploadQueue:
         with self.connect() as db:
             db.execute('CREATE TABLE IF NOT EXISTS queue (id TEXT PRIMARY KEY, payload TEXT NOT NULL, sent INTEGER DEFAULT 0, error TEXT)')
 
+    @contextmanager
     def connect(self):
-        return sqlite3.connect(self.path)
+        db = sqlite3.connect(self.path)
+        try:
+            with db:
+                yield db
+        finally:
+            db.close()
 
     def enqueue(self, listing):
         listing = dict(listing, eventId=listing.get('eventId') or str(uuid.uuid4()), reviewed=True)
