@@ -103,3 +103,10 @@ def cursor_rectangle(point,offset,size):
     if point is None:return None
     rect=(point[0]+offset[0],point[1]+offset[1],point[0]+offset[2],point[1]+offset[3])
     return rect if 0<=rect[0]<rect[2]<=size[0] and 0<=rect[1]<rect[3]<=size[1] else None
+
+
+def associated_shop(hover,click):
+    if not hover or not click:return None
+    if not 0<=click[1]-hover[2]<4:return None
+    if abs(click[0][0]-hover[0][0])>=35 or abs(click[0][1]-hover[0][1])>=35:return None
+    return hover[1],click[1]

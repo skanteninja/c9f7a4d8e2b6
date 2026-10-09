@@ -1,8 +1,14 @@
 import tempfile, unittest
 from pathlib import Path
-from core import UploadQueue, match_items, parse_integer, read_location, cursor_rectangle, validate_nickname
+from core import UploadQueue, match_items, parse_integer, read_location, cursor_rectangle, validate_nickname, associated_shop
 
 class CoreTests(unittest.TestCase):
+    def test_cursor_association_is_recent_and_nearby(self):
+        hover=((500,300),'Cheap Scrolls',10)
+        self.assertEqual(associated_shop(hover,((501,301),11)),('Cheap Scrolls',11))
+        self.assertIsNone(associated_shop(hover,((500,300),20)))
+        self.assertIsNone(associated_shop(hover,((900,300),11)))
+        self.assertIsNone(associated_shop(hover,((500,300),9)))
     def test_location_and_nickname(self):
         self.assertEqual(read_location('Free Market <12>','room'),12)
         self.assertEqual(read_location('CH. 7','channel'),7)

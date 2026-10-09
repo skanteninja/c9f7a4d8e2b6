@@ -5,7 +5,7 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
 from PIL import Image, ImageTk, ImageOps
-from core import UploadQueue, match_items, parse_integer, now_iso, validate_nickname, read_location, cursor_rectangle
+from core import UploadQueue, match_items, parse_integer, now_iso, validate_nickname, read_location, cursor_rectangle, associated_shop
 
 ASSETS = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parent))
 HOME = Path(os.getenv('LOCALAPPDATA', str(Path.home()))) / 'TCW-Shopper'
@@ -250,6 +250,9 @@ class Scanner:
                 while self.running:
                     image=self.frame(monitor);current_settings=dict(self.live_settings)
                     point,_=self.cursor_sample()
+                    click=self.cursor_click
+                    if click:
+                        clicked_shop=associated_shop(hover,click);self.cursor_click=None
                     anchor=current_settings.get('hover_anchor');box=current_settings['regions'].get('hover')
                     if point and point==last_cursor and anchor and box:
                         offset=[box[0]-anchor[0],box[1]-anchor[1],box[2]-anchor[0],box[3]-anchor[1]]
@@ -258,20 +261,21 @@ class Scanner:
                             label=self.ocr(image.crop(region),tesseract=current_settings['tesseract'])
                             if label:hover=(point,label[:100],time.monotonic())
                     last_cursor=point
-                    click=self.cursor_click
-                    if click and hover and click[1]>=hover[2] and click[1]-hover[2]<4 and abs(click[0][0]-hover[0][0])<35 and abs(click[0][1]-hover[0][1])<35:
-                        clicked_shop=(hover[1],click[1]);self.cursor_click=None
                     if clicked_shop and time.monotonic()-clicked_shop[1]<20:current_settings['clicked_shop']=clicked_shop[0]
                     # Fixed labels join the stable-frame hash so channel/room changes invalidate old context.
-                    rects=[current_settings['regions'][k] for k in ['name','price','shop','channel','room','seller'] if k in current_settings['regions']]
+                    rects=[current_settings['regions'][k] for k in ['name','price']]
                     extent=(min(r[0] for r in rects),min(r[1] for r in rects),max(r[2] for r in rects),max(r[3] for r in rects)+int(current_settings['row_stride'])*(int(current_settings['rows'])-1))
-                    key=hashlib.sha256(image.crop(extent).tobytes()).hexdigest()
+                    digest=hashlib.sha256(image.crop(extent).tobytes())
+                    for field in ['shop','channel','room','seller']:
+                        if field in current_settings['regions']:digest.update(image.crop(current_settings['regions'][field]).tobytes())
+                    key=digest.hexdigest()
                     context=tuple(current_settings[k] for k in ['server','world','channel','room','seller','shop'])
                     signature=(key,context,current_settings.get('clicked_shop'))
                     if signature==previous and signature!=published:
                         rows=self.extract(image,current_settings,now_iso());self.messages.put(('candidates',rows));published=signature
                     previous=signature;time.sleep(1.5)
             except Exception as exc:self.messages.put(('error',str(exc)));self.messages.put(('stopped',None))
+            finally:self.cursor_stop.set()
         threading.Thread(target=loop,daemon=True).start();self.status.set('Scanning stable shop frames. Review each candidate before publishing.')
 
     def select(self,event=None):
