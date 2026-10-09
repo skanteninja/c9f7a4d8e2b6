@@ -13,9 +13,27 @@ ASSETS = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parent))
 HOME = Path(os.getenv('LOCALAPPDATA', str(Path.home()))) / 'TCW-Shopper'
 HOME.mkdir(parents=True, exist_ok=True)
 
+def find_tesseract():
+    """Find bundled, PyInstaller, or standard Windows Tesseract locations."""
+    roots=[ASSETS, Path(__file__).resolve().parent, Path(sys.executable).resolve().parent]
+    for root in list(roots): roots.append(root / '_internal')
+    for root in roots:
+        for candidate in (root/'tesseract'/'tesseract.exe', root/'tesseract.exe'):
+            if candidate.exists(): return candidate
+        if root.exists():
+            try:
+                candidate=next(root.rglob('tesseract.exe'),None)
+                if candidate is not None:return candidate
+            except OSError: pass
+    for base in (os.environ.get('ProgramFiles',''), os.environ.get('ProgramFiles(x86)',''), os.environ.get('LOCALAPPDATA','')):
+        if base:
+            candidate=Path(base)/'Tesseract-OCR'/'tesseract.exe'
+            if candidate.exists():return candidate
+    return None
+
 class Scanner:
     def __init__(self, root):
-        self.root = root; root.title('TCW · SHOPPER Scanner 0.16.1'); root.geometry('980x700'); root.minsize(900,620)
+        self.root = root; root.title('TCW · SHOPPER Scanner 0.16.2'); root.geometry('980x700'); root.minsize(900,620)
         self.messages = queue.Queue(); self.uploads = UploadQueue(HOME / 'uploads.sqlite')
         self.catalog = json.loads((ASSETS / 'items.json').read_text(encoding='utf-8'))['items']
         self.settings_path = HOME / 'settings.json'
@@ -37,9 +55,9 @@ class Scanner:
         self.detected_context = tk.StringVar(value='Windia · Channel ? · FM room ? · Seller ? · Shop ?')
         self.running = False; self.camera = None; self.image = None; self.regions = self.config.get('regions', {})
         self.candidates = []; self.selected = None; self.upload_busy = False; self.capture_busy = False
-        bundled_tesseract = ASSETS / 'tesseract' / 'tesseract.exe'
+        bundled_tesseract = find_tesseract()
         saved_tesseract = self.config.get('tesseract') or ''
-        configured_tesseract = saved_tesseract if Path(saved_tesseract).exists() else (str(bundled_tesseract) if bundled_tesseract.exists() else '')
+        configured_tesseract = saved_tesseract if Path(saved_tesseract).exists() else (str(bundled_tesseract) if bundled_tesseract else '')
         self.vars = {key: tk.StringVar(value=str(self.config.get(key, default))) for key, default in {
             'endpoint':'https://maplestory-classic.ofri505.workers.dev', 'api_key':'', 'server':'Classic World',
             'world':'Windia', 'channel':'', 'room':'', 'seller':'', 'shop':'', 'monitor':'0',

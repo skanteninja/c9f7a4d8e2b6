@@ -8,7 +8,7 @@ For source runs, use the packaged scanner folder with items.json and icons/, ins
 
 The website upload connection is included and loaded automatically. You and your friend can use the same download; each uses their own public nickname. Existing saved connections and nicknames are retained. Local settings and the retryable upload queue live in %LOCALAPPDATA%/TCW-Shopper.
 
-## Scan a shop (automatic mode, 0.16.0)
+## Scan a shop (automatic mode, 0.16.2)
 
 1. Keep MapleStory.exe visible and open a shop. Start scanning; manual calibration is no longer required by default. Tesseract OCR is bundled in the Windows download and selected automatically.
 2. The scanner searches the entire client image for catalog item names and nearby prices explicitly labeled Price or mesos. Results need two consistent reads before appearing. Each item keeps its own evidence crop and capture timestamp.
@@ -76,7 +76,7 @@ This is capture of visible screen pixels, not background video recording or acce
 
 ## Ready-to-upload download (0.14.6)
 
-The packaged website connection and Tesseract OCR load automatically before first setup, including for existing installations without a key. The nickname prompt still appears only once. Screen calibration is optional in automatic mode. The shared credential grants listing uploads, not repository access.
+The packaged website connection and Tesseract OCR load automatically before first setup, including for existing installations without a key. The scanner searches the bundled OCR folder, the PyInstaller internal folder, the EXE folder, and standard Windows installation folders. The nickname prompt still appears only once. Screen calibration is optional in automatic mode. The shared credential grants listing uploads, not repository access.
 
 ## Capture dependency fix (0.14.7)
 
