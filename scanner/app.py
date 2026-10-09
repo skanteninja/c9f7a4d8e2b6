@@ -33,7 +33,7 @@ def find_tesseract():
 
 class Scanner:
     def __init__(self, root):
-        self.root = root; root.title('TCW · SHOPPER Scanner 0.16.3'); root.geometry('980x700'); root.minsize(900,620)
+        self.root = root; root.title('TCW · SHOPPER Scanner 0.16.4'); root.geometry('980x700'); root.minsize(900,620)
         self.messages = queue.Queue(); self.uploads = UploadQueue(HOME / 'uploads.sqlite')
         self.catalog = json.loads((ASSETS / 'items.json').read_text(encoding='utf-8'))['items']
         self.settings_path = HOME / 'settings.json'
@@ -479,7 +479,8 @@ class Scanner:
                 for index,row in enumerate(value):
                     confidence=row['matches'][0][0] if row['matches'] else 0
                     ambiguous=len(row['matches'])>1 and row['matches'][0][0]==row['matches'][1][0]
-                    self.table.insert('', 'end',iid=str(index),values=(row['raw_name'],row['price'],row['quantity'],row['slot'],'Ambiguous' if ambiguous else f'{confidence:.0%}'))
+                    match_label='No catalog match' if not row['matches'] else ('Ambiguous' if ambiguous else f'{confidence:.0%}')
+                    self.table.insert('', 'end',iid=str(index),values=(row['raw_name'],row['price'],row['quantity'],row['slot'],match_label))
                 if value:
                     ctx=value[0]['settings'];self.status.set(f"Captured {ctx.get('shop') or 'unknown shop'} · CH {ctx.get('channel') or '?'} · FM {ctx.get('room') or '?'} at {value[0]['observed_at']}. Review before publishing.")
                 else:self.status.set(f'{len(value)} rows read. Confirm item ID, digits, quantity, slot and location before publishing.')
@@ -509,3 +510,4 @@ if __name__=='__main__':
     root=tk.Tk()
     try:Scanner(root);root.mainloop()
     except Exception as exc:messagebox.showerror('SHOPPER scanner',str(exc));root.destroy()
+
