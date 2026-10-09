@@ -119,8 +119,10 @@ class Scanner:
         ttk.Label(outer,textvariable=self.status,wraplength=930).pack(anchor='w',pady=10)
 
     def toggle_details(self):
-        if self.show_details.get():self.details.pack(fill='x',pady=8)
-        else:self.details.pack_forget()
+        if self.show_details.get():
+            self.details.pack(fill='x',pady=8);self.root.minsize(900,840)
+        else:
+            self.details.pack_forget();self.root.minsize(900,620)
 
     def update_counts(self):
         summary=self.uploads.summary()
