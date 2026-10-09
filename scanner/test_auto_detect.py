@@ -24,6 +24,9 @@ class AutoTests(unittest.TestCase):
         self.assertEqual(rows[0]['quantity'],'1')
     def test_multiple_rows_keep_distinct_prices(self):
         rows,_,_=detect([line('Red Potion',350,240),line('Price: 100 mesos',350,259),line('Blue Potion',350,300),line('Price: 200 mesos',350,319)],CAT,(1024,768));self.assertEqual([r['price'] for r in rows],['100','200'])
+    def test_unmatched_catalog_item_is_still_shown_for_review(self):
+        rows,_,_=detect([line('Pink Allstar',350,240),line('1 for 5,000 mesos',350,259)],CAT,(1024,768))
+        self.assertEqual(len(rows),1);self.assertEqual(rows[0]['raw_name'],'Pink Allstar');self.assertEqual(rows[0]['matches'],[])
     def test_memory_requires_consistent_three_reviews_and_persists(self):
         with tempfile.TemporaryDirectory() as d:
             m=NameMemory(Path(d)/'names.json')
@@ -43,3 +46,4 @@ class AutoTests(unittest.TestCase):
             lines=ocr_lines(Image.new('RGB',(800,600)))
         self.assertEqual(lines[0]['text'],'Red Potion');self.assertEqual(lines[0]['box'],(10,20,70,30))
         self.assertEqual(lines[1]['text'],'Price: 1,500 mesos')
+
