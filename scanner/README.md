@@ -8,17 +8,17 @@ Use the packaged scanner folder with items.json and icons/. Install Python 3.11+
 
 The website upload connection is included and loaded automatically. You and your friend can use the same download; each uses their own public nickname. Existing saved connections and nicknames are retained. Local settings and the retryable upload queue live in %LOCALAPPDATA%/TCW-Shopper.
 
-## Scan a shop
+## Scan a shop (automatic mode, 0.15.0)
 
-1. Open MapleStory.exe; the scanner finds the game window automatically. Windia is fixed.
-2. Open a shop. Choose Settings → Screen setup → Calibrate screen regions. The scanner minimizes itself before capture.
-3. Drag around the first visible row's item name, price and quantity. Select the seller label, shop title, channel indicator and FM room text in the minimap once. Enter visible row count and vertical row spacing in original screen pixels. Recalibrate if the shop moves or resolution/scaling changes.
-4. Confirm whether the shop displays unit or bundle prices. Never infer this from quantity alone.
-5. Choose Start scanning and browse shops manually. Changed shop rows are read after two stable samples. Choose a row to review; correct item ID (duplicate names exist), exact price, quantity, actual shop slot, timestamp, and location. When scrolling, visible row 1 may be shop slot 5: correct the slot.
-6. For equipment, enter actual tooltip stats as JSON and mark them recorded. Base catalog stats are not a substitute. Otherwise the website marks stats unknown.
-7. Choose Publish. The website receives structured data and a small evidence crop. Retry queued uploads after connection failures; event IDs prevent duplicates. These labels are monitored automatically while scanning; confirm each captured listing before publishing.
+1. Keep MapleStory.exe visible and open a shop. Start scanning; manual calibration is no longer required by default.
+2. The scanner searches the entire client image for catalog item names and nearby prices explicitly labeled Price or mesos. Results need two consistent reads before appearing. Each item keeps its own evidence crop and capture timestamp.
+3. Select an offer and check the item, price, quantity and actual shop slot. Unknown quantities stay blank. More details opens automatically for missing seller, shop, channel or room. Correct these before Publish. Opening the channel chooser alone does not establish a new channel.
+4. Publish confirms the listing, uploads its reviewed evidence, and adds the item-name correction to local memory. A non-exact OCR name needs three consistent confirmations of the same item before the memory helps recognize it. Conflicting corrections disable that mapping. Numbers/prices are always read fresh.
+5. If no offers appear, use Settings → Troubleshooting → Import screenshot to test a shop image, or disable automatic detection under Screen setup and use Manual calibration fallback in Troubleshooting. Existing calibration is preserved.
 
-Screenshot import is available for calibration and review. Its file modified time is only a suggested capture time; confirm the actual observation timestamp. Uploads more than 30 days old are rejected. This version does not infer room/channel changes when those labels are hidden, does not process recorded video files, and does not auto-publish unreviewed OCR. Live capture and OCR accuracy need testing with real shop screenshots before removing the review step.
+This is an experimental text-and-layout detector, not a trained visual model. Explicit owner/seller and shop/store labels are supported; unlabeled titles or player names can require correction. Only room labels in the upper-left area and channel labels in the upper area are considered. It refuses multiple different channel values and ambiguous nearby prices. A different layout or unreadable font may yield no proposals. No full-screen images are uploaded. Gameplay recording/video-file import and automatic publishing are not implemented.
+
+Screenshot import is available for calibration and review. Its file modified time is only a suggested capture time; confirm the actual observation timestamp. Uploads more than 30 days old are rejected. Hidden room/channel labels remain unknown; this version does not process recorded video files or auto-publish unreviewed OCR. Live capture and OCR accuracy need testing with real shop screenshots before removing the review step.
 
 ## Packaging
 
@@ -79,3 +79,7 @@ The packaged website connection loads automatically before first setup, includin
 ## Capture dependency fix (0.14.7)
 
 OpenCV is explicitly installed and bundled to resolve the missing cv2 error during calibration. The Windows release now runs a capture-import smoke check inside the packaged executable before publishing.
+
+## Local learning and validation (0.15.0)
+
+Confirmed name corrections persist in %LOCALAPPDATA%/TCW-Shopper/name-corrections.json across updates, independently of the optional GitHub example-sharing setting. Only normalized OCR item names and confirmed catalog IDs/counts are stored locally, bounded to 1,000 entries. This is correction memory, not neural-network training. Reviewed crop examples continue through the existing learning archive for future evaluation. Detection has been checked against synthetic OCR layouts and a generated image through actual Tesseract; in-game recognition still needs a real client shop capture.

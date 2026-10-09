@@ -6,6 +6,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
 from PIL import Image, ImageTk, ImageOps
 from game_capture import GameCapture, CaptureUnavailable
+from auto_detect import ocr_lines, detect, NameMemory
 from core import UploadQueue, match_items, parse_integer, now_iso, validate_nickname, read_location, cursor_rectangle, associated_shop, needs_nickname_setup, learning_readings, ContextTracker
 
 ASSETS = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parent))
@@ -14,7 +15,7 @@ HOME.mkdir(parents=True, exist_ok=True)
 
 class Scanner:
     def __init__(self, root):
-        self.root = root; root.title('TCW · SHOPPER Scanner 0.14.7'); root.geometry('980x700'); root.minsize(900,620)
+        self.root = root; root.title('TCW · SHOPPER Scanner 0.15.0'); root.geometry('980x700'); root.minsize(900,620)
         self.messages = queue.Queue(); self.uploads = UploadQueue(HOME / 'uploads.sqlite')
         self.catalog = json.loads((ASSETS / 'items.json').read_text(encoding='utf-8'))['items']
         self.settings_path = HOME / 'settings.json'
@@ -22,6 +23,8 @@ class Scanner:
         bundled = json.loads((ASSETS / 'connection.json').read_text(encoding='utf-8'))
         if not self.config.get('api_key'):
             self.config.update({key: bundled[key] for key in ('endpoint', 'api_key')})
+        self.name_memory=NameMemory(HOME / 'name-corrections.json')
+        self.auto_detect=tk.BooleanVar(value=self.config.get('auto_detect',True))
         self.config['world'] = 'Windia'
         if self.config.get('capture_space')!='maplestory-client-v1':
             self.config['regions']={};self.config['screen_size']=None;self.config.pop('hover_anchor',None)
@@ -41,7 +44,7 @@ class Scanner:
         self.edit = {key: tk.StringVar() for key in ['item','price','quantity','slot','observed_at','stats']}
         self.share_learning = tk.BooleanVar(value=self.config.get('share_learning', True))
         self.stats_known = tk.BooleanVar(value=False)
-        self.status = tk.StringVar(value='Connected to the website. Calibrate a visible shop once.')
+        self.status = tk.StringVar(value='Ready. Open a shop in MapleStory and press Start scanning.')
         self.cursor_click=None; self.cursor_stop=threading.Event(); self.context_signature=None
         self.draw_ui(); self.root.after_idle(self.first_setup); self.root.after(200, self.pump); root.protocol('WM_DELETE_WINDOW', self.close)
 
@@ -63,14 +66,14 @@ class Scanner:
         ttk.Checkbutton(general,text='Share reviewed scanner examples with the project',variable=self.share_learning,command=self.save).pack(anchor='w',pady=8)
         ttk.Label(general,text='Confirmed item crops, OCR readings and corrections are archived in the public project GitHub to improve future scanner versions. Full-screen captures and connection keys are excluded.',wraplength=530).pack(anchor='w')
         ttk.Label(setup,text='The scanner finds MapleStory.exe and follows its monitor automatically.',wraplength=530).pack(anchor='w',pady=(0,8))
-        ttk.Label(setup,text='One-time setup for your game window',font=('Segoe UI',12,'bold')).pack(anchor='w')
-        ttk.Button(setup,text='Calibrate screen regions',command=lambda:(window.destroy(),self.calibrate_capture())).pack(anchor='w',pady=10)
+        ttk.Checkbutton(setup,text='Find shop fields automatically (experimental)',variable=self.auto_detect,command=self.save).pack(anchor='w')
+        ttk.Button(advanced,text='Manual calibration fallback',command=lambda:(window.destroy(),self.calibrate_capture())).pack(anchor='w',pady=10)
         for key,label in [('rows','Visible item rows'),('row_stride','Row spacing (pixels)'),('tesseract','Tesseract executable (optional)')]:
             row=ttk.Frame(setup);row.pack(fill='x',pady=5)
             ttk.Label(row,text=label,width=29).pack(side='left');ttk.Entry(row,textvariable=self.vars[key]).pack(side='left',fill='x',expand=True)
         ttk.Label(setup,text='Displayed price').pack(anchor='w',pady=(10,3))
         ttk.Combobox(setup,textvariable=self.vars['price_basis'],values=['unit','bundle'],state='readonly',width=14).pack(anchor='w')
-        ttk.Label(setup,text='World: Windia. Channel, minimap room, seller and shop are read automatically after calibration.',wraplength=530).pack(anchor='w',pady=12)
+        ttk.Label(setup,text='World: Windia. Automatic mode needs no calibration. Unreadable fields must be corrected before Publish.',wraplength=530).pack(anchor='w',pady=12)
         for label,command in [('Import screenshot',lambda:(window.destroy(),self.import_image())),('Read captured frame',self.read_current),('Retry waiting uploads',self.send)]:ttk.Button(advanced,text=label,command=command).pack(anchor='w',pady=6)
         ttk.Label(advanced,text='Uploads also retry automatically every 30 seconds while the scanner is open.',wraplength=530).pack(anchor='w',pady=12)
         ttk.Button(window,text='Done',command=lambda:(self.save(),window.destroy())).pack(anchor='e',padx=16,pady=(0,12))
@@ -143,6 +146,7 @@ class Scanner:
 
     def save(self):
         self.config.update({k:v.get() for k,v in self.vars.items()});self.config['regions']=self.regions;self.config['share_learning']=self.share_learning.get()
+        self.config['auto_detect']=self.auto_detect.get()
         self.settings_path.write_text(json.dumps(self.config,indent=2),encoding='utf-8')
         self.status.set('Settings saved locally.')
 
@@ -175,7 +179,8 @@ class Scanner:
         if not path:return
         try:
             self.image=Image.open(path).convert('RGB');self.imported_time=datetime.fromtimestamp(Path(path).stat().st_mtime,timezone.utc).isoformat().replace('+00:00','Z')
-            self.calibration(self.image)
+            if self.auto_detect.get():self.read_current()
+            else:self.calibration(self.image)
             self.status.set('Imported screenshot. File modified time is a suggested capture time; confirm it before publishing.')
         except Exception as exc:messagebox.showerror('Screenshot',str(exc))
 
@@ -204,7 +209,7 @@ class Scanner:
 
     def settings_snapshot(self):
         values={k:v.get() for k,v in self.vars.items()}
-        values['hover_anchor']=self.config.get('hover_anchor');values['regions']=dict(self.regions);values['screen_size']=self.config.get('screen_size');return values
+        values['auto_detect']=self.auto_detect.get();values['hover_anchor']=self.config.get('hover_anchor');values['regions']=dict(self.regions);values['screen_size']=self.config.get('screen_size');return values
 
     def ocr(self,image,numeric=False,tesseract=''):
         import pytesseract
@@ -234,6 +239,17 @@ class Scanner:
         if not result.get('shop') and settings.get('clicked_shop'):
             result['shop']=settings['clicked_shop'];readings['shop']=settings['clicked_shop']+' (cursor sign; confirm)'
         return result,readings
+
+    def auto_extract(self,image,settings,captured_at):
+        lines=ocr_lines(image,settings['tesseract'])
+        proposals,context,readings=detect(lines,self.catalog,image.size,self.name_memory)
+        detected=dict(settings,world='Windia',**context);candidates=[]
+        for row in proposals:
+            crop=image.crop(row['box']);crop.thumbnail((650,100));buffer=io.BytesIO();crop.save(buffer,format='JPEG',quality=75)
+            candidates.append(dict(row,observed_at=captured_at,settings=dict(detected),seller_read=context['seller'],
+                context_reads=dict(readings),image=crop,automatic=True,
+                evidence='data:image/jpeg;base64,'+base64.b64encode(buffer.getvalue()).decode()))
+        return candidates,detected,readings
 
     def extract(self,image,settings,captured_at,detected=None):
         if settings['screen_size'] and list(image.size)!=settings['screen_size']:raise ValueError('Screen resolution changed; recalibrate the shop.')
@@ -266,23 +282,17 @@ class Scanner:
         if self.image is None:self.status.set('Capture or import a screenshot first.');return
         image=self.image.copy();settings=self.settings_snapshot();at=getattr(self,'imported_time',now_iso())
         def work():
-            try:self.messages.put(('candidates',self.extract(image,settings,at)))
+            try:self.messages.put(('candidates',self.auto_extract(image,settings,at)[0] if settings['auto_detect'] else self.extract(image,settings,at)))
             except Exception as exc:self.messages.put(('error',str(exc)))
         threading.Thread(target=work,daemon=True).start();self.status.set('Reading shop fields…')
 
     def toggle(self):
-        if not self.running and (not self.vars['api_key'].get() or not all(k in self.regions for k in ['name','price','channel','room','seller']) or not ('shop' in self.regions or ('hover' in self.regions and self.config.get('hover_anchor')))):
-            self.status.set('Finish connection and screen setup in Settings once, then start scanning.');self.settings();return
         if self.running:self.running=False;self.scan_generation+=1;self.cursor_stop.set();self.start_button.configure(text='Start scanning');self.status.set('Scanning paused.');return
         try:
             settings=self.settings_snapshot()
             validate_nickname(settings['nickname'])
-            required=['name','price','channel','room','seller']
-            missing=[key for key in required if key not in self.regions]
-            if missing:raise ValueError('Calibrate these screen labels once: '+', '.join(missing)+'.')
-            if 'shop' not in self.regions and not ('hover' in self.regions and settings.get('hover_anchor')):
-                raise ValueError('Calibrate the shop title or the shop sign and cursor anchor once.')
-            if not all(k in self.regions for k in ['name','price']):raise ValueError('Calibrate a visible shop first.')
+            if not settings['auto_detect'] and (not all(k in self.regions for k in ['name','price','channel','room','seller']) or not ('shop' in self.regions or ('hover' in self.regions and settings.get('hover_anchor')))):
+                raise ValueError('Manual mode requires calibration. Enable automatic detection in Settings or calibrate first.')
             self.save();self.running=True;self.start_button.configure(text='Pause scanning')
         except Exception as exc:messagebox.showerror('Start scanning',str(exc));return
         # Snapshot settings on the Tk thread; refreshing location uses the Tk pump below.
@@ -303,6 +313,22 @@ class Scanner:
                         self.cursor_click=None;time.sleep(1.5);continue
                     if generation!=self.scan_generation or not self.running:break
                     current_settings=dict(self.live_settings)
+                    if current_settings['auto_detect']:
+                        rows,detected,readings=self.auto_extract(image,current_settings,frame_at)
+                        if generation!=self.scan_generation or not self.running:break
+                        detected=tracker.update(detected)
+                        self.messages.put(('context',detected))
+                        for row in rows:
+                            row['settings'].update({k:detected[k] for k in ['channel','room','seller','shop']})
+                            row['seller_read']=detected['seller']
+                        signature=(tuple((r['raw_name'],r['price'],r['quantity'],tuple(r['box'])) for r in rows),
+                                   tuple(detected[k] for k in ['channel','room','seller','shop']),self.game_capture.window.hwnd)
+                        if signature==previous and signature!=published:
+                            self.messages.put(('candidates',rows));published=signature
+                            if not rows:self.messages.put(('notice','Looking for item names and labeled prices. Open a shop; if nothing appears, import a shop screenshot or use manual fallback in Troubleshooting.'))
+                        elif signature!=previous:
+                            published=None;self.messages.put(('invalidate_candidates',None))
+                        previous=signature;time.sleep(1.5);continue
                     if current_settings.get('screen_size') and list(image.size)!=current_settings['screen_size']:
                         raise ValueError('MapleStory window size changed. Recalibrate once in Settings → Screen setup.')
                     point,_=self.cursor_sample()
@@ -344,7 +370,7 @@ class Scanner:
                     self.messages.put(('error',str(exc)));self.messages.put(('stopped',None))
             finally:
                 if generation==self.scan_generation:self.cursor_stop.set()
-        threading.Thread(target=loop,daemon=True).start();self.status.set('Scanning stable shop frames. Review each candidate before publishing.')
+        threading.Thread(target=loop,daemon=True).start();self.status.set('Scanning the game. Automatic detection reads stable offers; review before Publish.')
 
     def select(self,event=None):
         selection=self.table.selection()
@@ -360,6 +386,8 @@ class Scanner:
         # The capture's location is preserved; later channel/room edits must not move an old listing.
         for key in ['server','world','channel','room','seller','shop']:self.vars[key].set(row['settings'][key])
         if row['seller_read']:self.vars['seller'].set(row['seller_read'])
+        if row.get('automatic') and (not row['quantity'] or any(not row['settings'].get(k) for k in ['channel','room','seller','shop'])):
+            self.show_details.set(True);self.toggle_details()
         ctx=row['settings'];self.review_context.set(f"Captured: CH {ctx['channel']} · FM {ctx['room']} · {ctx['seller']} · {ctx['shop']}")
 
     def publish(self):
@@ -373,13 +401,16 @@ class Scanner:
             for key in ['server','seller','shop']:listing[key]=self.vars[key].get().strip()
             listing['world']='Windia'
             listing['nickname']=validate_nickname(self.vars['nickname'].get())
-            if not listing['shop']:raise ValueError('Confirm the shop name; calibrate the title or shop sign for detection.')
+            if not listing['shop']:raise ValueError('Confirm the shop name under More details / corrections.')
             for key in ['channel','room']:listing[key]=parse_integer(self.vars[key].get())
             if not all(listing[k] for k in ['world','seller','shop']):raise ValueError('Confirm world and seller for this shop.')
             if min(listing['quantity'],listing['channel'],listing['room'],listing['slot'])<1:raise ValueError('Quantity, channel, room and slot must be positive.')
             if not self.vars['api_key'].get():raise ValueError('Load your private connection file first.')
             if self.share_learning.get():listing['learning']=learning_readings(self.selected)
-            self.uploads.enqueue(listing);self.publish_button.configure(state='disabled');self.confirmed_session+=1;self.update_counts();self.selected=None;self.review_context.set('Published to the upload queue. Select another captured item.')
+            self.uploads.enqueue(listing)
+            try:self.name_memory.confirm(self.selected['raw_name'],item['id'])
+            except OSError:pass  # A local learning-write failure must not duplicate the queued upload.
+            self.publish_button.configure(state='disabled');self.confirmed_session+=1;self.update_counts();self.selected=None;self.review_context.set('Published to the upload queue. Select another captured item.')
             if self.pending_candidates is not None:
                 self.messages.put(('candidates',self.pending_candidates));self.pending_candidates=None
             self.status.set(f'Confirmed and queued. {self.uploads.count()} uploads pending.');self.send()
@@ -430,7 +461,8 @@ class Scanner:
                 if value:
                     ctx=value[0]['settings'];self.status.set(f"Captured {ctx.get('shop') or 'unknown shop'} · CH {ctx.get('channel') or '?'} · FM {ctx.get('room') or '?'} at {value[0]['observed_at']}. Review before publishing.")
                 else:self.status.set(f'{len(value)} rows read. Confirm item ID, digits, quantity, slot and location before publishing.')
-            elif kind=='error':self.root.deiconify();self.status.set(value)
+            elif kind=='notice':self.status.set(value)
+            elif kind=='error':self.root.deiconify();self.status.set(value);self.capture_status.set('Scanner error: '+value)
             elif kind=='upload_error':self.status.set('Upload retained for retry: '+value)
             elif kind=='uploaded':self.update_counts();self.status.set(f'{value} listings uploaded.')
             elif kind=='upload_done':self.upload_busy=False
@@ -445,7 +477,7 @@ class Scanner:
 
 if __name__=='__main__':
     if '--capture-self-test' in sys.argv:
-        import cv2, dxcam, numpy
+        import cv2, dxcam, numpy, auto_detect
         sys.exit(0)
     if sys.platform=='win32':
         try:
