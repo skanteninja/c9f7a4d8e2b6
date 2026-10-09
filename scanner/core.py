@@ -135,6 +135,18 @@ def learning_readings(candidate):
                 'quantity': str(candidate.get('quantity', ''))[:512]}
     for key in ('shop', 'channel', 'room'):
         readings[key] = str(candidate.get('context_reads', {}).get(key, ''))[:512]
-    return {'version': '0.14.4', 'readings': readings,
+    return {'version': '0.14.5', 'readings': readings,
             'matches': [{'itemId': item['id'], 'confidence': round(score, 4)}
                         for score, item in candidate.get('matches', [])[:5]]}
+
+
+class ContextTracker:
+    """Debounce each visible label independently; unreadable labels clear immediately."""
+    def __init__(self):self.previous={}
+    def update(self,detected):
+        stable=dict(detected)
+        for key in ('channel','room','seller','shop'):
+            value=str(detected.get(key,'') or '')
+            stable[key]=value if value and self.previous.get(key)==value else ''
+            self.previous[key]=value
+        return stable

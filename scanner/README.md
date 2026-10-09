@@ -61,3 +61,13 @@ The main screen has only **Start/Pause**, **Settings** and **Publish** buttons, 
 Settings separates **General** (nickname, private connection and learning sharing), **Screen setup** (one-time calibration, monitor, row layout, price basis and OCR executable) and **Troubleshooting** (screenshot import, reading a captured frame and manual upload retry). Settings saves when closed; no main-screen Save button is needed. Start opens Settings when connection/calibration is incomplete. Calibration still matters for real OCR, so it is moved into setup rather than removed.
 
 Counts distinguish confirmed items this session, successfully acknowledged uploads across sessions, and waiting uploads. Waiting uploads retry automatically every 30 seconds while the app is open. This never automatically confirms or publishes an unreviewed scan. Nickname persistence, Windia, continuous location tracking and reviewed learning examples are preserved.
+
+## MapleStory.exe capture (0.14.5)
+
+The scanner now finds the visible game window by its owning executable, `MapleStory.exe`, and automatically selects its GPU/display. It captures only the game's client area, so moving the game to another monitor does not move the calibrated OCR regions. The main screen shows the executable, PID, display, captured dimensions and live frame time. Manual monitor selection is removed.
+
+**After this update, calibrate once in Settings → Screen setup.** Older calibration used full-monitor coordinates and cannot safely be reused for the new game-window capture. Your nickname, connection, sharing preference and upload queue are preserved. Keep the game window at the calibrated size; resizing it requires recalibration.
+
+Start/Pause, Settings and Publish remain the only main buttons. If the game is missing, minimized, covered at the sampled visibility points or returns a black/no frame, scanning waits and reconnects automatically while showing the reason. Keep the entire game window on one monitor. With multiple MapleStory.exe processes, bring the desired game to the foreground once; otherwise the scanner keeps its previously selected instance. Channel/room/shop/seller labels now settle independently, so an unstable shop reading does not block a channel update. Mark the current channel indicator during calibration, not the entire channel-selection menu.
+
+This is capture of visible screen pixels, not background video recording or access to game memory. Automatic source selection does not guarantee OCR accuracy: check the captured game preview during calibration and test a real channel change. Windowed/borderless mode can help if exclusive fullscreen produces black frames. Process IDs and display diagnostics remain local and are not part of learning uploads.

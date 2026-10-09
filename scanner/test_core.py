@@ -45,3 +45,16 @@ class UploadCountTests(unittest.TestCase):
             self.assertEqual(queue.summary(),{'total':2,'sent':0,'pending':2})
             with queue.connect() as db:db.execute('UPDATE queue SET sent=1 WHERE id=?',('first',))
             self.assertEqual(UploadQueue(path).summary(),{'total':2,'sent':1,'pending':1})
+
+
+class ContextTrackerTests(unittest.TestCase):
+    def test_changing_shop_does_not_block_channel_updates(self):
+        from core import ContextTracker
+        tracker=ContextTracker();base={'world':'Windia','channel':'1','room':'7','seller':'Owner','shop':'Shop'}
+        self.assertEqual(tracker.update(base)['channel'],'')
+        self.assertEqual(tracker.update(base)['channel'],'1')
+        changed=dict(base,channel='2',shop='Opening...')
+        self.assertEqual(tracker.update(changed)['channel'],'')
+        settled=tracker.update(dict(changed,shop='New shop'))
+        self.assertEqual(settled['channel'],'2');self.assertEqual(settled['shop'],'')
+        self.assertEqual(tracker.update(dict(changed,channel='',shop='New shop'))['channel'],'')

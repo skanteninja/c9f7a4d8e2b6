@@ -5,7 +5,8 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
 from PIL import Image, ImageTk, ImageOps
-from core import UploadQueue, match_items, parse_integer, now_iso, validate_nickname, read_location, cursor_rectangle, associated_shop, needs_nickname_setup, learning_readings
+from game_capture import GameCapture, CaptureUnavailable
+from core import UploadQueue, match_items, parse_integer, now_iso, validate_nickname, read_location, cursor_rectangle, associated_shop, needs_nickname_setup, learning_readings, ContextTracker
 
 ASSETS = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parent))
 HOME = Path(os.getenv('LOCALAPPDATA', str(Path.home()))) / 'TCW-Shopper'
@@ -13,12 +14,16 @@ HOME.mkdir(parents=True, exist_ok=True)
 
 class Scanner:
     def __init__(self, root):
-        self.root = root; root.title('TCW · SHOPPER Scanner 0.14.4'); root.geometry('980x700'); root.minsize(900,620)
+        self.root = root; root.title('TCW · SHOPPER Scanner 0.14.5'); root.geometry('980x700'); root.minsize(900,620)
         self.messages = queue.Queue(); self.uploads = UploadQueue(HOME / 'uploads.sqlite')
         self.catalog = json.loads((ASSETS / 'items.json').read_text(encoding='utf-8'))['items']
         self.settings_path = HOME / 'settings.json'
         self.config = json.loads(self.settings_path.read_text()) if self.settings_path.exists() else {}
         self.config['world'] = 'Windia'
+        if self.config.get('capture_space')!='maplestory-client-v1':
+            self.config['regions']={};self.config['screen_size']=None;self.config.pop('hover_anchor',None)
+        self.scan_generation=0;self.closing=False
+        self.game_capture=None;self.capture_status=tk.StringVar(value='Capture: waiting for MapleStory.exe')
         self.confirmed_session = 0; self.next_retry = time.monotonic()+30
         self.counts = tk.StringVar(); self.review_context = tk.StringVar(value='Select a captured item to review.')
         self.show_details = tk.BooleanVar(value=False)
@@ -54,9 +59,10 @@ class Scanner:
         ttk.Button(general,text='Load connection file',command=self.load_connection).pack(anchor='w',pady=12)
         ttk.Checkbutton(general,text='Share reviewed scanner examples with the project',variable=self.share_learning,command=self.save).pack(anchor='w',pady=8)
         ttk.Label(general,text='Confirmed item crops, OCR readings and corrections are archived in the public project GitHub to improve future scanner versions. Full-screen captures and connection keys are excluded.',wraplength=530).pack(anchor='w')
+        ttk.Label(setup,text='The scanner finds MapleStory.exe and follows its monitor automatically.',wraplength=530).pack(anchor='w',pady=(0,8))
         ttk.Label(setup,text='One-time setup for your game window',font=('Segoe UI',12,'bold')).pack(anchor='w')
         ttk.Button(setup,text='Calibrate screen regions',command=lambda:(window.destroy(),self.calibrate_capture())).pack(anchor='w',pady=10)
-        for key,label in [('monitor','Game monitor'),('rows','Visible item rows'),('row_stride','Row spacing (pixels)'),('tesseract','Tesseract executable (optional)')]:
+        for key,label in [('rows','Visible item rows'),('row_stride','Row spacing (pixels)'),('tesseract','Tesseract executable (optional)')]:
             row=ttk.Frame(setup);row.pack(fill='x',pady=5)
             ttk.Label(row,text=label,width=29).pack(side='left');ttk.Entry(row,textvariable=self.vars[key]).pack(side='left',fill='x',expand=True)
         ttk.Label(setup,text='Displayed price').pack(anchor='w',pady=(10,3))
@@ -88,6 +94,7 @@ class Scanner:
         self.start_button=ttk.Button(toolbar,text='Start scanning',command=self.toggle);self.start_button.pack(side='left')
         ttk.Button(toolbar,text='Settings',command=self.settings).pack(side='right')
         ttk.Label(toolbar,textvariable=self.vars['nickname']).pack(side='right',padx=12)
+        ttk.Label(outer,textvariable=self.capture_status,wraplength=930).pack(anchor='w',pady=4)
         ttk.Label(outer,textvariable=self.detected_context,wraplength=930).pack(anchor='w',pady=4)
         ttk.Label(outer,textvariable=self.counts).pack(anchor='w',pady=4)
         self.update_counts()
@@ -143,22 +150,19 @@ class Scanner:
             data=json.loads(Path(path).read_text());self.vars['endpoint'].set(data['endpoint']);self.vars['api_key'].set(data['api_key']);self.save()
         except Exception as exc:messagebox.showerror('Connection file',str(exc))
 
-    def frame(self,monitor):
-        if sys.platform!='win32':raise ValueError('Live capture requires Windows. Screenshot import is available on other systems.')
-        import dxcam
-        if self.camera is None or getattr(self,'camera_monitor',None)!=monitor:
-            if self.camera is not None:self.camera.release()
-            self.camera=dxcam.create(output_idx=monitor,output_color='RGB',processor_backend='numpy');self.camera_monitor=monitor
-        array=self.camera.grab(new_frame_only=False)
-        if array is None:raise ValueError('No screen frame. Try windowed or borderless mode.')
-        return Image.fromarray(array)
+    def frame(self,monitor=None):
+        if self.game_capture is None:self.game_capture=GameCapture()
+        image=self.game_capture.frame()
+        game=self.game_capture.window
+        self.messages.put(('capture_status',f"Capturing MapleStory.exe · PID {game.pid} · {self.game_capture.display} · {image.width}×{image.height} · {datetime.now().strftime('%H:%M:%S')}"))
+        return image
 
     def calibrate_capture(self):
         if self.running:self.toggle()
         if self.capture_busy:return
-        self.root.iconify();monitor=int(self.vars['monitor'].get() or 0);self.capture_busy=True
+        self.root.iconify();self.capture_busy=True
         def capture():
-            try:time.sleep(.6);self.messages.put(('calibrate',self.frame(monitor)))
+            try:time.sleep(.6);self.messages.put(('calibrate',self.frame()))
             except Exception as exc:self.messages.put(('error',str(exc)))
             finally:self.messages.put(('capture_done',None))
         threading.Thread(target=capture,daemon=True).start()
@@ -192,7 +196,7 @@ class Scanner:
         canvas.bind('<ButtonPress-1>',down);canvas.bind('<B1-Motion>',move);canvas.bind('<ButtonRelease-1>',up)
         def finish():
             if not all(k in self.regions for k in ['name','price']):messagebox.showwarning('Calibration','Select at least item name and price.');return
-            self.config['screen_size']=list(image.size);self.save();window.destroy();self.read_current()
+            self.config['screen_size']=list(image.size);self.config['capture_space']='maplestory-client-v1';self.save();window.destroy();self.read_current()
         ttk.Button(window,text='Save regions & read shop',command=finish).pack(pady=8)
 
     def settings_snapshot(self):
@@ -207,19 +211,11 @@ class Scanner:
         return pytesseract.image_to_string(image,config=config).strip()
 
     def cursor_sample(self):
-        if sys.platform!='win32' or self.camera is None:return None,False
-        import ctypes
-        from ctypes import wintypes
-        point=wintypes.POINT()
-        if not ctypes.windll.user32.GetCursorPos(ctypes.byref(point)):return None,False
-        rect=self.camera._output.desc.DesktopCoordinates
-        xy=(point.x-rect.left,point.y-rect.top)
-        if not (0<=xy[0]<self.camera.width and 0<=xy[1]<self.camera.height):return None,False
-        return xy,bool(ctypes.windll.user32.GetAsyncKeyState(1)&0x8000)
+        return self.game_capture.cursor() if self.game_capture is not None else (None,False)
 
-    def watch_clicks(self):
+    def watch_clicks(self,generation):
         last=False
-        while not self.cursor_stop.wait(.04):
+        while generation==self.scan_generation and not self.cursor_stop.wait(.04):
             point,pressed=self.cursor_sample()
             if pressed and not last and point:self.cursor_click=(point,time.monotonic())
             last=pressed
@@ -274,7 +270,7 @@ class Scanner:
     def toggle(self):
         if not self.running and (not self.vars['api_key'].get() or not all(k in self.regions for k in ['name','price','channel','room','seller']) or not ('shop' in self.regions or ('hover' in self.regions and self.config.get('hover_anchor')))):
             self.status.set('Finish connection and screen setup in Settings once, then start scanning.');self.settings();return
-        if self.running:self.running=False;self.cursor_stop.set();self.start_button.configure(text='Start scanning');self.status.set('Scanning paused.');return
+        if self.running:self.running=False;self.scan_generation+=1;self.cursor_stop.set();self.start_button.configure(text='Start scanning');self.status.set('Scanning paused.');return
         try:
             settings=self.settings_snapshot()
             validate_nickname(settings['nickname'])
@@ -284,16 +280,28 @@ class Scanner:
             if 'shop' not in self.regions and not ('hover' in self.regions and settings.get('hover_anchor')):
                 raise ValueError('Calibrate the shop title or the shop sign and cursor anchor once.')
             if not all(k in self.regions for k in ['name','price']):raise ValueError('Calibrate a visible shop first.')
-            monitor=int(settings['monitor']);self.save();self.running=True;self.start_button.configure(text='Pause scanning')
+            self.save();self.running=True;self.start_button.configure(text='Pause scanning')
         except Exception as exc:messagebox.showerror('Start scanning',str(exc));return
         # Snapshot settings on the Tk thread; refreshing location uses the Tk pump below.
+        self.scan_generation+=1;generation=self.scan_generation
         self.live_settings=settings;self.cursor_stop.clear()
-        threading.Thread(target=self.watch_clicks,daemon=True).start()
+        threading.Thread(target=self.watch_clicks,args=(generation,),daemon=True).start()
         def loop():
-            previous=None;published=None;hover=None;last_cursor=None;clicked_shop=None;prior_location=None;previous_context=None
+            previous=None;published=None;hover=None;last_cursor=None;clicked_shop=None;prior_location=None;tracker=ContextTracker()
             try:
-                while self.running:
-                    image=self.frame(monitor);current_settings=dict(self.live_settings)
+                while self.running and generation==self.scan_generation:
+                    try:
+                        image=self.frame();frame_at=now_iso()
+                    except CaptureUnavailable as exc:
+                        self.messages.put(('capture_status','Capture waiting: '+str(exc)))
+                        self.messages.put(('context',{'world':'Windia','channel':'','room':'','seller':'','shop':''}))
+                        self.messages.put(('invalidate_candidates',None))
+                        previous=published=prior_location=hover=clicked_shop=None;tracker=ContextTracker()
+                        self.cursor_click=None;time.sleep(1.5);continue
+                    if generation!=self.scan_generation or not self.running:break
+                    current_settings=dict(self.live_settings)
+                    if current_settings.get('screen_size') and list(image.size)!=current_settings['screen_size']:
+                        raise ValueError('MapleStory window size changed. Recalibrate once in Settings → Screen setup.')
                     point,_=self.cursor_sample()
                     click=self.cursor_click
                     if click:
@@ -314,25 +322,25 @@ class Scanner:
                         clicked_shop=None;hover=None;current_settings.pop('clicked_shop',None)
                         detected,readings=self.screen_context(image,current_settings)
                     prior_location=location
+                    if generation!=self.scan_generation or not self.running:break
+                    detected=tracker.update(detected)
                     context=tuple(detected[k] for k in ['world','channel','room','seller','shop'])
-                    if context==previous_context:
-                        self.messages.put(('context',dict(detected)))
-                    else:
-                        # Show uncertainty while a new label settles; never claim the old location.
-                        self.messages.put(('context',dict(detected,channel='',room='',seller='',shop='')))
-                    previous_context=context
+                    self.messages.put(('context',dict(detected)))
                     rects=[current_settings['regions'][k] for k in ['name','price']]
                     extent=(min(r[0] for r in rects),min(r[1] for r in rects),max(r[2] for r in rects),max(r[3] for r in rects)+int(current_settings['row_stride'])*(int(current_settings['rows'])-1))
                     key=hashlib.sha256(image.crop(extent).tobytes()).hexdigest()
-                    signature=(key,context)
+                    signature=(key,context,self.game_capture.window.hwnd)
                     if signature==previous and signature!=published and all(detected[k] for k in ['channel','room','seller','shop']):
-                        rows=self.extract(image,current_settings,now_iso(),(detected,readings));self.messages.put(('candidates',rows));published=signature
+                        rows=self.extract(image,current_settings,frame_at,(detected,readings));self.messages.put(('candidates',rows));published=signature
                     elif signature!=previous:
                         published=None
                         self.messages.put(('invalidate_candidates',None))
                     previous=signature;time.sleep(1.5)
-            except Exception as exc:self.messages.put(('error',str(exc)));self.messages.put(('stopped',None))
-            finally:self.cursor_stop.set()
+            except Exception as exc:
+                if generation==self.scan_generation:
+                    self.messages.put(('error',str(exc)));self.messages.put(('stopped',None))
+            finally:
+                if generation==self.scan_generation:self.cursor_stop.set()
         threading.Thread(target=loop,daemon=True).start();self.status.set('Scanning stable shop frames. Review each candidate before publishing.')
 
     def select(self,event=None):
@@ -397,6 +405,7 @@ class Scanner:
             try:kind,value=self.messages.get_nowait()
             except queue.Empty:break
             if kind=='calibrate':self.image=value;self.imported_time=now_iso();self.calibration(value)
+            elif kind=='capture_status':self.capture_status.set(value)
             elif kind=='context':
                 self.detected_context.set(f"Windia · Channel {value.get('channel') or '?'} · FM room {value.get('room') or '?'} · Seller {value.get('seller') or '?'} · Shop {value.get('shop') or '?'}")
                 if self.selected is None:
@@ -427,7 +436,9 @@ class Scanner:
         self.root.after(200,self.pump)
 
     def close(self):
-        self.running=False;self.cursor_stop.set();self.save();self.root.destroy()
+        self.closing=True;self.running=False;self.scan_generation+=1;self.cursor_stop.set();self.save()
+        if self.game_capture is not None:self.game_capture.close()
+        self.root.destroy()
 
 if __name__=='__main__':
     if sys.platform=='win32':
