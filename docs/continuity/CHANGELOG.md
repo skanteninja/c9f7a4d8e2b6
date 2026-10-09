@@ -1,5 +1,12 @@
 # Continuity Changelog
 
+## 2026-10-09 — SHOPPER 0.14.1 context and downloads
+
+- Added Dashboard and SHOPPER scanner downloads backed by automatically published Windows releases.
+- Added arbitrary public contributor nicknames without exposing authenticated uploader IDs; migrated existing storage safely.
+- Added fixed shop-title/channel/map-label OCR regions and cursor-sign association; captured locations stay attached to older rows. Unreadable calibrated location fields require correction.
+- Six scanner tests, browser alias/shop/location/timestamp fixtures and release gates pass. Real-client calibration/accuracy remains unverified; review is required. See SHOPPER_2026-10-09.md.
+
 ## 2026-10-09 — shared SHOPPER release verified
 
 - Live dashboard item search, Builds below search and retained top navigation, separate SHOPPER page, durable authenticated listings API and WebSocket updates deployed. All six release gates and Windows packaging pass.

@@ -1,5 +1,11 @@
 # MapleStory Classic Builder — Project State
 
+## 2026-10-09 — SHOPPER downloads and contributor aliases deployed
+
+- Dashboard and SHOPPER download the permanent latest Windows release. Every scanner source update builds/tests/publishes a versioned release and updates the same download URL.
+- Arbitrary public nicknames identify listings/history while private uploader IDs stay internal. Shop/title, cursor-sign, channel and top-left room-label calibration added; old candidates retain their capture location.
+- Six scanner tests and browser fixtures for alias/shop/location/timestamp rendering pass. Real-client OCR calibration remains pending. See `SHOPPER_2026-10-09.md`.
+
 ## 2026-10-09 — shared SHOPPER deployed
 
 - Dashboard catalog search/build cards, SHOPPER navigation, shared durable listing API, live updates and reviewed Windows scanner implemented in source release `0.14.0-shared-shopper`.
@@ -30,7 +36,7 @@
 
 Last continuity baseline: 2026-10-06
 
-Current deployed checkpoint: 0.14.0-shared-shopper (live verified)
+Current deployed checkpoint: 0.14.1-shopper-context (live verified)
 Current source checkpoint: 0.13.1-founders-cash-shop
 
 ## Read this first in every new chat
