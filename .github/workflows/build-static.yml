@@ -20,6 +20,8 @@ on:
       - 'build.cjs'
       - 'patches/**'
       - 'worker.js'
+      - 'market/**'
+      - 'scanner/**'
       - 'wrangler.jsonc'
       - '.github/ci_static_proxy.py'
       - '.github/workflows/build-static.yml'
@@ -49,6 +51,8 @@ jobs:
           node audit/quest-regression.cjs
           node audit/etc-regression.cjs
           node audit/cash-shop-regression.cjs
+          node audit/market-regression.mjs
+          node --check site/shopper.js
           for f in app guide-data visuals visuals-db visuals-npc visuals-skills visuals-portals dashboard-polish progression-sync progression-level-hook progression-skill-state progression-gear-visual ownership-ui class-theme; do
             node --check "site/$f.js"
             test -s "site/$f.js"
@@ -57,15 +61,15 @@ jobs:
             test -s "site/$f.css"
           done
           for asset in styles.css visuals.css visuals-db.css visuals-npc.css visuals-skills.css visuals-portals.css dashboard-polish.css progression-sync.css progression-gear-visual.css ownership-ui.css session-flow.css potions.css royal-maple-theme.css guide-data.js app.js visuals.js visuals-db.js visuals-npc.js visuals-skills.js visuals-portals.js dashboard-polish.js progression-sync.js progression-level-hook.js progression-skill-state.js progression-gear-visual.js ownership-ui.js class-theme.js; do
-            grep -q "$asset?v=0.13.1-founders-cash-shop" site/index.html
+            grep -q "$asset?v=0.14.0-shared-shopper" site/index.html
           done
           for asset in perion.webp henesys.webp ellinia.webp; do
             test -s "site/assets/class-themes/$asset"
           done
           test -s "site/assets/variant-b-card-frame.svg"
           test -s "site/assets/royal-maple-card-frame.svg"
-          grep -q 'royal-maple-card-frame.svg?v=0.13.1-founders-cash-shop' site/royal-maple-theme.css
-          grep -q 'Top Classic World Maplestory 0.13.1-founders-cash-shop' site/build-info.txt
+          grep -q 'royal-maple-card-frame.svg?v=0.14.0-shared-shopper' site/royal-maple-theme.css
+          grep -q 'Top Classic World Maplestory 0.14.0-shared-shopper' site/build-info.txt
           ! grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard' site/app.js
           ! grep -q 'raw.githubusercontent.com/ohmi69/osms_datamine_dashboard' site/visuals.js
           grep -q '/game-data/' site/app.js
@@ -305,6 +309,13 @@ jobs:
           grep -o 'cash-shop-browser-regression-[^<]*' /tmp/cash-shop-test.html || true
           grep -q '>cash-shop-browser-regression-ok<' /tmp/cash-shop-test.html
           rm -f site/ci-progression-test.html site/ci-quest-test.html site/ci-planning-test.html site/ci-cash-shop-test.html
+          cp audit/shopper-browser.html site/ci-shopper-test.html
+          for viewport in 1440,1000 390,844; do
+            "$chrome" --headless --no-sandbox --disable-gpu --window-size="$viewport" --virtual-time-budget=30000 --dump-dom http://127.0.0.1:4173/ci-shopper-test.html >/tmp/shopper-test.html
+            grep -o 'shopper-browser-regression-[^<]*' /tmp/shopper-test.html || true
+            grep -q '>shopper-browser-regression-ok<' /tmp/shopper-test.html
+          done
+          rm -f site/ci-shopper-test.html
 
       - name: Commit generated site
         run: |

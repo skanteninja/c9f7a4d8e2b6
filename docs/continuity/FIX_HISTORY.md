@@ -1,5 +1,10 @@
 # Historical Fix / Regression Log
 
+## 2026-10-09 — market regression guards
+
+- Late observations cannot replace newer asking prices; upload retries deduplicate by contributor/event ID; identical items in separate slots stay separate. Item changes in a shop slot preserve historical observations.
+- Market API bypasses service-worker cache. Unchanged polling results preserve expanded observation history and avoid remounting item detail controls.
+
 ## 2026-10-06 — Founder’s Access Cash Shop deployed
 
 - Release `0.13.1-founders-cash-shop` is live: all 69 distinct Nexon-priced products are the default catalog, including discount/pack prices, Aurora Stamps, item expiry, separate sale windows, coupon style choices and weapon-cover restrictions.

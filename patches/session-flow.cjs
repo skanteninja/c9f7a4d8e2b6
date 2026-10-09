@@ -13,6 +13,7 @@ module.exports = function(app) {
   const stateNeedle = '  let state = loadState();';
   if (!app.includes(stateNeedle)) throw new Error('session state initialization target missing');
   const sessionCode = String.raw`  const SESSION_MODAL_IDS=['session-entry-modal','session-reset-modal','session-gender-modal'];
+  const SESSION_PUBLIC_ENTRY=(()=>{const p=new URLSearchParams(location.search);return p.get('page')==='shopper'||(!p.has('build')&&['dashboard','builds','classicdb'].includes(p.get('page')||'dashboard'));})();
   let sessionEntryStarted=false;
   let sessionEntryReady=false;
   let sessionLastFocus=null;
@@ -33,6 +34,7 @@ module.exports = function(app) {
   function sessionBuildName(){return activeBuild()?.name||'this build';}
   function sessionFlowSuppressed(){
     const params=new URLSearchParams(location.search);
+    if(SESSION_PUBLIC_ENTRY||params.get('page')==='shopper')return true;
     return ['ci','qa','test','avatar-parity','skill-stability','skill-regression'].some(key=>params.has(key));
   }
   function sessionModal(id){return document.getElementById(id);}

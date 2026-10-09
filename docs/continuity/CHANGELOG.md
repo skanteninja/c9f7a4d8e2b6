@@ -1,5 +1,10 @@
 # Continuity Changelog
 
+## 2026-10-09 — SHOPPER source implementation
+
+- Added dashboard item search, build cards below search, SHOPPER offers page, authenticated shared SQLite listing storage, live refresh and reviewed Windows scanner with offline upload queue.
+- Local checks pass; deployment/browser/Windows packaging gates pending. See `SHOPPER_2026-10-09.md`.
+
 ## 2026-10-06 — Founder’s Access Cash Shop deployed
 
 - Release `0.13.1-founders-cash-shop` is live: all 69 distinct Nexon-priced products are the default catalog, including discount/pack prices, Aurora Stamps, item expiry, separate sale windows, coupon style choices and weapon-cover restrictions.

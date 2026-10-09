@@ -1,0 +1,28 @@
+name: Build Windows SHOPPER scanner
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['scanner/**','audit/export-scanner-catalog.py','.github/workflows/build-scanner.yml']
+permissions:
+  contents: read
+jobs:
+  scanner:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r scanner/requirements.txt pyinstaller
+      - run: python audit/export-scanner-catalog.py
+      - run: python -m unittest discover -s scanner -p 'test_*.py'
+      - working-directory: scanner
+        run: pyinstaller --onedir --windowed --name TCW-Shopper --add-data "items.json;." app.py
+      - shell: pwsh
+        run: Copy-Item scanner/README.md scanner/dist/TCW-Shopper/README.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TCW-Shopper-Windows
+          path: scanner/dist/TCW-Shopper
+          retention-days: 30

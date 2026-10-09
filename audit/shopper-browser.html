@@ -1,0 +1,24 @@
+<!doctype html><meta charset="utf-8"><title>SHOPPER browser regression</title><style>body{margin:0}iframe{width:100vw;height:90vh;border:0}</style><body><iframe id="app" src="/?ci=shopper"></iframe><pre id="result">pending</pre><script>
+const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const frame=document.getElementById('app'),result=document.getElementById('result');
+frame.addEventListener('load',async()=>{try{
+ const w=frame.contentWindow,d=frame.contentDocument;
+ for(let n=0;n<70&&!d.documentElement.classList.contains('shopper-ready');n++)await delay(150);
+ if(!d.documentElement.classList.contains('shopper-ready'))throw Error('shopper boot');
+ const search=d.getElementById('dashboard-database-search');if(search.placeholder!=='Search the database')throw Error('search placeholder');
+ if(d.querySelectorAll('#dashboard-builds [data-build-select]').length!==3)throw Error('dashboard build count');
+ const a=d.getElementById('dashboard-database').getBoundingClientRect(),b=d.getElementById('dashboard-build-section').getBoundingClientRect();if(a.bottom>b.top+1)throw Error('builds not below search');
+ search.value='Blue Moon';search.dispatchEvent(new w.Event('input',{bubbles:true}));await delay(350);
+ const items=d.querySelectorAll('#dashboard-search-results [data-market-item]');if(items.length!==2)throw Error('duplicate-name item IDs must remain separate');
+ items[0].click();await delay(350);if(d.getElementById('dashboard-item-detail').hidden)throw Error('item detail hidden');
+ if(!d.getElementById('dashboard-item-detail').textContent.includes('Latest listings'))throw Error('item listings missing');
+ d.querySelector('#nav [data-page="shopper"]').click();await delay(350);
+ if(!d.querySelector('[data-page="shopper"]').classList.contains('active'))throw Error('SHOPPER navigation');
+ const input=d.getElementById('shopper-database-search');input.value='Sword';input.dispatchEvent(new w.Event('input',{bubbles:true}));await delay(350);
+ if(!d.querySelector('#shopper-search-results [data-market-item]'))throw Error('SHOPPER catalog search');
+ if(!d.querySelector('#nav [data-page="builds"]'))throw Error('Builds navigation lost');
+ for(const name of ['server','world','channel','room','age','sort'])if(!d.querySelector(`[data-market-filter="${name}"]`))throw Error('filter '+name);
+ if(d.documentElement.scrollWidth>d.documentElement.clientWidth+3)throw Error('horizontal overflow');
+ result.textContent='shopper-browser-regression-ok';
+}catch(error){result.textContent='shopper-browser-regression-failed: '+error.stack;}});
+</script>

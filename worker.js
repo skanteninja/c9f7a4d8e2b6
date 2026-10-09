@@ -152,9 +152,13 @@ async function rewriteClassicVisualScript(request, env) {
   return new Response(body, { status: asset.status, headers });
 }
 
+import {marketApi} from './market/api.js';
+export {MarketListings} from './market/api.js';
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if(url.pathname.startsWith('/api/market/'))return marketApi(request,env);
     if (request.method === 'GET' && ['/visuals.js','/visuals-db.js','/visuals-npc.js'].includes(url.pathname)) return rewriteClassicVisualScript(request, env);
     if (request.method === 'GET' && url.pathname === '/game-media/characters/classic-preview') return classicAvatarAsset(request, url, ctx);
     const upstream = upstreamFor(url);

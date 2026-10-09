@@ -1,5 +1,11 @@
 # Durable Project Decisions
 
+## 2026-10-09 — shared market
+
+- Website is the main interface; local companions capture while contributors manually browse shops. Listings go directly to the authenticated API and durable shared database, never GitHub commits or the chat.
+- Dashboard catalog search comes before Builds; Builds stays accessible in navigation. SHOPPER displays individual observed listings with precise timestamps and locations.
+- Preserve server/world separation, duplicate item-name IDs, unit/bundle price basis, unknown equipment stats, and scan age. Review uncertain OCR; never present a scan as proof of available stock or a completed sale.
+
 ## 2026-10-06 — release and archived beta Cash Shops
 
 - Founder’s Access is the default Cash Shop; Beta Cash Shop remains a separate accessible archive with all original prices/records. The user explicitly wants the beta label visible.

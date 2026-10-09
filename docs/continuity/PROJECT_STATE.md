@@ -1,5 +1,11 @@
 # MapleStory Classic Builder — Project State
 
+## 2026-10-09 — shared SHOPPER implementation
+
+- Dashboard catalog search/build cards, SHOPPER navigation, shared durable listing API, live updates and reviewed Windows scanner implemented in source release `0.14.0-shared-shopper`.
+- Local build/data/API/scanner checks pass. Deployment and browser verification pending at this checkpoint; not yet verified live.
+- See `SHOPPER_2026-10-09.md` for behavior, key management and remaining real-client OCR checks.
+
 ## 2026-10-06 — Founder’s Access Cash Shop deployed
 
 - Release `0.13.1-founders-cash-shop` is live: all 69 distinct Nexon-priced products are the default catalog, including discount/pack prices, Aurora Stamps, item expiry, separate sale windows, coupon style choices and weapon-cover restrictions.

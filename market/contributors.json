@@ -1,0 +1,12 @@
+[
+  {
+    "id": "ofri",
+    "keyHash": "8e50f2095ffeb3aba1a4580b1a182284c4a593970b4aac3d383135c921f76dad",
+    "enabled": true
+  },
+  {
+    "id": "friend",
+    "keyHash": "ef9a00f0c4c2b88ab9ac9c6baa7c0226ef6ed469c2e4bbae5fdeecb37e6357cc",
+    "enabled": true
+  }
+]
