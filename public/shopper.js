@@ -37,7 +37,7 @@
     selected=catalog.find(item=>item.id===Number(id));if(!selected)return;
     activeView=view;const root=document.getElementById(view+'-item-detail');if(!root)return;
     root.hidden=false;if(root.dataset.itemId!==String(selected.id)){root.innerHTML=detailMarkup(selected);root.dataset.itemId=String(selected.id);}
-    const current=selected.id,params=scopeParams(document.querySelector('[data-page="shopper"]'));
+    const current=selected.id,params=scopeParams(document.querySelector('section[data-page="shopper"]'));
     params.set('itemId',current);params.set('sort','newest');params.set('limit','12');
     const results=root.querySelector('[data-item-listings]');
     try{const data=await getListings(params);if(root.dataset.itemId!==String(current))return;const signature=JSON.stringify(data.listings);if(results.dataset.signature===signature)return;results.dataset.signature=signature;results.innerHTML=data.listings.length?data.listings.map(listingCard).join(''):'<p class="market-empty">No recent scans for this item yet. Listings appear here when a contributor publishes a scan.</p>';}
@@ -53,7 +53,7 @@
   }
   let shopperLimit=40;
   async function refreshShopper(){
-    const root=document.querySelector('[data-page="shopper"]'),results=document.getElementById('shopper-listings');if(!root||!results)return;
+    const root=document.querySelector('section[data-page="shopper"]'),results=document.getElementById('shopper-listings');if(!root||!results)return;
     const id=++requestId,params=scopeParams(root),q=document.getElementById('shopper-database-search').value.trim();
     if(q)params.set('q',q);params.set('limit',shopperLimit);
     try{
