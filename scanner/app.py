@@ -33,7 +33,7 @@ def find_tesseract():
 
 class Scanner:
     def __init__(self, root):
-        self.root = root; root.title('TCW · SHOPPER Scanner 0.16.2'); root.geometry('980x700'); root.minsize(900,620)
+        self.root = root; root.title('TCW · SHOPPER Scanner 0.16.3'); root.geometry('980x700'); root.minsize(900,620)
         self.messages = queue.Queue(); self.uploads = UploadQueue(HOME / 'uploads.sqlite')
         self.catalog = json.loads((ASSETS / 'items.json').read_text(encoding='utf-8'))['items']
         self.settings_path = HOME / 'settings.json'
@@ -57,7 +57,8 @@ class Scanner:
         self.candidates = []; self.selected = None; self.upload_busy = False; self.capture_busy = False
         bundled_tesseract = find_tesseract()
         saved_tesseract = self.config.get('tesseract') or ''
-        configured_tesseract = saved_tesseract if Path(saved_tesseract).exists() else (str(bundled_tesseract) if bundled_tesseract else '')
+        configured_tesseract = saved_tesseract if Path(saved_tesseract).is_file() else (str(bundled_tesseract) if bundled_tesseract else '')
+        self.config['tesseract'] = configured_tesseract
         self.vars = {key: tk.StringVar(value=str(self.config.get(key, default))) for key, default in {
             'endpoint':'https://maplestory-classic.ofri505.workers.dev', 'api_key':'', 'server':'Classic World',
             'world':'Windia', 'channel':'', 'room':'', 'seller':'', 'shop':'', 'monitor':'0',
