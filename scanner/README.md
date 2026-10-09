@@ -6,11 +6,11 @@ The website owns search and shared listings. This Windows companion captures scr
 
 Use the packaged scanner folder with items.json and icons/. Install Python 3.11+ for Windows and Tesseract OCR with English language data. Tesseract's installation options are documented at https://tesseract-ocr.github.io/tessdoc/Installation.html. Run start.bat. If Tesseract is not on PATH, enter its tesseract.exe path in the app.
 
-Load your private connection JSON. Ofri and Friend have different upload keys; never commit those files or post them publicly. The repository holds only their SHA-256 hashes. Changing or disabling a hash in market/contributors.json revokes that key after deployment. Local settings and a retryable SQLite upload queue live in %LOCALAPPDATA%/TCW-Shopper. Treat these local files as private.
+The website upload connection is included and loaded automatically. You and your friend can use the same download; each uses their own public nickname. Existing saved connections and nicknames are retained. Local settings and the retryable upload queue live in %LOCALAPPDATA%/TCW-Shopper.
 
 ## Scan a shop
 
-1. Select the game monitor; Windia is preselected and fixed.
+1. Open MapleStory.exe; the scanner finds the game window automatically. Windia is fixed.
 2. Open a shop. Choose Settings → Screen setup → Calibrate screen regions. The scanner minimizes itself before capture.
 3. Drag around the first visible row's item name, price and quantity. Select the seller label, shop title, channel indicator and FM room text in the minimap once. Enter visible row count and vertical row spacing in original screen pixels. Recalibrate if the shop moves or resolution/scaling changes.
 4. Confirm whether the shop displays unit or bundle prices. Never infer this from quantity alone.
@@ -38,7 +38,7 @@ In calibration, select Shop title in the open shop, Channel around the channel i
 
 Optional cursor association: while hovering a shop sign, capture/calibrate that screen; choose Cursor anchor and click where the game pointer was, then choose Shop sign and drag around its name. This defines the offset between the pointer and visible shop label. While browsing, hold the pointer still long enough for OCR, then click the shop. The scanner observes mouse presses, associates a recent nearby label, and suggests it if an open-shop title is unavailable. The suggestion expires after 20 seconds. It does not move/click the mouse. Confirm the name: this calibration-dependent suggestion is not guaranteed identification. Multiple monitor offsets use DXcam monitor geometry.
 
-The dashboard and SHOPPER page download the latest public Windows package. Every change under scanner/ rebuilds a versioned GitHub release and updates scanner-latest after successful checks. Public downloads never contain upload credentials. Use the private connection previously supplied to you. Tesseract must be installed separately.
+The dashboard and SHOPPER page download the latest public Windows package. Every change under scanner/ rebuilds a versioned GitHub release and updates scanner-latest after successful checks. The public download includes a shared upload connection, as requested. No connection-file setup is needed. Tesseract must be installed separately.
 
 ## Nickname and scanner improvement data (0.14.2)
 
@@ -71,3 +71,7 @@ The scanner now finds the visible game window by its owning executable, `MapleSt
 Start/Pause, Settings and Publish remain the only main buttons. If the game is missing, minimized, covered at the sampled visibility points or returns a black/no frame, scanning waits and reconnects automatically while showing the reason. Keep the entire game window on one monitor. With multiple MapleStory.exe processes, bring the desired game to the foreground once; otherwise the scanner keeps its previously selected instance. Channel/room/shop/seller labels now settle independently, so an unstable shop reading does not block a channel update. Mark the current channel indicator during calibration, not the entire channel-selection menu.
 
 This is capture of visible screen pixels, not background video recording or access to game memory. Automatic source selection does not guarantee OCR accuracy: check the captured game preview during calibration and test a real channel change. Windowed/borderless mode can help if exclusive fullscreen produces black frames. Process IDs and display diagnostics remain local and are not part of learning uploads.
+
+## Ready-to-upload download (0.14.6)
+
+The packaged website connection loads automatically before first setup, including for existing installations without a key. The nickname prompt still appears only once. Screen calibration and Tesseract remain required. The shared credential grants listing uploads, not repository access.

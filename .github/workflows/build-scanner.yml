@@ -18,7 +18,7 @@ jobs:
       - run: python audit/export-scanner-catalog.py
       - run: python -m unittest discover -s scanner -p 'test_*.py'
       - working-directory: scanner
-        run: pyinstaller --onedir --windowed --name TCW-Shopper --add-data "items.json;." app.py
+        run: pyinstaller --onedir --windowed --name TCW-Shopper --add-data "items.json;." --add-data "connection.json;." app.py
       - shell: pwsh
         run: Copy-Item scanner/README.md scanner/dist/TCW-Shopper/README.md
       - uses: actions/upload-artifact@v4
@@ -34,12 +34,12 @@ jobs:
         run: |
           Compress-Archive -Path scanner/dist/TCW-Shopper/* -DestinationPath TCW-Shopper-Windows.zip
           $tag = "scanner-$env:GITHUB_SHA"
-          gh release create $tag TCW-Shopper-Windows.zip --title "SHOPPER Windows $($env:GITHUB_SHA.Substring(0,7))" --notes "Windows scanner built from commit $env:GITHUB_SHA. Extract the whole ZIP. Install Tesseract, load your private connection file and choose a public nickname. Review scans before publishing."
+          gh release create $tag TCW-Shopper-Windows.zip --title "SHOPPER Windows $($env:GITHUB_SHA.Substring(0,7))" --notes "Windows scanner built from commit $env:GITHUB_SHA. Extract the whole ZIP. Install Tesseract, choose a public nickname; the website connection is included. Review scans before publishing."
           if ($LASTEXITCODE -ne 0) { throw 'Versioned scanner release failed' }
           gh release view scanner-latest *> $null
           if ($LASTEXITCODE -ne 0) {
-            gh release create scanner-latest --title "Latest SHOPPER Windows scanner" --notes "Automatically updated after scanner changes. Private upload connections are supplied separately."
+            gh release create scanner-latest --title "Latest SHOPPER Windows scanner" --notes "Automatically updated after scanner changes. Website upload connection is included."
           }
           gh release upload scanner-latest TCW-Shopper-Windows.zip --clobber
           if ($LASTEXITCODE -ne 0) { throw 'Latest scanner upload failed' }
-          gh release edit scanner-latest --title "Latest SHOPPER Windows scanner" --notes "Latest successful Windows package: $env:GITHUB_SHA. Extract the ZIP, install Tesseract, load your private connection and choose a nickname. Confirm OCR and shop/location before publishing."
+          gh release edit scanner-latest --title "Latest SHOPPER Windows scanner" --notes "Latest successful Windows package: $env:GITHUB_SHA. Extract the ZIP, install Tesseract, choose a nickname; the website upload connection is included. Confirm OCR and shop/location before publishing."

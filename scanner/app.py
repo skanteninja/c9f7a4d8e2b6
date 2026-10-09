@@ -14,11 +14,14 @@ HOME.mkdir(parents=True, exist_ok=True)
 
 class Scanner:
     def __init__(self, root):
-        self.root = root; root.title('TCW · SHOPPER Scanner 0.14.5'); root.geometry('980x700'); root.minsize(900,620)
+        self.root = root; root.title('TCW · SHOPPER Scanner 0.14.6'); root.geometry('980x700'); root.minsize(900,620)
         self.messages = queue.Queue(); self.uploads = UploadQueue(HOME / 'uploads.sqlite')
         self.catalog = json.loads((ASSETS / 'items.json').read_text(encoding='utf-8'))['items']
         self.settings_path = HOME / 'settings.json'
         self.config = json.loads(self.settings_path.read_text()) if self.settings_path.exists() else {}
+        bundled = json.loads((ASSETS / 'connection.json').read_text(encoding='utf-8'))
+        if not self.config.get('api_key'):
+            self.config.update({key: bundled[key] for key in ('endpoint', 'api_key')})
         self.config['world'] = 'Windia'
         if self.config.get('capture_space')!='maplestory-client-v1':
             self.config['regions']={};self.config['screen_size']=None;self.config.pop('hover_anchor',None)
@@ -38,7 +41,7 @@ class Scanner:
         self.edit = {key: tk.StringVar() for key in ['item','price','quantity','slot','observed_at','stats']}
         self.share_learning = tk.BooleanVar(value=self.config.get('share_learning', True))
         self.stats_known = tk.BooleanVar(value=False)
-        self.status = tk.StringVar(value='Load your connection file, then calibrate a visible shop.')
+        self.status = tk.StringVar(value='Connected to the website. Calibrate a visible shop once.')
         self.cursor_click=None; self.cursor_stop=threading.Event(); self.context_signature=None
         self.draw_ui(); self.root.after_idle(self.first_setup); self.root.after(200, self.pump); root.protocol('WM_DELETE_WINDOW', self.close)
 
@@ -56,7 +59,7 @@ class Scanner:
         ttk.Label(general,text='Public nickname',font=('Segoe UI',12,'bold')).pack(anchor='w')
         ttk.Label(general,textvariable=self.vars['nickname']).pack(anchor='w',pady=6)
         ttk.Button(general,text='Change nickname',command=self.ask_nickname).pack(anchor='w')
-        ttk.Button(general,text='Load connection file',command=self.load_connection).pack(anchor='w',pady=12)
+        ttk.Label(general,text='Website connection included — ready to upload.').pack(anchor='w',pady=12)
         ttk.Checkbutton(general,text='Share reviewed scanner examples with the project',variable=self.share_learning,command=self.save).pack(anchor='w',pady=8)
         ttk.Label(general,text='Confirmed item crops, OCR readings and corrections are archived in the public project GitHub to improve future scanner versions. Full-screen captures and connection keys are excluded.',wraplength=530).pack(anchor='w')
         ttk.Label(setup,text='The scanner finds MapleStory.exe and follows its monitor automatically.',wraplength=530).pack(anchor='w',pady=(0,8))
@@ -141,7 +144,7 @@ class Scanner:
     def save(self):
         self.config.update({k:v.get() for k,v in self.vars.items()});self.config['regions']=self.regions;self.config['share_learning']=self.share_learning.get()
         self.settings_path.write_text(json.dumps(self.config,indent=2),encoding='utf-8')
-        self.status.set('Settings saved locally. Keep the connection file private.')
+        self.status.set('Settings saved locally.')
 
     def load_connection(self):
         path=filedialog.askopenfilename(filetypes=[('Connection JSON','*.json')])
