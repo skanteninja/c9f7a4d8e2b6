@@ -12,6 +12,8 @@ on:
       - 'audit/quest-*.cjs'
       - 'audit/etc-*.cjs'
       - 'audit/cash-shop-*'
+      - 'audit/market-*'
+      - 'audit/shopper-browser.html'
       - 'audit/beta-cash-shop.json'
       - 'audit/nexon-founders-cash-shop.json'
       - 'audit/quest-browser.html'
