@@ -13,16 +13,19 @@ HOME.mkdir(parents=True, exist_ok=True)
 
 class Scanner:
     def __init__(self, root):
-        self.root = root; root.title('TCW · SHOPPER Scanner 0.14.2'); root.geometry('1140x800')
+        self.root = root; root.title('TCW · SHOPPER Scanner 0.14.3'); root.geometry('1140x830')
         self.messages = queue.Queue(); self.uploads = UploadQueue(HOME / 'uploads.sqlite')
         self.catalog = json.loads((ASSETS / 'items.json').read_text(encoding='utf-8'))['items']
         self.settings_path = HOME / 'settings.json'
         self.config = json.loads(self.settings_path.read_text()) if self.settings_path.exists() else {}
+        self.config['world'] = 'Windia'
+        self.pending_candidates = None
+        self.detected_context = tk.StringVar(value='Windia · Channel ? · FM room ? · Seller ? · Shop ?')
         self.running = False; self.camera = None; self.image = None; self.regions = self.config.get('regions', {})
         self.candidates = []; self.selected = None; self.upload_busy = False; self.capture_busy = False
         self.vars = {key: tk.StringVar(value=str(self.config.get(key, default))) for key, default in {
             'endpoint':'https://maplestory-classic.ofri505.workers.dev', 'api_key':'', 'server':'Classic World',
-            'world':'', 'channel':'', 'room':'', 'seller':'', 'shop':'', 'monitor':'0',
+            'world':'Windia', 'channel':'', 'room':'', 'seller':'', 'shop':'', 'monitor':'0',
             'row_stride':'36', 'rows':'4', 'price_basis':'unit', 'tesseract':'', 'nickname':''}.items()}
         self.edit = {key: tk.StringVar() for key in ['item','price','quantity','slot','observed_at','stats']}
         self.share_learning = tk.BooleanVar(value=self.config.get('share_learning', True))
@@ -77,8 +80,8 @@ class Scanner:
         fields = ttk.Frame(outer); fields.pack(fill='x', pady=12)
         for column, key in enumerate(['server','world','channel','room','seller','shop']):
             frame=ttk.Frame(fields);frame.grid(row=0,column=column,sticky='ew',padx=4);fields.columnconfigure(column,weight=1)
-            ttk.Label(frame,text={'room':'FM room','seller':'Seller (confirm each shop)'}.get(key,key.title())).pack(anchor='w')
-            ttk.Entry(frame,textvariable=self.vars[key],width=14).pack(fill='x')
+            ttk.Label(frame,text={'room':'FM room (automatic)','channel':'Channel (automatic)','seller':'Seller (automatic)','shop':'Shop (automatic)'}.get(key,key.title())).pack(anchor='w')
+            ttk.Entry(frame,textvariable=self.vars[key],width=14,state='readonly' if key=='world' else 'normal').pack(fill='x')
         controls=ttk.Frame(outer);controls.pack(fill='x')
         ttk.Button(controls,text='Capture & calibrate',command=self.calibrate_capture).pack(side='left')
         ttk.Button(controls,text='Import screenshot',command=self.import_image).pack(side='left',padx=6)
@@ -105,8 +108,9 @@ class Scanner:
         ttk.Entry(editor,textvariable=self.edit['stats'],width=65).grid(row=7,column=0,columnspan=4,sticky='ew',pady=4)
         self.preview_label=ttk.Label(editor);self.preview_label.grid(row=0,column=4,rowspan=6,padx=12)
         ttk.Button(editor,text='Confirm & publish listing',command=self.publish).grid(row=7,column=4,padx=10)
+        ttk.Label(outer,textvariable=self.detected_context,wraplength=1000).pack(anchor='w',pady=(6,0))
         ttk.Label(outer,textvariable=self.status,wraplength=1000).pack(anchor='w',pady=10)
-        ttk.Label(outer,text='Calibrate shop title, channel indicator and top-left map label. Confirm detected location and shop before publishing.').pack(anchor='w')
+        ttk.Label(outer,text='Calibrate once: shop owner/title, channel indicator and FM room minimap label. Confirm detected location and shop before publishing.').pack(anchor='w')
 
     def filter_items(self,event=None):
         q=self.edit['item'].get().lower();self.item_combo['values']=[f"{i['name']} · #{i['id']}" for i in self.catalog if q in i['name'].lower()][:60]
@@ -205,7 +209,7 @@ class Scanner:
             last=pressed
 
     def screen_context(self,image,settings):
-        result=dict(settings);readings={}
+        result=dict(settings,world='Windia',seller='',shop='',channel='',room='');readings={}
         for key in ['seller','shop','channel','room']:
             if key not in settings['regions']:continue
             raw=self.ocr(image.crop(settings['regions'][key]),tesseract=settings['tesseract']);readings[key]=raw
@@ -216,12 +220,12 @@ class Scanner:
             result['shop']=settings['clicked_shop'];readings['shop']=settings['clicked_shop']+' (cursor sign; confirm)'
         return result,readings
 
-    def extract(self,image,settings,captured_at):
+    def extract(self,image,settings,captured_at,detected=None):
         if settings['screen_size'] and list(image.size)!=settings['screen_size']:raise ValueError('Screen resolution changed; recalibrate the shop.')
         regions=settings['regions'];rows=max(1,min(12,int(settings['rows'])));stride=max(1,int(settings['row_stride']))
         if not all(k in regions for k in ['name','price']):raise ValueError('Calibrate item name and price first.')
         candidates=[]
-        settings,context_reads=self.screen_context(image,settings)
+        settings,context_reads=detected if detected is not None else self.screen_context(image,settings)
         seller_read=context_reads.get('seller','')
         for index in range(rows):
             crops={}
@@ -256,7 +260,11 @@ class Scanner:
         try:
             settings=self.settings_snapshot()
             validate_nickname(settings['nickname'])
-            if not settings['world']:raise ValueError('Enter your world before scanning.')
+            required=['name','price','channel','room','seller']
+            missing=[key for key in required if key not in self.regions]
+            if missing:raise ValueError('Calibrate these screen labels once: '+', '.join(missing)+'.')
+            if 'shop' not in self.regions and not ('hover' in self.regions and settings.get('hover_anchor')):
+                raise ValueError('Calibrate the shop title or the shop sign and cursor anchor once.')
             if not all(k in self.regions for k in ['name','price']):raise ValueError('Calibrate a visible shop first.')
             monitor=int(settings['monitor']);self.save();self.running=True;self.start_button.configure(text='Pause scanning')
         except Exception as exc:messagebox.showerror('Start scanning',str(exc));return
@@ -264,7 +272,7 @@ class Scanner:
         self.live_settings=settings;self.cursor_stop.clear()
         threading.Thread(target=self.watch_clicks,daemon=True).start()
         def loop():
-            previous=None;published=None;hover=None;last_cursor=None;clicked_shop=None
+            previous=None;published=None;hover=None;last_cursor=None;clicked_shop=None;prior_location=None;previous_context=None
             try:
                 while self.running:
                     image=self.frame(monitor);current_settings=dict(self.live_settings)
@@ -281,17 +289,28 @@ class Scanner:
                             if label:hover=(point,label[:100],time.monotonic())
                     last_cursor=point
                     if clicked_shop and time.monotonic()-clicked_shop[1]<20:current_settings['clicked_shop']=clicked_shop[0]
-                    # Fixed labels join the stable-frame hash so channel/room changes invalidate old context.
+                    # Track labels even outside shops and independently of stable item rows.
+                    detected,readings=self.screen_context(image,current_settings)
+                    location=(detected['channel'],detected['room'])
+                    if prior_location is not None and location!=prior_location:
+                        clicked_shop=None;hover=None;current_settings.pop('clicked_shop',None)
+                        detected,readings=self.screen_context(image,current_settings)
+                    prior_location=location
+                    context=tuple(detected[k] for k in ['world','channel','room','seller','shop'])
+                    if context==previous_context:
+                        self.messages.put(('context',dict(detected)))
+                    else:
+                        # Show uncertainty while a new label settles; never claim the old location.
+                        self.messages.put(('context',dict(detected,channel='',room='',seller='',shop='')))
+                    previous_context=context
                     rects=[current_settings['regions'][k] for k in ['name','price']]
                     extent=(min(r[0] for r in rects),min(r[1] for r in rects),max(r[2] for r in rects),max(r[3] for r in rects)+int(current_settings['row_stride'])*(int(current_settings['rows'])-1))
-                    digest=hashlib.sha256(image.crop(extent).tobytes())
-                    for field in ['shop','channel','room','seller']:
-                        if field in current_settings['regions']:digest.update(image.crop(current_settings['regions'][field]).tobytes())
-                    key=digest.hexdigest()
-                    context=tuple(current_settings[k] for k in ['server','world','channel','room','seller','shop'])
-                    signature=(key,context,current_settings.get('clicked_shop'))
-                    if signature==previous and signature!=published:
-                        rows=self.extract(image,current_settings,now_iso());self.messages.put(('candidates',rows));published=signature
+                    key=hashlib.sha256(image.crop(extent).tobytes()).hexdigest()
+                    signature=(key,context)
+                    if signature==previous and signature!=published and all(detected[k] for k in ['channel','room','seller','shop']):
+                        rows=self.extract(image,current_settings,now_iso(),(detected,readings));self.messages.put(('candidates',rows));published=signature
+                    elif signature!=previous:
+                        self.messages.put(('invalidate_candidates',None))
                     previous=signature;time.sleep(1.5)
             except Exception as exc:self.messages.put(('error',str(exc)));self.messages.put(('stopped',None))
             finally:self.cursor_stop.set()
@@ -300,7 +319,6 @@ class Scanner:
     def select(self,event=None):
         selection=self.table.selection()
         if not selection:return
-        if self.running:self.toggle()
         index=int(selection[0]);self.selected=self.candidates[index];row=self.selected
         self.item_combo['values']=[f"{i['name']} · #{i['id']}" for _,i in row['matches']]
         self.edit['item'].set(self.item_combo['values'][0] if self.item_combo['values'] else row['raw_name'])
@@ -319,7 +337,8 @@ class Scanner:
             listing={'itemId':item['id'],'price':parse_integer(self.edit['price'].get()),'quantity':parse_integer(self.edit['quantity'].get()),
                 'slot':parse_integer(self.edit['slot'].get()),'observedAt':self.edit['observed_at'].get(),
                 'stats':stats,'statsKnown':self.stats_known.get(),'priceBasis':self.vars['price_basis'].get(),'evidence':self.selected['evidence']}
-            for key in ['server','world','seller','shop']:listing[key]=self.vars[key].get().strip()
+            for key in ['server','seller','shop']:listing[key]=self.vars[key].get().strip()
+            listing['world']='Windia'
             listing['nickname']=validate_nickname(self.vars['nickname'].get())
             if not listing['shop']:raise ValueError('Confirm the shop name; calibrate the title or shop sign for detection.')
             for key in ['channel','room']:listing[key]=parse_integer(self.vars[key].get())
@@ -327,7 +346,10 @@ class Scanner:
             if min(listing['quantity'],listing['channel'],listing['room'],listing['slot'])<1:raise ValueError('Quantity, channel, room and slot must be positive.')
             if not self.vars['api_key'].get():raise ValueError('Load your private connection file first.')
             if self.share_learning.get():listing['learning']=learning_readings(self.selected)
-            self.uploads.enqueue(listing);self.selected=None;self.status.set(f'Confirmed and queued. {self.uploads.count()} uploads pending.');self.send()
+            self.uploads.enqueue(listing);self.selected=None;
+            if self.pending_candidates is not None:
+                self.messages.put(('candidates',self.pending_candidates));self.pending_candidates=None
+            self.status.set(f'Confirmed and queued. {self.uploads.count()} uploads pending.');self.send()
         except Exception as exc:messagebox.showerror('Review listing',str(exc))
 
     def send(self):
@@ -350,9 +372,18 @@ class Scanner:
             try:kind,value=self.messages.get_nowait()
             except queue.Empty:break
             if kind=='calibrate':self.image=value;self.imported_time=now_iso();self.calibration(value)
+            elif kind=='context':
+                self.detected_context.set(f"Windia · Channel {value.get('channel') or '?'} · FM room {value.get('room') or '?'} · Seller {value.get('seller') or '?'} · Shop {value.get('shop') or '?'}")
+                if self.selected is None:
+                    for key in ['world','channel','room','seller','shop']:self.vars[key].set(value.get(key,''))
+            elif kind=='invalidate_candidates':
+                self.pending_candidates=[]
+                if self.selected is None:
+                    self.candidates=[];self.table.delete(*self.table.get_children())
             elif kind=='candidates':
                 if self.selected is not None:
-                    self.status.set('A new shop frame was read. Finish the selected review before reading another frame.');continue
+                    self.pending_candidates=value
+                    self.status.set('Live location is updating. The selected listing keeps its original shop and location.');continue
                 self.candidates=value;self.table.delete(*self.table.get_children())
                 for index,row in enumerate(value):
                     confidence=row['matches'][0][0] if row['matches'] else 0

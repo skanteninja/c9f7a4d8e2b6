@@ -358,3 +358,6 @@ A new chat should be able to continue the project by reading these files without
 ### Scanner 0.14.2: nickname persistence and improvement dataset
 
 Nickname setup runs once; subsequent changes are through Settings. Reviewed OCR readings, candidate matches, corrected listings and item-row evidence are durably collected through the existing authenticated API and archived in GitHub every approximately five minutes. Sharing is controlled in Settings. Private keys, full screenshots and auth identity are excluded. This supports later evaluation and scanner code improvements; it does not automatically train a model.
+
+### 0.14.3 — Windia / continuous scanner context
+Windia is fixed in the scanner and SHOPPER. Channel, minimap FM room, seller and shop are monitored continuously after one-time calibration. Selected reviews keep original capture context while live tracking continues; unreadable labels clear stale candidates. No game hooks or unverified default screen coordinates.

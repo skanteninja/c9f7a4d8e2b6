@@ -10,13 +10,13 @@ Load your private connection JSON. Ofri and Friend have different upload keys; n
 
 ## Scan a shop
 
-1. Select the game monitor; enter the exact server/world, channel, FM room and seller/shop.
+1. Select the game monitor; Windia is preselected and fixed.
 2. Open a shop. Choose Capture & calibrate. The scanner minimizes itself before capture.
-3. Drag around the first visible row's item name, price and quantity. Optionally select the seller label. Enter visible row count and vertical row spacing in original screen pixels. Recalibrate if the shop moves or resolution/scaling changes.
+3. Drag around the first visible row's item name, price and quantity. Select the seller label, shop title, channel indicator and FM room text in the minimap once. Enter visible row count and vertical row spacing in original screen pixels. Recalibrate if the shop moves or resolution/scaling changes.
 4. Confirm whether the shop displays unit or bundle prices. Never infer this from quantity alone.
 5. Start screen scanning and browse shops manually. Changed shop rows are read after two stable samples. Choose a row to review; correct item ID (duplicate names exist), exact price, quantity, actual shop slot, timestamp, and location. When scrolling, visible row 1 may be shop slot 5: correct the slot.
 6. For equipment, enter actual tooltip stats as JSON and mark them recorded. Base catalog stats are not a substitute. Otherwise the website marks stats unknown.
-7. Confirm & publish. The website receives structured data and a small evidence crop. Retry queued uploads after connection failures; event IDs prevent duplicates. Update seller/channel/room whenever you move.
+7. Confirm & publish. The website receives structured data and a small evidence crop. Retry queued uploads after connection failures; event IDs prevent duplicates. These labels are monitored automatically while scanning; confirm each captured listing before publishing.
 
 Screenshot import is available for calibration and review. Its file modified time is only a suggested capture time; confirm the actual observation timestamp. Uploads more than 30 days old are rejected. This version does not infer room/channel changes when those labels are hidden, does not process recorded video files, and does not auto-publish unreviewed OCR. Live capture and OCR accuracy need testing with real shop screenshots before removing the review step.
 
@@ -32,7 +32,7 @@ The source catalog and release images are shared with the website. Actual asking
 
 ## Nicknames and screen context
 
-The scanner asks for a public nickname on startup. This is an arbitrary alias, not your in-game name. Each confirmed listing keeps the alias used when captured/published; private uploader account IDs are not shown publicly. Change nickname from the toolbar.
+The scanner asks for a public nickname only on first setup. This is an arbitrary alias, not your in-game name. Each confirmed listing keeps the alias used when captured/published; private uploader account IDs are not shown publicly. Change nickname only through Settings.
 
 In calibration, select Shop title in the open shop, Channel around the channel indicator, and Top-left map label around the Free Market room text. These fixed regions are read from the same screenshot as the prices. Unreadable calibrated channel/room labels clear the candidate location instead of silently reusing an older room. Review and correct them before publishing. Location on older candidates stays attached to the original frame.
 
@@ -47,3 +47,9 @@ The automatic nickname prompt appears once on first setup. Existing saved nickna
 **Settings → Share reviewed scanner examples** controls whether new confirmed listings include OCR readings and candidate matches. Sharing is enabled for this project by default. The same upload durably stores the reviewed item crop and your corrected item, price, quantity, shop, channel, FM room, public nickname, timestamp and observed stats. Private connection keys, full screenshots and local settings are excluded. Already queued confirmations retain their sharing choice.
 
 The website queues examples for GitHub; an Actions workflow archives them approximately every five minutes, subject to GitHub scheduling delays. Listing updates remain immediate. See `learning/scanner/README.md` for the dataset format. These examples support later scanner evaluation and code improvements; they do not automatically train a model.
+
+## Windia and automatic context (0.14.3)
+
+Windia is the only world in this client and is fixed in the scanner and SHOPPER world filter. Saved world settings migrate to Windia. Calibrate the channel indicator, FM room minimap text, seller and shop title once, alongside the item rows. After Start scanning, these labels are monitored even while walking through rooms or switching channels; no repeated manual location entry is needed when the calibrated labels remain visible. Labels settle across two screen reads. Unreadable, missing or changing labels show `?` and clear old candidates instead of reusing the last shop/location.
+
+Selecting a listing no longer pauses live tracking. Its original capture and editable review fields remain attached to that listing while the separate live-context line follows your current location. New candidates wait until you finish the selected review. A room/channel transition clears cursor shop suggestions. Calibration is still required for your resolution and client layout; this is screen OCR, not direct game-state access. Real-client OCR accuracy needs your testing.

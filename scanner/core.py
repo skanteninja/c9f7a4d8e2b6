@@ -130,6 +130,6 @@ def learning_readings(candidate):
                 'quantity': str(candidate.get('quantity', ''))[:512]}
     for key in ('shop', 'channel', 'room'):
         readings[key] = str(candidate.get('context_reads', {}).get(key, ''))[:512]
-    return {'version': '0.14.2', 'readings': readings,
+    return {'version': '0.14.3', 'readings': readings,
             'matches': [{'itemId': item['id'], 'confidence': round(score, 4)}
                         for score, item in candidate.get('matches', [])[:5]]}
