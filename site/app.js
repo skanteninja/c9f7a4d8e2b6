@@ -1757,7 +1757,7 @@ function renderEtc() {
   }
 
   let cashWired=false, cashCatalogPromise=null, cashRenderSequence=0, cashLimit=96;
-  const CASH_CATALOG_URL='./cash-shop-catalogs.json?v=0.14.0-shared-shopper';
+  const CASH_CATALOG_URL='./cash-shop-catalogs.json?v=0.14.1-shopper-context';
   function fetchCashCatalogs(){
     if(!cashCatalogPromise)cashCatalogPromise=fetch(CASH_CATALOG_URL,{cache:'force-cache'}).then(r=>{
       if(!r.ok)throw Error('Cash Shop catalog could not be loaded.');
@@ -1928,6 +1928,6 @@ function renderEtc() {
   hydrateLauncherState().finally(()=>window.TCW_SESSION_ENTRY?.afterHydration?.());
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    navigator.serviceWorker.register('./sw.js?v=0.14.0-shared-shopper').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=0.14.1-shopper-context').catch(()=>{});
   }
 })();
