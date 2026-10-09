@@ -8,7 +8,7 @@ For source runs, use the packaged scanner folder with items.json and icons/, ins
 
 The website upload connection is included and loaded automatically. You and your friend can use the same download; each uses their own public nickname. Existing saved connections and nicknames are retained. Local settings and the retryable upload queue live in %LOCALAPPDATA%/TCW-Shopper.
 
-## Scan a shop (automatic mode, 0.16.3)
+## Scan a shop (automatic mode, 0.16.4)
 
 1. Keep MapleStory.exe visible and open a shop. Start scanning; manual calibration is no longer required by default. Tesseract OCR is bundled in the Windows download and selected automatically.
 2. The scanner searches the entire client image for catalog item names and nearby prices explicitly labeled Price or mesos. Results need two consistent reads before appearing. Each item keeps its own evidence crop and capture timestamp.
@@ -85,3 +85,4 @@ OpenCV is explicitly installed and bundled to resolve the missing cv2 error duri
 ## Local learning and validation (0.15.0)
 
 Confirmed name corrections persist in %LOCALAPPDATA%/TCW-Shopper/name-corrections.json across updates, independently of the optional GitHub example-sharing setting. Only normalized OCR item names and confirmed catalog IDs/counts are stored locally, bounded to 1,000 entries. This is correction memory, not neural-network training. Reviewed crop examples continue through the existing learning archive for future evaluation. Detection has been checked against synthetic OCR layouts and a generated image through actual Tesseract; in-game recognition still needs a real client shop capture.
+
